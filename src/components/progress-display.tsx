@@ -112,35 +112,35 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
             <DollarSign className="w-6 h-6 text-primary" />
             <h3 className="text-lg font-semibold">Progresso de Vendas</h3>
           </div>
-          <div className="relative">
+          <div className="relative pt-6">
             <Progress value={salesPercentage} className="h-4" />
             <div
-              className="absolute top-0 h-full border-r-2 border-dashed border-white/50"
+              className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
               style={{ left: `${(metaMinha / metaLendaria) * 100}%` }}
               title={`Metinha: ${formatCurrency(metaMinha)}`}
             >
-              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">MIN</span>
+              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metinha</span>
             </div>
             <div
-              className="absolute top-0 h-full border-r-2 border-dashed border-white/50"
+              className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
               style={{ left: `${(meta / metaLendaria) * 100}%` }}
               title={`Meta: ${formatCurrency(meta)}`}
             >
-              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">META</span>
+              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Meta</span>
             </div>
              <div
-              className="absolute top-0 h-full border-r-2 border-dashed border-white/50"
+              className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
               style={{ left: `${(metona / metaLendaria) * 100}%` }}
               title={`Metona: ${formatCurrency(metona)}`}
             >
-              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">METONA</span>
+              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metona</span>
             </div>
             <div
               className="absolute top-0 h-full"
               style={{ left: `100%` }}
               title={`Lendária: ${formatCurrency(metaLendaria)}`}
             >
-              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">MAX</span>
+              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Lendária</span>
             </div>
           </div>
           <div className="text-right mt-2 font-bold text-lg text-primary">
@@ -177,5 +177,3 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
     </Card>
   );
 }
-
-    
