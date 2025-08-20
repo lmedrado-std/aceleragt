@@ -184,7 +184,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
   const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
   
   const totalIncentives = incentives
-    ? Object.values(incentives).reduce((sum, val) => sum + val, 0)
+    ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
 
   const renderSkeletons = () => (

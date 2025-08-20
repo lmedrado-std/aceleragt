@@ -75,45 +75,54 @@ const incentiveProjectionFlow = ai.defineFlow(
     let paBonus = 0;
     let ticketMedioBonus = 0;
     let corridinhaDiariaBonus = 0;
-
+    
+    // Calculate sales prize based on highest achieved tier
+    let salesPrize = 0;
     if (input.vendas >= input.metaMinha) {
-      metinhaPremio = input.metaMinhaPrize;
+      salesPrize = input.metaMinhaPrize;
     }
     if (input.vendas >= input.meta) {
-      metaPremio = input.metaPrize;
+      salesPrize = input.metaPrize;
     }
     if (input.vendas >= input.metona) {
-      metonaPremio = input.metonaPrize;
+      salesPrize = input.metonaPrize;
     }
+    
+    // Assign the prize to the correct tier for display, zeroing out the others.
+    if (input.vendas >= input.metona) {
+      metonaPremio = salesPrize;
+    } else if (input.vendas >= input.meta) {
+      metaPremio = salesPrize;
+    } else if (input.vendas >= input.metaMinha) {
+      metinhaPremio = salesPrize;
+    }
+
+
     if (input.vendas >= input.metaLendaria && input.legendariaBonusValorVenda > 0) {
       legendariaBonus = Math.floor((input.vendas - input.metona) / input.legendariaBonusValorVenda) * input.legendariaBonusValorPremio;
     }
 
-    if (input.pa >= input.paGoal1) {
+    if (input.pa >= input.paGoal4) {
+      paBonus = input.paPrize4;
+    } else if (input.pa >= input.paGoal3) {
+      paBonus = input.paPrize3;
+    } else if (input.pa >= input.paGoal2) {
+      paBonus = input.paPrize2;
+    } else if (input.pa >= input.paGoal1) {
       paBonus = input.paPrize1;
     }
-    if (input.pa >= input.paGoal2) {
-      paBonus = input.paPrize2;
-    }
-     if (input.pa >= input.paGoal3) {
-      paBonus = input.paPrize3;
-    }
-     if (input.pa >= input.paGoal4) {
-      paBonus = input.paPrize4;
-    }
 
-    if (input.ticketMedio >= input.ticketMedioGoal1) {
+
+    if (input.ticketMedio >= input.ticketMedioGoal4) {
+      ticketMedioBonus = input.ticketMedioPrize4;
+    } else if (input.ticketMedio >= input.ticketMedioGoal3) {
+      ticketMedioBonus = input.ticketMedioPrize3;
+    } else if (input.ticketMedio >= input.ticketMedioGoal2) {
+      ticketMedioBonus = input.ticketMedioPrize2;
+    } else if (input.ticketMedio >= input.ticketMedioGoal1) {
       ticketMedioBonus = input.ticketMedioPrize1;
     }
-    if (input.ticketMedio >= input.ticketMedioGoal2) {
-      ticketMedioBonus = input.ticketMedioPrize2;
-    }
-    if (input.ticketMedio >= input.ticketMedioGoal3) {
-      ticketMedioBonus = input.ticketMedioPrize3;
-    }
-     if (input.ticketMedio >= input.ticketMedioGoal4) {
-      ticketMedioBonus = input.ticketMedioPrize4;
-    }
+
 
     corridinhaDiariaBonus = input.corridinhaDiaria;
 
