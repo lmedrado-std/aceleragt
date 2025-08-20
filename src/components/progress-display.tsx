@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -19,11 +20,14 @@ import {
   Star,
   Gift,
   Zap,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "./ui/skeleton";
 
+
+type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
 
 interface ProgressDisplayProps {
   salesData: {
@@ -40,6 +44,7 @@ interface ProgressDisplayProps {
     corridinhaGoal4: number;
   };
   incentives: IncentiveProjectionOutput | null;
+  rankings: Record<RankingMetric, number> | null;
   loading: boolean;
 }
 
@@ -142,7 +147,28 @@ const IncentiveItem = ({
   </div>
 );
 
-export function ProgressDisplay({ salesData, incentives, loading }: ProgressDisplayProps) {
+const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
+  const getRankColor = (r?: number) => {
+    if (r === 1) return "text-amber-500";
+    if (r === 2) return "text-slate-500";
+    if (r === 3) return "text-amber-700";
+    return "text-muted-foreground";
+  };
+
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+        <span className="font-medium text-muted-foreground">{title}</span>
+        <div className="flex items-center gap-2">
+            <Trophy className={cn("w-5 h-5", getRankColor(rank))} />
+            <span className={cn("font-bold text-xl", getRankColor(rank))}>
+                {rank ? `${rank}º` : "-"}
+            </span>
+        </div>
+    </div>
+  )
+};
+
+export function ProgressDisplay({ salesData, incentives, rankings, loading }: ProgressDisplayProps) {
   const {
     vendas,
     pa,
@@ -259,6 +285,25 @@ export function ProgressDisplay({ salesData, incentives, loading }: ProgressDisp
           />
         </div>
 
+        {rankings && (
+            <>
+                <Separator />
+                <div>
+                     <div className="flex items-center gap-2 mb-4">
+                        <Trophy className="w-6 h-6 text-primary" />
+                        <h3 className="text-lg font-semibold">Ranking Geral</h3>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <RankingItem title="Vendas" rank={rankings.vendas} />
+                        <RankingItem title="PA" rank={rankings.pa} />
+                        <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
+                        <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
+                        <RankingItem title="Incentivos" rank={rankings.totalIncentives} />
+                    </div>
+                </div>
+            </>
+        )}
+
         <Separator/>
 
         <div className="pt-4">
@@ -334,3 +379,5 @@ export function ProgressDisplay({ salesData, incentives, loading }: ProgressDisp
     </Card>
   );
 }
+
+    

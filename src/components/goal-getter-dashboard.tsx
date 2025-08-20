@@ -1,9 +1,10 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Loader2,
@@ -112,6 +113,9 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type Seller = z.infer<typeof sellerSchema>;
 
+type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
+type Rankings = Record<string, Record<RankingMetric, number>>;
+
 const initialSellers: Seller[] = [
   { id: '1', name: 'Val', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
   { id: '2', name: 'Rose', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
@@ -127,6 +131,7 @@ export function GoalGetterDashboard() {
   const [incentives, setIncentives] =
     useState<Record<string, IncentiveProjectionOutput | null>>({});
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
+  const [rankings, setRankings] = useState<Rankings>({});
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -174,6 +179,40 @@ export function GoalGetterDashboard() {
   
   const [activeTab, setActiveTab] = useState(currentValues.sellers.length > 0 ? currentValues.sellers[0].id : "admin");
 
+  const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
+    const newRankings: Rankings = {};
+    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria', 'totalIncentives'];
+
+    metrics.forEach(metric => {
+        const sortedSellers = [...sellers]
+            .map(seller => {
+                let value = 0;
+                if (metric === 'totalIncentives') {
+                    const incentiveData = currentIncentives[seller.id];
+                    value = incentiveData ? Object.values(incentiveData).reduce((sum, val) => sum + val, 0) : 0;
+                } else {
+                    value = seller[metric as keyof Seller] as number;
+                }
+                return { id: seller.id, value };
+            })
+            .sort((a, b) => b.value - a.value);
+
+        let rank = 1;
+        for (let i = 0; i < sortedSellers.length; i++) {
+            if (i > 0 && sortedSellers[i].value < sortedSellers[i - 1].value) {
+                rank = i + 1;
+            }
+            const sellerId = sortedSellers[i].id;
+            if (!newRankings[sellerId]) {
+                newRankings[sellerId] = {} as Record<RankingMetric, number>;
+            }
+            newRankings[sellerId][metric] = rank;
+        }
+    });
+
+    setRankings(newRankings);
+  }, []);
+
   useEffect(() => {
     // This effect ensures localStorage is accessed only on the client side
     try {
@@ -195,12 +234,15 @@ export function GoalGetterDashboard() {
     const subscription = watch((value) => {
         try {
             localStorage.setItem("goalGetterState", JSON.stringify(value));
+            if(value.sellers && incentives){
+                 calculateRankings(value.sellers, incentives);
+            }
         } catch(error) {
             console.error("Failed to save state to localStorage", error);
         }
     });
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, incentives, calculateRankings]);
 
 
   const addSeller = () => {
@@ -311,6 +353,7 @@ export function GoalGetterDashboard() {
           newIncentives[seller.id] = result;
         }
         setIncentives(newIncentives);
+        calculateRankings(values.sellers, newIncentives);
         toast({
           title: "Sucesso!",
           description: "Painel de todos os vendedores atualizado com sucesso.",
@@ -579,6 +622,7 @@ export function GoalGetterDashboard() {
                                     corridinhaGoal4: currentValues.corridinhaGoal4,
                                 }}
                                 incentives={incentives[seller.id]}
+                                rankings={rankings[seller.id]}
                                 loading={isPending}
                             />
                         </div>
@@ -591,3 +635,5 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
+
+    
