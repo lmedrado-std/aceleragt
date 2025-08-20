@@ -5,17 +5,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useTransition } from "react";
 import {
-  DollarSign,
-  Package,
-  Ticket,
-  TrendingUp,
   Loader2,
   UserPlus,
   Trash2,
   Edit,
   Save,
   X,
-  Award,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -45,13 +41,6 @@ import { ProgressDisplay } from "@/components/progress-display";
 import { IncentivesDisplay } from "@/components/incentives-display";
 import { Logo } from "@/components/logo";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from 'lucide-react';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -62,6 +51,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 const sellerSchema = z.object({
   id: z.string(),
@@ -125,8 +116,8 @@ export function GoalGetterDashboard() {
   const { toast } = useToast();
   const [incentives, setIncentives] =
     useState<Record<string, IncentiveProjectionOutput | null>>({});
-  const [selectedSeller, setSelectedSeller] = useState<Seller | null>(initialSellers[0] || null);
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("admin");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -187,23 +178,22 @@ export function GoalGetterDashboard() {
       ticketMedio: 0,
       corridinhaDiaria: 0,
     };
-    form.setValue("sellers", [...form.getValues("sellers"), newSeller]);
+    const updatedSellers = [...form.getValues("sellers"), newSeller];
+    form.setValue("sellers", updatedSellers);
     form.setValue("newSellerName", "");
-    if (!selectedSeller) {
-        setSelectedSeller(newSeller);
-    }
+    setActiveTab(newSeller.id);
   };
 
   const removeSeller = (sellerId: string) => {
     const updatedSellers = currentValues.sellers.filter(s => s.id !== sellerId);
     form.setValue("sellers", updatedSellers);
-    if (selectedSeller?.id === sellerId) {
-        setSelectedSeller(updatedSellers[0] || null);
-        setIncentives(prev => {
-            const newIncentives = {...prev};
-            delete newIncentives[sellerId];
-            return newIncentives;
-        });
+    setIncentives(prev => {
+        const newIncentives = {...prev};
+        delete newIncentives[sellerId];
+        return newIncentives;
+    });
+    if (activeTab === sellerId) {
+        setActiveTab("admin");
     }
   }
 
@@ -231,9 +221,18 @@ export function GoalGetterDashboard() {
     setEditingSellerId(null);
   }
 
-  const selectedSellerIndex = currentValues.sellers.findIndex(s => s.id === selectedSeller?.id);
 
   const onSubmit = (values: FormValues) => {
+    if (activeTab === 'admin') {
+         toast({
+            title: "Metas Atualizadas",
+            description: "As metas globais foram salvas com sucesso.",
+        });
+        return;
+    }
+
+    const selectedSeller = values.sellers.find(s => s.id === activeTab);
+
     if (!selectedSeller) {
       toast({
         variant: "destructive",
@@ -245,14 +244,11 @@ export function GoalGetterDashboard() {
 
     startTransition(async () => {
       try {
-        const sellerData = values.sellers.find(s => s.id === selectedSeller.id);
-        if (!sellerData) throw new Error("Vendedor não encontrado");
-
         const result = await incentiveProjection({
-          vendas: sellerData.vendas,
-          pa: sellerData.pa,
-          ticketMedio: sellerData.ticketMedio,
-          corridinhaDiaria: sellerData.corridinhaDiaria,
+          vendas: selectedSeller.vendas,
+          pa: selectedSeller.pa,
+          ticketMedio: selectedSeller.ticketMedio,
+          corridinhaDiaria: selectedSeller.corridinhaDiaria,
           metaMinha: values.metaMinha,
           meta: values.meta,
           metona: values.metona,
@@ -288,7 +284,7 @@ export function GoalGetterDashboard() {
         setIncentives(prev => ({ ...prev, [selectedSeller.id]: result }));
         toast({
           title: "Sucesso!",
-          description: `Incentivos para ${selectedSeller.name} calculados.`,
+          description: `Incentivos para ${selectedSeller.name} calculados e painel atualizado.`,
         });
       } catch (error) {
         console.error("Calculation Error:", error);
@@ -300,10 +296,6 @@ export function GoalGetterDashboard() {
         });
       }
     });
-  };
-
-  const handleSellerChange = (seller: Seller) => {
-    setSelectedSeller(seller);
   };
   
   const renderGoalInputs = (level: string, goal1: any, prize1: any, goal2: any, prize2: any, goal3: any, prize3: any, goal4: any, prize4: any) => (
@@ -356,230 +348,185 @@ export function GoalGetterDashboard() {
           </p>
         </div>
       </header>
-       <div className="mb-6 flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full md:w-auto">
-                  {selectedSeller ? selectedSeller.name : "Selecione um Vendedor"}
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                {currentValues.sellers.length > 0 ? (
-                  currentValues.sellers.map((seller) => (
-                    <DropdownMenuItem
-                      key={seller.id}
-                      onSelect={() => handleSellerChange(seller)}
-                    >
-                      {seller.name}
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <DropdownMenuItem disabled>Nenhum vendedor cadastrado</DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <span className="text-muted-foreground">
-                {currentValues.sellers.length > 0 ? "Selecione um vendedor para ver seu desempenho." : "Cadastre um vendedor para começar."}
-            </span>
-       </div>
-
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid lg:grid-cols-5 gap-8">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Controles do Admin</CardTitle>
-                  <CardDescription>
-                    Ajuste as metas e gerencie os vendedores aqui.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                 <div>
-                    <h3 className="font-semibold mb-2 text-primary">Cadastrar Novo Vendedor</h3>
-                    <div className="flex items-center gap-2">
-                       <FormField control={form.control} name="newSellerName" render={({ field }) => (
-                          <FormItem className="flex-grow">
-                            <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
-                            <FormControl><Input placeholder="Nome do Vendedor" {...field} /></FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="button" onClick={addSeller}><UserPlus/></Button>
-                    </div>
-                  </div>
-
-                  <Separator/>
-
-                  <div>
-                     <h3 className="font-semibold mb-4 text-primary">Gerenciar Vendedores</h3>
-                     <div className="space-y-2">
-                        {currentValues.sellers.map((seller, index) => (
-                            <div key={seller.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
-                                {editingSellerId === seller.id ? (
-                                    <>
-                                        <FormField control={form.control} name={`sellers.${index}.name`} render={({ field }) => (
-                                          <FormItem className="flex-grow"><FormControl><Input {...field} /></FormControl></FormItem>
-                                        )}
-                                      />
-                                        <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
-                                        <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className="font-medium">{seller.name}</span>
-                                        <div className="flex items-center">
-                                            <Button size="icon" variant="ghost" onClick={() => startEditing(seller.id)}><Edit className="h-4 w-4"/></Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                                        <AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente o vendedor e seus dados.</AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </div>
-                                    </>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-1 md:grid-cols-7 h-auto">
+                    <TabsTrigger value="admin" className="flex items-center gap-2"><ShieldCheck className="h-4 w-4"/> Admin</TabsTrigger>
+                    {currentValues.sellers.map(seller => (
+                        <TabsTrigger key={seller.id} value={seller.id}>{seller.name}</TabsTrigger>
+                    ))}
+                </TabsList>
+                <TabsContent value="admin">
+                    <Card className="mt-4">
+                        <CardHeader>
+                        <CardTitle>Controles do Administrador</CardTitle>
+                        <CardDescription>
+                            Ajuste as metas, prêmios e gerencie os vendedores aqui.
+                        </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div>
+                                <h3 className="font-semibold mb-2 text-primary">Cadastrar Novo Vendedor</h3>
+                                <div className="flex items-center gap-2">
+                                <FormField control={form.control} name="newSellerName" render={({ field }) => (
+                                    <FormItem className="flex-grow">
+                                        <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
+                                        <FormControl><Input placeholder="Nome do Vendedor" {...field} /></FormControl>
+                                    </FormItem>
                                 )}
+                                />
+                                <Button type="button" onClick={addSeller}><UserPlus/></Button>
+                                </div>
                             </div>
-                        ))}
-                     </div>
-                  </div>
 
-                  <Separator/>
+                            <Separator/>
 
-                  <div>
-                    <h3 className="font-semibold mb-4 text-primary">Metas de Vendas</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-                      <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Metinha</h4>
-                          <div className="flex items-center gap-2">
-                              <FormField control={form.control} name="metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                              <FormField control={form.control} name="metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
-                          </div>
-                      </div>
-                       <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Meta</h4>
-                           <div className="flex items-center gap-2">
-                              <FormField control={form.control} name="meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                              <FormField control={form.control} name="metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
-                          </div>
-                      </div>
-                       <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Metona</h4>
-                           <div className="flex items-center gap-2">
-                              <FormField control={form.control} name="metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                              <FormField control={form.control} name="metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
-                          </div>
-                      </div>
-                       <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Lendária</h4>
-                           <div className="flex items-center gap-2">
-                              <FormField control={form.control} name="metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                              <span className="text-sm text-muted-foreground w-full">Bônus R$50 a cada R$2k</span>
-                          </div>
-                      </div>
-                    </div>
-                  </div>
+                            <div>
+                                <h3 className="font-semibold mb-4 text-primary">Gerenciar Vendedores</h3>
+                                <div className="space-y-2">
+                                    {currentValues.sellers.map((seller, index) => (
+                                        <div key={seller.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
+                                            {editingSellerId === seller.id ? (
+                                                <>
+                                                    <FormField control={form.control} name={`sellers.${index}.name`} render={({ field }) => (
+                                                    <FormItem className="flex-grow"><FormControl><Input {...field} /></FormControl></FormItem>
+                                                    )}
+                                                />
+                                                    <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
+                                                    <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="font-medium">{seller.name}</span>
+                                                    <div className="flex items-center">
+                                                        <Button size="icon" variant="ghost" onClick={() => startEditing(seller.id)}><Edit className="h-4 w-4"/></Button>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente o vendedor e seus dados.</AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                                    <AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <Separator/>
 
-                  <Separator />
+                            <div>
+                                <h3 className="font-semibold mb-4 text-primary">Metas de Vendas</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                                <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">Metinha</h4>
+                                    <div className="flex items-center gap-2">
+                                        <FormField control={form.control} name="metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                        <FormField control={form.control} name="metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">Meta</h4>
+                                    <div className="flex items-center gap-2">
+                                        <FormField control={form.control} name="meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                        <FormField control={form.control} name="metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">Metona</h4>
+                                    <div className="flex items-center gap-2">
+                                        <FormField control={form.control} name="metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                        <FormField control={form.control} name="metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">Lendária</h4>
+                                    <div className="flex items-center gap-2">
+                                        <FormField control={form.control} name="metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                        <span className="text-sm text-muted-foreground w-full">Bônus R$50 a cada R$2k</span>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
 
-                  {renderGoalInputs(
-                      "PA",
-                      "paGoal1", "paPrize1",
-                      "paGoal2", "paPrize2",
-                      "paGoal3", "paPrize3",
-                      "paGoal4", "paPrize4"
-                  )}
+                            <Separator />
+                            {renderGoalInputs("PA", "paGoal1", "paPrize1", "paGoal2", "paPrize2", "paGoal3", "paPrize3", "paGoal4", "paPrize4")}
+                            <Separator />
+                            {renderGoalInputs("Ticket Médio", "ticketMedioGoal1", "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3", "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4")}
+                            <Separator />
+                            {renderGoalInputs("Corridinha Diária", "corridinhaGoal1", "corridinhaPrize1", "corridinhaGoal2", "corridinhaPrize2", "corridinhaGoal3", "corridinhaPrize3", "corridinhaGoal4", "corridinhaPrize4")}
+                             <Separator />
 
-                   <Separator />
-
-                  {renderGoalInputs(
-                      "Ticket Médio",
-                      "ticketMedioGoal1", "ticketMedioPrize1",
-                      "ticketMedioGoal2", "ticketMedioPrize2",
-                      "ticketMedioGoal3", "ticketMedioPrize3",
-                      "ticketMedioGoal4", "ticketMedioPrize4"
-                  )}
-
-                   <Separator />
-
-                    {renderGoalInputs(
-                        "Corridinha Diária",
-                        "corridinhaGoal1", "corridinhaPrize1",
-                        "corridinhaGoal2", "corridinhaPrize2",
-                        "corridinhaGoal3", "corridinhaPrize3",
-                        "corridinhaGoal4", "corridinhaPrize4"
-                    )}
-                  
-                  <Separator />
-
-                  {selectedSeller && selectedSellerIndex !== -1 && (
-                    <div>
-                      <h3 className="font-semibold mb-4 text-primary">Lançar Vendas para {currentValues.sellers[selectedSellerIndex]?.name}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField control={form.control} name={`sellers.${selectedSellerIndex}.vendas`} render={({ field }) => ( <FormItem><FormLabel>Vendas Totais (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`sellers.${selectedSellerIndex}.pa`} render={({ field }) => ( <FormItem><FormLabel>PA Atual</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`sellers.${selectedSellerIndex}.ticketMedio`} render={({ field }) => ( <FormItem><FormLabel>Ticket Médio Atual (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`sellers.${selectedSellerIndex}.corridinhaDiaria`} render={({ field }) => ( <FormItem><FormLabel>Corridinha Diária (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <Button type="submit" disabled={isPending || !selectedSeller} className="w-full">
-                    {isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Calculando...
-                      </>
-                    ) : (
-                      "Calcular Incentivos e Atualizar Painel"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="lg:col-span-3 space-y-8">
-              {selectedSeller && selectedSellerIndex !== -1 ? (
-                <>
-                  <ProgressDisplay 
-                    salesData={{
-                        vendas: currentValues.sellers[selectedSellerIndex]?.vendas || 0,
-                        pa: currentValues.sellers[selectedSellerIndex]?.pa || 0,
-                        ticketMedio: currentValues.sellers[selectedSellerIndex]?.ticketMedio || 0,
-                        corridinhaDiaria: currentValues.sellers[selectedSellerIndex]?.corridinhaDiaria || 0,
-                        metaMinha: currentValues.metaMinha,
-                        meta: currentValues.meta,
-                        metona: currentValues.metona,
-                        metaLendaria: currentValues.metaLendaria,
-                        paGoal4: currentValues.paGoal4,
-                        ticketMedioGoal4: currentValues.ticketMedioGoal4,
-                        corridinhaGoal4: currentValues.corridinhaGoal4,
-                    }}
-                   />
-                  <IncentivesDisplay incentives={incentives[selectedSeller.id]} loading={isPending} />
-                </>
-              ) : (
-                <Card className="shadow-lg flex items-center justify-center h-full">
-                    <CardContent className="text-center text-muted-foreground p-10">
-                        <UserPlus className="mx-auto h-12 w-12" />
-                        <p className="mt-4">
-                            Selecione um vendedor ou cadastre um novo para ver o painel de progresso e incentivos.
-                        </p>
-                    </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
+                            <Button type="submit" disabled={isPending} className="w-full">
+                                {isPending ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>) : "Salvar Metas"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                
+                {currentValues.sellers.map((seller, index) => (
+                    <TabsContent key={seller.id} value={seller.id} className="mt-4">
+                        <div className="grid lg:grid-cols-5 gap-8">
+                             <div className="lg:col-span-2">
+                                 <Card>
+                                     <CardHeader>
+                                        <CardTitle>Lançar Vendas</CardTitle>
+                                        <CardDescription>Insira os dados de desempenho para <span className="font-bold text-primary">{seller.name}</span>.</CardDescription>
+                                     </CardHeader>
+                                     <CardContent className="space-y-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name={`sellers.${index}.vendas`} render={({ field }) => ( <FormItem><FormLabel>Vendas Totais (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                            <FormField control={form.control} name={`sellers.${index}.pa`} render={({ field }) => ( <FormItem><FormLabel>PA Atual</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                            <FormField control={form.control} name={`sellers.${index}.ticketMedio`} render={({ field }) => ( <FormItem><FormLabel>Ticket Médio Atual (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                            <FormField control={form.control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => ( <FormItem><FormLabel>Corridinha Diária (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                        </div>
+                                        <Button type="submit" disabled={isPending} className="w-full">
+                                            {isPending ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Calculando...
+                                            </>
+                                            ) : (
+                                            "Calcular Incentivos e Atualizar Painel"
+                                            )}
+                                        </Button>
+                                     </CardContent>
+                                 </Card>
+                             </div>
+                             <div className="lg:col-span-3 space-y-8">
+                                <ProgressDisplay 
+                                    salesData={{
+                                        vendas: currentValues.sellers[index]?.vendas || 0,
+                                        pa: currentValues.sellers[index]?.pa || 0,
+                                        ticketMedio: currentValues.sellers[index]?.ticketMedio || 0,
+                                        corridinhaDiaria: currentValues.sellers[index]?.corridinhaDiaria || 0,
+                                        metaMinha: currentValues.metaMinha,
+                                        meta: currentValues.meta,
+                                        metona: currentValues.metona,
+                                        metaLendaria: currentValues.metaLendaria,
+                                        paGoal4: currentValues.paGoal4,
+                                        ticketMedioGoal4: currentValues.ticketMedioGoal4,
+                                        corridinhaGoal4: currentValues.corridinhaGoal4,
+                                    }}
+                                />
+                                <IncentivesDisplay incentives={incentives[seller.id]} loading={isPending} />
+                             </div>
+                        </div>
+                    </TabsContent>
+                ))}
+            </Tabs>
         </form>
       </Form>
     </div>
