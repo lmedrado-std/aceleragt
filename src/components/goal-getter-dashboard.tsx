@@ -52,6 +52,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 
 const sellerSchema = z.object({
@@ -179,7 +185,7 @@ export function GoalGetterDashboard() {
     } catch (error) {
         console.error("Failed to load state from localStorage", error);
     }
-  }, [form.reset]);
+  }, [form]);
 
   useEffect(() => {
     // This effect saves the form state to localStorage on every change.
@@ -387,13 +393,31 @@ export function GoalGetterDashboard() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+           <TooltipProvider>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-1 md:grid-cols-7 h-auto">
-                    <TabsTrigger value="admin" className="flex items-center gap-2"><ShieldCheck className="h-4 w-4"/> Admin</TabsTrigger>
-                    {currentValues.sellers.map(seller => (
-                        <TabsTrigger key={seller.id} value={seller.id}>{seller.name}</TabsTrigger>
-                    ))}
-                </TabsList>
+                <div className="flex items-center border-b">
+                    <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
+                        {currentValues.sellers.map(seller => (
+                            <TabsTrigger key={seller.id} value={seller.id} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none">
+                                {seller.name}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                             <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
+                                <TabsTrigger value="admin" className="px-3">
+                                    <ShieldCheck className="h-5 w-5"/>
+                                    <span className="sr-only">Admin</span>
+                                </TabsTrigger>
+                             </TabsList>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Painel do Administrador</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+
                 <TabsContent value="admin">
                     <Card className="mt-4">
                         <CardHeader>
@@ -564,6 +588,7 @@ export function GoalGetterDashboard() {
                     </TabsContent>
                 ))}
             </Tabs>
+           </TooltipProvider>
         </form>
       </Form>
     </div>
