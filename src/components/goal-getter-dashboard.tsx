@@ -39,7 +39,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressDisplay } from "@/components/progress-display";
-import { IncentivesDisplay } from "@/components/incentives-display";
 import { Logo } from "@/components/logo";
 import {
   AlertDialog,
@@ -554,7 +553,7 @@ export function GoalGetterDashboard() {
                 
                 {currentValues.sellers.map((seller, index) => (
                     <TabsContent key={seller.id} value={seller.id} className="mt-4">
-                        <div className="grid lg:grid-cols-2 gap-8">
+                        <div className="grid lg:grid-cols-1 gap-8">
                             <ProgressDisplay 
                                 salesData={{
                                     vendas: currentValues.sellers[index]?.vendas || 0,
@@ -569,8 +568,9 @@ export function GoalGetterDashboard() {
                                     ticketMedioGoal4: currentValues.ticketMedioGoal4,
                                     corridinhaGoal4: currentValues.corridinhaGoal4,
                                 }}
+                                incentives={incentives[seller.id]}
+                                loading={isPending}
                             />
-                            <IncentivesDisplay incentives={incentives[seller.id]} loading={isPending} />
                         </div>
                     </TabsContent>
                 ))}
