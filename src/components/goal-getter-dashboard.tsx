@@ -15,6 +15,7 @@ import {
   Edit,
   Save,
   X,
+  Award,
 } from "lucide-react";
 
 import {
@@ -89,6 +90,10 @@ const formSchema = z.object({
   corridinhaGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   corridinhaGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   corridinhaGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   sellers: z.array(sellerSchema),
 });
 
@@ -132,6 +137,10 @@ export function GoalGetterDashboard() {
       corridinhaGoal2: 1500,
       corridinhaGoal3: 2000,
       corridinhaGoal4: 3000,
+      corridinhaPrize1: 5,
+      corridinhaPrize2: 10,
+      corridinhaPrize3: 15,
+      corridinhaPrize4: 20,
       sellers: initialSellers,
     },
   });
@@ -238,6 +247,10 @@ export function GoalGetterDashboard() {
           corridinhaGoal2: values.corridinhaGoal2,
           corridinhaGoal3: values.corridinhaGoal3,
           corridinhaGoal4: values.corridinhaGoal4,
+          corridinhaPrize1: values.corridinhaPrize1,
+          corridinhaPrize2: values.corridinhaPrize2,
+          corridinhaPrize3: values.corridinhaPrize3,
+          corridinhaPrize4: values.corridinhaPrize4,
         });
         setIncentives(prev => ({ ...prev, [selectedSeller.id]: result }));
         toast({
@@ -259,6 +272,42 @@ export function GoalGetterDashboard() {
   const handleSellerChange = (seller: Seller) => {
     setSelectedSeller(seller);
   };
+
+  const renderGoalInputs = (level: string, goal1: any, prize1: any, goal2: any, prize2: any, goal3: any, prize3: any, goal4: any, prize4: any) => (
+    <div>
+        <h3 className="font-semibold mb-4 text-primary">Metas de {level}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+            <div className="space-y-2">
+                <h4 className="font-medium text-sm">Metinha</h4>
+                <div className="flex items-center gap-2">
+                    <FormField control={form.control} name={goal1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={prize1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <h4 className="font-medium text-sm">Meta</h4>
+                 <div className="flex items-center gap-2">
+                    <FormField control={form.control} name={goal2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={prize2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <h4 className="font-medium text-sm">Metona</h4>
+                 <div className="flex items-center gap-2">
+                    <FormField control={form.control} name={goal3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={prize3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <h4 className="font-medium text-sm">Lendária</h4>
+                 <div className="flex items-center gap-2">
+                    <FormField control={form.control} name={goal4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={prize4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                </div>
+            </div>
+        </div>
+    </div>
+  )
 
 
   return (
@@ -439,15 +488,13 @@ export function GoalGetterDashboard() {
 
                    <Separator />
 
-                  <div>
-                    <h3 className="font-semibold mb-4 text-primary">Metas de Corridinha Diária</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <FormField control={form.control} name="corridinhaGoal1" render={({ field }) => ( <FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="corridinhaGoal2" render={({ field }) => ( <FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="corridinhaGoal3" render={({ field }) => ( <FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="corridinhaGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
-                    </div>
-                  </div>
+                    {renderGoalInputs(
+                        "Corridinha Diária",
+                        "corridinhaGoal1", "corridinhaPrize1",
+                        "corridinhaGoal2", "corridinhaPrize2",
+                        "corridinhaGoal3", "corridinhaPrize3",
+                        "corridinhaGoal4", "corridinhaPrize4"
+                    )}
                   
                   <Separator />
 
@@ -513,5 +560,3 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
-
-    

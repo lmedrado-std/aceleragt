@@ -34,6 +34,10 @@ const IncentiveProjectionInputSchema = z.object({
   corridinhaGoal2: z.number().describe('Corridinha Goal 2.'),
   corridinhaGoal3: z.number().describe('Corridinha Goal 3.'),
   corridinhaGoal4: z.number().describe('Corridinha Goal 4.'),
+  corridinhaPrize1: z.number().describe('Corridinha Prize 1.'),
+  corridinhaPrize2: z.number().describe('Corridinha Prize 2.'),
+  corridinhaPrize3: z.number().describe('Corridinha Prize 3.'),
+  corridinhaPrize4: z.number().describe('Corridinha Prize 4.'),
 });
 export type IncentiveProjectionInput = z.infer<typeof IncentiveProjectionInputSchema>;
 
@@ -84,10 +88,10 @@ const prompt = ai.definePrompt({
   Current Ticket Medio: R$ {{ticketMedio}}
 
   Corridinha Diaria Goals:
-  R$ {{corridinhaGoal1}} -> R$ 5,00
-  R$ {{corridinhaGoal2}} -> R$ 10,00
-  R$ {{corridinhaGoal3}} -> R$ 15,00
-  R$ {{corridinhaGoal4}} -> R$ 20,00
+  R$ {{corridinhaGoal1}} -> R$ {{corridinhaPrize1}}
+  R$ {{corridinhaGoal2}} -> R$ {{corridinhaPrize2}}
+  R$ {{corridinhaGoal3}} -> R$ {{corridinhaPrize3}}
+  R$ {{corridinhaGoal4}} -> R$ {{corridinhaPrize4}}
   Current Corridinha Diaria: R$ {{corridinhaDiaria}}
 
   Calculate the potential incentives based on the current sales data and goal parameters. Return the results in JSON format.
@@ -149,16 +153,16 @@ const incentiveProjectionFlow = ai.defineFlow(
     }
 
     if (input.corridinhaDiaria >= input.corridinhaGoal1) {
-      corridinhaDiariaBonus = 5;
+      corridinhaDiariaBonus = input.corridinhaPrize1;
     }
     if (input.corridinhaDiaria >= input.corridinhaGoal2) {
-      corridinhaDiariaBonus = 10;
+      corridinhaDiariaBonus = input.corridinhaPrize2;
     }
     if (input.corridinhaDiaria >= input.corridinhaGoal3) {
-      corridinhaDiariaBonus = 15;
+      corridinhaDiariaBonus = input.corridinhaPrize3;
     }
      if (input.corridinhaDiaria >= input.corridinhaGoal4) {
-      corridinhaDiariaBonus = 20;
+      corridinhaDiariaBonus = input.corridinhaPrize4;
     }
 
 
