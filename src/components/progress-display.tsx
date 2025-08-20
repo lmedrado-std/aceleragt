@@ -279,9 +279,12 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
             {formatCurrency(vendas)} / {formatCurrency(metaLendaria)}
           </div>
         </div>
-
-        {incentives && (
-            <div className="space-y-2">
+        
+        {loading ? (
+            <div className="space-y-2"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>
+        ) : incentives && (
+            <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+                <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
                 <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={incentives.metinhaPremio} />
                 <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={incentives.metaPremio} />
                 <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={incentives.metonaPremio} />
