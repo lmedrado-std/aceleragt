@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useTransition, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 import {
   Loader2,
   UserPlus,
@@ -124,6 +125,7 @@ export function GoalGetterDashboard() {
     useState<Record<string, IncentiveProjectionOutput | null>>({});
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [rankings, setRankings] = useState<Rankings>({});
+  const searchParams = useSearchParams();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -160,8 +162,20 @@ export function GoalGetterDashboard() {
   
   const { watch, getValues, setValue } = form;
   const currentValues = watch();
+
+  const getInitialTab = useCallback(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) return tabFromUrl;
+    if (currentValues.sellers.length > 0) return currentValues.sellers[0].id;
+    return "admin";
+  }, [searchParams, currentValues.sellers]);
   
-  const [activeTab, setActiveTab] = useState(currentValues.sellers.length > 0 ? currentValues.sellers[0].id : "admin");
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+
+  useEffect(() => {
+    setActiveTab(getInitialTab());
+  }, [getInitialTab])
+
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
