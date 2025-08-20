@@ -43,14 +43,6 @@ const IncentiveProjectionInputSchema = z.object({
   ticketMedioPrize3: z.number().describe('Ticket Medio Prize 3.'),
   ticketMedioPrize4: z.number().describe('Ticket Medio Prize 4.'),
   corridinhaDiaria: z.number().describe('Daily sales target for Corridinha Diaria.'),
-  corridinhaGoal1: z.number().describe('Corridinha Goal 1.'),
-  corridinhaGoal2: z.number().describe('Corridinha Goal 2.'),
-  corridinhaGoal3: z.number().describe('Corridinha Goal 3.'),
-  corridinhaGoal4: z.number().describe('Corridinha Goal 4.'),
-  corridinhaPrize1: z.number().describe('Corridinha Prize 1.'),
-  corridinhaPrize2: z.number().describe('Corridinha Prize 2.'),
-  corridinhaPrize3: z.number().describe('Corridinha Prize 3.'),
-  corridinhaPrize4: z.number().describe('Corridinha Prize 4.'),
 });
 export type IncentiveProjectionInput = z.infer<typeof IncentiveProjectionInputSchema>;
 
@@ -123,18 +115,7 @@ const incentiveProjectionFlow = ai.defineFlow(
       ticketMedioBonus = input.ticketMedioPrize4;
     }
 
-    if (input.corridinhaDiaria >= input.corridinhaGoal1) {
-      corridinhaDiariaBonus = input.corridinhaPrize1;
-    }
-    if (input.corridinhaDiaria >= input.corridinhaGoal2) {
-      corridinhaDiariaBonus = input.corridinhaPrize2;
-    }
-    if (input.corridinhaDiaria >= input.corridinhaGoal3) {
-      corridinhaDiariaBonus = input.corridinhaPrize3;
-    }
-     if (input.corridinhaDiaria >= input.corridinhaGoal4) {
-      corridinhaDiariaBonus = input.corridinhaPrize4;
-    }
+    corridinhaDiariaBonus = input.corridinhaDiaria;
 
 
     return {

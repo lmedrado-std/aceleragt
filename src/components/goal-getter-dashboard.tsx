@@ -99,14 +99,6 @@ const formSchema = z.object({
   ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   sellers: z.array(sellerSchema),
 });
 
@@ -162,14 +154,6 @@ export function GoalGetterDashboard() {
       ticketMedioPrize2: 10,
       ticketMedioPrize3: 15,
       ticketMedioPrize4: 20,
-      corridinhaGoal1: 1000,
-      corridinhaGoal2: 1500,
-      corridinhaGoal3: 2000,
-      corridinhaGoal4: 3000,
-      corridinhaPrize1: 5,
-      corridinhaPrize2: 10,
-      corridinhaPrize3: 15,
-      corridinhaPrize4: 20,
       sellers: initialSellers,
     },
   });
@@ -190,8 +174,12 @@ export function GoalGetterDashboard() {
                 if (metric === 'totalIncentives') {
                     const incentiveData = currentIncentives[seller.id];
                     value = incentiveData ? Object.values(incentiveData).reduce((sum, val) => sum + val, 0) : 0;
-                } else {
-                    value = seller[metric as keyof Seller] as number;
+                } else if (metric === 'corridinhaDiaria') {
+                    const incentiveData = currentIncentives[seller.id];
+                    value = incentiveData?.corridinhaDiariaBonus || 0;
+                }
+                else {
+                    value = seller[metric as keyof Omit<Seller, 'id' | 'name'>] as number;
                 }
                 return { id: seller.id, value };
             })
@@ -341,14 +329,6 @@ export function GoalGetterDashboard() {
             ticketMedioPrize2: values.ticketMedioPrize2,
             ticketMedioPrize3: values.ticketMedioPrize3,
             ticketMedioPrize4: values.ticketMedioPrize4,
-            corridinhaGoal1: values.corridinhaGoal1,
-            corridinhaGoal2: values.corridinhaGoal2,
-            corridinhaGoal3: values.corridinhaGoal3,
-            corridinhaGoal4: values.corridinhaGoal4,
-            corridinhaPrize1: values.corridinhaPrize1,
-            corridinhaPrize2: values.corridinhaPrize2,
-            corridinhaPrize3: values.corridinhaPrize3,
-            corridinhaPrize4: values.corridinhaPrize4,
           });
           newIncentives[seller.id] = result;
         }
@@ -589,8 +569,6 @@ export function GoalGetterDashboard() {
                                     {renderGoalInputs("PA", "paGoal1", "paPrize1", "paGoal2", "paPrize2", "paGoal3", "paPrize3", "paGoal4", "paPrize4")}
                                     <Separator />
                                     {renderGoalInputs("Ticket Médio", "ticketMedioGoal1", "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3", "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4")}
-                                    <Separator />
-                                    {renderGoalInputs("Corridinha Diária", "corridinhaGoal1", "corridinhaPrize1", "corridinhaGoal2", "corridinhaPrize2", "corridinhaGoal3", "corridinhaPrize3", "corridinhaGoal4", "corridinhaPrize4")}
                                 </div>
                             </div>
 
@@ -619,7 +597,6 @@ export function GoalGetterDashboard() {
                                     metaLendaria: currentValues.metaLendaria,
                                     paGoal4: currentValues.paGoal4,
                                     ticketMedioGoal4: currentValues.ticketMedioGoal4,
-                                    corridinhaGoal4: currentValues.corridinhaGoal4,
                                 }}
                                 incentives={incentives[seller.id]}
                                 rankings={rankings[seller.id]}
@@ -635,5 +612,3 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
-
-    

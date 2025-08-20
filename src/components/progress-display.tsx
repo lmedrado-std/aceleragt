@@ -41,7 +41,6 @@ interface ProgressDisplayProps {
     metaLendaria: number;
     paGoal4: number;
     ticketMedioGoal4: number;
-    corridinhaGoal4: number;
   };
   incentives: IncentiveProjectionOutput | null;
   rankings: Record<RankingMetric, number> | null;
@@ -180,7 +179,6 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
     metaLendaria,
     paGoal4,
     ticketMedioGoal4,
-    corridinhaGoal4,
   } = salesData;
 
   const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
@@ -279,7 +277,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
             icon={<TrendingUp className="w-5 h-5" />}
             title="Corridinha Diária"
             currentValue={corridinhaDiaria}
-            goalValue={corridinhaGoal4}
+            goalValue={corridinhaDiaria}
             formatValue={formatCurrency}
             isCurrency
           />
@@ -379,5 +377,3 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
     </Card>
   );
 }
-
-    
