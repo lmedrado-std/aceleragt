@@ -1,3 +1,9 @@
+import { GoalGetterDashboard } from "@/components/goal-getter-dashboard";
+
 export default function Home() {
-  return <></>;
+  return (
+    <main>
+      <GoalGetterDashboard />
+    </main>
+  );
 }
