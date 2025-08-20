@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useTransition, useEffect } from "react";
+import Link from "next/link";
 import {
   Loader2,
   UserPlus,
@@ -13,6 +14,7 @@ import {
   X,
   ShieldCheck,
   Calculator,
+  Home,
 } from "lucide-react";
 
 import {
@@ -367,16 +369,24 @@ export function GoalGetterDashboard() {
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8">
-      <header className="flex items-center gap-4 mb-8">
-        <Logo />
-        <div>
-          <h1 className="text-3xl font-bold font-headline text-primary">
-            Corridinha GT
-          </h1>
-          <p className="text-muted-foreground">
-            Acompanhe suas metas e maximize seus ganhos.
-          </p>
+      <header className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-4">
+            <Logo />
+            <div>
+              <h1 className="text-3xl font-bold font-headline text-primary">
+                Corridinha GT
+              </h1>
+              <p className="text-muted-foreground">
+                Acompanhe suas metas e maximize seus ganhos.
+              </p>
+            </div>
         </div>
+        <Button asChild variant="outline">
+          <Link href="/">
+            <Home className="mr-2 h-4 w-4" />
+            Página Inicial
+          </Link>
+        </Button>
       </header>
 
       <Form {...form}>
