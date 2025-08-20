@@ -34,3 +34,5 @@ firebase deploy
 ```
 
 Após a conclusão, o terminal mostrará a URL onde seu aplicativo está publicado e acessível para todos!
+# aceleracatu
+# aceleracatu
