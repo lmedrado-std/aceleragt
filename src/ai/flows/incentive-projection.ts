@@ -30,6 +30,10 @@ const IncentiveProjectionInputSchema = z.object({
   ticketMedioGoal3: z.number().describe('Ticket Medio Goal 3.'),
   ticketMedioGoal4: z.number().describe('Ticket Medio Goal 4.'),
   corridinhaDiaria: z.number().describe('Daily sales target for Corridinha Diaria.'),
+  corridinhaGoal1: z.number().describe('Corridinha Goal 1.'),
+  corridinhaGoal2: z.number().describe('Corridinha Goal 2.'),
+  corridinhaGoal3: z.number().describe('Corridinha Goal 3.'),
+  corridinhaGoal4: z.number().describe('Corridinha Goal 4.'),
 });
 export type IncentiveProjectionInput = z.infer<typeof IncentiveProjectionInputSchema>;
 
@@ -79,8 +83,12 @@ const prompt = ai.definePrompt({
   R$ {{ticketMedioGoal4}} -> R$ 20,00
   Current Ticket Medio: R$ {{ticketMedio}}
 
-  Corridinha Diaria Goal:
-  R$ {{corridinhaDiaria}} -> R$ 5,00
+  Corridinha Diaria Goals:
+  R$ {{corridinhaGoal1}} -> R$ 5,00
+  R$ {{corridinhaGoal2}} -> R$ 10,00
+  R$ {{corridinhaGoal3}} -> R$ 15,00
+  R$ {{corridinhaGoal4}} -> R$ 20,00
+  Current Corridinha Diaria: R$ {{corridinhaDiaria}}
 
   Calculate the potential incentives based on the current sales data and goal parameters. Return the results in JSON format.
   `,
@@ -111,7 +119,7 @@ const incentiveProjectionFlow = ai.defineFlow(
       metonaPremio = 120;
     }
     if (input.vendas >= input.metaLendaria) {
-      legendariaBonus = Math.floor((input.vendas - input.metaLendaria) / 2000) * 50;
+      legendariaBonus = Math.floor((input.vendas - input.metona) / 2000) * 50;
     }
 
     if (input.pa >= input.paGoal1) {
@@ -140,16 +148,16 @@ const incentiveProjectionFlow = ai.defineFlow(
       ticketMedioBonus = 20;
     }
 
-    if (input.corridinhaDiaria >= 180) {
+    if (input.corridinhaDiaria >= input.corridinhaGoal1) {
       corridinhaDiariaBonus = 5;
     }
-    if (input.corridinhaDiaria >= 185) {
+    if (input.corridinhaDiaria >= input.corridinhaGoal2) {
       corridinhaDiariaBonus = 10;
     }
-    if (input.corridinhaDiaria >= 190) {
+    if (input.corridinhaDiaria >= input.corridinhaGoal3) {
       corridinhaDiariaBonus = 15;
     }
-     if (input.corridinhaDiaria >= 200) {
+     if (input.corridinhaDiaria >= input.corridinhaGoal4) {
       corridinhaDiariaBonus = 20;
     }
 

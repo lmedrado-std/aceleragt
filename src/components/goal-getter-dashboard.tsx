@@ -82,9 +82,13 @@ const formSchema = z.object({
   paGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  corridinhaGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   sellers: z.array(sellerSchema),
 });
 
@@ -124,6 +128,10 @@ export function GoalGetterDashboard() {
       ticketMedioGoal2: 185,
       ticketMedioGoal3: 190,
       ticketMedioGoal4: 200,
+      corridinhaGoal1: 180,
+      corridinhaGoal2: 185,
+      corridinhaGoal3: 190,
+      corridinhaGoal4: 200,
       sellers: initialSellers,
     },
   });
@@ -176,8 +184,12 @@ export function GoalGetterDashboard() {
     setEditingSellerId(null);
   }
 
-  const saveSellerName = (sellerId: string, newName: string) => {
-     if (newName.trim() === "") {
+  const saveSellerName = (sellerId: string) => {
+    const sellerIndex = currentValues.sellers.findIndex(s => s.id === sellerId);
+    if (sellerIndex === -1) return;
+
+    const newName = form.getValues(`sellers.${sellerIndex}.name`);
+    if (newName.trim() === "") {
       toast({
         variant: "destructive",
         title: "Erro",
@@ -185,13 +197,9 @@ export function GoalGetterDashboard() {
       });
       return;
     }
-    const sellerIndex = currentValues.sellers.findIndex(s => s.id === sellerId);
-    if (sellerIndex !== -1) {
-        form.setValue(`sellers.${index}.name`, newName);
-    }
     setEditingSellerId(null);
   }
-  
+
   const selectedSellerIndex = currentValues.sellers.findIndex(s => s.id === selectedSeller?.id);
 
   const onSubmit = (values: FormValues) => {
@@ -226,6 +234,10 @@ export function GoalGetterDashboard() {
           ticketMedioGoal2: values.ticketMedioGoal2,
           ticketMedioGoal3: values.ticketMedioGoal3,
           ticketMedioGoal4: values.ticketMedioGoal4,
+          corridinhaGoal1: values.corridinhaGoal1,
+          corridinhaGoal2: values.corridinhaGoal2,
+          corridinhaGoal3: values.corridinhaGoal3,
+          corridinhaGoal4: values.corridinhaGoal4,
         });
         setIncentives(prev => ({ ...prev, [selectedSeller.id]: result }));
         toast({
@@ -330,7 +342,7 @@ export function GoalGetterDashboard() {
                                           <FormItem className="flex-grow"><FormControl><Input {...field} /></FormControl></FormItem>
                                         )}
                                       />
-                                        <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id, form.getValues(`sellers.${index}.name`))}><Save className="h-4 w-4"/></Button>
+                                        <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
                                         <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
                                     </>
                                 ) : (
@@ -424,6 +436,18 @@ export function GoalGetterDashboard() {
                         <FormField control={form.control} name="ticketMedioGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
                     </div>
                   </div>
+
+                   <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-4 text-primary">Metas de Corridinha Diária</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <FormField control={form.control} name="corridinhaGoal1" render={({ field }) => ( <FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal2" render={({ field }) => ( <FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal3" render={({ field }) => ( <FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
+                    </div>
+                  </div>
                   
                   <Separator />
 
@@ -467,6 +491,7 @@ export function GoalGetterDashboard() {
                         metaLendaria: currentValues.metaLendaria,
                         paGoal4: currentValues.paGoal4,
                         ticketMedioGoal4: currentValues.ticketMedioGoal4,
+                        corridinhaGoal4: currentValues.corridinhaGoal4,
                     }}
                    />
                   <IncentivesDisplay incentives={incentives[selectedSeller.id]} loading={isPending} />

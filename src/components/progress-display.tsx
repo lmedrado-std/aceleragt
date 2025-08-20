@@ -29,6 +29,7 @@ interface ProgressDisplayProps {
     metaLendaria: number;
     paGoal4: number;
     ticketMedioGoal4: number;
+    corridinhaGoal4: number;
   };
 }
 
@@ -92,6 +93,7 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
     metaLendaria,
     paGoal4,
     ticketMedioGoal4,
+    corridinhaGoal4,
   } = salesData;
 
   const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
@@ -166,7 +168,7 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
             icon={<TrendingUp className="w-5 h-5" />}
             title="Corridinha Diária"
             currentValue={corridinhaDiaria}
-            goalValue={200}
+            goalValue={corridinhaGoal4}
             formatValue={formatCurrency}
             isCurrency
           />
