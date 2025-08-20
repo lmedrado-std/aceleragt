@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import {
   Loader2,
   UserPlus,
@@ -57,10 +57,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const sellerSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Nome é obrigatório"),
-  vendas: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  pa: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  corridinhaDiaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  vendas: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
+  pa: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
+  ticketMedio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
+  corridinhaDiaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
 });
 
 const formSchema = z.object({
@@ -158,10 +158,40 @@ export function GoalGetterDashboard() {
     },
   });
 
-  const currentValues = form.watch();
+  const { watch, getValues, setValue } = form;
+  const currentValues = watch();
+
+  useEffect(() => {
+    // This effect ensures localStorage is accessed only on the client side
+    try {
+      const savedState = localStorage.getItem("goalGetterState");
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        // A simple validation to make sure we are not setting junk state
+        if (parsedState && typeof parsedState.meta === 'number') {
+            form.reset(parsedState);
+        }
+      }
+    } catch (error) {
+        console.error("Failed to load state from localStorage", error);
+    }
+  }, [form.reset]);
+
+  useEffect(() => {
+    // This effect saves the form state to localStorage on every change.
+    const subscription = watch((value) => {
+        try {
+            localStorage.setItem("goalGetterState", JSON.stringify(value));
+        } catch(error) {
+            console.error("Failed to save state to localStorage", error);
+        }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
 
   const addSeller = () => {
-    const newSellerName = form.getValues("newSellerName");
+    const newSellerName = getValues("newSellerName");
     if (newSellerName.trim() === "") {
       toast({
         variant: "destructive",
@@ -178,15 +208,15 @@ export function GoalGetterDashboard() {
       ticketMedio: 0,
       corridinhaDiaria: 0,
     };
-    const updatedSellers = [...form.getValues("sellers"), newSeller];
-    form.setValue("sellers", updatedSellers);
-    form.setValue("newSellerName", "");
+    const updatedSellers = [...getValues("sellers"), newSeller];
+    setValue("sellers", updatedSellers);
+    setValue("newSellerName", "");
     setActiveTab(newSeller.id);
   };
 
   const removeSeller = (sellerId: string) => {
     const updatedSellers = currentValues.sellers.filter(s => s.id !== sellerId);
-    form.setValue("sellers", updatedSellers);
+    setValue("sellers", updatedSellers);
     setIncentives(prev => {
         const newIncentives = {...prev};
         delete newIncentives[sellerId];
@@ -209,7 +239,7 @@ export function GoalGetterDashboard() {
     const sellerIndex = currentValues.sellers.findIndex(s => s.id === sellerId);
     if (sellerIndex === -1) return;
 
-    const newName = form.getValues(`sellers.${sellerIndex}.name`);
+    const newName = getValues(`sellers.${sellerIndex}.name`);
     if (newName.trim() === "") {
       toast({
         variant: "destructive",

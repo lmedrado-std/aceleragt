@@ -37,7 +37,7 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(value);
+  }).format(value || 0);
 
 const ProgressItem = ({
   icon,
@@ -54,7 +54,7 @@ const ProgressItem = ({
   formatValue?: (value: number) => string;
   isCurrency?: boolean;
 }) => {
-  const percentage = goalValue > 0 ? (currentValue / goalValue) * 100 : 0;
+  const percentage = goalValue > 0 ? ((currentValue || 0) / goalValue) * 100 : 0;
   const achieved = currentValue >= goalValue;
 
   return (
