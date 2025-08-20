@@ -19,16 +19,27 @@ const IncentiveProjectionInputSchema = z.object({
   meta: z.number().describe('The Meta sales goal.'),
   metona: z.number().describe('The Metona sales goal.'),
   metaLendaria: z.number().describe('The Legendaria sales goal.'),
+  metaMinhaPrize: z.number().describe('The Metinha prize.'),
+  metaPrize: z.number().describe('The Meta prize.'),
+  metonaPrize: z.number().describe('The Metona prize.'),
   pa: z.number().describe('Products per customer.'),
   paGoal1: z.number().describe('PA Goal 1.'),
   paGoal2: z.number().describe('PA Goal 2.'),
   paGoal3: z.number().describe('PA Goal 3.'),
   paGoal4: z.number().describe('PA Goal 4.'),
+  paPrize1: z.number().describe('PA Prize 1.'),
+  paPrize2: z.number().describe('PA Prize 2.'),
+  paPrize3: z.number().describe('PA Prize 3.'),
+  paPrize4: z.number().describe('PA Prize 4.'),
   ticketMedio: z.number().describe('Average ticket.'),
   ticketMedioGoal1: z.number().describe('Ticket Medio Goal 1.'),
   ticketMedioGoal2: z.number().describe('Ticket Medio Goal 2.'),
   ticketMedioGoal3: z.number().describe('Ticket Medio Goal 3.'),
   ticketMedioGoal4: z.number().describe('Ticket Medio Goal 4.'),
+  ticketMedioPrize1: z.number().describe('Ticket Medio Prize 1.'),
+  ticketMedioPrize2: z.number().describe('Ticket Medio Prize 2.'),
+  ticketMedioPrize3: z.number().describe('Ticket Medio Prize 3.'),
+  ticketMedioPrize4: z.number().describe('Ticket Medio Prize 4.'),
   corridinhaDiaria: z.number().describe('Daily sales target for Corridinha Diaria.'),
   corridinhaGoal1: z.number().describe('Corridinha Goal 1.'),
   corridinhaGoal2: z.number().describe('Corridinha Goal 2.'),
@@ -56,48 +67,6 @@ export async function incentiveProjection(input: IncentiveProjectionInput): Prom
   return incentiveProjectionFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'incentiveProjectionPrompt',
-  input: {schema: IncentiveProjectionInputSchema},
-  output: {schema: IncentiveProjectionOutputSchema},
-  prompt: `You are an expert sales incentive calculator.
-
-  Given the following sales data and goal parameters, calculate the potential incentives for a salesperson.
-
-  Sales Data:
-  Current Sales: R$ {{vendas}}
-
-  Sales Goals:
-  Metinha: R$ {{metaMinha}} -> Prêmio de R$ 50,00
-  Meta: R$ {{meta}} -> Prêmio de R$ 100,00
-  Metona: R$ {{metona}} -> Prêmio de R$ 120,00
-  Lendaria: R$ {{metaLendaria}} -> Bônus de R$ 50,00 a cada R$ 2.000,00 vendidos acima da Metona (se a meta Lendaria for atingida)
-
-  PA (Produtos por Atendimentos) Goals:
-  {{paGoal1}} -> R$ 5,00
-  {{paGoal2}} -> R$ 10,00
-  {{paGoal3}} -> R$ 15,00
-  {{paGoal4}} -> R$ 20,00
-  Current PA: {{pa}}
-
-  Ticket Medio Goals:
-  R$ {{ticketMedioGoal1}} -> R$ 5,00
-  R$ {{ticketMedioGoal2}} -> R$ 10,00
-  R$ {{ticketMedioGoal3}} -> R$ 15,00
-  R$ {{ticketMedioGoal4}} -> R$ 20,00
-  Current Ticket Medio: R$ {{ticketMedio}}
-
-  Corridinha Diaria Goals:
-  R$ {{corridinhaGoal1}} -> R$ {{corridinhaPrize1}}
-  R$ {{corridinhaGoal2}} -> R$ {{corridinhaPrize2}}
-  R$ {{corridinhaGoal3}} -> R$ {{corridinhaPrize3}}
-  R$ {{corridinhaGoal4}} -> R$ {{corridinhaPrize4}}
-  Current Corridinha Diaria: R$ {{corridinhaDiaria}}
-
-  Calculate the potential incentives based on the current sales data and goal parameters. Return the results in JSON format.
-  `,
-});
-
 const incentiveProjectionFlow = ai.defineFlow(
   {
     name: 'incentiveProjectionFlow',
@@ -114,42 +83,42 @@ const incentiveProjectionFlow = ai.defineFlow(
     let corridinhaDiariaBonus = 0;
 
     if (input.vendas >= input.metaMinha) {
-      metinhaPremio = 50;
+      metinhaPremio = input.metaMinhaPrize;
     }
     if (input.vendas >= input.meta) {
-      metaPremio = 100;
+      metaPremio = input.metaPrize;
     }
     if (input.vendas >= input.metona) {
-      metonaPremio = 120;
+      metonaPremio = input.metonaPrize;
     }
     if (input.vendas >= input.metaLendaria) {
       legendariaBonus = Math.floor((input.vendas - input.metona) / 2000) * 50;
     }
 
     if (input.pa >= input.paGoal1) {
-      paBonus = 5;
+      paBonus = input.paPrize1;
     }
     if (input.pa >= input.paGoal2) {
-      paBonus = 10;
+      paBonus = input.paPrize2;
     }
      if (input.pa >= input.paGoal3) {
-      paBonus = 15;
+      paBonus = input.paPrize3;
     }
      if (input.pa >= input.paGoal4) {
-      paBonus = 20;
+      paBonus = input.paPrize4;
     }
 
     if (input.ticketMedio >= input.ticketMedioGoal1) {
-      ticketMedioBonus = 5;
+      ticketMedioBonus = input.ticketMedioPrize1;
     }
     if (input.ticketMedio >= input.ticketMedioGoal2) {
-      ticketMedioBonus = 10;
+      ticketMedioBonus = input.ticketMedioPrize2;
     }
     if (input.ticketMedio >= input.ticketMedioGoal3) {
-      ticketMedioBonus = 15;
+      ticketMedioBonus = input.ticketMedioPrize3;
     }
      if (input.ticketMedio >= input.ticketMedioGoal4) {
-      ticketMedioBonus = 20;
+      ticketMedioBonus = input.ticketMedioPrize4;
     }
 
     if (input.corridinhaDiaria >= input.corridinhaGoal1) {

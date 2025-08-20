@@ -78,14 +78,25 @@ const formSchema = z.object({
   meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  metaMinhaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  metaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  metonaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   corridinhaGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   corridinhaGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   corridinhaGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -125,14 +136,25 @@ export function GoalGetterDashboard() {
       meta: 9000,
       metona: 10000,
       metaLendaria: 12000,
+      metaMinhaPrize: 50,
+      metaPrize: 100,
+      metonaPrize: 120,
       paGoal1: 1.5,
       paGoal2: 1.6,
       paGoal3: 1.9,
       paGoal4: 2.0,
+      paPrize1: 5,
+      paPrize2: 10,
+      paPrize3: 15,
+      paPrize4: 20,
       ticketMedioGoal1: 180,
       ticketMedioGoal2: 185,
       ticketMedioGoal3: 190,
       ticketMedioGoal4: 200,
+      ticketMedioPrize1: 5,
+      ticketMedioPrize2: 10,
+      ticketMedioPrize3: 15,
+      ticketMedioPrize4: 20,
       corridinhaGoal1: 1000,
       corridinhaGoal2: 1500,
       corridinhaGoal3: 2000,
@@ -235,14 +257,25 @@ export function GoalGetterDashboard() {
           meta: values.meta,
           metona: values.metona,
           metaLendaria: values.metaLendaria,
+          metaMinhaPrize: values.metaMinhaPrize,
+          metaPrize: values.metaPrize,
+          metonaPrize: values.metonaPrize,
           paGoal1: values.paGoal1,
           paGoal2: values.paGoal2,
           paGoal3: values.paGoal3,
           paGoal4: values.paGoal4,
+          paPrize1: values.paPrize1,
+          paPrize2: values.paPrize2,
+          paPrize3: values.paPrize3,
+          paPrize4: values.paPrize4,
           ticketMedioGoal1: values.ticketMedioGoal1,
           ticketMedioGoal2: values.ticketMedioGoal2,
           ticketMedioGoal3: values.ticketMedioGoal3,
           ticketMedioGoal4: values.ticketMedioGoal4,
+          ticketMedioPrize1: values.ticketMedioPrize1,
+          ticketMedioPrize2: values.ticketMedioPrize2,
+          ticketMedioPrize3: values.ticketMedioPrize3,
+          ticketMedioPrize4: values.ticketMedioPrize4,
           corridinhaGoal1: values.corridinhaGoal1,
           corridinhaGoal2: values.corridinhaGoal2,
           corridinhaGoal3: values.corridinhaGoal3,
@@ -272,7 +305,7 @@ export function GoalGetterDashboard() {
   const handleSellerChange = (seller: Seller) => {
     setSelectedSeller(seller);
   };
-
+  
   const renderGoalInputs = (level: string, goal1: any, prize1: any, goal2: any, prize2: any, goal3: any, prize3: any, goal4: any, prize4: any) => (
     <div>
         <h3 className="font-semibold mb-4 text-primary">Metas de {level}</h3>
@@ -426,65 +459,57 @@ export function GoalGetterDashboard() {
 
                   <div>
                     <h3 className="font-semibold mb-4 text-primary">Metas de Vendas</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-                      <FormField control={form.control} name="metaMinha" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Metinha (R$)</FormLabel>
-                            <FormControl><Input type="number" step="100" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField control={form.control} name="meta" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Meta (R$)</FormLabel>
-                            <FormControl><Input type="number" step="100" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField control={form.control} name="metona" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Metona (R$)</FormLabel>
-                            <FormControl><Input type="number" step="100" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField control={form.control} name="metaLendaria" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Lendária (R$)</FormLabel>
-                            <FormControl><Input type="number" step="100" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                      <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Metinha</h4>
+                          <div className="flex items-center gap-2">
+                              <FormField control={form.control} name="metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                              <FormField control={form.control} name="metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                          </div>
+                      </div>
+                       <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Meta</h4>
+                           <div className="flex items-center gap-2">
+                              <FormField control={form.control} name="meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                              <FormField control={form.control} name="metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                          </div>
+                      </div>
+                       <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Metona</h4>
+                           <div className="flex items-center gap-2">
+                              <FormField control={form.control} name="metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                              <FormField control={form.control} name="metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                          </div>
+                      </div>
+                       <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Lendária</h4>
+                           <div className="flex items-center gap-2">
+                              <FormField control={form.control} name="metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                              <span className="text-sm text-muted-foreground w-full">Bônus R$50 a cada R$2k</span>
+                          </div>
+                      </div>
                     </div>
                   </div>
 
                   <Separator />
 
-                  <div>
-                    <h3 className="font-semibold mb-4 text-primary">Metas de PA</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <FormField control={form.control} name="paGoal1" render={({ field }) => ( <FormItem><FormLabel>Metinha</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="paGoal2" render={({ field }) => ( <FormItem><FormLabel>Meta</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="paGoal3" render={({ field }) => ( <FormItem><FormLabel>Metona</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="paGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl></FormItem> )}/>
-                    </div>
-                  </div>
+                  {renderGoalInputs(
+                      "PA",
+                      "paGoal1", "paPrize1",
+                      "paGoal2", "paPrize2",
+                      "paGoal3", "paPrize3",
+                      "paGoal4", "paPrize4"
+                  )}
 
                    <Separator />
 
-                  <div>
-                    <h3 className="font-semibold mb-4 text-primary">Metas de Ticket Médio</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <FormField control={form.control} name="ticketMedioGoal1" render={({ field }) => ( <FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="ticketMedioGoal2" render={({ field }) => ( <FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="ticketMedioGoal3" render={({ field }) => ( <FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="ticketMedioGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                    </div>
-                  </div>
+                  {renderGoalInputs(
+                      "Ticket Médio",
+                      "ticketMedioGoal1", "ticketMedioPrize1",
+                      "ticketMedioGoal2", "ticketMedioPrize2",
+                      "ticketMedioGoal3", "ticketMedioPrize3",
+                      "ticketMedioGoal4", "ticketMedioPrize4"
+                  )}
 
                    <Separator />
 
