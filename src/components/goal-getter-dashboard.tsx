@@ -125,7 +125,7 @@ export function GoalGetterDashboard() {
   const [incentives, setIncentives] =
     useState<Record<string, IncentiveProjectionOutput | null>>({});
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("admin");
+  const [activeTab, setActiveTab] = useState(initialSellers.length > 0 ? initialSellers[0].id : "admin");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -233,7 +233,7 @@ export function GoalGetterDashboard() {
         return newIncentives;
     });
     if (activeTab === sellerId) {
-        setActiveTab("admin");
+        setActiveTab(updatedSellers.length > 0 ? updatedSellers[0].id : "admin");
     }
   }
 
