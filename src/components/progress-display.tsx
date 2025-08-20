@@ -21,6 +21,7 @@ import {
   Gift,
   Zap,
   Trophy,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -167,6 +168,22 @@ const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
   )
 };
 
+const SalesGoalDetail = ({ label, goal, current, prize }: {label: string; goal: number; current: number; prize: number;}) => {
+    const achieved = current >= goal;
+    return (
+        <div className={cn("flex justify-between items-center p-2 rounded-md", achieved ? "bg-green-100/80 dark:bg-green-900/30" : "")}>
+            <div className="flex items-center gap-2">
+                {achieved ? <CheckCircle className="w-5 h-5 text-green-500"/> : <Target className="w-5 h-5 text-muted-foreground"/>}
+                <div>
+                    <p className={cn("font-semibold", achieved && "text-green-700 dark:text-green-300")}>{label}</p>
+                    <p className="text-xs text-muted-foreground">{formatCurrency(current)} / {formatCurrency(goal)}</p>
+                </div>
+            </div>
+            <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(prize)}</p>
+        </div>
+    )
+}
+
 export function ProgressDisplay({ salesData, incentives, rankings, loading }: ProgressDisplayProps) {
   const {
     vendas,
@@ -263,6 +280,15 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
           </div>
         </div>
 
+        {incentives && (
+            <div className="space-y-2">
+                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={incentives.metinhaPremio} />
+                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={incentives.metaPremio} />
+                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={incentives.metonaPremio} />
+                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} />
+            </div>
+        )}
+
         <div className="grid sm:grid-cols-1 gap-6 pt-4">
           <ProgressItem
             icon={<Package className="w-5 h-5" />}
@@ -325,31 +351,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
               </div>
               
               <div className="space-y-2 pt-4">
-                 <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Prêmios</h3>
-                <IncentiveItem
-                  icon={<Award className="w-5 h-5" />}
-                  label="Prêmio Metinha"
-                  value={incentives.metinhaPremio}
-                  achieved={incentives.metinhaPremio > 0}
-                />
-                <IncentiveItem
-                  icon={<Award className="w-5 h-5" />}
-                  label="Prêmio Meta"
-                  value={incentives.metaPremio}
-                  achieved={incentives.metaPremio > 0}
-                />
-                <IncentiveItem
-                  icon={<Award className="w-5 h-5" />}
-                  label="Prêmio Metona"
-                  value={incentives.metonaPremio}
-                  achieved={incentives.metonaPremio > 0}
-                />
-                <IncentiveItem
-                  icon={<Star className="w-5 h-5" />}
-                  label="Bônus Lendária"
-                  value={incentives.legendariaBonus}
-                  achieved={incentives.legendariaBonus > 0}
-                />
+                 <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Outros Prêmios</h3>
                 <IncentiveItem
                   icon={<Gift className="w-5 h-5" />}
                   label="Bônus PA"
