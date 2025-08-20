@@ -128,10 +128,10 @@ export function GoalGetterDashboard() {
       ticketMedioGoal2: 185,
       ticketMedioGoal3: 190,
       ticketMedioGoal4: 200,
-      corridinhaGoal1: 180,
-      corridinhaGoal2: 185,
-      corridinhaGoal3: 190,
-      corridinhaGoal4: 200,
+      corridinhaGoal1: 1000,
+      corridinhaGoal2: 1500,
+      corridinhaGoal3: 2000,
+      corridinhaGoal4: 3000,
       sellers: initialSellers,
     },
   });
@@ -442,10 +442,10 @@ export function GoalGetterDashboard() {
                   <div>
                     <h3 className="font-semibold mb-4 text-primary">Metas de Corridinha Diária</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <FormField control={form.control} name="corridinhaGoal1" render={({ field }) => ( <FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="corridinhaGoal2" render={({ field }) => ( <FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="corridinhaGoal3" render={({ field }) => ( <FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
-                        <FormField control={form.control} name="corridinhaGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária (R$)</FormLabel><FormControl><Input type="number" step="5" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal1" render={({ field }) => ( <FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal2" render={({ field }) => ( <FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal3" render={({ field }) => ( <FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
+                        <FormField control={form.control} name="corridinhaGoal4" render={({ field }) => ( <FormItem><FormLabel>Lendária (R$)</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl></FormItem> )}/>
                     </div>
                   </div>
                   
@@ -513,3 +513,5 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
+
+    
