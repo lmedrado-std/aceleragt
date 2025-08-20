@@ -18,6 +18,7 @@ const IncentiveProjectionInputSchema = z.object({
   metaMinha: z.number().describe('The Metinha sales goal.'),
   meta: z.number().describe('The Meta sales goal.'),
   metona: z.number().describe('The Metona sales goal.'),
+  metaLendaria: z.number().describe('The Legendaria sales goal.'),
   pa: z.number().describe('Products per customer.'),
   paGoal1: z.number().describe('PA Goal 1.'),
   paGoal2: z.number().describe('PA Goal 2.'),
@@ -62,7 +63,7 @@ const prompt = ai.definePrompt({
   Metinha: R$ {{metaMinha}} -> Prêmio de R$ 50,00
   Meta: R$ {{meta}} -> Prêmio de R$ 100,00
   Metona: R$ {{metona}} -> Prêmio de R$ 120,00
-  Legendaria: Bônus de R$ 50,00 a cada R$ 2.000,00 vendidos acima da Metona
+  Lendaria: R$ {{metaLendaria}} -> Bônus de R$ 50,00 a cada R$ 2.000,00 vendidos acima da Metona (se a meta Lendaria for atingida)
 
   PA (Produtos por Atendimentos) Goals:
   {{paGoal1}} -> R$ 5,00
@@ -108,8 +109,11 @@ const incentiveProjectionFlow = ai.defineFlow(
     }
     if (input.vendas >= input.metona) {
       metonaPremio = 120;
-      legendariaBonus = Math.floor((input.vendas - input.metona) / 2000) * 50;
     }
+    if (input.vendas >= input.metaLendaria) {
+      legendariaBonus = Math.floor((input.vendas - input.metaLendaria) / 2000) * 50;
+    }
+
     if (input.pa >= input.paGoal1) {
       paBonus = 5;
     }

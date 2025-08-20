@@ -76,6 +76,7 @@ const formSchema = z.object({
   metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -114,6 +115,7 @@ export function GoalGetterDashboard() {
       metaMinha: 8000,
       meta: 9000,
       metona: 10000,
+      metaLendaria: 12000,
       paGoal1: 1.5,
       paGoal2: 1.6,
       paGoal3: 1.9,
@@ -185,7 +187,7 @@ export function GoalGetterDashboard() {
     }
     const sellerIndex = currentValues.sellers.findIndex(s => s.id === sellerId);
     if (sellerIndex !== -1) {
-        form.setValue(`sellers.${sellerIndex}.name`, newName);
+        form.setValue(`sellers.${index}.name`, newName);
     }
     setEditingSellerId(null);
   }
@@ -215,6 +217,7 @@ export function GoalGetterDashboard() {
           metaMinha: values.metaMinha,
           meta: values.meta,
           metona: values.metona,
+          metaLendaria: values.metaLendaria,
           paGoal1: values.paGoal1,
           paGoal2: values.paGoal2,
           paGoal3: values.paGoal3,
@@ -362,7 +365,7 @@ export function GoalGetterDashboard() {
 
                   <div>
                     <h3 className="font-semibold mb-4 text-primary">Metas de Vendas</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
                       <FormField control={form.control} name="metaMinha" render={({ field }) => (
                           <FormItem>
                             <FormLabel>Metinha (R$)</FormLabel>
@@ -382,6 +385,14 @@ export function GoalGetterDashboard() {
                       <FormField control={form.control} name="metona" render={({ field }) => (
                           <FormItem>
                             <FormLabel>Metona (R$)</FormLabel>
+                            <FormControl><Input type="number" step="100" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField control={form.control} name="metaLendaria" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Lendária (R$)</FormLabel>
                             <FormControl><Input type="number" step="100" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
@@ -453,6 +464,7 @@ export function GoalGetterDashboard() {
                         metaMinha: currentValues.metaMinha,
                         meta: currentValues.meta,
                         metona: currentValues.metona,
+                        metaLendaria: currentValues.metaLendaria,
                         paGoal4: currentValues.paGoal4,
                         ticketMedioGoal4: currentValues.ticketMedioGoal4,
                     }}
@@ -476,5 +488,3 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
-
-    

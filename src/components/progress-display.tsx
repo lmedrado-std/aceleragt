@@ -26,6 +26,7 @@ interface ProgressDisplayProps {
     metaMinha: number;
     meta: number;
     metona: number;
+    metaLendaria: number;
     paGoal4: number;
     ticketMedioGoal4: number;
   };
@@ -88,11 +89,12 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
     metaMinha,
     meta,
     metona,
+    metaLendaria,
     paGoal4,
     ticketMedioGoal4,
   } = salesData;
 
-  const salesPercentage = metona > 0 ? (vendas / metona) * 100 : 0;
+  const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
 
   return (
     <Card className="shadow-lg">
@@ -112,28 +114,35 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
             <Progress value={salesPercentage} className="h-4" />
             <div
               className="absolute top-0 h-full border-r-2 border-dashed border-white/50"
-              style={{ left: `${(metaMinha / metona) * 100}%` }}
+              style={{ left: `${(metaMinha / metaLendaria) * 100}%` }}
               title={`Metinha: ${formatCurrency(metaMinha)}`}
             >
               <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">MIN</span>
             </div>
             <div
               className="absolute top-0 h-full border-r-2 border-dashed border-white/50"
-              style={{ left: `${(meta / metona) * 100}%` }}
+              style={{ left: `${(meta / metaLendaria) * 100}%` }}
               title={`Meta: ${formatCurrency(meta)}`}
             >
               <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">META</span>
             </div>
              <div
-              className="absolute top-0 h-full "
-              style={{ left: `100%` }}
+              className="absolute top-0 h-full border-r-2 border-dashed border-white/50"
+              style={{ left: `${(metona / metaLendaria) * 100}%` }}
               title={`Metona: ${formatCurrency(metona)}`}
+            >
+              <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">METONA</span>
+            </div>
+            <div
+              className="absolute top-0 h-full"
+              style={{ left: `100%` }}
+              title={`Lendária: ${formatCurrency(metaLendaria)}`}
             >
               <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold">MAX</span>
             </div>
           </div>
           <div className="text-right mt-2 font-bold text-lg text-primary">
-            {formatCurrency(vendas)} / {formatCurrency(metona)}
+            {formatCurrency(vendas)} / {formatCurrency(metaLendaria)}
           </div>
         </div>
 
