@@ -118,6 +118,20 @@ const initialSellers: Seller[] = [
   { id: '6', name: 'Dajila', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
 ];
 
+const goalTiers = [
+    { id: 'Metinha', goal: 'paGoal1', prize: 'paPrize1'},
+    { id: 'Meta', goal: 'paGoal2', prize: 'paPrize2' },
+    { id: 'Metona', goal: 'paGoal3', prize: 'paPrize3' },
+    { id: 'Lendária', goal: 'paGoal4', prize: 'paPrize4' },
+];
+
+const ticketMedioTiers = [
+    { id: 'Metinha', goal: 'ticketMedioGoal1', prize: 'ticketMedioPrize1'},
+    { id: 'Meta', goal: 'ticketMedioGoal2', prize: 'ticketMedioPrize2' },
+    { id: 'Metona', goal: 'ticketMedioGoal3', prize: 'ticketMedioPrize3' },
+    { id: 'Lendária', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
+];
+
 export function GoalGetterDashboard() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -367,38 +381,19 @@ export function GoalGetterDashboard() {
     calculateAllIncentives(values);
   };
   
-  const renderGoalInputs = (level: string, goal1: any, prize1: any, goal2: any, prize2: any, goal3: any, prize3: any, goal4: any, prize4: any) => (
+  const renderGoalInputs = (level: string, tiers: typeof goalTiers | typeof ticketMedioTiers) => (
     <div>
         <h3 className="font-semibold mb-4 text-primary">Metas de {level}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-            <div className="space-y-2">
-                <h4 className="font-medium text-sm">Metinha</h4>
-                <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    <FormField control={form.control} name={prize1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+            {tiers.map(tier => (
+                 <div className="space-y-2" key={tier.id}>
+                    <h4 className="font-medium text-sm">{tier.id}</h4>
+                    <div className="flex items-center gap-2">
+                        <FormField control={form.control} name={tier.goal as keyof FormValues} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={tier.prize as keyof FormValues} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                    </div>
                 </div>
-            </div>
-             <div className="space-y-2">
-                <h4 className="font-medium text-sm">Meta</h4>
-                 <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    <FormField control={form.control} name={prize2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                </div>
-            </div>
-             <div className="space-y-2">
-                <h4 className="font-medium text-sm">Metona</h4>
-                 <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    <FormField control={form.control} name={prize3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                </div>
-            </div>
-             <div className="space-y-2">
-                <h4 className="font-medium text-sm">Lendária</h4>
-                 <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    <FormField control={form.control} name={prize4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                </div>
-            </div>
+            ))}
         </div>
     </div>
   )
@@ -580,9 +575,9 @@ export function GoalGetterDashboard() {
                                     </div>
 
                                     <Separator />
-                                    {renderGoalInputs("PA", "paGoal1", "paPrize1", "paGoal2", "paPrize2", "paGoal3", "paPrize3", "paGoal4", "paPrize4")}
+                                    {renderGoalInputs("PA", goalTiers)}
                                     <Separator />
-                                    {renderGoalInputs("Ticket Médio", "ticketMedioGoal1", "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3", "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4")}
+                                    {renderGoalInputs("Ticket Médio", ticketMedioTiers)}
                                 </div>
                             </div>
 
