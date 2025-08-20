@@ -323,7 +323,9 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
                   {formatCurrency(totalIncentives)}
                 </span>
               </div>
-              <div className="space-y-2 pt-2">
+              
+              <div className="space-y-2 pt-4">
+                 <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Prêmios</h3>
                 <IncentiveItem
                   icon={<Award className="w-5 h-5" />}
                   label="Prêmio Metinha"
