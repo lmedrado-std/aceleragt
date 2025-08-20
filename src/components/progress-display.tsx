@@ -143,7 +143,7 @@ export function ProgressDisplay({ salesData }: ProgressDisplayProps) {
             title="Produtos por Atendimento (PA)"
             currentValue={pa}
             goalValue={paGoal4}
-            formatValue={(v) => v.toFixed(2)}
+            formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
           />
           <ProgressItem
             icon={<Ticket className="w-5 h-5" />}
