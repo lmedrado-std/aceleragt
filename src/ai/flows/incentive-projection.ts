@@ -22,6 +22,8 @@ const IncentiveProjectionInputSchema = z.object({
   metaMinhaPrize: z.number().describe('The Metinha prize.'),
   metaPrize: z.number().describe('The Meta prize.'),
   metonaPrize: z.number().describe('The Metona prize.'),
+  legendariaBonusValorVenda: z.number().describe('The sales amount for the Legendaria bonus rule.'),
+  legendariaBonusValorPremio: z.number().describe('The prize amount for the Legendaria bonus rule.'),
   pa: z.number().describe('Products per customer.'),
   paGoal1: z.number().describe('PA Goal 1.'),
   paGoal2: z.number().describe('PA Goal 2.'),
@@ -91,8 +93,8 @@ const incentiveProjectionFlow = ai.defineFlow(
     if (input.vendas >= input.metona) {
       metonaPremio = input.metonaPrize;
     }
-    if (input.vendas >= input.metaLendaria) {
-      legendariaBonus = Math.floor((input.vendas - input.metona) / 2000) * 50;
+    if (input.vendas >= input.metaLendaria && input.legendariaBonusValorVenda > 0) {
+      legendariaBonus = Math.floor((input.vendas - input.metona) / input.legendariaBonusValorVenda) * input.legendariaBonusValorPremio;
     }
 
     if (input.pa >= input.paGoal1) {

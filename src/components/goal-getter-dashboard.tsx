@@ -69,6 +69,8 @@ const formSchema = z.object({
   meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  legendariaBonusValorVenda: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(1, "Deve ser maior que zero"),
+  legendariaBonusValorPremio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metaMinhaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   metonaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -127,6 +129,8 @@ export function GoalGetterDashboard() {
       meta: 9000,
       metona: 10000,
       metaLendaria: 12000,
+      legendariaBonusValorVenda: 2000,
+      legendariaBonusValorPremio: 50,
       metaMinhaPrize: 50,
       metaPrize: 100,
       metonaPrize: 120,
@@ -283,6 +287,8 @@ export function GoalGetterDashboard() {
           meta: values.meta,
           metona: values.metona,
           metaLendaria: values.metaLendaria,
+          legendariaBonusValorVenda: values.legendariaBonusValorVenda,
+          legendariaBonusValorPremio: values.legendariaBonusValorPremio,
           metaMinhaPrize: values.metaMinhaPrize,
           metaPrize: values.metaPrize,
           metonaPrize: values.metonaPrize,
@@ -335,29 +341,29 @@ export function GoalGetterDashboard() {
             <div className="space-y-2">
                 <h4 className="font-medium text-sm">Metinha</h4>
                 <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                    <FormField control={form.control} name={prize1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={goal1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                    <FormField control={form.control} name={prize1} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 </div>
             </div>
              <div className="space-y-2">
                 <h4 className="font-medium text-sm">Meta</h4>
                  <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                    <FormField control={form.control} name={prize2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={goal2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                    <FormField control={form.control} name={prize2} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 </div>
             </div>
              <div className="space-y-2">
                 <h4 className="font-medium text-sm">Metona</h4>
                  <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                    <FormField control={form.control} name={prize3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={goal3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                    <FormField control={form.control} name={prize3} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 </div>
             </div>
              <div className="space-y-2">
                 <h4 className="font-medium text-sm">Lendária</h4>
                  <div className="flex items-center gap-2">
-                    <FormField control={form.control} name={goal4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                    <FormField control={form.control} name={prize4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                    <FormField control={form.control} name={goal4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                    <FormField control={form.control} name={prize4} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 </div>
             </div>
         </div>
@@ -483,9 +489,10 @@ export function GoalGetterDashboard() {
                                 </div>
                                 <div className="space-y-2">
                                     <h4 className="font-medium text-sm">Lendária</h4>
+                                    <FormField control={form.control} name="metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
                                     <div className="flex items-center gap-2">
-                                        <FormField control={form.control} name="metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                        <span className="text-sm text-muted-foreground w-full">Bônus R$50 a cada R$2k</span>
+                                        <FormField control={form.control} name="legendariaBonusValorVenda" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Venda" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                        <FormField control={form.control} name="legendariaBonusValorPremio" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>Bônus (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Prêmio" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                     </div>
                                 </div>
                                 </div>
