@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { ArrowRight, Store as StoreIcon, Lock } from "lucide-react";
+import { ArrowRight, Store as StoreIcon, Lock, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadState, Store } from "@/lib/storage";
 
@@ -17,6 +17,15 @@ export default function Home() {
     setState(loadedState);
     setLoading(false);
   }, []);
+
+  if (loading) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+    )
+  }
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
@@ -32,9 +41,7 @@ export default function Home() {
 
         <div className="w-full max-w-md border bg-card p-6 rounded-lg shadow-sm mt-8">
           <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Selecione uma Loja</h2>
-          {loading ? (
-            <p className="text-center text-muted-foreground">Carregando lojas...</p>
-          ) : !state || state.stores.length === 0 ? (
+          {!state || state.stores.length === 0 ? (
             <div className="text-center text-muted-foreground py-4">
               <p>Nenhuma loja encontrada.</p>
               <p className="text-sm mt-2">O administrador precisa adicionar uma loja no painel global.</p>
@@ -56,7 +63,7 @@ export default function Home() {
 
         <div className="text-center mt-8">
           <Button variant="link" asChild>
-            <Link href="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+            <Link href="/login?redirect=/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 Acesso Restrito de Administrador
             </Link>

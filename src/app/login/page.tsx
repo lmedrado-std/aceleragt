@@ -9,14 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
-import { ArrowLeft, KeyRound, LogOut } from 'lucide-react';
+import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -24,24 +24,15 @@ function LoginComponent() {
   const redirectUrl = searchParams.get('redirect') || '/admin';
 
   useEffect(() => {
+    // This effect runs only on the client
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-    setIsAdmin(adminAuthenticated);
-
-    // If user is already authenticated, redirect them away from the login page
     if (adminAuthenticated) {
-        router.push(redirectUrl);
+      router.push(redirectUrl);
+    } else {
+      setLoading(false);
     }
   }, [router, redirectUrl]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('adminAuthenticated');
-    setIsAdmin(false); 
-    toast({
-        title: 'Saída segura!',
-        description: 'Você saiu do modo de administrador.',
-    });
-    router.push('/'); 
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +56,15 @@ function LoginComponent() {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+     return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">Verificando acesso...</p>
+        </div>
+    )
+  }
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
@@ -113,7 +113,12 @@ function LoginComponent() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div>Carregando...</div>}>
+        <Suspense fallback={
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
+                <p className="mt-4 text-muted-foreground">Carregando...</p>
+            </div>
+        }>
             <LoginComponent />
         </Suspense>
     )

@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { PlusCircle, KeyRound, Trash2, Home, ArrowRight, LogOut } from "lucide-react";
+import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,8 +111,9 @@ export default function AdminPage() {
 
   if (loading) {
       return (
-          <div className="flex items-center justify-center min-h-screen">
-              Carregando painel de administrador...
+          <div className="flex flex-col items-center justify-center min-h-screen">
+              <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
+              <p className="mt-4 text-muted-foreground">Carregando painel de administrador...</p>
           </div>
       )
   }
@@ -152,7 +153,7 @@ export default function AdminPage() {
                         onChange={(e) => setNewStoreName(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleAddStore()}
                         />
-                    <Button type="button" onClick={handleAddStore}><PlusCircle/></Button>
+                    <Button type="button" onClick={handleAddStore}>Adicionar</Button>
                     </div>
                 </div>
                 <Separator className="my-4"/>

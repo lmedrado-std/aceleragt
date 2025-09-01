@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { ArrowRight, Home, Shield } from "lucide-react";
+import { ArrowRight, Home, Shield, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
@@ -63,6 +63,14 @@ export default function StoreHomePage() {
     }
   };
 
+  if (loading) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">Carregando dados da loja...</p>
+        </div>
+    )
+  }
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
@@ -78,7 +86,7 @@ export default function StoreHomePage() {
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
         <Logo />
         <h1 className="text-5xl font-bold font-headline text-primary text-center">
-          {loading ? "Carregando..." : (error ? "Erro" : storeName)}
+          {error ? "Erro" : storeName}
         </h1>
 
         {error && (
