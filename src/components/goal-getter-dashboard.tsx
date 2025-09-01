@@ -595,7 +595,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                           <h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3>
                                         </CardHeader>
                                         <CardContent className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                                            {(currentValues.sellers || []).map((seller, index) => (
+                                            {(currentValues.sellers || []).length > 0 ? currentValues.sellers.map((seller, index) => (
                                                 <div key={seller.id}>
                                                     <h4 className="font-medium mb-2">{seller.name}</h4>
                                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -605,7 +605,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                         <FormField control={form.control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Corridinha</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            )) : (
+                                                <p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>
+                                            )}
                                         </CardContent>
                                        </Card>
                                     </div>
@@ -696,3 +698,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
