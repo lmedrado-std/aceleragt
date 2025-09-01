@@ -21,21 +21,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 
 
 export default function Home() {
-  const [state, setState] = useState<AppState>(loadState());
+  const [state, setState] = useState<AppState>(getInitialState());
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [newStoreName, setNewStoreName] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
+    // This effect runs once on component mount on the client side.
     const loadedState = loadState();
     setState(loadedState);
     setLoading(false);
     
+    // Check for admin authentication in session storage.
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
 
@@ -65,7 +66,7 @@ export default function Home() {
             },
             goals: {
                 ...state.goals,
-                [newStore.id]: getInitialState().goals.default, // Use default goals
+                [newStore.id]: state.goals.default || getInitialState().goals.default,
             },
             incentives: {
                 ...state.incentives,

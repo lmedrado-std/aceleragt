@@ -63,7 +63,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, AppState, Seller, Goals, Incentives, setAdminPassword, getAdminPassword } from "@/lib/storage";
+import { loadState, saveState, Seller, Incentives, setAdminPassword } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -154,30 +154,41 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, getValues, setValue, reset, formState: { isDirty } } = form;
   const currentValues = watch();
 
-  const getInitialTab = useCallback(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl && (isAdmin || (currentValues.sellers && currentValues.sellers.some(s => s.id === tabFromUrl)))) {
-      return tabFromUrl;
-    }
-    if (currentValues.sellers && currentValues.sellers.length > 0) return currentValues.sellers[0].id;
-    return "admin";
-  }, [searchParams, currentValues.sellers, isAdmin]);
-  
-  const [activeTab, setActiveTab] = useState('admin');
-
+  // This effect runs on mount to check auth status and set the initial tab
   useEffect(() => {
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
-    const initialTab = getInitialTab();
-    setActiveTab(initialTab);
-    
-    // If trying to access admin tab without auth, redirect
-    if (initialTab === 'admin' && !adminAuthenticated) {
-       router.replace(`/dashboard/${storeId}?tab=${currentValues.sellers?.[0]?.id || ''}`);
+
+    const sellers = getValues('sellers');
+    const tabFromUrl = searchParams.get('tab');
+    let initialTab = 'admin';
+
+    if (tabFromUrl) {
+        const isValidSellerTab = sellers.some(s => s.id === tabFromUrl);
+        if (tabFromUrl === 'admin' && !adminAuthenticated) {
+            // Not admin, trying to access admin tab
+            initialTab = sellers.length > 0 ? sellers[0].id : ''; 
+        } else if (isValidSellerTab || (tabFromUrl === 'admin' && adminAuthenticated)) {
+            initialTab = tabFromUrl;
+        } else {
+             // Invalid tab, redirect to a safe default
+            initialTab = sellers.length > 0 ? sellers[0].id : (adminAuthenticated ? 'admin' : '');
+        }
+    } else {
+        // No tab in URL, set a default
+        initialTab = sellers.length > 0 ? sellers[0].id : (adminAuthenticated ? 'admin' : '');
     }
+    
+    if (initialTab && initialTab !== tabFromUrl) {
+         router.replace(`/dashboard/${storeId}?tab=${initialTab}`);
+    } else if (!initialTab) {
+        // No valid tab can be determined (e.g., no sellers, not admin)
+        router.replace(`/loja/${storeId}`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId, isAdmin]); // Only re-run if storeId changes.
 
-  }, [getInitialTab, storeId, isAdmin, router, currentValues.sellers]);
-
+  const activeTab = searchParams.get('tab') || (getValues('sellers')?.[0]?.id ?? '');
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -255,8 +266,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }, [loadDataForStore]);
 
   useEffect(() => {
+    if (!isDirty) return;
     const subscription = watch((value) => {
-        if (!isDirty) return;
         try {
             const state = loadState();
             state.sellers[storeId] = value.sellers || [];
