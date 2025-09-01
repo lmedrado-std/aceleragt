@@ -161,7 +161,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const currentValues = watch();
 
   const getActiveTab = useCallback(() => {
-    return searchParams.get('tab') || (getValues('sellers')?.[0]?.id ?? 'admin');
+    const sellers = getValues('sellers');
+    const firstSellerId = sellers && sellers.length > 0 ? sellers[0].id : 'admin';
+    return searchParams.get('tab') || firstSellerId;
   }, [searchParams, getValues]);
   
   const [activeTab, setActiveTab] = useState(getActiveTab);
@@ -180,7 +182,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     // Redirect non-admins trying to access admin tab
     if (tab === 'admin' && !adminAuthenticated) {
       toast({ variant: 'destructive', title: 'Acesso Negado' });
-      const firstSellerId = state.sellers[storeId]?.[0]?.id;
+      const sellers = getValues('sellers');
+      const firstSellerId = sellers && sellers.length > 0 ? sellers[0].id : null;
       if (firstSellerId) {
         router.replace(`/dashboard/${storeId}?tab=${firstSellerId}`);
       } else {
@@ -190,7 +193,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     
     setActiveTab(tab);
-  }, [storeId, getActiveTab, router, toast]);
+  }, [storeId, getActiveTab, router, toast, getValues]);
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -298,7 +301,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       });
       return;
     }
-    const currentSellers = getValues("sellers");
+    const currentSellers = getValues("sellers") || [];
     const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
     let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
     
@@ -325,7 +328,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   };
 
   const removeSeller = (sellerId: string) => {
-    const updatedSellers = currentValues.sellers.filter(s => s.id !== sellerId);
+    const updatedSellers = (currentValues.sellers || []).filter(s => s.id !== sellerId);
     setValue("sellers", updatedSellers, { shouldDirty: true });
     setIncentives(prev => {
         const newIncentives = {...prev};
@@ -346,7 +349,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
 
   const saveSellerName = (sellerId: string) => {
-    const sellerIndex = currentValues.sellers.findIndex(s => s.id === sellerId);
+    const sellerIndex = (currentValues.sellers || []).findIndex(s => s.id === sellerId);
     if (sellerIndex === -1) return;
 
     const newName = getValues(`sellers.${sellerIndex}.name`);
@@ -691,6 +694,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         />
                     </TabsContent>
                 ))}
+
+                {currentValues.sellers && currentValues.sellers.length === 0 && (
+                    <TabsContent value="admin" className="mt-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Sem vendedores</CardTitle>
+                                <CardDescription>
+                                    Esta loja ainda não tem vendedores. Adicione um vendedor na aba de administrador para começar.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </TabsContent>
+                )}
             </Tabs>
            </TooltipProvider>
         </form>
@@ -698,5 +714,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

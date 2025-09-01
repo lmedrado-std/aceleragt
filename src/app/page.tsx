@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ArrowRight, Lock, Store as StoreIcon, PlusCircle, Trash2, KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadState, saveState, Store, getInitialState, setAdminPassword } from "@/lib/storage";
+import { AppState, loadState, saveState, Store, getInitialState, setAdminPassword, Goals } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -53,9 +53,10 @@ export default function Home() {
             });
             return;
         }
-
+        
+        const newStoreId = new Date().toISOString();
         const newStore: Store = {
-            id: new Date().toISOString(),
+            id: newStoreId,
             name: newStoreName,
         };
         
@@ -64,15 +65,15 @@ export default function Home() {
             stores: [...state.stores, newStore],
             sellers: {
                 ...state.sellers,
-                [newStore.id]: [], // Start with no sellers
+                [newStoreId]: [], // Start with an empty list of sellers for the new store
             },
             goals: {
                 ...state.goals,
-                [newStore.id]: state.goals.default || getInitialState().goals.default,
+                [newStoreId]: state.goals.default || getInitialState().goals.default, // Initialize with default goals
             },
             incentives: {
                 ...state.incentives,
-                [newStore.id]: {}, // Start with no incentives
+                [newStoreId]: {}, // Start with empty incentives
             }
         };
         
