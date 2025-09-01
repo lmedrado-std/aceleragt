@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,29 +11,37 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { ArrowLeft, KeyRound } from 'lucide-react';
 import Link from 'next/link';
-import { getAdminPassword, loadState } from '@/lib/storage';
+import { getAdminPassword } from '@/lib/storage';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Check if admin is already logged in when component mounts
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+    setIsAdmin(adminAuthenticated);
+  }, []);
+
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuthenticated');
+    setIsAdmin(false); // Update state to reflect logout
     toast({
         title: 'Saída segura!',
         description: 'Você saiu do modo de administrador.',
     });
-    router.push('/');
+    // Do not redirect, let the user stay on the login page.
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // If user clicks the button and is already logged in, log them out.
-    if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+    if (isAdmin) {
         handleLogout();
         return;
     }
@@ -49,12 +57,10 @@ function LoginComponent() {
         description: 'Bem-vindo, administrador.',
       });
 
-      const redirectUrl = searchParams.get('redirect');
-      if (redirectUrl) {
-        router.push(redirectUrl);
-      } else {
-        router.push('/');
-      }
+      // Default redirect to global admin page if no other redirect is specified
+      const redirectUrl = searchParams.get('redirect') || '/admin';
+      router.push(redirectUrl);
+
     } else {
       toast({
         variant: 'destructive',
@@ -64,8 +70,6 @@ function LoginComponent() {
       setIsSubmitting(false);
     }
   };
-
-  const isAdmin = typeof window !== 'undefined' && sessionStorage.getItem('adminAuthenticated') === 'true';
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
