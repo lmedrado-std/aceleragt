@@ -222,8 +222,6 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
       (incentives.corridinhaDiariaBonus || 0)
     : 0;
 
-  const prizeReceived = 0; // Placeholder for future implementation
-
   const renderSkeletons = () => (
      <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -257,7 +255,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
       </CardHeader>
       <CardContent className="space-y-8" data-achieved={totalIncentives > 0}>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
             <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-lg font-semibold text-emerald-800">
@@ -272,21 +270,6 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                     <p className="text-sm text-muted-foreground">
                     Valor acumulado das metas
                     </p>
-                </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-amber-200 to-yellow-100 border-amber-300 shadow-md hover:shadow-lg transition-all rounded-2xl">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold text-amber-800">
-                    Prêmio Recebido
-                    </CardTitle>
-                    <Trophy className="h-6 w-6 text-amber-600" />
-                </CardHeader>
-                <CardContent>
-                    <p className="text-3xl font-bold text-amber-700">
-                    {formatCurrency(prizeReceived)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Total acumulado (histórico)</p>
                 </CardContent>
             </Card>
         </div>
