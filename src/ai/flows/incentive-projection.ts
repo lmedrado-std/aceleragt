@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -74,32 +75,24 @@ const incentiveProjectionFlow = ai.defineFlow(
     let legendariaBonus = 0;
     let paBonus = 0;
     let ticketMedioBonus = 0;
-    let corridinhaDiariaBonus = 0;
     
     // Calculate sales prize based on highest achieved tier
-    let salesPrize = 0;
     if (input.vendas >= input.metaMinha) {
-      salesPrize = input.metaMinhaPrize;
+      metinhaPremio = input.metaMinhaPrize;
     }
     if (input.vendas >= input.meta) {
-      salesPrize = input.metaPrize;
+      metinhaPremio = 0; // Not cumulative
+      metaPremio = input.metaPrize;
     }
     if (input.vendas >= input.metona) {
-      salesPrize = input.metonaPrize;
-    }
-    
-    // Assign the prize to the correct tier for display, zeroing out the others.
-    if (input.vendas >= input.metona) {
-      metonaPremio = salesPrize;
-    } else if (input.vendas >= input.meta) {
-      metaPremio = salesPrize;
-    } else if (input.vendas >= input.metaMinha) {
-      metinhaPremio = salesPrize;
+      metinhaPremio = 0;
+      metaPremio = 0; // Not cumulative
+      metonaPremio = input.metonaPrize;
     }
 
-
+    // Legendaria bonus is an ADD-ON to the Metona prize
     if (input.vendas >= input.metaLendaria && input.legendariaBonusValorVenda > 0) {
-      legendariaBonus = Math.floor((input.vendas - input.metona) / input.legendariaBonusValorVenda) * input.legendariaBonusValorPremio;
+      legendariaBonus = Math.floor((input.vendas - input.metaLendaria) / input.legendariaBonusValorVenda) * input.legendariaBonusValorPremio;
     }
 
     if (input.pa >= input.paGoal4) {
@@ -123,19 +116,14 @@ const incentiveProjectionFlow = ai.defineFlow(
       ticketMedioBonus = input.ticketMedioPrize1;
     }
 
-
-    corridinhaDiariaBonus = input.corridinhaDiaria;
-
-
     return {
-      metinhaPremio: metinhaPremio,
-      metaPremio: metaPremio,
-      metonaPremio: metonaPremio,
-      legendariaBonus: legendariaBonus,
-      paBonus: paBonus,
-      ticketMedioBonus: ticketMedioBonus,
-      corridinhaDiariaBonus: corridinhaDiariaBonus,
+      metinhaPremio,
+      metaPremio,
+      metonaPremio,
+      legendariaBonus,
+      paBonus,
+      ticketMedioBonus,
+      corridinhaDiariaBonus: input.corridinhaDiaria, // This is a direct bonus
     };
-
   }
 );

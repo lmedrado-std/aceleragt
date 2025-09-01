@@ -37,7 +37,7 @@ export default function Home() {
         transition={{ duration: 0.6 }}
       >
         {/* Logo */}
-        <Image src="/NOVA LOGO.JPG" alt="Supermoda" width={180} height={80} priority />
+        <Image src="https://i.ibb.co/3kC2Vv8/corridinha-gt-banner.png" alt="Supermoda" width={180} height={80} priority />
 
         {/* Título */}
         <div className="text-center space-y-2">
