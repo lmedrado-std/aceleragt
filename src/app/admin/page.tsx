@@ -53,7 +53,6 @@ export default function AdminPage() {
       return;
     }
 
-    // Use a function update with setState to ensure we have the latest state
     setState(currentState => {
       if (!currentState) return null;
 
@@ -63,7 +62,6 @@ export default function AdminPage() {
       const newState: AppState = {
         ...currentState,
         stores: [...currentState.stores, newStore],
-        // Ensure new store has all required data structures initialized
         sellers: { ...currentState.sellers, [newStoreId]: [] as Seller[] },
         goals: { ...currentState.goals, [newStoreId]: currentState.goals.default || getInitialState().goals.default as Goals },
         incentives: { ...currentState.incentives, [newStoreId]: {} }
@@ -74,7 +72,7 @@ export default function AdminPage() {
       setNewStoreName("");
       toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
       
-      return newState; // Return the new state to update the component
+      return newState;
     });
   };
 
