@@ -157,12 +157,12 @@ export default function AdminDashboardPage() {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Incentivos Pagos</CardTitle>
+                        <CardTitle className="text-sm font-medium">Ganhos Totais (Prêmios)</CardTitle>
                         <Award className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                         <div className="text-2xl font-bold">{formatCurrency(totalIncentives)}</div>
-                         <p className="text-xs text-muted-foreground">Total de prêmios e bônus</p>
+                         <p className="text-xs text-muted-foreground">Soma de todos os prêmios e bônus</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -232,7 +232,7 @@ export default function AdminDashboardPage() {
                     </Card>
                     <Card>
                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Award className="text-green-500" /> Top 5 Vendedores (Incentivos)</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><Award className="text-green-500" /> Top 5 Vendedores (Ganhos)</CardTitle>
                             <CardDescription>Quem mais ganhou em prêmios e bônus.</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -271,7 +271,7 @@ export default function AdminDashboardPage() {
                                     <TableHead>Loja</TableHead>
                                     <TableHead className="text-center">Vendedores</TableHead>
                                     <TableHead>Vendas Totais</TableHead>
-                                    <TableHead className="text-right">Incentivos Pagos</TableHead>
+                                    <TableHead className="text-right">Ganhos Totais (Prêmios)</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
