@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { AppState, loadState, saveState, Store } from '@/lib/storage';
+import { AppState, loadState, saveState, Store, getInitialState } from '@/lib/storage';
 import { Home, Store as StoreIcon, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -51,6 +51,18 @@ export default function AdminPage() {
         const newState: AppState = {
             ...state,
             stores: [...state.stores, newStore],
+            sellers: {
+                ...state.sellers,
+                [newStore.id]: [], // Start with no sellers
+            },
+            goals: {
+                ...state.goals,
+                [newStore.id]: getInitialState().goals.default, // Use default goals
+            },
+            incentives: {
+                ...state.incentives,
+                [newStore.id]: {}, // Start with no incentives
+            }
         };
         
         saveState(newState);
