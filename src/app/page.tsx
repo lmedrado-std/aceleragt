@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -28,11 +29,6 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 p-8 relative">
-      {/* Badge de debug */}
-      <div className="absolute bottom-3 right-3 bg-yellow-300/80 text-yellow-900 text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
-        PÁGINA: HOME (/)
-      </div>
-
       <div className="flex flex-col items-center gap-10 max-w-4xl w-full">
         <Logo />
 
