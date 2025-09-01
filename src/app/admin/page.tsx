@@ -84,6 +84,8 @@ export default function AdminPage() {
         }
 
         const newState = { ...currentState };
+        const storeToRemove = newState.stores.find(s => s.id === id);
+        
         newState.stores = newState.stores.filter(s => s.id !== id);
         delete newState.sellers[id];
         delete newState.goals[id];
@@ -91,7 +93,9 @@ export default function AdminPage() {
         
         saveState(newState);
         
-        toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
+        if (storeToRemove) {
+          toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
+        }
         
         return newState;
     });
@@ -199,6 +203,7 @@ export default function AdminPage() {
                     placeholder="Pelo menos 4 caracteres"
                     value={newAdminPassword}
                     onChange={(e) => setNewAdminPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
                     />
                 </div>
                 <Button onClick={handleChangePassword} className="w-full mt-4"><KeyRound/> Alterar Senha</Button>
