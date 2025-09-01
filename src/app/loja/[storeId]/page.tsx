@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ArrowRight, Home, Shield, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
 import { loadState, Seller } from "@/lib/storage";
@@ -22,7 +22,7 @@ export default function StoreHomePage() {
   const { toast } = useToast();
   const storeId = params.storeId as string;
 
-  useEffect(() => {
+  const loadStoreData = useCallback(() => {
     if (!storeId) {
       setError("ID da loja não encontrado na URL.");
       setLoading(false);
@@ -36,6 +36,7 @@ export default function StoreHomePage() {
         if (store) {
             setStoreName(store.name);
             setSellers(savedState.sellers[storeId] || []);
+            setError(null); // Clear previous errors if found
         } else {
             setError(`Loja com ID "${storeId}" não foi encontrada.`);
             toast({
@@ -50,8 +51,23 @@ export default function StoreHomePage() {
     } finally {
         setLoading(false);
     }
-
   }, [storeId, toast]);
+
+  useEffect(() => {
+    loadStoreData();
+
+    // Listen for custom storage events
+    const handleStorageUpdate = () => {
+      console.log('Storage updated, reloading store data...');
+      loadStoreData();
+    };
+
+    window.addEventListener('storage_updated', handleStorageUpdate);
+
+    return () => {
+      window.removeEventListener('storage_updated', handleStorageUpdate);
+    };
+  }, [loadStoreData]);
 
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';

@@ -186,6 +186,8 @@ export function saveState(state: AppState) {
     try {
         const serializedState = JSON.stringify(state);
         localStorage.setItem(LOCAL_STORAGE_KEY, serializedState);
+        // Dispatch a custom event to notify other parts of the app
+        window.dispatchEvent(new CustomEvent('storage_updated'));
     } catch (error) {
         console.error("Could not save state to localStorage", error);
     }
