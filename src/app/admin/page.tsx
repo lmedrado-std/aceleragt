@@ -47,7 +47,9 @@ export default function AdminPage() {
 
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
-      toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
+      setTimeout(() => {
+        toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
+      }, 0);
       return;
     }
 
@@ -66,7 +68,10 @@ export default function AdminPage() {
       };
 
       saveState(newState);
-      toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+
+      setTimeout(() => {
+        toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+      }, 0);
       
       setNewStoreName("");
       
@@ -79,7 +84,9 @@ export default function AdminPage() {
     if (!currentState) return;
 
     if (currentState.stores.length <= 1) {
-        toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+        setTimeout(() => {
+          toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+        }, 0);
         return;
     }
 
@@ -96,26 +103,34 @@ export default function AdminPage() {
     setState(newState); // Update the state safely
     
     if (storeToRemove) {
-      toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
+      setTimeout(() => {
+        toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
+      }, 0);
     }
   };
 
   const handleChangePassword = () => {
     if (newAdminPassword.length < 4) {
-      toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
+      setTimeout(() => {
+        toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
+      }, 0);
       return;
     }
     setAdminPassword(newAdminPassword);
     setNewAdminPassword("");
-    toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
+    setTimeout(() => {
+      toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
+    }, 0);
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuthenticated');
-    toast({
-        title: 'Saída segura!',
-        description: 'Você saiu do modo de administrador.',
-    });
+    setTimeout(() => {
+      toast({
+          title: 'Saída segura!',
+          description: 'Você saiu do modo de administrador.',
+      });
+    }, 0);
     router.push('/');
   }
 
