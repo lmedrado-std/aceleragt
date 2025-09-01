@@ -4,12 +4,16 @@
 @tailwind utilities;
 
 body {
-  font-family: 'PT Sans', sans-serif;
+  font-family: 'Inter', 'PT Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'PT Sans', sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Azul muito claro */
+    --background: 220 20% 97%; /* #f3f4f6 - Cinza Neutro */
     --foreground: 222 88% 12%;
 
     --card: 0 0% 100%;
@@ -18,31 +22,32 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 222 88% 12%;
 
-    /* Azul Vibrante */
-    --primary: 195 89% 52%; 
+    /* Azul Vibrante - #4F46E5 */
+    --primary: 242 78% 61%; 
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 88% 12%;
+    /* Roxo - #7C3AED */
+    --secondary: 262 83% 62%;
+    --secondary-foreground: 0 0% 100%;
     
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     
-    /* Verde para Sucesso */
-    --accent: 120 60% 90%;
-    --accent-foreground: 120 40% 30%;
+    /* Verde para Sucesso - #10B981 */
+    --accent: 159 82% 42%;
+    --accent-foreground: 0 0% 100%;
     
-    /* Vermelho para Destrutivo/Erro */
+    /* Vermelho para Destrutivo/Erro - #EF4444 */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 195 89% 52%;
+    --ring: 242 78% 61%;
     
-    --chart-1: 195 89% 52%; /* Azul Primário */
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
+    --chart-1: 242 78% 61%; /* Azul Primário */
+    --chart-2: 262 83% 62%; /* Roxo Secundário */
+    --chart-3: 159 82% 42%; /* Verde Sucesso */
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     
@@ -59,31 +64,28 @@ body {
     --popover: 222 88% 12%;
     --popover-foreground: 210 40% 98%;
     
-    /* Azul Vibrante */
-    --primary: 195 89% 62%;
+    --primary: 242 78% 71%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 262 83% 72%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    /* Verde para Sucesso */
-    --accent: 120 50% 25%;
-    --accent-foreground: 120 60% 90%;
+    --accent: 159 82% 52%;
+    --accent-foreground: 0 0% 100%;
     
-    /* Vermelho para Destrutivo/Erro */
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 195 89% 62%;
+    --ring: 242 78% 71%;
     
-    --chart-1: 195 89% 62%; /* Azul Primário */
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
+    --chart-1: 242 78% 71%;
+    --chart-2: 262 83% 72%;
+    --chart-3: 159 82% 52%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
