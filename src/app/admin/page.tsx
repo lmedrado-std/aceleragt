@@ -39,12 +39,10 @@ export default function AdminPage() {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
     if (!isAdmin) {
       router.push('/login?redirect=/admin');
-      return;
+    } else {
+      setState(loadState());
+      setLoading(false);
     }
-    
-    const loadedState = loadState();
-    setState(loadedState);
-    setLoading(false);
   }, [router]);
 
   const handleAddStore = () => {
