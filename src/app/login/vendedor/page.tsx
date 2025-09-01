@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Logo } from '@/components/logo';
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { loadState, Seller } from '@/lib/storage';
@@ -98,7 +97,6 @@ function SellerLoginComponent() {
             </Button>
         </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Logo />
         <Card className="w-full">
           <CardHeader className="items-center text-center">
             <SellerAvatar avatarId={seller.avatarId} className="h-20 w-20 mb-4" />
