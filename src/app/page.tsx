@@ -35,10 +35,10 @@ export default function Home() {
 
         <div className="text-center space-y-2">
           <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm">
-            Bem-vindo(a) ao Corridinha GT
+            Bem-vindo Corridinha GT
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Acompanhe o desempenho da sua loja e impulsione suas metas!
+            Acompanhe o desempenho de suas vendas e impulsione suas metas!
           </p>
         </div>
 
