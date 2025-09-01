@@ -15,8 +15,17 @@ type Seller = {
   avatarId: string;
 };
 
+const initialSellers: Seller[] = [
+  { id: '1', name: 'Val', avatarId: 'avatar1' },
+  { id: '2', name: 'Rose', avatarId: 'avatar2' },
+  { id: '3', name: 'Thays', avatarId: 'avatar3' },
+  { id: '4', name: 'Mercia', avatarId: 'avatar4' },
+  { id: '5', name: 'Joisse', avatarId: 'avatar5' },
+  { id: '6', name: 'Dajila', avatarId: 'avatar6' },
+];
+
 export default function Home() {
-  const [sellers, setSellers] = useState<Seller[]>([]);
+  const [sellers, setSellers] = useState<Seller[]>(initialSellers);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,13 +33,14 @@ export default function Home() {
       const savedState = localStorage.getItem("goalGetterState");
       if (savedState) {
         const parsedState = JSON.parse(savedState);
-        if (parsedState && Array.isArray(parsedState.sellers)) {
+        if (parsedState && Array.isArray(parsedState.sellers) && parsedState.sellers.length > 0) {
           setSellers(parsedState.sellers);
         }
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
-      // Fallback or handle error if needed
+      // Fallback to initial sellers if there's an error
+      setSellers(initialSellers);
     } finally {
         setLoading(false);
     }

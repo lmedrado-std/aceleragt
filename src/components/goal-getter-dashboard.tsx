@@ -94,7 +94,7 @@ const formSchema = z.object({
   paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
   ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
   ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
   ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
@@ -352,7 +352,7 @@ export function GoalGetterDashboard() {
             meta: values.meta,
             metona: values.metona,
             metaLendaria: values.metaLendaria,
-            legendariaBonusValorVenda: values.legendariaBonusValorVenda,
+            legendariaBonusValorVenda: values.legendariaBonusValorPremio,
             legendariaBonusValorPremio: values.legendariaBonusValorPremio,
             metaMinhaPrize: values.metaMinhaPrize,
             metaPrize: values.metaPrize,
@@ -637,3 +637,5 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
+
+    
