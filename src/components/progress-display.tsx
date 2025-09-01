@@ -194,14 +194,18 @@ const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {l
 }
 
 const EmptyIncentives = () => (
-    <div className="text-center py-10 text-muted-foreground">
-        <Award className="mx-auto h-12 w-12" />
-        <p className="mt-4 font-semibold">
-            Nenhuma meta foi atingida ainda.
-        </p>
-        <p className="text-sm">
-           Continue vendendo para ver seus prêmios aqui!
-        </p>
+    <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-4 rounded-lg bg-muted/50 p-6">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Award className="h-8 w-8 text-primary" />
+        </div>
+        <div>
+            <p className="font-semibold text-lg text-foreground">
+                Nenhuma meta atingida ainda
+            </p>
+            <p className="text-sm mt-1">
+                Continue no seu ritmo que você chega lá!
+            </p>
+        </div>
     </div>
 );
 
@@ -335,13 +339,17 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
         {loading ? (
             <div className="space-y-2"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>
         ) : incentives ? (
-            <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
-                <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
-                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} achieved={metinhaAchieved} isActive={metinhaAchieved && !metaAchieved} />
-                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} achieved={metaAchieved} isActive={metaAchieved && !metonaAchieved} />
-                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} achieved={metonaAchieved} isActive={metonaAchieved} />
-                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} achieved={lendariaAchieved} isActive={lendariaAchieved} />
-            </div>
+             totalIncentives > 0 ? (
+                <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+                    <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
+                    <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} achieved={metinhaAchieved} isActive={metinhaAchieved && !metaAchieved} />
+                    <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} achieved={metaAchieved} isActive={metaAchieved && !metonaAchieved} />
+                    <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} achieved={metonaAchieved} isActive={metonaAchieved} />
+                    <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} achieved={lendariaAchieved} isActive={lendariaAchieved} />
+                </div>
+             ) : (
+                <EmptyIncentives />
+             )
         ): (
              <EmptyIncentives />
         )}
@@ -399,7 +407,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
         <div className="pt-4">
           {loading ? (
             renderSkeletons()
-          ) : incentives ? (
+          ) : incentives && totalIncentives > 0 ? (
             <div className="space-y-4">
                <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Outros Prêmios</h3>
               <div className="space-y-2">
@@ -423,8 +431,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                 />
               </div>
             </div>
-          ) : (
-            <EmptyIncentives />
+          ) : !loading && (
+             <div></div>
           )}
         </div>
 
