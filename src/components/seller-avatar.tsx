@@ -67,6 +67,22 @@ const Avatar8 = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+const Avatar9 = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <circle cx="40" cy="40" r="40" fill="#F0A7D1"/>
+        <path d="M20 20C20 42.0914 37.9086 60 60 60" stroke="#D26DA9" strokeWidth="8"/>
+        <path d="M60 20C37.9086 20 20 37.9086 20 60" stroke="#A85484" strokeWidth="8"/>
+    </svg>
+);
+
+const Avatar10 = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <circle cx="40" cy="40" r="40" fill="#B2F0A7"/>
+        <rect x="25" y="25" width="30" height="30" fill="#80D26D" transform="rotate(45 40 40)"/>
+        <circle cx="40" cy="40" r="10" fill="#5AA854"/>
+    </svg>
+);
+
 
 const avatarComponents: { [key: string]: React.FC<React.SVGProps<SVGSVGElement>> } = {
   avatar1: Avatar1,
@@ -77,6 +93,8 @@ const avatarComponents: { [key: string]: React.FC<React.SVGProps<SVGSVGElement>>
   avatar6: Avatar6,
   avatar7: Avatar7,
   avatar8: Avatar8,
+  avatar9: Avatar9,
+  avatar10: Avatar10,
 };
 
 interface SellerAvatarProps {
@@ -93,5 +111,3 @@ export function SellerAvatar({ avatarId, className }: SellerAvatarProps) {
     </div>
   );
 }
-
-    

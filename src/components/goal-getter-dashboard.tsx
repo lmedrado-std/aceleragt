@@ -133,7 +133,7 @@ const ticketMedioTiers = [
     { id: 'Lendária', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
 ];
 
-const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8'];
+const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9', 'avatar10'];
 
 export function GoalGetterDashboard() {
   const [isPending, startTransition] = useTransition();
@@ -637,5 +637,3 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
-
-    
