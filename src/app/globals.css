@@ -13,7 +13,7 @@ h1, h2, h3, h4, h5, h6 {
 
 @layer base {
   :root {
-    --background: 220 20% 97%; /* #f3f4f6 - Cinza Neutro */
+    --background: 220 20% 97%; /* #f5f6fa - Cinza Neutro Claro */
     --foreground: 222 88% 12%;
 
     --card: 0 0% 100%;
@@ -22,12 +22,12 @@ h1, h2, h3, h4, h5, h6 {
     --popover: 0 0% 100%;
     --popover-foreground: 222 88% 12%;
 
-    /* Azul Vibrante - #4F46E5 */
-    --primary: 242 78% 61%; 
+    /* Rosa - #E35573 */
+    --primary: 348 71% 61%; 
     --primary-foreground: 0 0% 100%;
     
-    /* Roxo - #7C3AED */
-    --secondary: 262 83% 62%;
+    /* Azul - #5A6FAE */
+    --secondary: 227 34% 52%;
     --secondary-foreground: 0 0% 100%;
     
     --muted: 210 40% 96.1%;
@@ -43,10 +43,10 @@ h1, h2, h3, h4, h5, h6 {
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 242 78% 61%;
+    --ring: 348 71% 61%;
     
-    --chart-1: 242 78% 61%; /* Azul Primário */
-    --chart-2: 262 83% 62%; /* Roxo Secundário */
+    --chart-1: 348 71% 61%; /* Rosa Primário */
+    --chart-2: 227 34% 52%; /* Azul Secundário */
     --chart-3: 159 82% 42%; /* Verde Sucesso */
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
@@ -55,7 +55,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .dark {
-    --background: 222 88% 12%;
+    --background: 0 0% 23%; /* #3A3A3A - Cinza Neutro Escuro */
     --foreground: 210 40% 98%;
     
     --card: 222 88% 14%;
@@ -64,10 +64,10 @@ h1, h2, h3, h4, h5, h6 {
     --popover: 222 88% 12%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 242 78% 71%;
+    --primary: 348 71% 71%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 262 83% 72%;
+    --secondary: 227 34% 62%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -81,10 +81,10 @@ h1, h2, h3, h4, h5, h6 {
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 242 78% 71%;
+    --ring: 348 71% 71%;
     
-    --chart-1: 242 78% 71%;
-    --chart-2: 262 83% 72%;
+    --chart-1: 348 71% 71%;
+    --chart-2: 227 34% 62%;
     --chart-3: 159 82% 52%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;

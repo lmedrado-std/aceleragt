@@ -1,12 +1,13 @@
+
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Store as StoreIcon, Lock, Loader2, FolderOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadState } from "@/lib/storage";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Home() {
   const [state, setState] = useState<AppState | null>(null);
@@ -20,52 +21,51 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
-        <Loader2 className="h-16 w-16 animate-spin text-indigo-600" />
-        <p className="mt-4 text-gray-500">Carregando...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary via-secondary to-primary/80">
+        <Loader2 className="h-16 w-16 animate-spin text-white" />
+        <p className="mt-4 text-white/80">Carregando...</p>
       </div>
     );
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100 p-8 relative">
-      <div className="flex flex-col items-center gap-10 max-w-4xl w-full">
-        
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Image
-            src="https://i.ibb.co/hK2Gvj5/corridinha-gt-banner.png"
-            alt="Corridinha GT Banner"
-            width={400}
-            height={400}
-            className="rounded-lg shadow-xl"
-            priority
-          />
-        </motion.div>
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary via-secondary to-neutral-light p-6">
+      <motion.div 
+        className="flex flex-col items-center gap-8 max-w-4xl w-full"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Logo */}
+        <Image src="/NOVA LOGO.JPG" alt="Supermoda" width={180} height={80} priority />
 
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl font-extrabold font-headline text-indigo-700 drop-shadow-sm">
-            Bem-vindo ao Corridinha GT
+        {/* Título */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-extrabold text-neutral-dark drop-shadow-sm">
+            Bem-vindo à <span className="text-primary">Supermoda</span> 🚀
           </h1>
-          <p className="text-lg text-gray-600 max-w-xl mx-auto">
-            Selecione a loja para visualizar o painel.
+          <p className="text-lg text-neutral-dark/80 max-w-xl mx-auto">
+            Acompanhe suas vendas e impulsione resultados com mais estilo.
           </p>
         </div>
 
-        <div className="w-full max-w-md bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-lg border border-indigo-100">
-          <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">
-            Selecione uma Loja
+        {/* Card */}
+        <motion.div
+          className="w-full max-w-lg backdrop-blur-md bg-white/80 p-8 rounded-3xl shadow-xl border border-gray-200 mt-4"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <h2 className="text-center text-xl font-semibold text-neutral-dark mb-6">
+            Selecione sua loja para começar
           </h2>
 
           {!state || state.stores.length === 0 ? (
-            <div className="flex flex-col items-center text-gray-500 py-6">
-              <FolderOpen className="h-10 w-10 mb-3 text-gray-400" />
-              <p className="font-medium">Nenhuma loja encontrada</p>
-              <p className="text-sm mt-1 text-gray-400">
-                O administrador precisa adicionar uma loja no painel global.
+            <div className="flex flex-col items-center text-gray-500 py-6 text-center">
+              <FolderOpen className="h-12 w-12 mb-4 text-gray-400" />
+              <p className="font-medium text-lg">Nenhuma loja encontrada</p>
+              <p className="text-sm mt-1 text-gray-400 max-w-xs">
+                O administrador precisa adicionar uma loja no painel global para começar.
               </p>
             </div>
           ) : (
@@ -74,28 +74,33 @@ export default function Home() {
                 <Button
                   asChild
                   size="lg"
-                  variant="outline"
                   key={store.id}
-                  className="justify-start h-auto py-4 px-5 rounded-2xl border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md"
+                  className="justify-start h-auto py-4 px-5 rounded-xl border border-gray-200 
+                            bg-gradient-to-r from-primary/90 to-secondary/90 text-white
+                            hover:from-primary hover:to-secondary transition-all 
+                            shadow-sm hover:shadow-lg hover:-translate-y-1 group"
                 >
                   <Link href={`/loja/${store.id}`} className="flex items-center gap-4 w-full">
-                    <StoreIcon className="h-7 w-7 text-indigo-600" />
-                    <span className="font-semibold text-base flex-grow text-left text-gray-700">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white/20">
+                      <StoreIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="font-semibold text-base flex-grow text-left">
                       {store.name}
                     </span>
-                    <ArrowRight className="ml-auto h-5 w-5 text-indigo-500" />
+                    <ArrowRight className="ml-auto h-5 w-5 text-white/70 group-hover:text-white transition-colors" />
                   </Link>
                 </Button>
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
 
+        {/* Admin */}
         <div className="text-center mt-6">
           <Button
             variant="ghost"
             asChild
-            className="text-sm text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-2"
+            className="text-sm text-gray-600 hover:text-primary transition-colors flex items-center gap-2"
           >
             <Link href="/login?redirect=/admin">
               <Lock className="h-4 w-4" />
@@ -103,7 +108,7 @@ export default function Home() {
             </Link>
           </Button>
         </div>
-      </div>
+      </motion.div>
     </main>
   );
 }
