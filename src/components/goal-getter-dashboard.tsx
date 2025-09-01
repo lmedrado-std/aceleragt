@@ -142,6 +142,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loggedInSellerId, setLoggedInSellerId] = useState<string | null>(null);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
 
@@ -168,20 +169,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const getActiveTab = useCallback(() => {
     const sellers = getValues('sellers');
-    const firstSellerId = sellers && sellers.length > 0 ? sellers[0].id : 'admin';
-    const tabFromUrl = searchParams.get('tab');
-    
-    const sellerIsAuthenticated = (sellerId: string) => {
-        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
-    }
-
-    if (tabFromUrl && tabFromUrl !== 'admin') {
-      if (sellerIsAuthenticated(tabFromUrl)) {
-        return tabFromUrl;
-      }
-    }
-
-    return tabFromUrl || firstSellerId;
+    return searchParams.get('tab') || (sellers?.[0]?.id ?? 'admin');
   }, [searchParams, getValues]);
   
   const [activeTab, setActiveTab] = useState(getActiveTab);
@@ -197,29 +185,43 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
      if (store?.themeColor) {
       document.documentElement.style.setProperty('--primary-hue', store.themeColor);
     }
-
-
-    const tab = getActiveTab();
     
-    if (tab === 'admin' && !adminAuthenticated) {
-      toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Por favor, faça login como administrador.' });
-      const destination = `/dashboard/${storeId}?tab=admin`;
-      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-      return;
+    const tabFromUrl = searchParams.get('tab');
+    let currentLoggedInSeller: string | null = null;
+    if (!adminAuthenticated) {
+        (state.sellers[storeId] || []).forEach(seller => {
+            if(sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === 'true') {
+                currentLoggedInSeller = seller.id;
+            }
+        });
+        setLoggedInSellerId(currentLoggedInSeller);
     }
 
-    const sellerIsAuthenticated = (sellerId: string) => {
-        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
-    }
+    const tabToActivate = tabFromUrl || (state.sellers[storeId]?.[0]?.id ?? 'admin');
 
-    if(tab !== 'admin' && !sellerIsAuthenticated(tab)){
-      const destination = `/dashboard/${storeId}?tab=${tab}`;
-      router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tab}&redirect=${encodeURIComponent(destination)}`);
-      return;
+    // Security check
+    if (adminAuthenticated) {
+        // Admin can see everything
+    } else if (currentLoggedInSeller) {
+        // A seller is logged in
+        if (tabToActivate !== currentLoggedInSeller) {
+            toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você só pode ver seu próprio painel.' });
+            router.push(`/dashboard/${storeId}?tab=${currentLoggedInSeller}`);
+            return;
+        }
+    } else {
+        // No one is logged in, must authenticate
+        const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
+        if (tabToActivate === 'admin') {
+            router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+        } else {
+            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
+        }
+        return;
     }
     
-    setActiveTab(tab);
-  }, [storeId, getActiveTab, router, toast]);
+    setActiveTab(tabToActivate);
+  }, [storeId, router, toast, searchParams]);
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -268,7 +270,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const state = loadState();
       const store = state.stores.find(s => s.id === storeId);
       if (!store) {
-        toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." });
+        setTimeout(() => toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." }), 0);
         router.push('/');
         return;
       }
@@ -391,7 +393,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
   
   const handleTabChange = (newTab: string) => {
-      if (newTab === 'admin' && !isAdmin) {
+      // Security Check: Non-admins cannot view other seller tabs or the admin tab
+      if (!isAdmin && loggedInSellerId && newTab !== loggedInSellerId) {
+          toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você só pode acessar o seu painel.' });
+          // Force back to their own tab
+          router.push(`/dashboard/${storeId}?tab=${loggedInSellerId}`);
+          return;
+      }
+       if (newTab === 'admin' && !isAdmin) {
           toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa ser um administrador.'})
           const destination = `/dashboard/${storeId}?tab=admin`;
           router.push(`/login?redirect=${encodeURIComponent(destination)}`);
@@ -402,7 +411,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
       }
 
-      if(newTab !== 'admin' && !sellerIsAuthenticated(newTab)){
+      if(newTab !== 'admin' && !isAdmin && !sellerIsAuthenticated(newTab)){
         const destination = `/dashboard/${storeId}?tab=${newTab}`;
         router.push(`/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(destination)}`);
         return;
@@ -470,6 +479,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     backgroundColor: currentStore?.themeColor ? `${currentStore.themeColor}1A` : undefined, // Add alpha for transparency
     borderLeft: currentStore?.themeColor ? `4px solid ${currentStore.themeColor}`: undefined,
   };
+  
+  const visibleSellers = isAdmin ? (currentValues.sellers || []) : (currentValues.sellers || []).filter(s => s.id === loggedInSellerId);
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
@@ -509,7 +520,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <div className="flex items-center border-b">
                     <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
-                        {(currentValues.sellers || []).map(seller => (
+                        {visibleSellers.map(seller => (
                             <TabsTrigger key={seller.id} value={seller.id} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none data-[state=active]:bg-primary/5">
                                 {seller.name}
                             </TabsTrigger>
