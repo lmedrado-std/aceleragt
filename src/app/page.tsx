@@ -4,9 +4,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { ArrowRight, Lock, Store as StoreIcon, PlusCircle, Trash2 } from "lucide-react";
+import { ArrowRight, Lock, Store as StoreIcon, PlusCircle, Trash2, KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadState, saveState, Store, getInitialState } from "@/lib/storage";
+import { AppState, loadState, saveState, Store, getInitialState, setAdminPassword } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -21,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 
 export default function Home() {
@@ -28,6 +29,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [newStoreName, setNewStoreName] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -109,6 +111,23 @@ export default function Home() {
         });
     };
 
+    const handleChangePassword = () => {
+        if (newAdminPassword.length < 4) {
+          toast({
+            variant: "destructive",
+            title: "Senha muito curta",
+            description: "A senha deve ter pelo menos 4 caracteres.",
+          });
+          return;
+        }
+        setAdminPassword(newAdminPassword);
+        setNewAdminPassword("");
+        toast({
+          title: "Sucesso!",
+          description: "Sua senha de administrador foi alterada.",
+        });
+      };
+
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
@@ -165,24 +184,46 @@ export default function Home() {
         </div>
         
         {isAdmin && (
-            <Card className="w-full max-w-md mt-6">
-                <CardHeader>
-                    <CardTitle>Adicionar Nova Loja</CardTitle>
-                    <CardDescription>Crie uma nova loja para gerenciar.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex gap-2">
-                        <Input
-                            id="new-store"
-                            value={newStoreName}
-                            onChange={(e) => setNewStoreName(e.target.value)}
-                            placeholder="Nome da nova loja"
-                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddStore(); }}}
-                        />
-                        <Button onClick={handleAddStore}><PlusCircle/> Adicionar</Button>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="w-full max-w-md mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Adicionar Loja</CardTitle>
+                        <CardDescription>Crie uma nova loja.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                             <Label htmlFor="new-store">Nome da Loja</Label>
+                             <Input
+                                id="new-store"
+                                value={newStoreName}
+                                onChange={(e) => setNewStoreName(e.target.value)}
+                                placeholder="Ex: SUPERMODA ITABUNA"
+                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddStore(); }}}
+                            />
+                        </div>
+                        <Button onClick={handleAddStore} className="w-full"><PlusCircle/> Adicionar Loja</Button>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Segurança</CardTitle>
+                        <CardDescription>Altere sua senha.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                             <Label htmlFor="new-password">Nova Senha</Label>
+                             <Input
+                                id="new-password"
+                                type="password"
+                                value={newAdminPassword}
+                                onChange={(e) => setNewAdminPassword(e.target.value)}
+                                placeholder="Pelo menos 4 caracteres"
+                            />
+                        </div>
+                        <Button onClick={handleChangePassword} className="w-full"><KeyRound/> Alterar Senha</Button>
+                    </CardContent>
+                </Card>
+            </div>
         )}
 
 

@@ -63,7 +63,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Incentives, setAdminPassword } from "@/lib/storage";
+import { loadState, saveState, Seller, Incentives } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -78,7 +78,6 @@ const sellerSchema = z.object({
 
 const formSchema = z.object({
   newSellerName: z.string(),
-  adminPassword: z.string(),
   goals: z.object({
     metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -145,7 +144,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       newSellerName: "",
-      adminPassword: "",
       goals: loadState().goals.default,
       sellers: [],
     },
@@ -154,41 +152,49 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, getValues, setValue, reset, formState: { isDirty } } = form;
   const currentValues = watch();
 
-  // This effect runs on mount to check auth status and set the initial tab
-  useEffect(() => {
-    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-    setIsAdmin(adminAuthenticated);
+  const getInitialTab = useCallback(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) return tabFromUrl;
 
     const sellers = getValues('sellers');
-    const tabFromUrl = searchParams.get('tab');
-    let initialTab = 'admin';
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
 
-    if (tabFromUrl) {
-        const isValidSellerTab = sellers.some(s => s.id === tabFromUrl);
-        if (tabFromUrl === 'admin' && !adminAuthenticated) {
-            // Not admin, trying to access admin tab
-            initialTab = sellers.length > 0 ? sellers[0].id : ''; 
-        } else if (isValidSellerTab || (tabFromUrl === 'admin' && adminAuthenticated)) {
-            initialTab = tabFromUrl;
-        } else {
-             // Invalid tab, redirect to a safe default
-            initialTab = sellers.length > 0 ? sellers[0].id : (adminAuthenticated ? 'admin' : '');
-        }
-    } else {
-        // No tab in URL, set a default
-        initialTab = sellers.length > 0 ? sellers[0].id : (adminAuthenticated ? 'admin' : '');
+    // If tab is admin but not auth, redirect to first seller
+    if (tabFromUrl === 'admin' && !adminAuthenticated) {
+        if (sellers.length > 0) return sellers[0].id;
+        return ''; // Should be redirected back to store page
     }
     
-    if (initialTab && initialTab !== tabFromUrl) {
-         router.replace(`/dashboard/${storeId}?tab=${initialTab}`);
-    } else if (!initialTab) {
-        // No valid tab can be determined (e.g., no sellers, not admin)
-        router.replace(`/loja/${storeId}`);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId, isAdmin]); // Only re-run if storeId changes.
+    // Default to first seller if available
+    if (sellers.length > 0) return sellers[0].id;
+    
+    // Default to admin if auth and no sellers
+    if (adminAuthenticated) return "admin";
+    
+    return ''; // Should be redirected back to store page
+  }, [searchParams, getValues]);
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab);
 
-  const activeTab = searchParams.get('tab') || (getValues('sellers')?.[0]?.id ?? '');
+  useEffect(() => {
+     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+     setIsAdmin(adminAuthenticated);
+
+     const currentTab = getInitialTab();
+     
+     if(!currentTab) {
+        router.replace(`/loja/${storeId}`);
+        return;
+     }
+
+     if(currentTab !== searchParams.get('tab')){
+        router.replace(`/dashboard/${storeId}?tab=${currentTab}`);
+     }
+
+     setActiveTab(currentTab);
+
+  }, [getInitialTab, storeId, router, searchParams])
+
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -248,7 +254,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
       reset({
         newSellerName: "",
-        adminPassword: "",
         sellers: storeSellers,
         goals: storeGoals,
       });
@@ -266,8 +271,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }, [loadDataForStore]);
 
   useEffect(() => {
-    if (!isDirty) return;
     const subscription = watch((value) => {
+        if (!isDirty) return;
         try {
             const state = loadState();
             state.sellers[storeId] = value.sellers || [];
@@ -360,26 +365,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
   
   const handleTabChange = (newTab: string) => {
+      if (newTab === 'admin' && !isAdmin) {
+          toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa ser um administrador.'})
+          return;
+      }
       router.push(`/dashboard/${storeId}?tab=${newTab}`);
   }
-  
-   const handleChangePassword = () => {
-    const newPassword = getValues("adminPassword");
-    if (newPassword.length < 4) {
-      toast({
-        variant: "destructive",
-        title: "Senha muito curta",
-        description: "A senha deve ter pelo menos 4 caracteres.",
-      });
-      return;
-    }
-    setAdminPassword(newPassword);
-    setValue("adminPassword", "");
-    toast({
-      title: "Sucesso!",
-      description: "Sua senha foi alterada.",
-    });
-  };
 
   const calculateAllIncentives = (values: FormValues) => {
     startTransition(async () => {
@@ -513,9 +504,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     <TabsContent value="admin">
                         <Card className="mt-4">
                             <CardHeader>
-                            <CardTitle>Controles do Administrador</CardTitle>
+                            <CardTitle>Painel Administrativo da Loja</CardTitle>
                             <CardDescription>
-                                Ajuste as metas, prêmios, gerencie os vendedores e a segurança aqui.
+                                Ajuste as metas, prêmios e gerencie os vendedores desta loja aqui.
                             </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -597,31 +588,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                     </div>
                                                 ))}
                                             </div>
-                                        </div>
-
-                                        <Separator />
-
-                                        <div>
-                                            <h3 className="font-semibold mb-2 text-primary">Segurança</h3>
-                                            <div className="flex items-end gap-2">
-                                                 <FormField
-                                                    control={form.control}
-                                                    name="adminPassword"
-                                                    render={({ field }) => (
-                                                        <FormItem className="flex-grow">
-                                                            <FormLabel>Alterar Senha de Administrador</FormLabel>
-                                                            <FormControl>
-                                                                <Input type="password" placeholder="Nova senha" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <Button type="button" onClick={handleChangePassword}>
-                                                    <KeyRound /> Alterar
-                                                </Button>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground mt-2">A senha é salva localmente no navegador. Limpar os dados do site exigirá que a senha padrão "supermoda" seja usada novamente.</p>
                                         </div>
 
                                     </div>

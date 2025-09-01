@@ -58,7 +58,7 @@ export default function LoginPage() {
           <CardHeader className="text-center">
             <CardTitle>Acesso Restrito</CardTitle>
             <CardDescription>
-              Por favor, insira a senha para continuar.
+              Por favor, insira a senha de administrador para continuar.
             </CardDescription>
           </CardHeader>
           <CardContent>
