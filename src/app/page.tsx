@@ -45,47 +45,53 @@ export default function Home() {
   }, []);
 
   const handleAddStore = () => {
-        if (!newStoreName.trim()) {
-            toast({
-                variant: "destructive",
-                title: "Erro",
-                description: "O nome da loja não pode estar vazio.",
-            });
-            return;
-        }
-        
-        const newStoreId = new Date().toISOString();
-        const newStore: Store = {
-            id: newStoreId,
-            name: newStoreName,
-        };
-        
-        const newState: AppState = {
-            ...state,
-            stores: [...state.stores, newStore],
-            sellers: {
-                ...state.sellers,
-                [newStoreId]: [], // Start with an empty list of sellers for the new store
-            },
-            goals: {
-                ...state.goals,
-                [newStoreId]: state.goals.default || getInitialState().goals.default, // Initialize with default goals
-            },
-            incentives: {
-                ...state.incentives,
-                [newStoreId]: {}, // Start with empty incentives
-            }
-        };
-        
-        saveState(newState);
-        setState(newState);
-        setNewStoreName("");
-
+    if (!newStoreName.trim()) {
         toast({
-            title: "Sucesso!",
-            description: `Loja "${newStore.name}" adicionada.`,
+            variant: "destructive",
+            title: "Erro",
+            description: "O nome da loja não pode estar vazio.",
         });
+        return;
+    }
+    
+    const newStoreId = new Date().toISOString();
+    const newStore: Store = {
+        id: newStoreId,
+        name: newStoreName,
     };
+    
+    // Create a new state object based on the current one
+    const newState: AppState = {
+        ...state,
+        stores: [...state.stores, newStore],
+        sellers: {
+            ...state.sellers,
+            [newStoreId]: [], // Start with an empty list of sellers for the new store
+        },
+        goals: {
+            ...state.goals,
+            // Initialize with default goals, ensuring the object exists.
+            [newStoreId]: state.goals.default || getInitialState().goals.default,
+        },
+        incentives: {
+            ...state.incentives,
+            [newStoreId]: {}, // Start with empty incentives
+        }
+    };
+    
+    // Save the entire new state to localStorage first
+    saveState(newState);
+    
+    // Then, update the component's state to reflect the change
+    setState(newState);
+    
+    setNewStoreName("");
+
+    toast({
+        title: "Sucesso!",
+        description: `Loja "${newStore.name}" adicionada.`,
+    });
+};
     
     const handleRemoveStore = (storeId: string) => {
         if (state.stores.length <= 1) {

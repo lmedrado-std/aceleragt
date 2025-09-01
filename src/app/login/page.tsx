@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,11 @@ import { ArrowLeft, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
 
-export default function LoginPage() {
+function LoginComponent() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -31,7 +32,9 @@ export default function LoginPage() {
         title: 'Acesso concedido!',
         description: 'Bem-vindo, administrador.',
       });
-      router.push('/'); // Redirect to the main page after login
+      // Check if there's a redirect URL in the query params
+      const redirectUrl = searchParams.get('redirect');
+      router.push(redirectUrl || '/'); // Redirect to the intended page or home
     } else {
       toast({
         variant: 'destructive',
@@ -84,4 +87,12 @@ export default function LoginPage() {
       </div>
     </main>
   );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Carregando...</div>}>
+            <LoginComponent />
+        </Suspense>
+    )
 }
