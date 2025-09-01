@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ArrowRight, User, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 
 type Seller = {
   id: string;
@@ -50,18 +53,26 @@ export default function Home() {
                  <p className="text-center text-muted-foreground">Carregando vendedores...</p>
             ) : (
                  <div className="grid grid-cols-1 gap-4">
-                     <Button asChild size="lg" variant="secondary" className="justify-start">
-                      <Link href="/dashboard?tab=admin">
-                        <Shield className="mr-4 h-5 w-5" />
-                        Administrador
+                     <Button asChild size="lg" variant="secondary" className="justify-start h-auto py-3">
+                      <Link href="/dashboard?tab=admin" className="flex items-center gap-4">
+                        <Shield className="h-6 w-6" />
+                        <div className="flex flex-col items-start">
+                          <span className="font-semibold text-base">Administrador</span>
+                          <span className="text-sm text-muted-foreground font-normal">Ver painel de controle</span>
+                        </div>
                         <ArrowRight className="ml-auto h-5 w-5" />
                       </Link>
                     </Button>
                     {sellers.map((seller) => (
-                      <Button asChild size="lg" variant="outline" key={seller.id} className="justify-start">
-                        <Link href={`/dashboard?tab=${seller.id}`}>
-                           <User className="mr-4 h-5 w-5" />
-                           {seller.name}
+                      <Button asChild size="lg" variant="outline" key={seller.id} className="justify-start h-auto py-3">
+                        <Link href={`/dashboard?tab=${seller.id}`} className="flex items-center gap-4">
+                           <Avatar>
+                             <AvatarFallback>{seller.name.charAt(0).toUpperCase()}</AvatarFallback>
+                           </Avatar>
+                           <div className="flex flex-col items-start">
+                              <span className="font-semibold text-base">{seller.name}</span>
+                              <span className="text-sm text-muted-foreground font-normal">Ver meu desempenho</span>
+                           </div>
                            <ArrowRight className="ml-auto h-5 w-5" />
                         </Link>
                       </Button>
