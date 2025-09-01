@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Loader2, DollarSign, Users, Award, Trophy, BarChartHorizontal } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 
 
 type SellerWithStore = Seller & { storeName: string; totalIncentives: number };
@@ -186,17 +186,24 @@ export default function AdminDashboardPage() {
                         <CardDescription>Análise do desempenho de vendas de cada loja.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                         <ResponsiveContainer width="100%" height={250}>
-                            <BarChart layout="vertical" data={storePerformance}>
-                                <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} />
-                                <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={150} />
-                                <Tooltip 
-                                    cursor={{fill: 'hsl(var(--muted))'}}
-                                    content={<ChartTooltipContent formatter={(value) => formatCurrency(value as number)} />}
-                                />
-                                <Bar dataKey="totalSales" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                         <ChartContainer config={{
+                            totalSales: {
+                                label: "Vendas",
+                                color: "hsl(var(--primary))",
+                            },
+                         }} className="min-h-[250px] w-full">
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart layout="vertical" data={storePerformance}>
+                                    <XAxis type="number" dataKey="totalSales" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} />
+                                    <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={150} />
+                                    <Tooltip 
+                                        cursor={{fill: 'hsl(var(--muted))'}}
+                                        content={<ChartTooltipContent formatter={(value) => formatCurrency(value as number)} hideLabel />}
+                                    />
+                                    <Bar dataKey="totalSales" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
                     </CardContent>
                 </Card>
 
