@@ -6,6 +6,7 @@ import { ArrowRight, Store as StoreIcon, Lock, Loader2, FolderOpen } from "lucid
 import { useEffect, useState } from "react";
 import { AppState, loadState } from "@/lib/storage";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Home() {
   const [state, setState] = useState<AppState | null>(null);
@@ -19,15 +20,15 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Carregando...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary via-secondary to-primary/80">
+        <Loader2 className="h-16 w-16 animate-spin text-white" />
+        <p className="mt-4 text-white/80">Carregando...</p>
       </div>
     );
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-neutral-light p-6">
       <motion.div 
         className="flex flex-col items-center gap-8 max-w-4xl w-full"
         initial={{ opacity: 0, y: 20 }}
@@ -38,11 +39,8 @@ export default function Home() {
         {/* Título */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-extrabold text-neutral-dark drop-shadow-sm">
-            Bem-vindo à <span className="text-primary">Supermoda</span> 🚀
+            Seja bem-vindo 🚀
           </h1>
-          <p className="text-lg text-neutral-dark/80 max-w-xl mx-auto">
-            Acompanhe suas vendas e impulsione resultados com mais estilo.
-          </p>
         </div>
 
         {/* Card */}
