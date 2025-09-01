@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Import useRouter
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ArrowRight, Lock, Store as StoreIcon, PlusCircle, Trash2, KeyRound } from "lucide-react";
@@ -31,17 +32,14 @@ export default function Home() {
   const [newStoreName, setNewStoreName] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
   const { toast } = useToast();
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
-    // This effect runs once on component mount on the client side.
     const loadedState = loadState();
     setState(loadedState);
     setLoading(false);
-    
-    // Check for admin authentication in session storage.
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
-
   }, []);
 
   const handleAddStore = () => {
@@ -60,37 +58,34 @@ export default function Home() {
         name: newStoreName,
     };
     
-    // Create a new state object based on the current one
     const newState: AppState = {
         ...state,
         stores: [...state.stores, newStore],
         sellers: {
             ...state.sellers,
-            [newStoreId]: [], // Start with an empty list of sellers for the new store
+            [newStoreId]: [], 
         },
         goals: {
             ...state.goals,
-            // Initialize with default goals, ensuring the object exists.
             [newStoreId]: state.goals.default || getInitialState().goals.default,
         },
         incentives: {
             ...state.incentives,
-            [newStoreId]: {}, // Start with empty incentives
+            [newStoreId]: {},
         }
     };
     
-    // Save the entire new state to localStorage first
     saveState(newState);
-    
-    // Then, update the component's state to reflect the change
-    setState(newState);
-    
+    setState(newState); // This updates the UI
     setNewStoreName("");
 
     toast({
         title: "Sucesso!",
         description: `Loja "${newStore.name}" adicionada.`,
     });
+
+    // Programmatically navigate to the new store's page
+    router.push(`/loja/${newStoreId}`);
 };
     
     const handleRemoveStore = (storeId: string) => {
