@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller } from "@/lib/storage";
+import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,46 +47,58 @@ export default function AdminPage() {
     setLoading(false);
   }, [router]);
 
-  const reloadState = () => {
-    const loadedState = loadState();
-    setState(loadedState);
-  }
-
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
       toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       return;
     }
-    const currentState = loadState();
-    const newStoreId = new Date().toISOString();
-    const newStore: Store = { id: newStoreId, name: newStoreName };
-    const newState: AppState = {
-      ...currentState,
-      stores: [...currentState.stores, newStore],
-      sellers: { ...currentState.sellers, [newStoreId]: [] as Seller[] },
-      goals: { ...currentState.goals, [newStoreId]: currentState.goals.default || getInitialState().goals.default },
-      incentives: { ...currentState.incentives, [newStoreId]: {} }
-    };
-    saveState(newState);
-    reloadState(); 
-    setNewStoreName("");
-    toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+
+    // Use a function update with setState to ensure we have the latest state
+    setState(currentState => {
+      if (!currentState) return null;
+
+      const newStoreId = new Date().toISOString();
+      const newStore: Store = { id: newStoreId, name: newStoreName };
+      
+      const newState: AppState = {
+        ...currentState,
+        stores: [...currentState.stores, newStore],
+        // Ensure new store has all required data structures initialized
+        sellers: { ...currentState.sellers, [newStoreId]: [] as Seller[] },
+        goals: { ...currentState.goals, [newStoreId]: currentState.goals.default || getInitialState().goals.default as Goals },
+        incentives: { ...currentState.incentives, [newStoreId]: {} }
+      };
+
+      saveState(newState);
+      
+      setNewStoreName("");
+      toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+      
+      return newState; // Return the new state to update the component
+    });
   };
 
   const handleRemoveStore = (id: string) => {
-    const currentState = loadState();
-    if (currentState.stores.length <= 1) {
-      toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-      return;
-    }
-    const newState = { ...currentState };
-    newState.stores = newState.stores.filter(s => s.id !== id);
-    delete newState.sellers[id];
-    delete newState.goals[id];
-    delete newState.incentives[id];
-    saveState(newState);
-    reloadState();
-    toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
+    setState(currentState => {
+        if (!currentState) return null;
+
+        if (currentState.stores.length <= 1) {
+            toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+            return currentState;
+        }
+
+        const newState = { ...currentState };
+        newState.stores = newState.stores.filter(s => s.id !== id);
+        delete newState.sellers[id];
+        delete newState.goals[id];
+        delete newState.incentives[id];
+        
+        saveState(newState);
+        
+        toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
+        
+        return newState;
+    });
   };
 
   const handleChangePassword = () => {
