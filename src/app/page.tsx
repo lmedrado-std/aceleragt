@@ -37,7 +37,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
         >
           <Image
-            src="/corridinha-gt-banner.png"
+            src="https://i.ibb.co/hK2Gvj5/corridinha-gt-banner.png"
             alt="Corridinha GT Banner"
             width={400}
             height={400}
