@@ -67,7 +67,11 @@ const ProgressItem = ({
   themeColor?: string | null;
 }) => {
   const percentage = goalValue > 0 ? Math.min(((currentValue || 0) / goalValue) * 100, 100) : 0;
-  const achieved = currentValue >= goalValue;
+  
+  const progressStyle = themeColor ? {
+      background: `linear-gradient(to right, ${themeColor} , ${themeColor}dd)`
+  } : {};
+
 
   return (
     <div className="space-y-2">
@@ -82,7 +86,7 @@ const ProgressItem = ({
           </span>
         </div>
       </div>
-      <Progress value={percentage} themeColor={themeColor} />
+       <Progress value={percentage} style={progressStyle} />
     </div>
   );
 };
@@ -240,6 +244,9 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
   const lendariaAchieved = vendas >= metaLendaria;
 
   const headerStyle = themeColor ? { color: themeColor } : {};
+  const totalIncentiveStyle = themeColor ? { background: `linear-gradient(to right, ${themeColor}BF, ${themeColor})`} : {
+    background: 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary-dark)))'
+  };
 
   return (
     <Card className="shadow-lg border-2 border-transparent has-[[data-achieved=true]]:border-green-500 transition-all">
@@ -256,7 +263,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
             <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
           </div>
           <div className="relative pt-6">
-            <Progress value={salesPercentage} className="h-4" themeColor={themeColor} />
+            <Progress value={salesPercentage} className="h-4" style={{background: 'hsl(var(--secondary))'}} indicatorStyle={{ background: `linear-gradient(to right, ${themeColor || 'hsl(var(--primary))'} , #34d399)`}}/>
             {metaLendaria > 0 && (
               <>
                 <div
@@ -367,7 +374,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
             renderSkeletons()
           ) : incentives ? (
             <div className="space-y-4">
-              <div className="bg-gradient-to-r from-primary/80 to-primary text-primary-foreground p-6 rounded-lg flex justify-between items-center shadow-lg" style={themeColor ? { background: `linear-gradient(to right, ${themeColor}BF, ${themeColor})`} : {}}>
+              <div className="bg-gradient-to-r from-primary/80 to-primary text-primary-foreground p-6 rounded-lg flex justify-between items-center shadow-lg" style={totalIncentiveStyle}>
                 <span className="font-bold text-xl">
                   Seu Ganho Total
                 </span>
@@ -413,3 +420,5 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     </Card>
   );
 }
+
+    
