@@ -222,6 +222,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
       (incentives.corridinhaDiariaBonus || 0)
     : 0;
 
+  const prizeReceived = 0; // Placeholder for future implementation
+
   const renderSkeletons = () => (
      <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -244,12 +246,9 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
   const lendariaAchieved = vendas >= metaLendaria;
 
   const headerStyle = themeColor ? { color: themeColor } : {};
-  const totalIncentiveStyle = themeColor ? { background: `linear-gradient(to right, ${themeColor}BF, ${themeColor})`} : {
-    background: 'linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary-dark)))'
-  };
-
+  
   return (
-    <Card className="shadow-lg border-2 border-transparent has-[[data-achieved=true]]:border-green-500 transition-all">
+    <Card className="shadow-lg border-2 border-transparent transition-all overflow-hidden">
       <CardHeader>
         <CardTitle>Dashboard de Progresso e Incentivos</CardTitle>
         <CardDescription>
@@ -257,9 +256,45 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8" data-achieved={totalIncentives > 0}>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-lg font-semibold text-emerald-800">
+                    Seu Ganho Total
+                    </CardTitle>
+                    <DollarSign className="h-6 w-6 text-emerald-600" />
+                </CardHeader>
+                <CardContent>
+                    <p className="text-3xl font-bold text-emerald-700">
+                    {formatCurrency(totalIncentives)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                    Valor acumulado das metas
+                    </p>
+                </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-amber-200 to-yellow-100 border-amber-300 shadow-md hover:shadow-lg transition-all rounded-2xl">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-lg font-semibold text-amber-800">
+                    Prêmio Recebido
+                    </CardTitle>
+                    <Trophy className="h-6 w-6 text-amber-600" />
+                </CardHeader>
+                <CardContent>
+                    <p className="text-3xl font-bold text-amber-700">
+                    {formatCurrency(prizeReceived)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Total acumulado (histórico)</p>
+                </CardContent>
+            </Card>
+        </div>
+
+
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-6 h-6 text-primary" style={headerStyle} />
+            <Target className="w-6 h-6 text-primary" style={headerStyle} />
             <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
           </div>
           <div className="relative pt-6">
@@ -374,17 +409,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
             renderSkeletons()
           ) : incentives ? (
             <div className="space-y-4">
-              <div className="bg-gradient-to-r from-primary/80 to-primary text-primary-foreground p-6 rounded-lg flex justify-between items-center shadow-lg" style={totalIncentiveStyle}>
-                <span className="font-bold text-xl">
-                  Seu Ganho Total
-                </span>
-                <span className="text-4xl font-bold">
-                  {formatCurrency(totalIncentives)}
-                </span>
-              </div>
-              
-              <div className="space-y-2 pt-4">
-                 <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Outros Prêmios</h3>
+               <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Outros Prêmios</h3>
+              <div className="space-y-2">
                 <IncentiveItem
                   icon={<Gift className="w-5 h-5" />}
                   label="Bônus PA"
