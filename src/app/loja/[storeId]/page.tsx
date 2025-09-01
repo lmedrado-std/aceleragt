@@ -30,15 +30,16 @@ export default function StoreHomePage() {
     };
 
     try {
+        const decodedStoreId = decodeURIComponent(storeId);
         const savedState = loadState();
-        const store = savedState.stores.find(s => s.id === storeId);
+        const store = savedState.stores.find(s => s.id === decodedStoreId);
         
         if (store) {
             setStoreName(store.name);
-            setSellers(savedState.sellers[storeId] || []);
+            setSellers(savedState.sellers[decodedStoreId] || []);
             setError(null); // Clear previous errors if found
         } else {
-            setError(`Loja com ID "${storeId}" não foi encontrada.`);
+            setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
             toast({
               variant: "destructive",
               title: "Erro ao carregar",

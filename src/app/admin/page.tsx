@@ -56,7 +56,7 @@ export default function AdminPage() {
     setState(currentState => {
       if (!currentState) return null;
 
-      const newStoreId = new Date().toISOString();
+      const newStoreId = crypto.randomUUID();
       const newStore: Store = { id: newStoreId, name: newStoreName };
       
       const newState: AppState = {
@@ -111,9 +111,7 @@ export default function AdminPage() {
 
   const handleChangePassword = () => {
     if (newAdminPassword.length < 4) {
-      setTimeout(() => {
-        toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
-      }, 0);
+      toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
       return;
     }
     setAdminPassword(newAdminPassword);

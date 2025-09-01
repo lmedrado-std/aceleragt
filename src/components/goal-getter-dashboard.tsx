@@ -298,7 +298,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         }
     }
     const newSeller: Seller = {
-      id: new Date().toISOString(), name: newSellerName, avatarId: randomAvatarId,
+      id: crypto.randomUUID(), name: newSellerName, avatarId: randomAvatarId,
       vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0,
     };
     const updatedSellers = [...currentSellers, newSeller];
