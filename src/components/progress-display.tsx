@@ -16,8 +16,7 @@ import {
   Ticket,
   TrendingUp,
   CheckCircle,
-  Award, 
-  Star,
+  Award,
   Gift,
   Zap,
   Trophy,
@@ -31,15 +30,16 @@ import { Goals } from "@/lib/storage";
 
 type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
 
-type SalesData = {
+// Combine sales data with all possible goals for calculation
+type ProgressDisplaySalesData = {
     vendas: number;
     pa: number;
     ticketMedio: number;
     corridinhaDiaria: number;
-} & Omit<Goals, 'paGoal1' | 'paGoal2' | 'paGoal3' | 'ticketMedioGoal1' | 'ticketMedioGoal2' | 'ticketMedioGoal3'>;
+} & Goals;
 
 interface ProgressDisplayProps {
-  salesData: SalesData;
+  salesData: ProgressDisplaySalesData;
   incentives: IncentiveProjectionOutput | null;
   rankings: Record<RankingMetric, number> | null;
   loading: boolean;
@@ -57,41 +57,34 @@ const ProgressItem = ({
   currentValue,
   goalValue,
   formatValue = (v) => v.toString(),
-  isCurrency = false,
 }: {
   icon: React.ReactNode;
   title: string;
   currentValue: number;
   goalValue: number;
   formatValue?: (value: number) => string;
-  isCurrency?: boolean;
 }) => {
-  const percentage = goalValue > 0 ? ((currentValue || 0) / goalValue) * 100 : 0;
+  const percentage = goalValue > 0 ? Math.min(((currentValue || 0) / goalValue) * 100, 100) : 0;
   const achieved = currentValue >= goalValue;
 
   return (
-    <div>
-      <div className="flex justify-between items-baseline mb-1">
+    <div className="space-y-2">
+      <div className="flex justify-between items-baseline">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           {icon}
           <span>{title}</span>
         </div>
-        <div
-          className={cn(
-            "font-semibold flex items-center gap-1",
-            achieved && "text-green-600 dark:text-green-400"
-          )}
-        >
-          {achieved && <CheckCircle className="w-4 h-4" />}
+        <div className="font-semibold flex items-center gap-1 text-sm">
           <span>
             {formatValue(currentValue)} / {formatValue(goalValue)}
           </span>
         </div>
       </div>
-      <Progress value={percentage} className={achieved ? "[&>div]:bg-green-500" : ""} />
+      <Progress value={percentage} className={achieved ? "accent" : ""} />
     </div>
   );
 };
+
 
 const IncentiveItem = ({
   icon,
@@ -113,10 +106,10 @@ const IncentiveItem = ({
     <div className="flex items-center gap-3">
       <div
         className={cn(
-          "p-1.5 rounded-full",
+          "p-1.5 rounded-full bg-opacity-10",
           achieved
-            ? "bg-green-500 text-white"
-            : "bg-primary/10 text-primary"
+            ? "bg-green-500 text-green-600"
+            : "bg-primary text-primary"
         )}
       >
         {icon}
@@ -165,22 +158,31 @@ const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
   )
 };
 
-const SalesGoalDetail = ({ label, goal, current, prize, prizeLabel }: {label: string; goal: number; current: number; prize: number; prizeLabel?:string }) => {
-    const achieved = current >= goal;
-    let finalPrize = prize;
-    if (prizeLabel === "Prêmio Meta" && current >= salesData.metona) finalPrize = 0;
-    if (prizeLabel === "Prêmio Metinha" && current >= salesData.meta) finalPrize = 0;
-    
+const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {label: string; goal: number; current: number; prize: number; achieved: boolean; isActive: boolean; }) => {
     return (
-        <div className={cn("flex justify-between items-center p-2 rounded-md", achieved ? "bg-green-100/80 dark:bg-green-900/30" : "")}>
+        <div className={cn(
+            "flex justify-between items-center p-2 rounded-md transition-all",
+            achieved && isActive ? "bg-green-100/80 dark:bg-green-900/30 ring-2 ring-green-500" :
+            achieved ? "bg-green-100/50 dark:bg-green-900/20" : 
+            "bg-muted/30"
+        )}>
             <div className="flex items-center gap-2">
                 {achieved ? <CheckCircle className="w-5 h-5 text-green-500"/> : <Target className="w-5 h-5 text-muted-foreground"/>}
                 <div>
-                    <p className={cn("font-semibold", achieved && "text-green-700 dark:text-green-300")}>{label}</p>
+                    <p className={cn(
+                      "font-semibold", 
+                      achieved && "text-green-700 dark:text-green-300",
+                      !achieved && "text-muted-foreground"
+                    )}>{label}</p>
                     <p className="text-xs text-muted-foreground">{formatCurrency(current)} / {formatCurrency(goal)}</p>
                 </div>
             </div>
-            <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(finalPrize)}</p>
+            <p className={cn(
+                "font-bold text-lg", 
+                achieved && isActive ? "text-green-600 dark:text-green-400" :
+                achieved ? "text-green-500/70 dark:text-green-400/70" : 
+                "text-muted-foreground"
+              )}>{formatCurrency(prize)}</p>
         </div>
     )
 }
@@ -200,6 +202,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
     metaLendaria,
     paGoal4,
     ticketMedioGoal4,
+    legendariaBonusValorPremio,
+    legendariaBonusValorVenda
   } = salesData;
 
   const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
@@ -229,6 +233,11 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
       </div>
     </div>
   );
+  
+  const metinhaAchieved = vendas >= metaMinha;
+  const metaAchieved = vendas >= meta;
+  const metonaAchieved = vendas >= metona;
+  const lendariaAchieved = vendas >= metaLendaria;
 
   return (
     <Card className="shadow-lg border-2 border-transparent has-[[data-achieved=true]]:border-green-500 transition-all">
@@ -238,11 +247,11 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
           Sua jornada para o sucesso em tempo real.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6" data-achieved={totalIncentives > 0}>
+      <CardContent className="space-y-8" data-achieved={totalIncentives > 0}>
         <div>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-6 h-6 text-primary" />
-            <h3 className="text-lg font-semibold">Progresso de Vendas</h3>
+            <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
           </div>
           <div className="relative pt-6">
             <Progress value={salesPercentage} className="h-4" />
@@ -289,10 +298,10 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
         ) : incentives ? (
             <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
                 <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
-                <SalesGoalDetail label="Prêmio Metinha" prizeLabel="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} />
-                <SalesGoalDetail label="Prêmio Meta" prizeLabel="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} />
-                <SalesGoalDetail label="Prêmio Metona" prizeLabel="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} />
-                <SalesGoalDetail label="Bônus Lendária" prizeLabel="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} />
+                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} achieved={metinhaAchieved} isActive={metinhaAchieved && !metaAchieved} />
+                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} achieved={metaAchieved} isActive={metaAchieved && !metonaAchieved} />
+                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} achieved={metonaAchieved} isActive={metonaAchieved} />
+                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} achieved={lendariaAchieved} isActive={lendariaAchieved} />
             </div>
         ): (
              <div className="text-center py-4 text-muted-foreground">
@@ -300,50 +309,51 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
             </div>
         )}
 
-        <div className="grid sm:grid-cols-1 gap-6 pt-4">
-          <ProgressItem
-            icon={<Package className="w-5 h-5" />}
-            title="Produtos por Atendimento (PA)"
-            currentValue={pa}
-            goalValue={paGoal4}
-            formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
-          />
-          <ProgressItem
-            icon={<Ticket className="w-5 h-5" />}
-            title="Ticket Médio"
-            currentValue={ticketMedio}
-            goalValue={ticketMedioGoal4}
-            formatValue={formatCurrency}
-            isCurrency
-          />
-          <ProgressItem
-            icon={<TrendingUp className="w-5 h-5" />}
-            title="Corridinha Diária"
-            currentValue={corridinhaDiaria}
-            goalValue={corridinhaDiaria}
-            formatValue={formatCurrency}
-            isCurrency
-          />
-        </div>
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-2"><Package/> Desempenho Adicional</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ProgressItem
+                icon={<Package className="w-5 h-5" />}
+                title="Produtos por Atendimento (PA)"
+                currentValue={pa}
+                goalValue={paGoal4}
+                formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
+              />
+              <ProgressItem
+                icon={<Ticket className="w-5 h-5" />}
+                title="Ticket Médio"
+                currentValue={ticketMedio}
+                goalValue={ticketMedioGoal4}
+                formatValue={formatCurrency}
+              />
+              <ProgressItem
+                icon={<TrendingUp className="w-5 h-5" />}
+                title="Corridinha Diária"
+                currentValue={corridinhaDiaria}
+                goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1}
+                formatValue={formatCurrency}
+              />
+            </CardContent>
+          </Card>
 
-        {rankings && (
-            <>
-                <Separator />
-                <div>
-                     <div className="flex items-center gap-2 mb-4">
-                        <Trophy className="w-6 h-6 text-primary" />
-                        <h3 className="text-lg font-semibold">Ranking Geral</h3>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <RankingItem title="Vendas" rank={rankings.vendas} />
-                        <RankingItem title="PA" rank={rankings.pa} />
-                        <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
-                        <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
-                        <RankingItem title="Incentivos" rank={rankings.totalIncentives} />
-                    </div>
-                </div>
-            </>
-        )}
+          {rankings && (
+            <Card>
+                <CardHeader className="pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2"><Trophy/> Ranking Geral</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <RankingItem title="Vendas" rank={rankings.vendas} />
+                    <RankingItem title="PA" rank={rankings.pa} />
+                    <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
+                    <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
+                    <RankingItem title="Incentivos" rank={rankings.totalIncentives} />
+                </CardContent>
+            </Card>
+          )}
+        </div>
 
         <Separator/>
 
@@ -352,11 +362,11 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
             renderSkeletons()
           ) : incentives ? (
             <div className="space-y-4">
-              <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg flex justify-between items-center">
-                <span className="font-bold text-primary text-lg">
-                  Ganho Total
+              <div className="bg-gradient-to-r from-primary/80 to-primary text-primary-foreground p-6 rounded-lg flex justify-between items-center shadow-lg">
+                <span className="font-bold text-xl">
+                  Seu Ganho Total
                 </span>
-                <span className="text-3xl font-bold text-primary">
+                <span className="text-4xl font-bold">
                   {formatCurrency(totalIncentives)}
                 </span>
               </div>
@@ -377,7 +387,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
                 />
                 <IncentiveItem
                   icon={<Zap className="w-5 h-5" />}
-                  label="Bônus Corridinha Diária"
+                  label="Bônus Corridinha"
                   value={incentives.corridinhaDiariaBonus}
                   achieved={incentives.corridinhaDiariaBonus > 0}
                 />

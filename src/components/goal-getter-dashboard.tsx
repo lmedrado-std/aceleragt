@@ -17,7 +17,9 @@ import {
   ShieldCheck,
   Calculator,
   Home,
-  KeyRound
+  LogOut,
+  ChevronRight,
+  Target
 } from "lucide-react";
 
 import {
@@ -63,7 +65,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Incentives } from "@/lib/storage";
+import { loadState, saveState, Seller, Incentives, getInitialState, Goals } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -97,13 +99,13 @@ const formSchema = z.object({
     paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   }),
   sellers: z.array(sellerSchema),
 });
@@ -115,17 +117,17 @@ type Rankings = Record<string, Record<RankingMetric, number>>;
 
 
 const goalTiers = [
-    { id: 'Metinha', goal: 'paGoal1', prize: 'paPrize1'},
-    { id: 'Meta', goal: 'paGoal2', prize: 'paPrize2' },
-    { id: 'Metona', goal: 'paGoal3', prize: 'paPrize3' },
-    { id: 'Lendária', goal: 'paGoal4', prize: 'paPrize4' },
+    { id: 'Nível 1', goal: 'paGoal1', prize: 'paPrize1'},
+    { id: 'Nível 2', goal: 'paGoal2', prize: 'paPrize2' },
+    { id: 'Nível 3', goal: 'paGoal3', prize: 'paPrize3' },
+    { id: 'Nível 4', goal: 'paGoal4', prize: 'paPrize4' },
 ];
 
 const ticketMedioTiers = [
-    { id: 'Metinha', goal: 'ticketMedioGoal1', prize: 'ticketMedioPrize1'},
-    { id: 'Meta', goal: 'ticketMedioGoal2', prize: 'ticketMedioPrize2' },
-    { id: 'Metona', goal: 'ticketMedioGoal3', prize: 'ticketMedioPrize3' },
-    { id: 'Lendária', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
+    { id: 'Nível 1', goal: 'ticketMedioGoal1', prize: 'ticketMedioPrize1'},
+    { id: 'Nível 2', goal: 'ticketMedioGoal2', prize: 'ticketMedioPrize2' },
+    { id: 'Nível 3', goal: 'ticketMedioGoal3', prize: 'ticketMedioPrize3' },
+    { id: 'Nível 4', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
 ];
 
 const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9', 'avatar10'];
@@ -137,64 +139,58 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [storeName, setStoreName] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      newSellerName: "",
-      goals: loadState().goals.default,
-      sellers: [],
-    },
+    defaultValues: getInitialStateForForm(),
   });
   
+  function getInitialStateForForm(): FormValues {
+      const state = loadState();
+      return {
+        newSellerName: "",
+        goals: state.goals[storeId] || state.goals.default,
+        sellers: state.sellers[storeId] || [],
+      }
+  }
+
   const { watch, getValues, setValue, reset, formState: { isDirty } } = form;
   const currentValues = watch();
 
-  const getInitialTab = useCallback(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl) return tabFromUrl;
-
-    const sellers = getValues('sellers');
-    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-
-    // If tab is admin but not auth, redirect to first seller
-    if (tabFromUrl === 'admin' && !adminAuthenticated) {
-        if (sellers.length > 0) return sellers[0].id;
-        return ''; // Should be redirected back to store page
-    }
-    
-    // Default to first seller if available
-    if (sellers.length > 0) return sellers[0].id;
-    
-    // Default to admin if auth and no sellers
-    if (adminAuthenticated) return "admin";
-    
-    return ''; // Should be redirected back to store page
+  const getActiveTab = useCallback(() => {
+    return searchParams.get('tab') || (getValues('sellers')?.[0]?.id ?? 'admin');
   }, [searchParams, getValues]);
   
-  const [activeTab, setActiveTab] = useState(getInitialTab);
+  const [activeTab, setActiveTab] = useState(getActiveTab);
 
+  // Effect to check auth and handle initial tab loading
   useEffect(() => {
-     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-     setIsAdmin(adminAuthenticated);
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+    setIsAdmin(adminAuthenticated);
 
-     const currentTab = getInitialTab();
-     
-     if(!currentTab) {
+    const state = loadState();
+    const store = state.stores.find(s => s.id === storeId);
+    setStoreName(store?.name || 'Loja não encontrada');
+
+    const tab = getActiveTab();
+    
+    // Redirect non-admins trying to access admin tab
+    if (tab === 'admin' && !adminAuthenticated) {
+      toast({ variant: 'destructive', title: 'Acesso Negado' });
+      const firstSellerId = state.sellers[storeId]?.[0]?.id;
+      if (firstSellerId) {
+        router.replace(`/dashboard/${storeId}?tab=${firstSellerId}`);
+      } else {
         router.replace(`/loja/${storeId}`);
-        return;
-     }
-
-     if(currentTab !== searchParams.get('tab')){
-        router.replace(`/dashboard/${storeId}?tab=${currentTab}`);
-     }
-
-     setActiveTab(currentTab);
-
-  }, [getInitialTab, storeId, router, searchParams])
-
+      }
+      return;
+    }
+    
+    setActiveTab(tab);
+  }, [storeId, getActiveTab, router, toast]);
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -270,13 +266,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       loadDataForStore();
   }, [loadDataForStore]);
 
+  // Effect for saving data to localStorage on change
   useEffect(() => {
+    if (!isDirty) return;
+    
     const subscription = watch((value) => {
-        if (!isDirty) return;
         try {
             const state = loadState();
             state.sellers[storeId] = value.sellers || [];
-            state.goals[storeId] = value.goals;
+            state.goals[storeId] = value.goals as Goals;
             state.incentives[storeId] = incentives;
             saveState(state);
             if(value.sellers && incentives){
@@ -362,6 +360,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     // setValue will be handled by watch, just end editing
     setEditingSellerId(null);
+    toast({ title: "Sucesso!", description: "Nome do vendedor atualizado." });
   }
   
   const handleTabChange = (newTab: string) => {
@@ -369,6 +368,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa ser um administrador.'})
           return;
       }
+      setActiveTab(newTab);
       router.push(`/dashboard/${storeId}?tab=${newTab}`);
   }
 
@@ -433,7 +433,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   
   const renderGoalInputs = (level: string, tiers: typeof goalTiers | typeof ticketMedioTiers) => (
     <div>
-        <h3 className="font-semibold mb-4 text-primary">Metas de {level}</h3>
+        <h3 className="font-semibold mb-4 text-primary">{level}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
             {tiers.map(tier => (
                  <div className="space-y-2" key={tier.id}>
@@ -451,24 +451,32 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8">
-      <header className="flex items-center justify-between gap-4 mb-8">
+      <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
             <Logo />
             <div>
               <h1 className="text-3xl font-bold font-headline text-primary">
-                Corridinha GT
+                {storeName}
               </h1>
               <p className="text-muted-foreground">
                 Acompanhe suas metas e maximize seus ganhos.
               </p>
             </div>
         </div>
-        <Button asChild variant="outline">
-          <Link href={`/loja/${storeId}`}>
-            <Home className="mr-2 h-4 w-4" />
-            Página da Loja
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href={`/loja/${storeId}`}>
+              <ChevronRight className="mr-2 h-4 w-4" />
+              Ir para a Loja
+            </Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/">
+              <Home className="mr-2 h-4 w-4" />
+              Todas as Lojas
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <Form {...form}>
@@ -477,8 +485,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <div className="flex items-center border-b">
                     <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
-                        {currentValues.sellers && currentValues.sellers.map(seller => (
-                            <TabsTrigger key={seller.id} value={seller.id} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none">
+                        {(currentValues.sellers || []).map(seller => (
+                            <TabsTrigger key={seller.id} value={seller.id} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none data-[state=active]:bg-primary/5">
                                 {seller.name}
                             </TabsTrigger>
                         ))}
@@ -487,7 +495,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
-                                    <TabsTrigger value="admin" className="px-3">
+                                    <TabsTrigger value="admin" className="px-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none data-[state=active]:bg-primary/5">
                                         <ShieldCheck className="h-5 w-5"/>
                                         <span className="sr-only">Admin</span>
                                     </TabsTrigger>
@@ -502,7 +510,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 {isAdmin && (
                     <TabsContent value="admin">
-                        <Card className="mt-4">
+                        <Card className="mt-4 border-primary/20">
                             <CardHeader>
                             <CardTitle>Painel Administrativo da Loja</CardTitle>
                             <CardDescription>
@@ -511,90 +519,103 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 
-                                <div className="grid lg:grid-cols-2 gap-8">
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h3 className="font-semibold mb-2 text-primary">Cadastrar Novo Vendedor</h3>
-                                            <div className="flex items-center gap-2">
-                                            <FormField control={form.control} name="newSellerName" render={({ field }) => (
-                                                <FormItem className="flex-grow">
-                                                    <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
-                                                    <FormControl><Input placeholder="Nome do Vendedor" {...field} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSeller(); }}} /></FormControl>
-                                                </FormItem>
-                                            )}
-                                            />
-                                            <Button type="button" onClick={addSeller}><UserPlus/></Button>
-                                            </div>
-                                        </div>
-
-                                        <Separator/>
-
-                                        <div>
-                                            <h3 className="font-semibold mb-4 text-primary">Gerenciar Vendedores</h3>
-                                            <div className="space-y-2">
-                                                {currentValues.sellers && currentValues.sellers.map((seller, index) => (
-                                                    <div key={seller.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
-                                                        {editingSellerId === seller.id ? (
-                                                            <>
-                                                                <FormField control={form.control} name={`sellers.${index}.name`} render={({ field }) => (
-                                                                <FormItem className="flex-grow"><FormControl><Input {...field} autoFocus onKeyDown={(e) => { if(e.key === 'Enter') saveSellerName(seller.id); if(e.key==='Escape') cancelEditing(); }}/></FormControl></FormItem>
-                                                                )}
-                                                            />
-                                                                <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
-                                                                <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <span className="font-medium">{seller.name}</span>
-                                                                <div className="flex items-center">
-                                                                    <Button size="icon" variant="ghost" onClick={() => startEditing(seller.id)}><Edit className="h-4 w-4"/></Button>
-                                                                    <AlertDialog>
-                                                                        <AlertDialogTrigger asChild>
-                                                                            <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
-                                                                        </AlertDialogTrigger>
-                                                                        <AlertDialogContent>
-                                                                            <AlertDialogHeader>
-                                                                                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                                                                <AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente o vendedor e seus dados.</AlertDialogDescription>
-                                                                            </AlertDialogHeader>
-                                                                            <AlertDialogFooter>
-                                                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                                <AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction>
-                                                                            </AlertDialogFooter>
-                                                                        </AlertDialogContent>
-                                                                    </AlertDialog>
-                                                                </div>
-                                                            </>
+                                <div className="grid lg:grid-cols-2 gap-x-8 gap-y-10">
+                                    <div className="space-y-8">
+                                       <Card>
+                                            <CardHeader>
+                                                <h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3>
+                                            </CardHeader>
+                                            <CardContent className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <FormLabel>Cadastrar Novo Vendedor</FormLabel>
+                                                    <div className="flex items-center gap-2">
+                                                        <FormField control={form.control} name="newSellerName" render={({ field }) => (
+                                                            <FormItem className="flex-grow">
+                                                                <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
+                                                                <FormControl><Input placeholder="Nome do Vendedor" {...field} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSeller(); }}} /></FormControl>
+                                                            </FormItem>
                                                         )}
+                                                        />
+                                                        <Button type="button" onClick={addSeller}><UserPlus/></Button>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                                </div>
+                                                
+                                                <Separator/>
+
+                                                <div className="space-y-2">
+                                                  <FormLabel>Vendedores Atuais</FormLabel>
+                                                  {(currentValues.sellers || []).length > 0 ? (
+                                                      <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                                          {(currentValues.sellers || []).map((seller, index) => (
+                                                              <div key={seller.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
+                                                                  {editingSellerId === seller.id ? (
+                                                                      <>
+                                                                          <FormField control={form.control} name={`sellers.${index}.name`} render={({ field }) => (
+                                                                          <FormItem className="flex-grow"><FormControl><Input {...field} autoFocus onKeyDown={(e) => { if(e.key === 'Enter') saveSellerName(seller.id); if(e.key==='Escape') cancelEditing(); }}/></FormControl></FormItem>
+                                                                          )}
+                                                                      />
+                                                                          <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
+                                                                          <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
+                                                                      </>
+                                                                  ) : (
+                                                                      <>
+                                                                          <span className="font-medium">{seller.name}</span>
+                                                                          <div className="flex items-center">
+                                                                              <Button size="icon" variant="ghost" onClick={() => startEditing(seller.id)}><Edit className="h-4 w-4"/></Button>
+                                                                              <AlertDialog>
+                                                                                  <AlertDialogTrigger asChild>
+                                                                                      <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
+                                                                                  </AlertDialogTrigger>
+                                                                                  <AlertDialogContent>
+                                                                                      <AlertDialogHeader>
+                                                                                          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                                                                          <AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente o vendedor e seus dados.</AlertDialogDescription>
+                                                                                      </AlertDialogHeader>
+                                                                                      <AlertDialogFooter>
+                                                                                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                                                          <AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction>
+                                                                                      </AlertDialogFooter>
+                                                                                  </AlertDialogContent>
+                                                                              </AlertDialog>
+                                                                          </div>
+                                                                      </>
+                                                                  )}
+                                                              </div>
+                                                          ))}
+                                                      </div>
+                                                    ) : (
+                                                      <p className="text-sm text-muted-foreground text-center py-4">Nenhum vendedor cadastrado.</p>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                         
-                                        <Separator/>
-
-                                        <div>
-                                            <h3 className="font-semibold mb-4 text-primary">Lançar Vendas</h3>
-                                            <div className="space-y-4">
-                                                {currentValues.sellers && currentValues.sellers.map((seller, index) => (
-                                                    <div key={seller.id}>
-                                                        <h4 className="font-medium mb-2">{seller.name}</h4>
-                                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                                                            <FormField control={form.control} name={`sellers.${index}.vendas`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Vendas</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                                            <FormField control={form.control} name={`sellers.${index}.pa`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">PA</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                                            <FormField control={form.control} name={`sellers.${index}.ticketMedio`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Ticket Médio</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                                            <FormField control={form.control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Corridinha</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                                        </div>
+                                       <Card>
+                                        <CardHeader>
+                                          <h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                                            {(currentValues.sellers || []).map((seller, index) => (
+                                                <div key={seller.id}>
+                                                    <h4 className="font-medium mb-2">{seller.name}</h4>
+                                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                                        <FormField control={form.control} name={`sellers.${index}.vendas`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Vendas (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                                        <FormField control={form.control} name={`sellers.${index}.pa`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">PA</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                                        <FormField control={form.control} name={`sellers.${index}.ticketMedio`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Ticket Médio</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                                        <FormField control={form.control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Corridinha</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </div>
-
+                                                </div>
+                                            ))}
+                                        </CardContent>
+                                       </Card>
                                     </div>
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h3 className="font-semibold mb-4 text-primary">Metas de Vendas</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+
+                                    <div className="space-y-8">
+                                       <Card>
+                                          <CardHeader>
+                                            <h3 className="font-semibold text-lg text-primary">Metas de Vendas</h3>
+                                          </CardHeader>
+                                          <CardContent className="space-y-6">
                                             <div className="space-y-2">
                                                 <h4 className="font-medium text-sm">Metinha</h4>
                                                 <div className="flex items-center gap-2">
@@ -624,19 +645,26 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                     <FormField control={form.control} name="goals.legendariaBonusValorPremio" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>Bônus (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Prêmio" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                                 </div>
                                             </div>
-                                            </div>
-                                        </div>
+                                          </CardContent>
+                                        </Card>
+                                        
+                                        <Card>
+                                          <CardHeader>
+                                            <h3 className="font-semibold text-lg text-primary">Metas de PA e Ticket Médio</h3>
+                                          </CardHeader>
+                                          <CardContent className="space-y-6">
+                                            {renderGoalInputs("Metas de PA", goalTiers)}
+                                            <Separator />
+                                            {renderGoalInputs("Metas de Ticket Médio", ticketMedioTiers)}
+                                          </CardContent>
+                                        </Card>
 
-                                        <Separator />
-                                        {renderGoalInputs("PA", goalTiers)}
-                                        <Separator />
-                                        {renderGoalInputs("Ticket Médio", ticketMedioTiers)}
                                     </div>
                                 </div>
 
                                 <Separator />
 
-                                <Button type="submit" disabled={isPending} className="w-full">
+                                <Button type="submit" disabled={isPending} size="lg" className="w-full">
                                     {isPending ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando...</>) : "Salvar Metas e Calcular Todos os Incentivos"}
                                     <Calculator className="ml-2 h-5 w-5"/>
                                 </Button>
@@ -645,22 +673,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     </TabsContent>
                 )}
                 
-                {currentValues.sellers && currentValues.sellers.map((seller, index) => (
+                {(currentValues.sellers || []).map((seller, index) => (
                     <TabsContent key={seller.id} value={seller.id} className="mt-4">
-                        <div className="grid lg:grid-cols-1 gap-8">
-                            <ProgressDisplay 
-                                salesData={{
-                                    vendas: currentValues.sellers[index]?.vendas || 0,
-                                    pa: currentValues.sellers[index]?.pa || 0,
-                                    ticketMedio: currentValues.sellers[index]?.ticketMedio || 0,
-                                    corridinhaDiaria: currentValues.sellers[index]?.corridinhaDiaria || 0,
-                                    ...currentValues.goals
-                                }}
-                                incentives={incentives[seller.id]}
-                                rankings={rankings[seller.id]}
-                                loading={isPending}
-                            />
-                        </div>
+                        <ProgressDisplay 
+                            salesData={{
+                                vendas: currentValues.sellers[index]?.vendas || 0,
+                                pa: currentValues.sellers[index]?.pa || 0,
+                                ticketMedio: currentValues.sellers[index]?.ticketMedio || 0,
+                                corridinhaDiaria: currentValues.sellers[index]?.corridinhaDiaria || 0,
+                                ...currentValues.goals
+                            }}
+                            incentives={incentives[seller.id]}
+                            rankings={rankings[seller.id]}
+                            loading={isPending}
+                        />
                     </TabsContent>
                 ))}
             </Tabs>
