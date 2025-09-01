@@ -111,6 +111,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const currentValues = watch();
 
   const [activeTab, setActiveTab] = useState(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) return tabFromUrl;
+
     const state = loadState();
     const sellers = state.sellers[storeId] || [];
     return sellers?.[0]?.id ?? 'admin';
@@ -199,6 +202,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const state = loadState();
     const tabFromUrl = searchParams.get('tab');
     let currentLoggedInSeller: string | null = null;
+
     if (!adminAuthenticated) {
         (state.sellers[storeId] || []).forEach(seller => {
             if(sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === 'true') {
@@ -209,22 +213,28 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
 
     const tabToActivate = tabFromUrl || (state.sellers[storeId]?.[0]?.id ?? 'admin');
+    
+    const sellerIsAuthenticated = (sellerId: string) => {
+        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
+    }
 
-    if (adminAuthenticated) {
-    } else if (currentLoggedInSeller) {
-        if (tabToActivate !== currentLoggedInSeller) {
+    if (tabToActivate === 'admin') {
+        if (!adminAuthenticated) {
+            const destination = `/dashboard/${storeId}?tab=admin`;
+            router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+            return;
+        }
+    } else { // It's a seller tab
+        if (!adminAuthenticated && !sellerIsAuthenticated(tabToActivate)) {
+            const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
+            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
+            return;
+        }
+        if (!adminAuthenticated && currentLoggedInSeller && tabToActivate !== currentLoggedInSeller) {
             toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você só pode ver seu próprio painel.' });
             router.push(`/dashboard/${storeId}?tab=${currentLoggedInSeller}`);
             return;
         }
-    } else {
-        const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
-        if (tabToActivate === 'admin') {
-            router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-        } else {
-            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
-        }
-        return;
     }
     
     if (tabToActivate !== activeTab) {

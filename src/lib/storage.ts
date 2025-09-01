@@ -137,6 +137,9 @@ function mergeWithInitialState(savedState: AppState): AppState {
         if (!seller.password) {
           seller.password = seller.name.toLowerCase();
         }
+         if (!seller.avatarId) {
+          seller.avatarId = `avatar${(Math.floor(Math.random() * 10) + 1)}`;
+        }
       });
     });
 
