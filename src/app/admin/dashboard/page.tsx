@@ -136,7 +136,7 @@ export default function AdminDashboardPage() {
                 </Button>
             </div>
             <div className="flex flex-col items-center gap-6 w-full max-w-7xl">
-                <Logo />
+                
                 <h1 className="text-4xl font-bold font-headline text-primary text-center">
                     Dashboard Geral
                 </h1>
@@ -298,5 +298,3 @@ export default function AdminDashboardPage() {
         </main>
     )
 }
-
-    

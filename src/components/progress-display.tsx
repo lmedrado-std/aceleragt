@@ -28,7 +28,7 @@ import { Skeleton } from "./ui/skeleton";
 import { Goals } from "@/lib/storage";
 
 
-type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
+type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
 
 type ProgressDisplaySalesData = {
     vendas: number;
@@ -396,7 +396,6 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                     <RankingItem title="PA" rank={rankings.pa} />
                     <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
                     <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
-                    <RankingItem title="Incentivos" rank={rankings.totalIncentives} />
                 </CardContent>
             </Card>
           )}
@@ -446,5 +445,3 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     </Card>
   );
 }
-
-    

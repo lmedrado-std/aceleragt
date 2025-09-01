@@ -78,7 +78,7 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
+export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
 export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
@@ -122,16 +122,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         setRankings({});
         return;
     }
-    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria', 'totalIncentives'];
+    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria'];
 
     metrics.forEach(metric => {
         const sortedSellers = [...sellers]
             .map(seller => {
                 let value = 0;
-                if (metric === 'totalIncentives') {
-                    const incentiveData = currentIncentives[seller.id];
-                    value = incentiveData ? Object.values(incentiveData).reduce((sum, val) => sum + val, 0) : 0;
-                } else if (metric === 'corridinhaDiaria') {
+                if (metric === 'corridinhaDiaria') {
                     const incentiveData = currentIncentives[seller.id];
                     value = incentiveData?.corridinhaDiariaBonus || 0;
                 }
