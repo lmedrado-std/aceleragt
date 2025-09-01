@@ -197,10 +197,10 @@ const EmptyIncentives = () => (
     <div className="text-center py-10 text-muted-foreground">
         <Award className="mx-auto h-12 w-12" />
         <p className="mt-4 font-semibold">
-            Seus incentivos não foram calculados ainda.
+            Nenhuma meta foi atingida ainda.
         </p>
         <p className="text-sm">
-            Peça ao administrador para salvar e calcular as metas.
+           Continue vendendo para ver seus prêmios aqui!
         </p>
     </div>
 );
