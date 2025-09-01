@@ -11,8 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { ArrowLeft, KeyRound } from 'lucide-react';
 import Link from 'next/link';
-
-const ADMIN_PASSWORD = "supermoda"; // This should be in an environment variable in a real app
+import { getAdminPassword } from '@/lib/storage';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
@@ -23,14 +22,16 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+    const adminPassword = getAdminPassword();
 
-    if (password === ADMIN_PASSWORD) {
+    if (password === adminPassword) {
       sessionStorage.setItem('adminAuthenticated', 'true');
       toast({
         title: 'Acesso concedido!',
-        description: 'Bem-vindo ao painel de administração.',
+        description: 'Bem-vindo, administrador.',
       });
-      router.push('/admin');
+      router.push('/'); // Redirect to the main page after login
     } else {
       toast({
         variant: 'destructive',

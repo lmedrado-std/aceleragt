@@ -2,6 +2,9 @@
 import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 
 const LOCAL_STORAGE_KEY = "goalGetterState_v2";
+const ADMIN_PASSWORD_KEY = "goalGetterAdminPassword";
+const DEFAULT_ADMIN_PASSWORD = "supermoda";
+
 
 export interface Seller {
   id: string;
@@ -176,4 +179,19 @@ export function saveState(state: AppState) {
     } catch (error) {
         console.error("Could not save state to localStorage", error);
     }
+}
+
+
+export function getAdminPassword(): string {
+    if (typeof window === 'undefined') {
+        return DEFAULT_ADMIN_PASSWORD;
+    }
+    return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_ADMIN_PASSWORD;
+}
+
+export function setAdminPassword(password: string) {
+     if (typeof window === 'undefined') {
+        return;
+    }
+    localStorage.setItem(ADMIN_PASSWORD_KEY, password);
 }
