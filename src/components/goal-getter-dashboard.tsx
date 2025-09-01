@@ -174,7 +174,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       }
        setCurrentStore(store);
       if (store.themeColor) {
-        document.documentElement.style.setProperty('--primary-hue', store.themeColor);
+        document.documentElement.style.setProperty('--primary', '195 89% 52%');
       }
       
       const storeSellers = state.sellers[storeId] || [];
@@ -328,7 +328,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <div className="flex items-center gap-4">
             <Logo themeColor={currentStore?.themeColor} />
             <div>
-              <h1 className="text-3xl font-bold font-headline text-primary" style={{color: currentStore?.themeColor}}>
+              <h1 className="text-3xl font-bold font-headline" style={{color: currentStore?.themeColor}}>
                 {currentStore?.name || 'Carregando...'}
               </h1>
               <p className="text-muted-foreground">
@@ -361,7 +361,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 <div className="flex items-center border-b">
                     <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
                         {visibleSellers.map(seller => (
-                            <TabsTrigger key={seller.id} value={seller.id} className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none data-[state=active]:bg-primary/5">
+                             <TabsTrigger key={seller.id} value={seller.id} className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-md">
                                 {seller.name}
                             </TabsTrigger>
                         ))}
@@ -370,7 +370,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
-                                    <TabsTrigger value="admin" className="px-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none data-[state=active]:bg-primary/5">
+                                    <TabsTrigger value="admin" className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md">
                                         <ShieldCheck className="h-5 w-5"/>
                                         <span className="sr-only">Admin</span>
                                     </TabsTrigger>
@@ -414,5 +414,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    
