@@ -18,7 +18,9 @@ import {
   Calculator,
   Home,
   ChevronRight,
-  Target
+  Target,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 import {
@@ -70,6 +72,7 @@ import { loadState, saveState, Seller, Incentives, getInitialState, Goals } from
 const sellerSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Nome é obrigatório"),
+  password: z.string().min(4, "A senha deve ter pelo menos 4 caracteres"),
   avatarId: z.string(),
   vendas: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
   pa: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
@@ -79,6 +82,7 @@ const sellerSchema = z.object({
 
 const formSchema = z.object({
   newSellerName: z.string(),
+  newSellerPassword: z.string(),
   goals: z.object({
     metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -139,6 +143,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeName, setStoreName] = useState('');
+  const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -151,18 +157,32 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const state = loadState();
       return {
         newSellerName: "",
+        newSellerPassword: "",
         goals: state.goals[storeId] || state.goals.default,
         sellers: state.sellers[storeId] || [],
       }
   }
 
-  const { watch, getValues, setValue, reset, formState: { isDirty } } = form;
+  const { watch, getValues, setValue, reset, formState: { isDirty, errors } } = form;
   const currentValues = watch();
 
   const getActiveTab = useCallback(() => {
     const sellers = getValues('sellers');
     const firstSellerId = sellers && sellers.length > 0 ? sellers[0].id : 'admin';
-    return searchParams.get('tab') || firstSellerId;
+    const tabFromUrl = searchParams.get('tab');
+    
+    const sellerIsAuthenticated = (sellerId: string) => {
+        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
+    }
+
+    if (tabFromUrl && tabFromUrl !== 'admin') {
+      if (sellerIsAuthenticated(tabFromUrl)) {
+        return tabFromUrl;
+      }
+      // If not authenticated, the logic below will handle it
+    }
+
+    return tabFromUrl || firstSellerId;
   }, [searchParams, getValues]);
   
   const [activeTab, setActiveTab] = useState(getActiveTab);
@@ -184,9 +204,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       router.push(`/login?redirect=${encodeURIComponent(destination)}`);
       return;
     }
+
+    const sellerIsAuthenticated = (sellerId: string) => {
+        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
+    }
+
+    if(tab !== 'admin' && !sellerIsAuthenticated(tab)){
+      const destination = `/dashboard/${storeId}?tab=${tab}`;
+      router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tab}&redirect=${encodeURIComponent(destination)}`);
+      return;
+    }
     
     setActiveTab(tab);
-  }, [storeId, getActiveTab, router, toast, getValues]);
+  }, [storeId, getActiveTab, router, toast]);
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -208,7 +238,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     value = incentiveData?.corridinhaDiariaBonus || 0;
                 }
                 else {
-                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId'>] as number;
+                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId' | 'password'>] as number;
                 }
                 return { id: seller.id, value };
             })
@@ -284,10 +314,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const addSeller = () => {
     const newSellerName = getValues("newSellerName");
+    const newSellerPassword = getValues("newSellerPassword");
+
     if (newSellerName.trim() === "") {
-      toast({ variant: "destructive", title: "Erro", description: "O nome do vendedor não pode estar vazio." });
+      form.setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
       return;
     }
+    if (newSellerPassword.trim().length < 4) {
+      form.setError("newSellerPassword", { type: "manual", message: "Senha deve ter no mínimo 4 caracteres." });
+      return;
+    }
+     form.clearErrors(["newSellerName", "newSellerPassword"]);
+
     const currentSellers = getValues("sellers") || [];
     const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
     let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
@@ -298,12 +336,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         }
     }
     const newSeller: Seller = {
-      id: crypto.randomUUID(), name: newSellerName, avatarId: randomAvatarId,
+      id: crypto.randomUUID(), 
+      name: newSellerName, 
+      password: newSellerPassword,
+      avatarId: randomAvatarId,
       vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0,
     };
     const updatedSellers = [...currentSellers, newSeller];
     setValue("sellers", updatedSellers, { shouldDirty: true });
     setValue("newSellerName", "");
+    setValue("newSellerPassword", "");
     router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
   };
 
@@ -325,14 +367,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const saveSellerName = (sellerId: string) => {
     const sellerIndex = (currentValues.sellers || []).findIndex(s => s.id === sellerId);
     if (sellerIndex === -1) return;
-
+    
     const newName = getValues(`sellers.${sellerIndex}.name`);
+    const newPassword = getValues(`sellers.${sellerIndex}.password`);
     if (newName.trim() === "") {
       toast({ variant: "destructive", title: "Erro", description: "O nome do vendedor não pode estar vazio." });
       return;
     }
+    if(newPassword && newPassword.length < 4){
+      toast({ variant: "destructive", title: "Erro", description: "A senha deve ter pelo menos 4 caracteres." });
+      return;
+    }
+
     setEditingSellerId(null);
-    toast({ title: "Sucesso!", description: "Nome do vendedor atualizado." });
+    toast({ title: "Sucesso!", description: "Dados do vendedor atualizados." });
   }
   
   const handleTabChange = (newTab: string) => {
@@ -342,8 +390,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           router.push(`/login?redirect=${encodeURIComponent(destination)}`);
           return;
       }
+      
+      const sellerIsAuthenticated = (sellerId: string) => {
+        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
+      }
+
+      if(newTab !== 'admin' && !sellerIsAuthenticated(newTab)){
+        const destination = `/dashboard/${storeId}?tab=${newTab}`;
+        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(destination)}`);
+        return;
+      }
+
       setActiveTab(newTab);
-      router.push(`/dashboard/${storeId}?tab=${newTab}`);
+      router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
+  }
+
+  const togglePasswordVisibility = (sellerId: string) => {
+    setShowPassword(prev => ({...prev, [sellerId]: !prev[sellerId]}));
   }
 
   const calculateAllIncentives = (values: FormValues) => {
@@ -472,17 +535,25 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                        <Card>
                                             <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3></CardHeader>
                                             <CardContent className="space-y-4">
-                                                <div className="space-y-2">
+                                                <div className="space-y-4">
                                                     <FormLabel>Cadastrar Novo Vendedor</FormLabel>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                         <FormField control={form.control} name="newSellerName" render={({ field }) => (
-                                                            <FormItem className="flex-grow">
+                                                            <FormItem>
                                                                 <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
-                                                                <FormControl><Input placeholder="Nome do Vendedor" {...field} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSeller(); }}} /></FormControl>
+                                                                <FormControl><Input placeholder="Nome do Vendedor" {...field} /></FormControl>
+                                                                <FormMessage>{errors.newSellerName?.message}</FormMessage>
                                                             </FormItem>
                                                         )}/>
-                                                        <Button type="button" onClick={addSeller}><UserPlus/></Button>
+                                                        <FormField control={form.control} name="newSellerPassword" render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel className="sr-only">Senha</FormLabel>
+                                                                <FormControl><Input type="password" placeholder="Senha" {...field} /></FormControl>
+                                                                <FormMessage>{errors.newSellerPassword?.message}</FormMessage>
+                                                            </FormItem>
+                                                        )}/>
                                                     </div>
+                                                    <Button type="button" onClick={addSeller} className="w-full"><UserPlus className="mr-2"/> Adicionar Vendedor</Button>
                                                 </div>
                                                 <Separator/>
                                                 <div className="space-y-2">
@@ -494,9 +565,17 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                                   {editingSellerId === seller.id ? (
                                                                       <>
                                                                           <FormField control={form.control} name={`sellers.${index}.name`} render={({ field }) => (
-                                                                          <FormItem className="flex-grow"><FormControl><Input {...field} autoFocus onKeyDown={(e) => { if(e.key === 'Enter') saveSellerName(seller.id); if(e.key==='Escape') cancelEditing(); }}/></FormControl></FormItem>
+                                                                            <FormItem className="flex-grow"><FormControl><Input {...field} autoFocus onKeyDown={(e) => { if(e.key === 'Enter') saveSellerName(seller.id); }}/></FormControl></FormItem>
                                                                           )}/>
-                                                                          <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
+                                                                          <div className="relative flex-grow">
+                                                                            <FormField control={form.control} name={`sellers.${index}.password`} render={({ field }) => (
+                                                                              <FormItem><FormControl><Input type={showPassword[seller.id] ? 'text' : 'password'} {...field} onKeyDown={(e) => { if(e.key === 'Enter') saveSellerName(seller.id); }}/></FormControl></FormItem>
+                                                                            )}/>
+                                                                            <Button size="icon" variant="ghost" type="button" className="absolute right-0 top-1/2 -translate-y-1/2 h-full" onClick={() => togglePasswordVisibility(seller.id)}>
+                                                                                {showPassword[seller.id] ? <EyeOff/> : <Eye/>}
+                                                                            </Button>
+                                                                          </div>
+                                                                          <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4 text-green-600"/></Button>
                                                                           <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
                                                                       </>
                                                                   ) : (

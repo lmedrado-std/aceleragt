@@ -80,6 +80,17 @@ export default function StoreHomePage() {
     }
   };
 
+  const handleSellerAccess = (sellerId: string) => {
+    const isSellerAuthenticated = sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
+    const destination = `/dashboard/${storeId}?tab=${sellerId}`;
+
+    if (isSellerAuthenticated) {
+      router.push(destination);
+    } else {
+      router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`);
+    }
+  };
+
   if (loading) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
@@ -129,15 +140,21 @@ export default function StoreHomePage() {
                         </div>
                         </Button>
                         {sellers.map((seller) => (
-                        <Button asChild size="lg" variant="outline" key={seller.id} className="justify-start h-auto py-3">
-                            <Link href={`/dashboard/${storeId}?tab=${seller.id}`} className="flex items-center gap-4">
-                            <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
-                            <div className="flex flex-col items-start">
-                                <span className="font-semibold text-base">{seller.name}</span>
-                                <span className="text-sm text-muted-foreground font-normal">Ver meu desempenho</span>
+                        <Button 
+                            size="lg" 
+                            variant="outline" 
+                            key={seller.id} 
+                            className="justify-start h-auto py-3"
+                            onClick={() => handleSellerAccess(seller.id)}
+                        >
+                            <div className="flex items-center gap-4 w-full">
+                                <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
+                                <div className="flex flex-col items-start">
+                                    <span className="font-semibold text-base">{seller.name}</span>
+                                    <span className="text-sm text-muted-foreground font-normal">Ver meu desempenho</span>
+                                </div>
+                                <ArrowRight className="ml-auto h-5 w-5" />
                             </div>
-                            <ArrowRight className="ml-auto h-5 w-5" />
-                            </Link>
                         </Button>
                         ))}
                     </div>

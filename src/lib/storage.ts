@@ -14,6 +14,7 @@ export interface Seller {
   pa: number;
   ticketMedio: number;
   corridinhaDiaria: number;
+  password?: string;
 }
 
 export interface Goals {
@@ -90,17 +91,17 @@ const store1Id = 'supermoda-catu';
 const store2Id = 'supermoda-premium';
 
 const initialSellersStore1: Seller[] = [
-  { id: 'seller-1-uuid', name: 'Val', avatarId: 'avatar1', vendas: 9250, pa: 1.65, ticketMedio: 188, corridinhaDiaria: 50 },
-  { id: 'seller-2-uuid', name: 'Rose', avatarId: 'avatar2', vendas: 8100, pa: 1.55, ticketMedio: 182, corridinhaDiaria: 0 },
-  { id: 'seller-3-uuid', name: 'Thays', avatarId: 'avatar3', vendas: 12500, pa: 2.1, ticketMedio: 205, corridinhaDiaria: 100 },
-  { id: 'seller-4-uuid', name: 'Mercia', avatarId: 'avatar4', vendas: 7500, pa: 1.4, ticketMedio: 170, corridinhaDiaria: 20 },
-  { id: 'seller-5-uuid', name: 'Joisse', avatarId: 'avatar5', vendas: 10100, pa: 1.95, ticketMedio: 191, corridinhaDiaria: 0 },
-  { id: 'seller-6-uuid', name: 'Dajila', avatarId: 'avatar6', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: 'seller-1-uuid', name: 'Val', avatarId: 'avatar1', vendas: 9250, pa: 1.65, ticketMedio: 188, corridinhaDiaria: 50, password: 'val' },
+  { id: 'seller-2-uuid', name: 'Rose', avatarId: 'avatar2', vendas: 8100, pa: 1.55, ticketMedio: 182, corridinhaDiaria: 0, password: 'rose' },
+  { id: 'seller-3-uuid', name: 'Thays', avatarId: 'avatar3', vendas: 12500, pa: 2.1, ticketMedio: 205, corridinhaDiaria: 100, password: 'thays' },
+  { id: 'seller-4-uuid', name: 'Mercia', avatarId: 'avatar4', vendas: 7500, pa: 1.4, ticketMedio: 170, corridinhaDiaria: 20, password: 'mercia' },
+  { id: 'seller-5-uuid', name: 'Joisse', avatarId: 'avatar5', vendas: 10100, pa: 1.95, ticketMedio: 191, corridinhaDiaria: 0, password: 'joisse' },
+  { id: 'seller-6-uuid', name: 'Dajila', avatarId: 'avatar6', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0, password: 'dajila' },
 ];
 
 const initialSellersStore2: Seller[] = [
-    { id: 'seller-7-uuid', name: 'Carlos', avatarId: 'avatar7', vendas: 15000, pa: 2.5, ticketMedio: 220, corridinhaDiaria: 150 },
-    { id: 'seller-8-uuid', name: 'Beatriz', avatarId: 'avatar8', vendas: 9800, pa: 1.8, ticketMedio: 195, corridinhaDiaria: 0 },
+    { id: 'seller-7-uuid', name: 'Carlos', avatarId: 'avatar7', vendas: 15000, pa: 2.5, ticketMedio: 220, corridinhaDiaria: 150, password: 'carlos' },
+    { id: 'seller-8-uuid', name: 'Beatriz', avatarId: 'avatar8', vendas: 9800, pa: 1.8, ticketMedio: 195, corridinhaDiaria: 0, password: 'beatriz' },
 ];
 
 
@@ -148,6 +149,16 @@ function mergeWithInitialState(savedState: AppState): AppState {
             }
         }
     }
+    
+    // Ensure all sellers have a password
+    Object.keys(savedState.sellers).forEach(storeId => {
+      savedState.sellers[storeId].forEach(seller => {
+        if (!seller.password) {
+          seller.password = seller.name.toLowerCase();
+        }
+      });
+    });
+
 
     return savedState;
 }

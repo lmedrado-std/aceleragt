@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2 } from "lucide-react";
+import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [newStoreName, setNewStoreName] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
+  const [editingStoreName, setEditingStoreName] = useState("");
   const { toast } = useToast();
   const router = useRouter();
 
@@ -68,7 +70,6 @@ export default function AdminPage() {
       };
 
       saveState(newState);
-
       setTimeout(() => {
         toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
       }, 0);
@@ -80,34 +81,67 @@ export default function AdminPage() {
   };
 
   const handleRemoveStore = (id: string) => {
-    const currentState = state;
-    if (!currentState) return;
+    setState(currentState => {
+        if (!currentState) return null;
 
-    if (currentState.stores.length <= 1) {
-        setTimeout(() => {
-          toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-        }, 0);
-        return;
-    }
+        if (currentState.stores.length <= 1) {
+            setTimeout(() => {
+              toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+            }, 0);
+            return currentState;
+        }
 
-    const storeToRemove = currentState.stores.find(s => s.id === id);
-    const newState: AppState = {
-        ...currentState,
-        stores: currentState.stores.filter(s => s.id !== id),
-    };
-    delete newState.sellers[id];
-    delete newState.goals[id];
-    delete newState.incentives[id];
-    
-    saveState(newState);
-    setState(newState); // Update the state safely
-    
-    if (storeToRemove) {
-      setTimeout(() => {
-        toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
-      }, 0);
-    }
+        const storeToRemove = currentState.stores.find(s => s.id === id);
+        const newState: AppState = { ...currentState };
+        newState.stores = currentState.stores.filter(s => s.id !== id);
+        delete newState.sellers[id];
+        delete newState.goals[id];
+        delete newState.incentives[id];
+        
+        saveState(newState);
+        
+        if (storeToRemove) {
+          setTimeout(() => {
+            toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
+          }, 0);
+        }
+
+        return newState;
+    });
   };
+
+  const handleStartEditingStore = (store: Store) => {
+    setEditingStoreId(store.id);
+    setEditingStoreName(store.name);
+  };
+
+  const handleCancelEditingStore = () => {
+    setEditingStoreId(null);
+    setEditingStoreName("");
+  };
+
+  const handleSaveStoreName = (id: string) => {
+    if (!editingStoreName.trim()) {
+      toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
+      return;
+    }
+    setState(currentState => {
+      if (!currentState) return null;
+      const newState = {
+        ...currentState,
+        stores: currentState.stores.map(store => 
+          store.id === id ? { ...store, name: editingStoreName } : store
+        )
+      };
+      saveState(newState);
+      setTimeout(() => {
+        toast({ title: "Sucesso!", description: `Nome da loja atualizado para "${editingStoreName}".` });
+      }, 0);
+      return newState;
+    });
+    handleCancelEditingStore();
+  };
+
 
   const handleChangePassword = () => {
     if (newAdminPassword.length < 4) {
@@ -185,20 +219,37 @@ export default function AdminPage() {
                 <div className="space-y-2 mt-2 max-h-40 overflow-y-auto pr-2">
                     {state?.stores.map((store) => (
                         <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
-                            <span className="font-medium">{store.name}</span>
-                            <div className="flex items-center">
-                                <Button asChild variant="ghost" size="sm">
-                                  <Link href={`/loja/${store.id}`}>
-                                    Ir para Loja <ArrowRight className="ml-2 h-4 w-4"/>
-                                  </Link>
-                                </Button>
-                                <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
-                                    <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
+                            {editingStoreId === store.id ? (
+                              <>
+                                <Input 
+                                  value={editingStoreName}
+                                  onChange={(e) => setEditingStoreName(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleSaveStoreName(store.id)}
+                                  autoFocus
+                                  className="h-8"
+                                />
+                                <Button size="icon" variant="ghost" onClick={() => handleSaveStoreName(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
+                                <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
+                              </>
+                            ) : (
+                              <>
+                                <span className="font-medium">{store.name}</span>
+                                <div className="flex items-center">
+                                    <Button asChild variant="ghost" size="sm">
+                                      <Link href={`/loja/${store.id}`}>
+                                        Ir para Loja <ArrowRight className="ml-2 h-4 w-4"/>
+                                      </Link>
+                                    </Button>
+                                    <Button size="icon" variant="ghost" onClick={() => handleStartEditingStore(store)}><Edit className="h-4 w-4"/></Button>
+                                    <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                        <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
+                                        <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                              </>
+                            )}
                         </div>
                     ))}
                 </div>
