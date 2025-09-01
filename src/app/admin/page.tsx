@@ -66,9 +66,9 @@ export default function AdminPage() {
       };
 
       saveState(newState);
+      toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
       
       setNewStoreName("");
-      toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
       
       return newState;
     });
