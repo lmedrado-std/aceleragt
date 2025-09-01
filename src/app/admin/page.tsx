@@ -22,11 +22,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
+import { useRouter } from 'next/navigation';
+
 
 export default function AdminPage() {
     const [state, setState] = useState<AppState>(loadState());
     const [newStoreName, setNewStoreName] = useState("");
     const { toast } = useToast();
+    const router = useRouter();
+
+    useEffect(() => {
+        const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+        if (!isAuthenticated) {
+            router.push('/login');
+        }
+    }, [router]);
 
     useEffect(() => {
         const loadedState = loadState();

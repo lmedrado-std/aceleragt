@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { ArrowRight, Shield, Store } from "lucide-react";
+import { ArrowRight, Lock, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadState } from "@/lib/storage";
 
@@ -31,21 +31,11 @@ export default function Home() {
         </p>
         
         <div className="w-full max-w-md border bg-card p-6 rounded-lg shadow-sm mt-8">
-            <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Acessar Painel</h2>
+            <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Acessar Painel da Loja</h2>
             {loading ? (
                  <p className="text-center text-muted-foreground">Carregando lojas...</p>
             ) : (
                  <div className="grid grid-cols-1 gap-4">
-                     <Button asChild size="lg" variant="secondary" className="justify-start h-auto py-3">
-                      <Link href="/admin" className="flex items-center gap-4">
-                        <Shield className="h-6 w-6" />
-                        <div className="flex flex-col items-start">
-                          <span className="font-semibold text-base">Administrador Global</span>
-                          <span className="text-sm text-muted-foreground font-normal">Gerenciar lojas</span>
-                        </div>
-                        <ArrowRight className="ml-auto h-5 w-5" />
-                      </Link>
-                    </Button>
                     {stores.map((store) => (
                       <Button asChild size="lg" variant="outline" key={store.id} className="justify-start h-auto py-3">
                         <Link href={`/loja/${store.id}`} className="flex items-center gap-4">
@@ -60,6 +50,12 @@ export default function Home() {
                     ))}
                  </div>
             )}
+        </div>
+         <div className="text-center mt-4">
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+                <Lock className="h-4 w-4" />
+                Acesso Restrito
+            </Link>
         </div>
       </div>
     </main>
