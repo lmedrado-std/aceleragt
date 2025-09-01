@@ -8,9 +8,7 @@ import { useState, useTransition, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-  Loader2,
   ShieldCheck,
-  Calculator,
   Home,
 } from "lucide-react";
 
@@ -22,8 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
 import { useToast } from "@/hooks/use-toast";
-
-import { Logo } from "@/components/logo";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -327,7 +323,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
-            <Logo themeColor={currentStore?.themeColor} />
             <div>
               <h1 className="text-3xl font-bold font-headline" style={{color: currentStore?.themeColor}}>
                 {currentStore?.name || 'Carregando...'}
@@ -415,5 +410,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

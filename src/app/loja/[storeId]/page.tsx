@@ -3,7 +3,6 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
 import { ArrowRight, Home, Shield, Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
@@ -101,7 +100,7 @@ export default function StoreHomePage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-8 relative">
        <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
                 <Link href="/">
@@ -111,8 +110,7 @@ export default function StoreHomePage() {
             </Button>
         </div>
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
-        <Logo />
-        <h1 className="text-5xl font-bold font-headline text-primary text-center">
+        <h1 className="text-5xl font-extrabold text-red-600 tracking-wide text-center">
           {error ? "Erro" : storeName}
         </h1>
 
@@ -125,15 +123,15 @@ export default function StoreHomePage() {
                 <p className="text-xl text-muted-foreground text-center">
                 Selecione seu usuário para começar.
                 </p>
-                <div className="w-full max-w-md border bg-card p-6 rounded-lg shadow-sm mt-8">
-                    <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Acessar Painel</h2>
+                <div className="w-full max-w-md bg-white p-6 rounded-2xl shadow-lg mt-8 border border-gray-200">
+                    <h2 className="text-center text-lg font-semibold text-gray-700 mb-6">Acessar Painel</h2>
                     <div className="grid grid-cols-1 gap-4">
-                        <Button size="lg" variant="secondary" className="justify-start h-auto py-3" onClick={handleAdminAccess}>
+                        <Button size="lg" variant="default" className="justify-start h-auto py-3 rounded-lg bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold transition-transform transform hover:scale-105" onClick={handleAdminAccess}>
                         <div className="flex items-center gap-4 w-full">
                             <Shield className="h-6 w-6" />
                             <div className="flex flex-col items-start">
                             <span className="font-semibold text-base">Administrador</span>
-                            <span className="text-sm text-muted-foreground font-normal">Ver painel de controle</span>
+                            <span className="text-sm opacity-90 font-normal">Ver painel de controle</span>
                             </div>
                             <ArrowRight className="ml-auto h-5 w-5" />
                         </div>
@@ -143,16 +141,16 @@ export default function StoreHomePage() {
                             size="lg" 
                             variant="outline" 
                             key={seller.id} 
-                            className="justify-start h-auto py-3"
+                            className="justify-start h-auto py-3 rounded-lg transition-transform transform hover:scale-105 hover:bg-gray-50"
                             onClick={() => handleSellerAccess(seller.id)}
                         >
                             <div className="flex items-center gap-4 w-full">
                                 <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
                                 <div className="flex flex-col items-start">
-                                    <span className="font-semibold text-base">{seller.name}</span>
+                                    <span className="font-semibold text-base text-gray-800">{seller.name}</span>
                                     <span className="text-sm text-muted-foreground font-normal">Ver meu desempenho</span>
                                 </div>
-                                <ArrowRight className="ml-auto h-5 w-5" />
+                                <ArrowRight className="ml-auto h-5 w-5 text-gray-400" />
                             </div>
                         </Button>
                         ))}
