@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -81,33 +80,31 @@ export default function AdminPage() {
   };
 
   const handleRemoveStore = (id: string) => {
-    setState(currentState => {
-        if (!currentState) return null;
+    const currentState = state;
+    if (!currentState) return;
 
-        if (currentState.stores.length <= 1) {
-            setTimeout(() => {
-              toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-            }, 0);
-            return currentState;
-        }
+    if (currentState.stores.length <= 1) {
+        setTimeout(() => {
+            toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+        }, 0);
+        return;
+    }
 
-        const storeToRemove = currentState.stores.find(s => s.id === id);
-        const newState: AppState = { ...currentState };
-        newState.stores = currentState.stores.filter(s => s.id !== id);
-        delete newState.sellers[id];
-        delete newState.goals[id];
-        delete newState.incentives[id];
-        
-        saveState(newState);
-        
-        if (storeToRemove) {
-          setTimeout(() => {
-            toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
-          }, 0);
-        }
-
-        return newState;
-    });
+    const storeToRemove = currentState.stores.find(s => s.id === id);
+    const newState: AppState = { ...currentState };
+    newState.stores = currentState.stores.filter(s => s.id !== id);
+    delete newState.sellers[id];
+    delete newState.goals[id];
+    delete newState.incentives[id];
+    
+    saveState(newState);
+    setState(newState);
+    
+    if (storeToRemove) {
+      setTimeout(() => {
+        toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
+      }, 0);
+    }
   };
 
   const handleStartEditingStore = (store: Store) => {
@@ -122,7 +119,9 @@ export default function AdminPage() {
 
   const handleSaveStoreName = (id: string) => {
     if (!editingStoreName.trim()) {
-      toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
+      setTimeout(() => {
+        toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
+      }, 0);
       return;
     }
     setState(currentState => {
@@ -145,7 +144,9 @@ export default function AdminPage() {
 
   const handleChangePassword = () => {
     if (newAdminPassword.length < 4) {
-      toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
+      setTimeout(() => {
+        toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
+      }, 0);
       return;
     }
     setAdminPassword(newAdminPassword);
@@ -195,6 +196,21 @@ export default function AdminPage() {
         <p className="text-lg text-muted-foreground text-center">
             Gerencie todas as lojas e configurações do sistema aqui.
         </p>
+
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-xl">Visão Geral</CardTitle>
+            <CardDescription>Acesse o dashboard com dados consolidados de todas as lojas.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin/dashboard">
+                <LineChart className="mr-2 h-4 w-4"/>
+                Acessar Dashboard Geral
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
 
         <Card className="w-full max-w-4xl mt-10">
             <CardContent className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
