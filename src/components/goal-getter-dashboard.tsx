@@ -66,7 +66,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Incentives, getInitialState, Goals } from "@/lib/storage";
+import { loadState, saveState, Seller, Incentives, getInitialState, Goals, Store } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -142,7 +142,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
-  const [storeName, setStoreName] = useState('');
+  const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
 
   const searchParams = useSearchParams();
@@ -179,7 +179,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       if (sellerIsAuthenticated(tabFromUrl)) {
         return tabFromUrl;
       }
-      // If not authenticated, the logic below will handle it
     }
 
     return tabFromUrl || firstSellerId;
@@ -194,7 +193,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     const state = loadState();
     const store = state.stores.find(s => s.id === storeId);
-    setStoreName(store?.name || 'Loja não encontrada');
+    setCurrentStore(store || null);
+     if (store?.themeColor) {
+      document.documentElement.style.setProperty('--primary-hue', store.themeColor);
+    }
+
 
     const tab = getActiveTab();
     
@@ -263,11 +266,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const loadDataForStore = useCallback(() => {
     try {
       const state = loadState();
-      const storeExists = state.stores.some(s => s.id === storeId);
-      if (!storeExists) {
+      const store = state.stores.find(s => s.id === storeId);
+      if (!store) {
         toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." });
         router.push('/');
         return;
+      }
+       setCurrentStore(store);
+      if (store.themeColor) {
+        document.documentElement.style.setProperty('--primary-hue', store.themeColor);
       }
       
       const storeSellers = state.sellers[storeId] || [];
@@ -275,7 +282,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const storeIncentives = state.incentives[storeId] || {};
 
       reset({
-        ...getValues(), // keep other form values like newStoreName
+        ...getValues(),
         sellers: storeSellers,
         goals: storeGoals,
       });
@@ -459,15 +466,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   )
 
+  const cardHeaderStyle = {
+    backgroundColor: currentStore?.themeColor ? `${currentStore.themeColor}1A` : undefined, // Add alpha for transparency
+    borderLeft: currentStore?.themeColor ? `4px solid ${currentStore.themeColor}`: undefined,
+  };
+
   return (
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
-       <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: PAINEL (goal-getter-dashboard.tsx)</div>
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
-            <Logo />
+            <Logo themeColor={currentStore?.themeColor} />
             <div>
-              <h1 className="text-3xl font-bold font-headline text-primary">
-                {storeName}
+              <h1 className="text-3xl font-bold font-headline text-primary" style={{color: currentStore?.themeColor}}>
+                {currentStore?.name || 'Carregando...'}
               </h1>
               <p className="text-muted-foreground">
                 Acompanhe as metas e os ganhos da equipe.
@@ -481,12 +492,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
               Todas as Lojas
             </Link>
           </Button>
-          <Button asChild variant="ghost">
-            <Link href={`/loja/${storeId}`}>
-              <ChevronRight className="mr-2 h-4 w-4" />
-              Painel da Loja
-            </Link>
-          </Button>
+          {isAdmin && (
+            <Button asChild variant="outline">
+                <Link href="/admin">
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Admin Global
+                </Link>
+            </Button>
+          )}
         </div>
       </header>
 
@@ -521,7 +534,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 {isAdmin && (
                     <TabsContent value="admin">
-                        <Card className="mt-4 border-primary/20">
+                        <Card className="mt-4" style={cardHeaderStyle}>
                             <CardHeader>
                             <CardTitle>Painel Administrativo da Loja</CardTitle>
                             <CardDescription>
@@ -666,6 +679,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             incentives={incentives[seller.id]}
                             rankings={rankings[seller.id]}
                             loading={isPending}
+                            themeColor={currentStore?.themeColor}
                         />
                     </TabsContent>
                 ))}
@@ -689,3 +703,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    

@@ -50,6 +50,7 @@ export type Incentives = Record<string, IncentiveProjectionOutput | null>;
 export interface Store {
     id: string;
     name: string;
+    themeColor: string;
 }
 
 export interface AppState {
@@ -108,8 +109,8 @@ const initialSellersStore2: Seller[] = [
 export function getInitialState(): AppState {
     return {
         stores: [
-            { id: store1Id, name: 'SUPERMODA CATU' },
-            { id: store2Id, name: 'SUPERMODA PREMIUM' },
+            { id: store1Id, name: 'SUPERMODA CATU', themeColor: '#ef4444' },
+            { id: store2Id, name: 'SUPERMODA PREMIUM', themeColor: '#8b5cf6' },
         ],
         sellers: {
             [store1Id]: initialSellersStore1,
@@ -136,7 +137,6 @@ function mergeWithInitialState(savedState: AppState): AppState {
     if (storesToMerge.length > 0) {
         savedState.stores = [...savedState.stores, ...storesToMerge];
         
-        // Add corresponding data for new stores
         for (const store of storesToMerge) {
             if (!savedState.sellers[store.id]) {
                 savedState.sellers[store.id] = initialState.sellers[store.id] || [];
@@ -150,7 +150,13 @@ function mergeWithInitialState(savedState: AppState): AppState {
         }
     }
     
-    // Ensure all sellers have a password
+    // Ensure all entities have necessary fields
+    savedState.stores.forEach(store => {
+      if (!store.themeColor) {
+        store.themeColor = '#3b82f6'; 
+      }
+    });
+
     Object.keys(savedState.sellers).forEach(storeId => {
       savedState.sellers[storeId].forEach(seller => {
         if (!seller.password) {
@@ -158,7 +164,6 @@ function mergeWithInitialState(savedState: AppState): AppState {
         }
       });
     });
-
 
     return savedState;
 }
@@ -173,9 +178,7 @@ export function loadState(): AppState {
 
         if (v2StateRaw) {
             const parsed = JSON.parse(v2StateRaw) as AppState;
-            // Basic validation
             if (parsed && parsed.stores && parsed.sellers) {
-                // Ensure default stores are present
                 return mergeWithInitialState(parsed);
             }
         }
@@ -197,7 +200,6 @@ export function saveState(state: AppState) {
     try {
         const serializedState = JSON.stringify(state);
         localStorage.setItem(LOCAL_STORAGE_KEY, serializedState);
-        // Dispatch a custom event to notify other parts of the app
         window.dispatchEvent(new CustomEvent('storage_updated'));
     } catch (error) {
         console.error("Could not save state to localStorage", error);
@@ -218,3 +220,5 @@ export function setAdminPassword(password: string) {
     }
     localStorage.setItem(ADMIN_PASSWORD_KEY, password);
 }
+
+    

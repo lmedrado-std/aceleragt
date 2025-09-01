@@ -30,7 +30,6 @@ import { Goals } from "@/lib/storage";
 
 type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
 
-// Combine sales data with all possible goals for calculation
 type ProgressDisplaySalesData = {
     vendas: number;
     pa: number;
@@ -43,6 +42,7 @@ interface ProgressDisplayProps {
   incentives: IncentiveProjectionOutput | null;
   rankings: Record<RankingMetric, number> | null;
   loading: boolean;
+  themeColor?: string | null;
 }
 
 const formatCurrency = (value: number) =>
@@ -57,12 +57,14 @@ const ProgressItem = ({
   currentValue,
   goalValue,
   formatValue = (v) => v.toString(),
+  themeColor
 }: {
   icon: React.ReactNode;
   title: string;
   currentValue: number;
   goalValue: number;
   formatValue?: (value: number) => string;
+  themeColor?: string | null;
 }) => {
   const percentage = goalValue > 0 ? Math.min(((currentValue || 0) / goalValue) * 100, 100) : 0;
   const achieved = currentValue >= goalValue;
@@ -80,7 +82,7 @@ const ProgressItem = ({
           </span>
         </div>
       </div>
-      <Progress value={percentage} className={achieved ? "accent" : ""} />
+      <Progress value={percentage} themeColor={themeColor} />
     </div>
   );
 };
@@ -187,7 +189,7 @@ const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {l
     )
 }
 
-export function ProgressDisplay({ salesData, incentives, rankings, loading }: ProgressDisplayProps) {
+export function ProgressDisplay({ salesData, incentives, rankings, loading, themeColor }: ProgressDisplayProps) {
   const {
     vendas,
     pa,
@@ -202,8 +204,6 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
     metaLendaria,
     paGoal4,
     ticketMedioGoal4,
-    legendariaBonusValorPremio,
-    legendariaBonusValorVenda
   } = salesData;
 
   const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
@@ -239,6 +239,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
   const metonaAchieved = vendas >= metona;
   const lendariaAchieved = vendas >= metaLendaria;
 
+  const headerStyle = themeColor ? { color: themeColor } : {};
+
   return (
     <Card className="shadow-lg border-2 border-transparent has-[[data-achieved=true]]:border-green-500 transition-all">
       <CardHeader>
@@ -250,11 +252,11 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
       <CardContent className="space-y-8" data-achieved={totalIncentives > 0}>
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-6 h-6 text-primary" />
+            <DollarSign className="w-6 h-6 text-primary" style={headerStyle} />
             <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
           </div>
           <div className="relative pt-6">
-            <Progress value={salesPercentage} className="h-4" />
+            <Progress value={salesPercentage} className="h-4" themeColor={themeColor} />
             {metaLendaria > 0 && (
               <>
                 <div
@@ -288,7 +290,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
               </>
             )}
           </div>
-          <div className="text-right mt-2 font-bold text-lg text-primary">
+          <div className="text-right mt-2 font-bold text-lg text-primary" style={headerStyle}>
             {formatCurrency(vendas)} / {formatCurrency(metaLendaria)}
           </div>
         </div>
@@ -321,6 +323,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
                 currentValue={pa}
                 goalValue={paGoal4}
                 formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
+                themeColor={themeColor}
               />
               <ProgressItem
                 icon={<Ticket className="w-5 h-5" />}
@@ -328,6 +331,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
                 currentValue={ticketMedio}
                 goalValue={ticketMedioGoal4}
                 formatValue={formatCurrency}
+                themeColor={themeColor}
               />
               <ProgressItem
                 icon={<TrendingUp className="w-5 h-5" />}
@@ -335,6 +339,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
                 currentValue={corridinhaDiaria}
                 goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1}
                 formatValue={formatCurrency}
+                themeColor={themeColor}
               />
             </CardContent>
           </Card>
@@ -362,7 +367,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
             renderSkeletons()
           ) : incentives ? (
             <div className="space-y-4">
-              <div className="bg-gradient-to-r from-primary/80 to-primary text-primary-foreground p-6 rounded-lg flex justify-between items-center shadow-lg">
+              <div className="bg-gradient-to-r from-primary/80 to-primary text-primary-foreground p-6 rounded-lg flex justify-between items-center shadow-lg" style={themeColor ? { background: `linear-gradient(to right, ${themeColor}BF, ${themeColor})`} : {}}>
                 <span className="font-bold text-xl">
                   Seu Ganho Total
                 </span>
@@ -408,3 +413,5 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
     </Card>
   );
 }
+
+    

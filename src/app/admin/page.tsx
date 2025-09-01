@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart } from "lucide-react";
+import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Palette } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,9 +30,11 @@ export default function AdminPage() {
   const [state, setState] = useState<AppState | null>(null);
   const [loading, setLoading] = useState(true);
   const [newStoreName, setNewStoreName] = useState("");
-  const [newAdminPassword, setNewAdminPassword] = useState("");
+  
+  const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: ''});
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
-  const [editingStoreName, setEditingStoreName] = useState("");
+  const [editingStore, setEditingStore] = useState<{name: string, themeColor: string}>({ name: '', themeColor: '#3b82f6'});
+
   const { toast } = useToast();
   const router = useRouter();
 
@@ -48,7 +51,7 @@ export default function AdminPage() {
 
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
-      setTimeout(() => {
+       setTimeout(() => {
         toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       }, 0);
       return;
@@ -58,7 +61,7 @@ export default function AdminPage() {
       if (!currentState) return null;
 
       const newStoreId = crypto.randomUUID();
-      const newStore: Store = { id: newStoreId, name: newStoreName };
+      const newStore: Store = { id: newStoreId, name: newStoreName, themeColor: '#3b82f6' };
       
       const newState: AppState = {
         ...currentState,
@@ -69,9 +72,9 @@ export default function AdminPage() {
       };
 
       saveState(newState);
-      setTimeout(() => {
-        toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
-      }, 0);
+       setTimeout(() => {
+          toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+       }, 0);
       
       setNewStoreName("");
       
@@ -109,16 +112,16 @@ export default function AdminPage() {
 
   const handleStartEditingStore = (store: Store) => {
     setEditingStoreId(store.id);
-    setEditingStoreName(store.name);
+    setEditingStore({ name: store.name, themeColor: store.themeColor || '#3b82f6' });
   };
 
   const handleCancelEditingStore = () => {
     setEditingStoreId(null);
-    setEditingStoreName("");
+    setEditingStore({ name: '', themeColor: '#3b82f6' });
   };
 
-  const handleSaveStoreName = (id: string) => {
-    if (!editingStoreName.trim()) {
+  const handleSaveStore = (id: string) => {
+    if (!editingStore.name.trim()) {
       setTimeout(() => {
         toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       }, 0);
@@ -129,12 +132,12 @@ export default function AdminPage() {
       const newState = {
         ...currentState,
         stores: currentState.stores.map(store => 
-          store.id === id ? { ...store, name: editingStoreName } : store
+          store.id === id ? { ...store, name: editingStore.name, themeColor: editingStore.themeColor } : store
         )
       };
       saveState(newState);
       setTimeout(() => {
-        toast({ title: "Sucesso!", description: `Nome da loja atualizado para "${editingStoreName}".` });
+        toast({ title: "Sucesso!", description: `Loja "${editingStore.name}" atualizada.` });
       }, 0);
       return newState;
     });
@@ -143,14 +146,20 @@ export default function AdminPage() {
 
 
   const handleChangePassword = () => {
-    if (newAdminPassword.length < 4) {
+    if (adminPasswords.new.length < 4) {
       setTimeout(() => {
         toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
       }, 0);
       return;
     }
-    setAdminPassword(newAdminPassword);
-    setNewAdminPassword("");
+     if (adminPasswords.new !== adminPasswords.confirm) {
+      setTimeout(() => {
+        toast({ variant: "destructive", title: "Senhas não conferem", description: "As senhas digitadas não são iguais." });
+      }, 0);
+      return;
+    }
+    setAdminPassword(adminPasswords.new);
+    setAdminPasswords({ new: '', confirm: ''});
     setTimeout(() => {
       toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
     }, 0);
@@ -178,8 +187,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="flex flex-col items-center min-h-screen bg-background p-8 relative">
-      <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: ADMIN GLOBAL (/admin/page.tsx)</div>
+    <main className="flex flex-col items-center min-h-screen bg-background p-4 sm:p-8 relative">
       <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
                 <Link href="/">
@@ -212,10 +220,12 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="w-full max-w-4xl mt-10">
-            <CardContent className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-8">
             <Card>
-                <CardHeader><CardTitle className="text-lg">Gerenciar Lojas</CardTitle></CardHeader>
+                <CardHeader>
+                    <CardTitle className="text-xl">Gerenciar Lojas</CardTitle>
+                    <CardDescription>Adicione, renomeie e defina um tema para cada loja.</CardDescription>
+                </CardHeader>
                 <CardContent>
                 <div className="space-y-2 mb-4">
                     <Label htmlFor="new-store">Adicionar Nova Loja</Label>
@@ -232,24 +242,36 @@ export default function AdminPage() {
                 </div>
                 <Separator className="my-4"/>
                 <Label>Lojas Atuais</Label>
-                <div className="space-y-2 mt-2 max-h-40 overflow-y-auto pr-2">
+                <div className="space-y-2 mt-2 max-h-60 overflow-y-auto pr-2">
                     {state?.stores.map((store) => (
                         <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
                             {editingStoreId === store.id ? (
                               <>
                                 <Input 
-                                  value={editingStoreName}
-                                  onChange={(e) => setEditingStoreName(e.target.value)}
-                                  onKeyDown={(e) => e.key === 'Enter' && handleSaveStoreName(store.id)}
+                                  value={editingStore.name}
+                                  onChange={(e) => setEditingStore(s => ({...s, name: e.target.value}))}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleSaveStore(store.id)}
                                   autoFocus
                                   className="h-8"
                                 />
-                                <Button size="icon" variant="ghost" onClick={() => handleSaveStoreName(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
+                                <div className='relative'>
+                                    <Palette className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2"/>
+                                    <Input
+                                        type="color"
+                                        value={editingStore.themeColor}
+                                        onChange={(e) => setEditingStore(s => ({...s, themeColor: e.target.value}))}
+                                        className="h-8 w-16 p-1 pl-7"
+                                    />
+                                </div>
+                                <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
                                 <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
                               </>
                             ) : (
                               <>
-                                <span className="font-medium">{store.name}</span>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full" style={{backgroundColor: store.themeColor}}></div>
+                                    <span className="font-medium">{store.name}</span>
+                                </div>
                                 <div className="flex items-center">
                                     <Button asChild variant="ghost" size="sm">
                                       <Link href={`/loja/${store.id}`}>
@@ -272,24 +294,38 @@ export default function AdminPage() {
                 </CardContent>
             </Card>
             <Card>
-                <CardHeader><CardTitle className="text-lg">Segurança</CardTitle></CardHeader>
+                <CardHeader>
+                    <CardTitle className="text-xl">Segurança</CardTitle>
+                    <CardDescription>Altere a senha de acesso ao painel de administrador.</CardDescription>
+                </CardHeader>
                 <CardContent>
-                <div className="space-y-2">
-                    <Label htmlFor="new-password">Alterar Senha de Administrador</Label>
-                    <Input 
-                    id="new-password"
-                    type="password" 
-                    placeholder="Pelo menos 4 caracteres"
-                    value={newAdminPassword}
-                    onChange={(e) => setNewAdminPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-                    />
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="new-password">Nova Senha</Label>
+                        <Input 
+                            id="new-password"
+                            type="password" 
+                            placeholder="Pelo menos 4 caracteres"
+                            value={adminPasswords.new}
+                            onChange={(e) => setAdminPasswords(p => ({...p, new: e.target.value}))}
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                        <Input 
+                            id="confirm-password"
+                            type="password" 
+                            placeholder="Repita a senha"
+                            value={adminPasswords.confirm}
+                            onChange={(e) => setAdminPasswords(p => ({...p, confirm: e.target.value}))}
+                            onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                        />
+                    </div>
                 </div>
                 <Button onClick={handleChangePassword} className="w-full mt-4"><KeyRound/> Alterar Senha</Button>
                 </CardContent>
             </Card>
-            </CardContent>
-        </Card>
+        </div>
         
         <div className="text-center mt-8">
             <Button variant="link" onClick={handleLogout} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
@@ -301,3 +337,5 @@ export default function AdminPage() {
     </main>
   );
 }
+
+    

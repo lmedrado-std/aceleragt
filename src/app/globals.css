@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,7 +9,7 @@ body {
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
+    --background: 210 40% 98%; /* Azul muito claro */
     --foreground: 222 88% 12%;
 
     --card: 0 0% 100%;
@@ -17,8 +18,8 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 222 88% 12%;
 
-    /* Azul Primário */
-    --primary: 205 82% 45%;
+    /* Azul Vibrante */
+    --primary: 205 82% 45%; 
     --primary-foreground: 0 0% 100%;
     
     --secondary: 210 40% 96.1%;
@@ -39,7 +40,7 @@ body {
     --input: 214.3 31.8% 91.4%;
     --ring: 205 82% 45%;
     
-    --chart-1: 12 76% 61%;
+    --chart-1: 205 82% 45%; /* Azul Primário */
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
@@ -58,7 +59,7 @@ body {
     --popover: 222 88% 12%;
     --popover-foreground: 210 40% 98%;
     
-    /* Azul Primário */
+    /* Azul Vibrante */
     --primary: 205 82% 55%;
     --primary-foreground: 0 0% 100%;
 
@@ -80,7 +81,7 @@ body {
     --input: 217.2 32.6% 17.5%;
     --ring: 205 82% 55%;
     
-    --chart-1: 220 70% 50%;
+    --chart-1: 205 82% 55%; /* Azul Primário */
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
@@ -96,3 +97,5 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+    

@@ -1,14 +1,18 @@
+
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { loadState, AppState, Seller, Store } from '@/lib/storage';
+import { loadState, AppState, Seller } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Loader2, DollarSign, Users, Award, Trophy } from 'lucide-react';
+import { ArrowLeft, Loader2, DollarSign, Users, Award, Trophy, BarChartHorizontal } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { ChartTooltipContent } from '@/components/ui/chart';
+
 
 type SellerWithStore = Seller & { storeName: string; totalIncentives: number };
 type StorePerformance = {
@@ -122,8 +126,7 @@ export default function AdminDashboardPage() {
     }
     
     return (
-        <main className="flex flex-col items-center min-h-screen bg-background p-8 relative">
-            <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: DASHBOARD ADMIN</div>
+        <main className="flex flex-col items-center min-h-screen bg-background p-4 sm:p-8 relative">
             <div className="absolute top-4 left-4">
                 <Button asChild variant="outline">
                     <Link href="/admin">
@@ -137,8 +140,8 @@ export default function AdminDashboardPage() {
                 <h1 className="text-4xl font-bold font-headline text-primary text-center">
                     Dashboard Geral
                 </h1>
-                <p className="text-lg text-muted-foreground text-center">
-                    Visão consolidada do desempenho de todas as lojas.
+                <p className="text-lg text-muted-foreground text-center max-w-2xl">
+                    Visão consolidada do desempenho de todas as lojas, com rankings e comparativos.
                 </p>
 
                 <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3 w-full mt-6">
@@ -173,6 +176,30 @@ export default function AdminDashboardPage() {
                         </CardContent>
                     </Card>
                 </div>
+                
+                 <Card className="w-full mt-6">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <BarChartHorizontal className="text-primary" />
+                            Comparativo de Vendas por Loja
+                        </CardTitle>
+                        <CardDescription>Análise do desempenho de vendas de cada loja.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         <ResponsiveContainer width="100%" height={250}>
+                            <BarChart layout="vertical" data={storePerformance}>
+                                <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} />
+                                <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={150} />
+                                <Tooltip 
+                                    cursor={{fill: 'hsl(var(--muted))'}}
+                                    content={<ChartTooltipContent formatter={(value) => formatCurrency(value as number)} />}
+                                />
+                                <Bar dataKey="totalSales" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
 
                 <div className="grid md:grid-cols-2 gap-6 w-full mt-6">
                     <Card>
@@ -195,8 +222,8 @@ export default function AdminDashboardPage() {
                                         <TableRow key={seller.id}>
                                             <TableCell className="font-bold">{index + 1}</TableCell>
                                             <TableCell>{seller.name}</TableCell>
-                                            <TableCell>{seller.storeName}</TableCell>
-                                            <TableCell className="text-right">{formatCurrency(seller.vendas)}</TableCell>
+                                            <TableCell className="text-muted-foreground">{seller.storeName}</TableCell>
+                                            <TableCell className="text-right font-semibold">{formatCurrency(seller.vendas)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -223,8 +250,8 @@ export default function AdminDashboardPage() {
                                         <TableRow key={seller.id}>
                                             <TableCell className="font-bold">{index + 1}</TableCell>
                                             <TableCell>{seller.name}</TableCell>
-                                            <TableCell>{seller.storeName}</TableCell>
-                                            <TableCell className="text-right">{formatCurrency(seller.totalIncentives)}</TableCell>
+                                            <TableCell className="text-muted-foreground">{seller.storeName}</TableCell>
+                                            <TableCell className="text-right font-semibold">{formatCurrency(seller.totalIncentives)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -234,23 +261,24 @@ export default function AdminDashboardPage() {
                 </div>
                  <Card className="w-full mt-6">
                         <CardHeader>
-                            <CardTitle>Desempenho por Loja</CardTitle>
+                            <CardTitle>Desempenho Detalhado por Loja</CardTitle>
+                            <CardDescription>Uma visão completa do desempenho de cada unidade de negócio.</CardDescription>
                         </CardHeader>
                         <CardContent>
                              <Table>
                                 <TableHeader>
                                     <TableRow>
                                     <TableHead>Loja</TableHead>
-                                    <TableHead>Vendedores</TableHead>
-                                    <TableHead>Vendas</TableHead>
-                                    <TableHead className="text-right">Incentivos</TableHead>
+                                    <TableHead className="text-center">Vendedores</TableHead>
+                                    <TableHead>Vendas Totais</TableHead>
+                                    <TableHead className="text-right">Incentivos Pagos</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {storePerformance.map((store) => (
                                         <TableRow key={store.id}>
                                             <TableCell className="font-medium">{store.name}</TableCell>
-                                            <TableCell>{store.sellerCount}</TableCell>
+                                            <TableCell className="text-center">{store.sellerCount}</TableCell>
                                             <TableCell>{formatCurrency(store.totalSales)}</TableCell>
                                             <TableCell className="text-right">{formatCurrency(store.totalIncentives)}</TableCell>
                                         </TableRow>
@@ -263,3 +291,5 @@ export default function AdminDashboardPage() {
         </main>
     )
 }
+
+    
