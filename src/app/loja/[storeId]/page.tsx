@@ -22,23 +22,35 @@ export default function StoreHomePage() {
   useEffect(() => {
     if (!storeId) return;
 
-    try {
-      const savedState = loadState();
-      const store = savedState.stores.find(s => s.id === storeId);
+    let attempts = 0;
+    const maxAttempts = 5;
+    const intervalId = setInterval(() => {
+        try {
+            const savedState = loadState();
+            const store = savedState.stores.find(s => s.id === storeId);
+            
+            if (store) {
+                clearInterval(intervalId); // Stop trying
+                setStoreName(store.name);
+                setSellers(savedState.sellers[storeId] || []);
+                setLoading(false);
+            } else {
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    clearInterval(intervalId);
+                    console.error("Store not found after multiple attempts, redirecting.");
+                    router.push('/');
+                }
+            }
+        } catch (error) {
+            clearInterval(intervalId);
+            console.error("Failed to load state from localStorage", error);
+            router.push('/');
+        }
+    }, 200); // Check every 200ms
 
-      if (store) {
-        setStoreName(store.name);
-        setSellers(savedState.sellers[storeId] || []);
-      } else {
-        // Redirect if store not found
-        router.push('/');
-      }
-    } catch (error) {
-      console.error("Failed to load state from localStorage", error);
-       router.push('/');
-    } finally {
-        setLoading(false);
-    }
+    return () => clearInterval(intervalId); // Cleanup on unmount
+
   }, [storeId, router]);
 
   const handleAdminAccess = () => {
