@@ -3,7 +3,6 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
 import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Palette } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
@@ -197,8 +196,7 @@ export default function AdminPage() {
             </Button>
         </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
-        <Logo />
-        <h1 className="text-4xl font-bold font-headline text-primary text-center">
+        <h1 className="text-4xl font-bold font-headline text-primary text-center mt-12">
             Painel Administrativo Global
         </h1>
         <p className="text-lg text-muted-foreground text-center">
