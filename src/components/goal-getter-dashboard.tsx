@@ -17,9 +17,10 @@ import {
   ShieldCheck,
   Calculator,
   Home,
-  LogOut,
   ChevronRight,
-  Target
+  Target,
+  PlusCircle,
+  KeyRound
 } from "lucide-react";
 
 import {
@@ -65,7 +66,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Incentives, getInitialState, Goals } from "@/lib/storage";
+import { loadState, saveState, Seller, Incentives, getInitialState, Goals, AppState, Store, setAdminPassword } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -80,6 +81,8 @@ const sellerSchema = z.object({
 
 const formSchema = z.object({
   newSellerName: z.string(),
+  newStoreName: z.string(),
+  newAdminPassword: z.string(),
   goals: z.object({
     metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -140,6 +143,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeName, setStoreName] = useState('');
+  const [allStores, setAllStores] = useState<Store[]>([]);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -152,6 +156,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const state = loadState();
       return {
         newSellerName: "",
+        newStoreName: "",
+        newAdminPassword: "",
         goals: state.goals[storeId] || state.goals.default,
         sellers: state.sellers[storeId] || [],
       }
@@ -176,19 +182,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const state = loadState();
     const store = state.stores.find(s => s.id === storeId);
     setStoreName(store?.name || 'Loja não encontrada');
+    setAllStores(state.stores);
 
     const tab = getActiveTab();
     
-    // Redirect non-admins trying to access admin tab
     if (tab === 'admin' && !adminAuthenticated) {
-      toast({ variant: 'destructive', title: 'Acesso Negado' });
-      const sellers = getValues('sellers');
-      const firstSellerId = sellers && sellers.length > 0 ? sellers[0].id : null;
-      if (firstSellerId) {
-        router.replace(`/dashboard/${storeId}?tab=${firstSellerId}`);
-      } else {
-        router.replace(`/loja/${storeId}`);
-      }
+      toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Por favor, faça login como administrador.' });
+      const destination = `/dashboard/${storeId}?tab=admin`;
+      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
       return;
     }
     
@@ -252,24 +253,24 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const storeIncentives = state.incentives[storeId] || {};
 
       reset({
-        newSellerName: "",
+        ...getValues(), // keep other form values like newStoreName
         sellers: storeSellers,
         goals: storeGoals,
       });
 
       setIncentives(storeIncentives);
+      setAllStores(state.stores);
       calculateRankings(storeSellers, storeIncentives);
 
     } catch (error) {
         console.error("Failed to load state from localStorage", error);
     }
-  }, [storeId, reset, router, calculateRankings, toast]);
+  }, [storeId, reset, router, calculateRankings, toast, getValues]);
   
   useEffect(() => {
       loadDataForStore();
   }, [loadDataForStore]);
 
-  // Effect for saving data to localStorage on change
   useEffect(() => {
     if (!isDirty) return;
     
@@ -290,15 +291,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     return () => subscription.unsubscribe();
   }, [watch, incentives, storeId, calculateRankings, isDirty]);
 
-
   const addSeller = () => {
     const newSellerName = getValues("newSellerName");
     if (newSellerName.trim() === "") {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "O nome do vendedor não pode estar vazio.",
-      });
+      toast({ variant: "destructive", title: "Erro", description: "O nome do vendedor não pode estar vazio." });
       return;
     }
     const currentSellers = getValues("sellers") || [];
@@ -310,16 +306,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
         }
     }
-
-
     const newSeller: Seller = {
-      id: new Date().toISOString(),
-      name: newSellerName,
-      avatarId: randomAvatarId,
-      vendas: 0,
-      pa: 0,
-      ticketMedio: 0,
-      corridinhaDiaria: 0,
+      id: new Date().toISOString(), name: newSellerName, avatarId: randomAvatarId,
+      vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0,
     };
     const updatedSellers = [...currentSellers, newSeller];
     setValue("sellers", updatedSellers, { shouldDirty: true });
@@ -335,18 +324,66 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         delete newIncentives[sellerId];
         return newIncentives;
     });
-    
     const newTab = updatedSellers.length > 0 ? updatedSellers[0].id : "admin";
     router.push(`/dashboard/${storeId}?tab=${newTab}`);
   }
 
-  const startEditing = (sellerId: string) => {
-    setEditingSellerId(sellerId);
-  }
+  const handleAddStore = () => {
+    const newStoreName = getValues("newStoreName");
+    if (!newStoreName.trim()) {
+        toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
+        return;
+    }
+    const state = loadState();
+    const newStoreId = new Date().toISOString();
+    const newStore: Store = { id: newStoreId, name: newStoreName };
+    const newState: AppState = {
+        ...state,
+        stores: [...state.stores, newStore],
+        sellers: { ...state.sellers, [newStoreId]: [] },
+        goals: { ...state.goals, [newStoreId]: state.goals.default || getInitialState().goals.default },
+        incentives: { ...state.incentives, [newStoreId]: {} }
+    };
+    saveState(newState);
+    setAllStores(newState.stores); // Update local state for UI
+    setValue("newStoreName", "");
+    toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+    router.push(`/loja/${newStoreId}`);
+  };
+    
+  const handleRemoveStore = (id: string) => {
+    const state = loadState();
+    if (state.stores.length <= 1) {
+         toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+        return;
+    }
+    const newState = { ...state };
+    newState.stores = newState.stores.filter(s => s.id !== id);
+    delete newState.sellers[id];
+    delete newState.goals[id];
+    delete newState.incentives[id];
+    saveState(newState);
+    setAllStores(newState.stores); // Update UI
+    toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
+    if (storeId === id) {
+      router.push('/');
+    }
+  };
 
-  const cancelEditing = () => {
-    setEditingSellerId(null);
-  }
+  const handleChangePassword = () => {
+    const newPassword = getValues("newAdminPassword");
+    if (newPassword.length < 4) {
+      toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
+      return;
+    }
+    setAdminPassword(newPassword);
+    setValue("newAdminPassword", "");
+    toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
+  };
+
+
+  const startEditing = (sellerId: string) => setEditingSellerId(sellerId);
+  const cancelEditing = () => setEditingSellerId(null);
 
   const saveSellerName = (sellerId: string) => {
     const sellerIndex = (currentValues.sellers || []).findIndex(s => s.id === sellerId);
@@ -354,14 +391,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     const newName = getValues(`sellers.${sellerIndex}.name`);
     if (newName.trim() === "") {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "O nome do vendedor não pode estar vazio.",
-      });
+      toast({ variant: "destructive", title: "Erro", description: "O nome do vendedor não pode estar vazio." });
       return;
     }
-    // setValue will be handled by watch, just end editing
     setEditingSellerId(null);
     toast({ title: "Sucesso!", description: "Nome do vendedor atualizado." });
   }
@@ -369,6 +401,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const handleTabChange = (newTab: string) => {
       if (newTab === 'admin' && !isAdmin) {
           toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa ser um administrador.'})
+          const destination = `/dashboard/${storeId}?tab=admin`;
+          router.push(`/login?redirect=${encodeURIComponent(destination)}`);
           return;
       }
       setActiveTab(newTab);
@@ -381,58 +415,32 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         const newIncentives: Record<string, IncentiveProjectionOutput | null> = {};
         for (const seller of values.sellers) {
           const result = await incentiveProjection({
-            vendas: seller.vendas,
-            pa: seller.pa,
-            ticketMedio: seller.ticketMedio,
-            corridinhaDiaria: seller.corridinhaDiaria,
-            metaMinha: values.goals.metaMinha,
-            meta: values.goals.meta,
-            metona: values.goals.metona,
-            metaLendaria: values.goals.metaLendaria,
-            legendariaBonusValorVenda: values.goals.legendariaBonusValorVenda,
-            legendariaBonusValorPremio: values.goals.legendariaBonusValorPremio,
-            metaMinhaPrize: values.goals.metaMinhaPrize,
-            metaPrize: values.goals.metaPrize,
-            metonaPrize: values.goals.metonaPrize,
-            paGoal1: values.goals.paGoal1,
-            paGoal2: values.goals.paGoal2,
-            paGoal3: values.goals.paGoal3,
-            paGoal4: values.goals.paGoal4,
-            paPrize1: values.goals.paPrize1,
-            paPrize2: values.goals.paPrize2,
-            paPrize3: values.goals.paPrize3,
-            paPrize4: values.goals.paPrize4,
-            ticketMedioGoal1: values.goals.ticketMedioGoal1,
-            ticketMedioGoal2: values.goals.ticketMedioGoal2,
-            ticketMedioGoal3: values.goals.ticketMedioGoal3,
-            ticketMedioGoal4: values.goals.ticketMedioGoal4,
-            ticketMedioPrize1: values.goals.ticketMedioPrize1,
-            ticketMedioPrize2: values.goals.ticketMedioPrize2,
-            ticketMedioPrize3: values.goals.ticketMedioPrize3,
+            vendas: seller.vendas, pa: seller.pa, ticketMedio: seller.ticketMedio, corridinhaDiaria: seller.corridinhaDiaria,
+            metaMinha: values.goals.metaMinha, meta: values.goals.meta, metona: values.goals.metona,
+            metaLendaria: values.goals.metaLendaria, legendariaBonusValorVenda: values.goals.legendariaBonusValorVenda,
+            legendariaBonusValorPremio: values.goals.legendariaBonusValorPremio, metaMinhaPrize: values.goals.metaMinhaPrize,
+            metaPrize: values.goals.metaPrize, metonaPrize: values.goals.metonaPrize, paGoal1: values.goals.paGoal1,
+            paGoal2: values.goals.paGoal2, paGoal3: values.goals.paGoal3, paGoal4: values.goals.paGoal4,
+            paPrize1: values.goals.paPrize1, paPrize2: values.goals.paPrize2, paPrize3: values.goals.paPrize3,
+            paPrize4: values.goals.paPrize4, ticketMedioGoal1: values.goals.ticketMedioGoal1,
+            ticketMedioGoal2: values.goals.ticketMedioGoal2, ticketMedioGoal3: values.goals.ticketMedioGoal3,
+            ticketMedioGoal4: values.goals.ticketMedioGoal4, ticketMedioPrize1: values.goals.ticketMedioPrize1,
+            ticketMedioPrize2: values.goals.ticketMedioPrize2, ticketMedioPrize3: values.goals.ticketMedioPrize3,
             ticketMedioPrize4: values.goals.ticketMedioPrize4,
           });
           newIncentives[seller.id] = result;
         }
         setIncentives(newIncentives);
         calculateRankings(values.sellers, newIncentives);
-        toast({
-          title: "Sucesso!",
-          description: "Painel de todos os vendedores atualizado com sucesso.",
-        });
+        toast({ title: "Sucesso!", description: "Painel de todos os vendedores atualizado com sucesso." });
       } catch (error) {
         console.error("Calculation Error:", error);
-        toast({
-          variant: "destructive",
-          title: "Erro de Cálculo",
-          description: "Não foi possível calcular os incentivos. Tente novamente.",
-        });
+        toast({ variant: "destructive", title: "Erro de Cálculo", description: "Não foi possível calcular os incentivos. Tente novamente." });
       }
     });
   };
 
-  const onSubmit = (values: FormValues) => {
-    calculateAllIncentives(values);
-  };
+  const onSubmit = (values: FormValues) => calculateAllIncentives(values);
   
   const renderGoalInputs = (level: string, tiers: typeof goalTiers | typeof ticketMedioTiers) => (
     <div>
@@ -450,7 +458,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         </div>
     </div>
   )
-
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
@@ -521,14 +528,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                 Ajuste as metas, prêmios e gerencie os vendedores desta loja aqui.
                             </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="space-y-10">
                                 
                                 <div className="grid lg:grid-cols-2 gap-x-8 gap-y-10">
                                     <div className="space-y-8">
                                        <Card>
-                                            <CardHeader>
-                                                <h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3>
-                                            </CardHeader>
+                                            <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3></CardHeader>
                                             <CardContent className="space-y-4">
                                                 <div className="space-y-2">
                                                     <FormLabel>Cadastrar Novo Vendedor</FormLabel>
@@ -538,14 +543,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                                 <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
                                                                 <FormControl><Input placeholder="Nome do Vendedor" {...field} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSeller(); }}} /></FormControl>
                                                             </FormItem>
-                                                        )}
-                                                        />
+                                                        )}/>
                                                         <Button type="button" onClick={addSeller}><UserPlus/></Button>
                                                     </div>
                                                 </div>
-                                                
                                                 <Separator/>
-
                                                 <div className="space-y-2">
                                                   <FormLabel>Vendedores Atuais</FormLabel>
                                                   {(currentValues.sellers || []).length > 0 ? (
@@ -556,8 +558,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                                       <>
                                                                           <FormField control={form.control} name={`sellers.${index}.name`} render={({ field }) => (
                                                                           <FormItem className="flex-grow"><FormControl><Input {...field} autoFocus onKeyDown={(e) => { if(e.key === 'Enter') saveSellerName(seller.id); if(e.key==='Escape') cancelEditing(); }}/></FormControl></FormItem>
-                                                                          )}
-                                                                      />
+                                                                          )}/>
                                                                           <Button size="icon" variant="ghost" onClick={() => saveSellerName(seller.id)}><Save className="h-4 w-4"/></Button>
                                                                           <Button size="icon" variant="ghost" onClick={cancelEditing}><X className="h-4 w-4"/></Button>
                                                                       </>
@@ -567,18 +568,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                                           <div className="flex items-center">
                                                                               <Button size="icon" variant="ghost" onClick={() => startEditing(seller.id)}><Edit className="h-4 w-4"/></Button>
                                                                               <AlertDialog>
-                                                                                  <AlertDialogTrigger asChild>
-                                                                                      <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button>
-                                                                                  </AlertDialogTrigger>
+                                                                                  <AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
                                                                                   <AlertDialogContent>
-                                                                                      <AlertDialogHeader>
-                                                                                          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                                                                          <AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente o vendedor e seus dados.</AlertDialogDescription>
-                                                                                      </AlertDialogHeader>
-                                                                                      <AlertDialogFooter>
-                                                                                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                                          <AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction>
-                                                                                      </AlertDialogFooter>
+                                                                                      <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente o vendedor e seus dados.</AlertDialogDescription></AlertDialogHeader>
+                                                                                      <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
                                                                                   </AlertDialogContent>
                                                                               </AlertDialog>
                                                                           </div>
@@ -587,17 +580,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                               </div>
                                                           ))}
                                                       </div>
-                                                    ) : (
-                                                      <p className="text-sm text-muted-foreground text-center py-4">Nenhum vendedor cadastrado.</p>
-                                                    )}
+                                                    ) : (<p className="text-sm text-muted-foreground text-center py-4">Nenhum vendedor cadastrado.</p>)}
                                                 </div>
                                             </CardContent>
                                         </Card>
                                         
                                        <Card>
-                                        <CardHeader>
-                                          <h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3>
-                                        </CardHeader>
+                                        <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3></CardHeader>
                                         <CardContent className="space-y-4 max-h-80 overflow-y-auto pr-2">
                                             {(currentValues.sellers || []).length > 0 ? currentValues.sellers.map((seller, index) => (
                                                 <div key={seller.id}>
@@ -609,40 +598,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                                         <FormField control={form.control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => ( <FormItem><FormLabel className="text-xs">Corridinha</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                                     </div>
                                                 </div>
-                                            )) : (
-                                                <p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>
-                                            )}
+                                            )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
                                         </CardContent>
                                        </Card>
                                     </div>
 
                                     <div className="space-y-8">
                                        <Card>
-                                          <CardHeader>
-                                            <h3 className="font-semibold text-lg text-primary">Metas de Vendas</h3>
-                                          </CardHeader>
+                                          <CardHeader><h3 className="font-semibold text-lg text-primary">Metas de Vendas</h3></CardHeader>
                                           <CardContent className="space-y-6">
-                                            <div className="space-y-2">
-                                                <h4 className="font-medium text-sm">Metinha</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <FormField control={form.control} name="goals.metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                                    <FormField control={form.control} name="goals.metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <h4 className="font-medium text-sm">Meta</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <FormField control={form.control} name="goals.meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                                    <FormField control={form.control} name="goals.metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <h4 className="font-medium text-sm">Metona</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <FormField control={form.control} name="goals.metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                                    <FormField control={form.control} name="goals.metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
-                                                </div>
-                                            </div>
+                                            <div className="space-y-2"><h4 className="font-medium text-sm">Metinha</h4><div className="flex items-center gap-2"><FormField control={form.control} name="goals.metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/><FormField control={form.control} name="goals.metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/></div></div>
+                                            <div className="space-y-2"><h4 className="font-medium text-sm">Meta</h4><div className="flex items-center gap-2"><FormField control={form.control} name="goals.meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/><FormField control={form.control} name="goals.metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/></div></div>
+                                            <div className="space-y-2"><h4 className="font-medium text-sm">Metona</h4><div className="flex items-center gap-2"><FormField control={form.control} name="goals.metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/><FormField control={form.control} name="goals.metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/></div></div>
                                             <div className="space-y-2">
                                                 <h4 className="font-medium text-sm">Lendária</h4>
                                                 <FormField control={form.control} name="goals.metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
@@ -655,25 +622,66 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                         </Card>
                                         
                                         <Card>
-                                          <CardHeader>
-                                            <h3 className="font-semibold text-lg text-primary">Metas de PA e Ticket Médio</h3>
-                                          </CardHeader>
-                                          <CardContent className="space-y-6">
-                                            {renderGoalInputs("Metas de PA", goalTiers)}
-                                            <Separator />
-                                            {renderGoalInputs("Metas de Ticket Médio", ticketMedioTiers)}
-                                          </CardContent>
+                                          <CardHeader><h3 className="font-semibold text-lg text-primary">Metas de PA e Ticket Médio</h3></CardHeader>
+                                          <CardContent className="space-y-6">{renderGoalInputs("Metas de PA", goalTiers)}<Separator />{renderGoalInputs("Metas de Ticket Médio", ticketMedioTiers)}</CardContent>
                                         </Card>
-
                                     </div>
                                 </div>
-
                                 <Separator />
-
                                 <Button type="submit" disabled={isPending} size="lg" className="w-full">
                                     {isPending ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando...</>) : "Salvar Metas e Calcular Todos os Incentivos"}
                                     <Calculator className="ml-2 h-5 w-5"/>
                                 </Button>
+
+                                <Separator />
+
+                                <div>
+                                <CardTitle>Administração Global</CardTitle>
+                                <CardDescription>Gerencie todas as lojas e configurações do sistema.</CardDescription>
+                                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <Card>
+                                    <CardHeader><CardTitle>Gerenciar Lojas</CardTitle></CardHeader>
+                                    <CardContent>
+                                      <div className="space-y-2 mb-4">
+                                        <FormLabel htmlFor="new-store">Adicionar Nova Loja</FormLabel>
+                                        <div className="flex items-center gap-2">
+                                          <FormField control={form.control} name="newStoreName" render={({ field }) => ( <FormItem className="flex-grow"><FormControl><Input placeholder="Ex: SUPERMODA ITABUNA" {...field} /></FormControl></FormItem> )}/>
+                                          <Button type="button" onClick={handleAddStore}><PlusCircle/></Button>
+                                        </div>
+                                      </div>
+                                      <Separator className="my-4"/>
+                                      <FormLabel>Lojas Atuais</FormLabel>
+                                      <div className="space-y-2 mt-2 max-h-40 overflow-y-auto pr-2">
+                                          {allStores.map((store) => (
+                                              <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
+                                                  <span className="font-medium">{store.name}</span>
+                                                  <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                      <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
+                                                      <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                  </AlertDialog>
+                                              </div>
+                                          ))}
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                  <Card>
+                                    <CardHeader><CardTitle>Segurança</CardTitle></CardHeader>
+                                    <CardContent>
+                                      <div className="space-y-2">
+                                        <FormLabel htmlFor="new-password">Alterar Senha de Administrador</FormLabel>
+                                        <FormField control={form.control} name="newAdminPassword" render={({ field }) => (
+                                          <FormItem>
+                                            <FormControl><Input type="password" placeholder="Pelo menos 4 caracteres" {...field} /></FormControl>
+                                          </FormItem>
+                                        )}/>
+                                      </div>
+                                      <Button onClick={handleChangePassword} className="w-full mt-4"><KeyRound/> Alterar Senha</Button>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -696,13 +704,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     </TabsContent>
                 ))}
 
-                {currentValues.sellers && currentValues.sellers.length === 0 && (
-                    <TabsContent value="admin" className="mt-4">
+                {currentValues.sellers && currentValues.sellers.length === 0 && activeTab !== 'admin' && (
+                    <TabsContent value={activeTab} className="mt-4">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Sem vendedores</CardTitle>
                                 <CardDescription>
-                                    Esta loja ainda não tem vendedores. Adicione um vendedor na aba de administrador para começar.
+                                    Esta loja ainda não tem vendedores. Peça ao administrador para adicionar vendedores no painel de controle.
                                 </CardDescription>
                             </CardHeader>
                         </Card>
