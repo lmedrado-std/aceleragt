@@ -67,6 +67,7 @@ import {
 const sellerSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Nome é obrigatório"),
+  avatarId: z.string(),
   vendas: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
   pa: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
   ticketMedio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
@@ -94,12 +95,12 @@ const formSchema = z.object({
   paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+  ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
   sellers: z.array(sellerSchema),
 });
 
@@ -110,12 +111,12 @@ type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'tot
 type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const initialSellers: Seller[] = [
-  { id: '1', name: 'Val', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '2', name: 'Rose', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '3', name: 'Thays', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '4', name: 'Mercia', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '5', name: 'Joisse', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '6', name: 'Dajila', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: '1', name: 'Val', avatarId: 'avatar1', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: '2', name: 'Rose', avatarId: 'avatar2', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: '3', name: 'Thays', avatarId: 'avatar3', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: '4', name: 'Mercia', avatarId: 'avatar4', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: '5', name: 'Joisse', avatarId: 'avatar5', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+  { id: '6', name: 'Dajila', avatarId: 'avatar6', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
 ];
 
 const goalTiers = [
@@ -131,6 +132,8 @@ const ticketMedioTiers = [
     { id: 'Metona', goal: 'ticketMedioGoal3', prize: 'ticketMedioPrize3' },
     { id: 'Lendária', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
 ];
+
+const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8'];
 
 export function GoalGetterDashboard() {
   const [isPending, startTransition] = useTransition();
@@ -207,7 +210,7 @@ export function GoalGetterDashboard() {
                     value = incentiveData?.corridinhaDiariaBonus || 0;
                 }
                 else {
-                    value = seller[metric as keyof Omit<Seller, 'id' | 'name'>] as number;
+                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId'>] as number;
                 }
                 return { id: seller.id, value };
             })
@@ -271,15 +274,28 @@ export function GoalGetterDashboard() {
       });
       return;
     }
+    const currentSellers = getValues("sellers");
+    const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
+    let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+    
+    // Ensure the new avatar is not already in use if possible
+    if (existingAvatarIds.size < availableAvatarIds.length) {
+        while (existingAvatarIds.has(randomAvatarId)) {
+            randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+        }
+    }
+
+
     const newSeller: Seller = {
       id: new Date().toISOString(),
       name: newSellerName,
+      avatarId: randomAvatarId,
       vendas: 0,
       pa: 0,
       ticketMedio: 0,
       corridinhaDiaria: 0,
     };
-    const updatedSellers = [...getValues("sellers"), newSeller];
+    const updatedSellers = [...currentSellers, newSeller];
     setValue("sellers", updatedSellers);
     setValue("newSellerName", "");
     setActiveTab(newSeller.id);
@@ -621,3 +637,5 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
+
+    

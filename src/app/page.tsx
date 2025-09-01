@@ -4,14 +4,15 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { ArrowRight, User, Shield } from "lucide-react";
+import { ArrowRight, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SellerAvatar } from "@/components/seller-avatar";
 
 
 type Seller = {
   id: string;
   name: string;
+  avatarId: string;
 };
 
 export default function Home() {
@@ -66,9 +67,7 @@ export default function Home() {
                     {sellers.map((seller) => (
                       <Button asChild size="lg" variant="outline" key={seller.id} className="justify-start h-auto py-3">
                         <Link href={`/dashboard?tab=${seller.id}`} className="flex items-center gap-4">
-                           <Avatar>
-                             <AvatarFallback>{seller.name.charAt(0).toUpperCase()}</AvatarFallback>
-                           </Avatar>
+                           <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
                            <div className="flex flex-col items-start">
                               <span className="font-semibold text-base">{seller.name}</span>
                               <span className="text-sm text-muted-foreground font-normal">Ver meu desempenho</span>
@@ -84,3 +83,5 @@ export default function Home() {
     </main>
   );
 }
+
+    
