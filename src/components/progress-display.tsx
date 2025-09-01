@@ -26,23 +26,20 @@ import {
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "./ui/skeleton";
+import { Goals } from "@/lib/storage";
 
 
 type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
 
-interface ProgressDisplayProps {
-  salesData: {
+type SalesData = {
     vendas: number;
     pa: number;
     ticketMedio: number;
     corridinhaDiaria: number;
-    metaMinha: number;
-    meta: number;
-    metona: number;
-    metaLendaria: number;
-    paGoal4: number;
-    ticketMedioGoal4: number;
-  };
+} & Omit<Goals, 'paGoal1' | 'paGoal2' | 'paGoal3' | 'ticketMedioGoal1' | 'ticketMedioGoal2' | 'ticketMedioGoal3'>;
+
+interface ProgressDisplayProps {
+  salesData: SalesData;
   incentives: IncentiveProjectionOutput | null;
   rankings: Record<RankingMetric, number> | null;
   loading: boolean;
@@ -168,8 +165,12 @@ const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
   )
 };
 
-const SalesGoalDetail = ({ label, goal, current, prize }: {label: string; goal: number; current: number; prize: number;}) => {
+const SalesGoalDetail = ({ label, goal, current, prize, prizeLabel }: {label: string; goal: number; current: number; prize: number; prizeLabel?:string }) => {
     const achieved = current >= goal;
+    let finalPrize = prize;
+    if (prizeLabel === "Prêmio Meta" && current >= salesData.metona) finalPrize = 0;
+    if (prizeLabel === "Prêmio Metinha" && current >= salesData.meta) finalPrize = 0;
+    
     return (
         <div className={cn("flex justify-between items-center p-2 rounded-md", achieved ? "bg-green-100/80 dark:bg-green-900/30" : "")}>
             <div className="flex items-center gap-2">
@@ -179,7 +180,7 @@ const SalesGoalDetail = ({ label, goal, current, prize }: {label: string; goal: 
                     <p className="text-xs text-muted-foreground">{formatCurrency(current)} / {formatCurrency(goal)}</p>
                 </div>
             </div>
-            <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(prize)}</p>
+            <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(finalPrize)}</p>
         </div>
     )
 }
@@ -191,8 +192,11 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
     ticketMedio,
     corridinhaDiaria,
     metaMinha,
+    metaMinhaPrize,
     meta,
+    metaPrize,
     metona,
+    metonaPrize,
     metaLendaria,
     paGoal4,
     ticketMedioGoal4,
@@ -282,13 +286,17 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading }: Pr
         
         {loading ? (
             <div className="space-y-2"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>
-        ) : incentives && (
+        ) : incentives ? (
             <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
                 <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
-                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={incentives.metinhaPremio} />
-                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={incentives.metaPremio} />
-                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={incentives.metonaPremio} />
-                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} />
+                <SalesGoalDetail label="Prêmio Metinha" prizeLabel="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} />
+                <SalesGoalDetail label="Prêmio Meta" prizeLabel="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} />
+                <SalesGoalDetail label="Prêmio Metona" prizeLabel="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} />
+                <SalesGoalDetail label="Bônus Lendária" prizeLabel="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} />
+            </div>
+        ): (
+             <div className="text-center py-4 text-muted-foreground">
+                <p>Nenhum cálculo de incentivo encontrado.</p>
             </div>
         )}
 

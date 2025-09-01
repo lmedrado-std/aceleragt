@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useTransition, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Loader2,
   UserPlus,
@@ -62,6 +62,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { loadState, saveState, AppState, Seller, Goals, Incentives } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -76,48 +77,41 @@ const sellerSchema = z.object({
 
 const formSchema = z.object({
   newSellerName: z.string(),
-  metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  legendariaBonusValorVenda: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(1, "Deve ser maior que zero"),
-  legendariaBonusValorPremio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  metaMinhaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  metaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  metonaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-  ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  goals: z.object({
+    metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    legendariaBonusValorVenda: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(1, "Deve ser maior que zero"),
+    legendariaBonusValorPremio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    metaMinhaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    metaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    metonaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+  }),
   sellers: z.array(sellerSchema),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-type Seller = z.infer<typeof sellerSchema>;
 
 type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria' | 'totalIncentives';
 type Rankings = Record<string, Record<RankingMetric, number>>;
 
-const initialSellers: Seller[] = [
-  { id: '1', name: 'Val', avatarId: 'avatar1', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '2', name: 'Rose', avatarId: 'avatar2', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '3', name: 'Thays', avatarId: 'avatar3', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '4', name: 'Mercia', avatarId: 'avatar4', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '5', name: 'Joisse', avatarId: 'avatar5', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '6', name: 'Dajila', avatarId: 'avatar6', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-];
 
 const goalTiers = [
     { id: 'Metinha', goal: 'paGoal1', prize: 'paPrize1'},
@@ -135,49 +129,25 @@ const ticketMedioTiers = [
 
 const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9', 'avatar10'];
 
-export function GoalGetterDashboard() {
+export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const [incentives, setIncentives] =
-    useState<Record<string, IncentiveProjectionOutput | null>>({});
+  const [incentives, setIncentives] = useState<Incentives>({});
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [rankings, setRankings] = useState<Rankings>({});
   const searchParams = useSearchParams();
-  
+  const router = useRouter();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       newSellerName: "",
-      metaMinha: 8000,
-      meta: 9000,
-      metona: 10000,
-      metaLendaria: 12000,
-      legendariaBonusValorVenda: 2000,
-      legendariaBonusValorPremio: 50,
-      metaMinhaPrize: 50,
-      metaPrize: 100,
-      metonaPrize: 120,
-      paGoal1: 1.5,
-      paGoal2: 1.6,
-      paGoal3: 1.9,
-      paGoal4: 2.0,
-      paPrize1: 5,
-      paPrize2: 10,
-      paPrize3: 15,
-      paPrize4: 20,
-      ticketMedioGoal1: 180,
-      ticketMedioGoal2: 185,
-      ticketMedioGoal3: 190,
-      ticketMedioGoal4: 200,
-      ticketMedioPrize1: 5,
-      ticketMedioPrize2: 10,
-      ticketMedioPrize3: 15,
-      ticketMedioPrize4: 20,
-      sellers: initialSellers,
+      goals: loadState().goals.default,
+      sellers: [],
     },
   });
   
-  const { watch, getValues, setValue } = form;
+  const { watch, getValues, setValue, reset } = form;
   const currentValues = watch();
 
   const getInitialTab = useCallback(() => {
@@ -233,26 +203,43 @@ export function GoalGetterDashboard() {
   }, []);
 
   useEffect(() => {
-    // This effect ensures localStorage is accessed only on the client side
     try {
-      const savedState = localStorage.getItem("goalGetterState");
-      if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        // A simple validation to make sure we are not setting junk state
-        if (parsedState && typeof parsedState.meta === 'number') {
-            form.reset(parsedState);
-        }
+      const state = loadState();
+      const storeExists = state.stores.some(s => s.id === storeId);
+      if (!storeExists) {
+        toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." });
+        router.push('/');
+        return;
       }
+      
+      const storeSellers = state.sellers[storeId] || [];
+      const storeGoals = state.goals[storeId] || state.goals.default;
+      const storeIncentives = state.incentives[storeId] || {};
+
+      reset({
+        newSellerName: "",
+        sellers: storeSellers,
+        goals: storeGoals,
+      });
+
+      setIncentives(storeIncentives);
+      if(storeSellers.length > 0) {
+        calculateRankings(storeSellers, storeIncentives);
+      }
+
     } catch (error) {
         console.error("Failed to load state from localStorage", error);
     }
-  }, [form]);
+  }, [storeId, reset, router, calculateRankings, toast]);
 
   useEffect(() => {
-    // This effect saves the form state to localStorage on every change.
     const subscription = watch((value) => {
         try {
-            localStorage.setItem("goalGetterState", JSON.stringify(value));
+            const state = loadState();
+            state.sellers[storeId] = value.sellers || [];
+            state.goals[storeId] = value.goals;
+            state.incentives[storeId] = incentives;
+            saveState(state);
             if(value.sellers && incentives){
                  calculateRankings(value.sellers, incentives);
             }
@@ -261,7 +248,7 @@ export function GoalGetterDashboard() {
         }
     });
     return () => subscription.unsubscribe();
-  }, [watch, incentives, calculateRankings]);
+  }, [watch, incentives, storeId, calculateRankings]);
 
 
   const addSeller = () => {
@@ -278,7 +265,6 @@ export function GoalGetterDashboard() {
     const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
     let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
     
-    // Ensure the new avatar is not already in use if possible
     if (existingAvatarIds.size < availableAvatarIds.length) {
         while (existingAvatarIds.has(randomAvatarId)) {
             randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
@@ -348,31 +334,31 @@ export function GoalGetterDashboard() {
             pa: seller.pa,
             ticketMedio: seller.ticketMedio,
             corridinhaDiaria: seller.corridinhaDiaria,
-            metaMinha: values.metaMinha,
-            meta: values.meta,
-            metona: values.metona,
-            metaLendaria: values.metaLendaria,
-            legendariaBonusValorVenda: values.legendariaBonusValorPremio,
-            legendariaBonusValorPremio: values.legendariaBonusValorPremio,
-            metaMinhaPrize: values.metaMinhaPrize,
-            metaPrize: values.metaPrize,
-            metonaPrize: values.metonaPrize,
-            paGoal1: values.paGoal1,
-            paGoal2: values.paGoal2,
-            paGoal3: values.paGoal3,
-            paGoal4: values.paGoal4,
-            paPrize1: values.paPrize1,
-            paPrize2: values.paPrize2,
-            paPrize3: values.paPrize3,
-            paPrize4: values.paPrize4,
-            ticketMedioGoal1: values.ticketMedioGoal1,
-            ticketMedioGoal2: values.ticketMedioGoal2,
-            ticketMedioGoal3: values.ticketMedioGoal3,
-            ticketMedioGoal4: values.ticketMedioGoal4,
-            ticketMedioPrize1: values.ticketMedioPrize1,
-            ticketMedioPrize2: values.ticketMedioPrize2,
-            ticketMedioPrize3: values.ticketMedioPrize3,
-            ticketMedioPrize4: values.ticketMedioPrize4,
+            metaMinha: values.goals.metaMinha,
+            meta: values.goals.meta,
+            metona: values.goals.metona,
+            metaLendaria: values.goals.metaLendaria,
+            legendariaBonusValorVenda: values.goals.legendariaBonusValorPremio,
+            legendariaBonusValorPremio: values.goals.legendariaBonusValorPremio,
+            metaMinhaPrize: values.goals.metaMinhaPrize,
+            metaPrize: values.goals.metaPrize,
+            metonaPrize: values.goals.metonaPrize,
+            paGoal1: values.goals.paGoal1,
+            paGoal2: values.goals.paGoal2,
+            paGoal3: values.goals.paGoal3,
+            paGoal4: values.goals.paGoal4,
+            paPrize1: values.goals.paPrize1,
+            paPrize2: values.goals.paPrize2,
+            paPrize3: values.goals.paPrize3,
+            paPrize4: values.goals.paPrize4,
+            ticketMedioGoal1: values.goals.ticketMedioGoal1,
+            ticketMedioGoal2: values.goals.ticketMedioGoal2,
+            ticketMedioGoal3: values.goals.ticketMedioGoal3,
+            ticketMedioGoal4: values.goals.ticketMedioGoal4,
+            ticketMedioPrize1: values.goals.ticketMedioPrize1,
+            ticketMedioPrize2: values.goals.ticketMedioPrize2,
+            ticketMedioPrize3: values.goals.ticketMedioPrize3,
+            ticketMedioPrize4: values.goals.ticketMedioPrize4,
           });
           newIncentives[seller.id] = result;
         }
@@ -405,8 +391,8 @@ export function GoalGetterDashboard() {
                  <div className="space-y-2" key={tier.id}>
                     <h4 className="font-medium text-sm">{tier.id}</h4>
                     <div className="flex items-center gap-2">
-                        <FormField control={form.control} name={tier.goal as keyof FormValues} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={tier.prize as keyof FormValues} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={`goals.${tier.goal}` as keyof FormValues} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={`goals.${tier.prize}` as keyof FormValues} render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                     </div>
                 </div>
             ))}
@@ -430,9 +416,9 @@ export function GoalGetterDashboard() {
             </div>
         </div>
         <Button asChild variant="outline">
-          <Link href="/">
+          <Link href={`/loja/${storeId}`}>
             <Home className="mr-2 h-4 w-4" />
-            Página Inicial
+            Página da Loja
           </Link>
         </Button>
       </header>
@@ -561,30 +547,30 @@ export function GoalGetterDashboard() {
                                         <div className="space-y-2">
                                             <h4 className="font-medium text-sm">Metinha</h4>
                                             <div className="flex items-center gap-2">
-                                                <FormField control={form.control} name="metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                                <FormField control={form.control} name="metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.metaMinha" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.metaMinhaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
                                             <h4 className="font-medium text-sm">Meta</h4>
                                             <div className="flex items-center gap-2">
-                                                <FormField control={form.control} name="meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                                <FormField control={form.control} name="metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.meta" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.metaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
                                             <h4 className="font-medium text-sm">Metona</h4>
                                             <div className="flex items-center gap-2">
-                                                <FormField control={form.control} name="metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
-                                                <FormField control={form.control} name="metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.metona" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.metonaPrize" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Prêmio</FormLabel><FormControl><Input type="number" placeholder="Prêmio (R$)" {...field} /></FormControl></FormItem> )}/>
                                             </div>
                                         </div>
                                         <div className="space-y-2">
                                             <h4 className="font-medium text-sm">Lendária</h4>
-                                            <FormField control={form.control} name="metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
+                                            <FormField control={form.control} name="goals.metaLendaria" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel className="sr-only">Meta</FormLabel><FormControl><Input type="number" placeholder="Meta" {...field} /></FormControl></FormItem> )}/>
                                             <div className="flex items-center gap-2">
-                                                <FormField control={form.control} name="legendariaBonusValorVenda" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Venda" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                                <FormField control={form.control} name="legendariaBonusValorPremio" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>Bônus (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Prêmio" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.legendariaBonusValorVenda" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Venda" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                                <FormField control={form.control} name="goals.legendariaBonusValorPremio" render={({ field }) => ( <FormItem className="flex-grow"><FormLabel>Bônus (R$)</FormLabel><FormControl><Input type="number" placeholder="Valor Prêmio" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                             </div>
                                         </div>
                                         </div>
@@ -616,12 +602,7 @@ export function GoalGetterDashboard() {
                                     pa: currentValues.sellers[index]?.pa || 0,
                                     ticketMedio: currentValues.sellers[index]?.ticketMedio || 0,
                                     corridinhaDiaria: currentValues.sellers[index]?.corridinhaDiaria || 0,
-                                    metaMinha: currentValues.metaMinha,
-                                    meta: currentValues.meta,
-                                    metona: currentValues.metona,
-                                    metaLendaria: currentValues.metaLendaria,
-                                    paGoal4: currentValues.paGoal4,
-                                    ticketMedioGoal4: currentValues.ticketMedioGoal4,
+                                    ...currentValues.goals
                                 }}
                                 incentives={incentives[seller.id]}
                                 rankings={rankings[seller.id]}
@@ -637,5 +618,3 @@ export function GoalGetterDashboard() {
     </div>
   );
 }
-
-    
