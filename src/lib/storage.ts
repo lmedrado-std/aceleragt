@@ -86,64 +86,51 @@ const defaultGoals: Goals = {
   ticketMedioPrize4: 20,
 };
 
-const initialSellers: Seller[] = [
-  { id: '1', name: 'Val', avatarId: 'avatar1', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '2', name: 'Rose', avatarId: 'avatar2', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '3', name: 'Thays', avatarId: 'avatar3', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '4', name: 'Mercia', avatarId: 'avatar4', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
-  { id: '5', name: 'Joisse', avatarId: 'avatar5', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
+const store1Id = 'supermoda-catu';
+const store2Id = 'supermoda-premium';
+
+const initialSellersStore1: Seller[] = [
+  { id: '1', name: 'Val', avatarId: 'avatar1', vendas: 9250, pa: 1.65, ticketMedio: 188, corridinhaDiaria: 50 },
+  { id: '2', name: 'Rose', avatarId: 'avatar2', vendas: 8100, pa: 1.55, ticketMedio: 182, corridinhaDiaria: 0 },
+  { id: '3', name: 'Thays', avatarId: 'avatar3', vendas: 12500, pa: 2.1, ticketMedio: 205, corridinhaDiaria: 100 },
+  { id: '4', name: 'Mercia', avatarId: 'avatar4', vendas: 7500, pa: 1.4, ticketMedio: 170, corridinhaDiaria: 20 },
+  { id: '5', name: 'Joisse', avatarId: 'avatar5', vendas: 10100, pa: 1.95, ticketMedio: 191, corridinhaDiaria: 0 },
   { id: '6', name: 'Dajila', avatarId: 'avatar6', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0 },
 ];
 
-const initialStore: Store = { id: 'supermoda-catu', name: 'SUPERMODA CATU'};
+const initialSellersStore2: Seller[] = [
+    { id: '10', name: 'Carlos', avatarId: 'avatar7', vendas: 15000, pa: 2.5, ticketMedio: 220, corridinhaDiaria: 150 },
+    { id: '11', name: 'Beatriz', avatarId: 'avatar8', vendas: 9800, pa: 1.8, ticketMedio: 195, corridinhaDiaria: 0 },
+];
+
 
 export function getInitialState(): AppState {
     return {
-        stores: [initialStore],
+        stores: [
+            { id: store1Id, name: 'SUPERMODA CATU' },
+            { id: store2Id, name: 'SUPERMODA PREMIUM' },
+        ],
         sellers: {
-            [initialStore.id]: initialSellers
+            [store1Id]: initialSellersStore1,
+            [store2Id]: initialSellersStore2,
         },
         goals: {
             'default': defaultGoals,
-            [initialStore.id]: defaultGoals
+            [store1Id]: defaultGoals,
+            [store2Id]: { ...defaultGoals, metaMinha: 10000, meta: 12000, metona: 15000, metaLendaria: 20000 },
         },
         incentives: {
-            [initialStore.id]: {}
+            [store1Id]: {},
+            [store2Id]: {},
         },
     }
 }
-
-function migrateV1State(v1State: any): AppState {
-    const initialState = getInitialState();
-    const storeId = initialState.stores[0].id;
-
-    if (v1State && v1State.sellers) {
-        initialState.sellers[storeId] = v1State.sellers;
-    }
-    
-    const goals: Partial<Goals> = {};
-    for (const key in defaultGoals) {
-        if (v1State && typeof v1State[key] === 'number') {
-            (goals as any)[key] = v1State[key];
-        } else {
-            (goals as any)[key] = (defaultGoals as any)[key];
-        }
-    }
-    initialState.goals[storeId] = goals as Goals;
-
-    // v1 did not store incentives, so it starts empty.
-    initialState.incentives[storeId] = {};
-    
-    return initialState;
-}
-
 
 export function loadState(): AppState {
     if (typeof window === 'undefined') {
         return getInitialState();
     }
     try {
-        const v1StateRaw = localStorage.getItem("goalGetterState");
         const v2StateRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
 
         if (v2StateRaw) {
@@ -154,14 +141,6 @@ export function loadState(): AppState {
             }
         }
         
-        if (v1StateRaw) {
-            const parsedV1 = JSON.parse(v1StateRaw);
-            const migratedState = migrateV1State(parsedV1);
-            saveState(migratedState); // Save migrated state to v2 key
-            localStorage.removeItem("goalGetterState"); // Remove old state
-            return migratedState;
-        }
-
         return getInitialState();
     } catch (error) {
         console.error("Could not load state from localStorage", error);

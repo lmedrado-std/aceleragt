@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { PlusCircle, KeyRound, Trash2, Home } from "lucide-react";
+import { PlusCircle, KeyRound, Trash2, Home, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +47,11 @@ export default function AdminPage() {
     setLoading(false);
   }, [router]);
 
+  const reloadState = () => {
+    const loadedState = loadState();
+    setState(loadedState);
+  }
+
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
       toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
@@ -63,7 +68,7 @@ export default function AdminPage() {
       incentives: { ...currentState.incentives, [newStoreId]: {} }
     };
     saveState(newState);
-    setState(newState); // Update local state to re-render
+    reloadState(); // Force re-read from localStorage
     setNewStoreName("");
     toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
   };
@@ -80,7 +85,7 @@ export default function AdminPage() {
     delete newState.goals[id];
     delete newState.incentives[id];
     saveState(newState);
-    setState(newState); // Update UI
+    reloadState(); // Force re-read from localStorage
     toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
   };
 
@@ -147,12 +152,19 @@ export default function AdminPage() {
                     {state?.stores.map((store) => (
                         <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
                             <span className="font-medium">{store.name}</span>
-                            <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
-                                <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            <div className="flex items-center">
+                                <Button asChild variant="ghost" size="sm">
+                                  <Link href={`/loja/${store.id}`}>
+                                    Ir para Loja <ArrowRight className="ml-2 h-4 w-4"/>
+                                  </Link>
+                                </Button>
+                                <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                    <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -179,7 +191,7 @@ export default function AdminPage() {
         
         <div className="text-center mt-8">
             <Button variant="link" asChild>
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+            <Link href="/login" onClick={() => sessionStorage.removeItem('adminAuthenticated')} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                 Sair do Modo Administrador
             </Link>
             </Button>

@@ -34,7 +34,7 @@ function LoginComponent() {
         title: 'Saída segura!',
         description: 'Você saiu do modo de administrador.',
     });
-    // Do not redirect, let the user stay on the login page.
+    router.push('/');
   }
 
   const handleSubmit = (e: React.FormEvent) => {
