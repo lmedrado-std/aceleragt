@@ -193,6 +193,18 @@ const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {l
     )
 }
 
+const EmptyIncentives = () => (
+    <div className="text-center py-10 text-muted-foreground">
+        <Award className="mx-auto h-12 w-12" />
+        <p className="mt-4 font-semibold">
+            Seus incentivos não foram calculados ainda.
+        </p>
+        <p className="text-sm">
+            Peça ao administrador para salvar e calcular as metas.
+        </p>
+    </div>
+);
+
 export function ProgressDisplay({ salesData, incentives, rankings, loading, themeColor }: ProgressDisplayProps) {
   const {
     vendas,
@@ -331,9 +343,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                 <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} achieved={lendariaAchieved} isActive={lendariaAchieved} />
             </div>
         ): (
-             <div className="text-center py-4 text-muted-foreground">
-                <p>Nenhum cálculo de incentivo encontrado.</p>
-            </div>
+             <EmptyIncentives />
         )}
 
         <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 pt-4">
@@ -414,12 +424,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
               </div>
             </div>
           ) : (
-            <div className="text-center py-10 text-muted-foreground">
-              <Award className="mx-auto h-12 w-12" />
-              <p className="mt-4">
-                Clique em "Salvar Metas e Calcular" no painel de admin para ver seus incentivos.
-              </p>
-            </div>
+            <EmptyIncentives />
           )}
         </div>
 
