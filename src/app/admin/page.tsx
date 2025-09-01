@@ -75,30 +75,29 @@ export default function AdminPage() {
   };
 
   const handleRemoveStore = (id: string) => {
-    setState(currentState => {
-        if (!currentState) return null;
+    const currentState = state;
+    if (!currentState) return;
 
-        if (currentState.stores.length <= 1) {
-            toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-            return currentState;
-        }
+    if (currentState.stores.length <= 1) {
+        toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
+        return;
+    }
 
-        const newState = { ...currentState };
-        const storeToRemove = newState.stores.find(s => s.id === id);
-        
-        newState.stores = newState.stores.filter(s => s.id !== id);
-        delete newState.sellers[id];
-        delete newState.goals[id];
-        delete newState.incentives[id];
-        
-        saveState(newState);
-        
-        if (storeToRemove) {
-          toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
-        }
-        
-        return newState;
-    });
+    const storeToRemove = currentState.stores.find(s => s.id === id);
+    const newState: AppState = {
+        ...currentState,
+        stores: currentState.stores.filter(s => s.id !== id),
+    };
+    delete newState.sellers[id];
+    delete newState.goals[id];
+    delete newState.incentives[id];
+    
+    saveState(newState);
+    setState(newState); // Update the state safely
+    
+    if (storeToRemove) {
+      toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
+    }
   };
 
   const handleChangePassword = () => {
