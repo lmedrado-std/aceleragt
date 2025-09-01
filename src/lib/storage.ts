@@ -126,6 +126,33 @@ export function getInitialState(): AppState {
     }
 }
 
+function mergeWithInitialState(savedState: AppState): AppState {
+    const initialState = getInitialState();
+    
+    // Merge stores
+    const savedStoreIds = new Set(savedState.stores.map(s => s.id));
+    const storesToMerge = initialState.stores.filter(s => !savedStoreIds.has(s.id));
+    if (storesToMerge.length > 0) {
+        savedState.stores = [...savedState.stores, ...storesToMerge];
+        
+        // Add corresponding data for new stores
+        for (const store of storesToMerge) {
+            if (!savedState.sellers[store.id]) {
+                savedState.sellers[store.id] = initialState.sellers[store.id] || [];
+            }
+            if (!savedState.goals[store.id]) {
+                savedState.goals[store.id] = initialState.goals[store.id] || defaultGoals;
+            }
+            if (!savedState.incentives[store.id]) {
+                savedState.incentives[store.id] = initialState.incentives[store.id] || {};
+            }
+        }
+    }
+
+    return savedState;
+}
+
+
 export function loadState(): AppState {
     if (typeof window === 'undefined') {
         return getInitialState();
@@ -134,14 +161,18 @@ export function loadState(): AppState {
         const v2StateRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
 
         if (v2StateRaw) {
-            const parsed = JSON.parse(v2StateRaw);
+            const parsed = JSON.parse(v2StateRaw) as AppState;
             // Basic validation
             if (parsed && parsed.stores && parsed.sellers) {
-                return parsed;
+                // Ensure default stores are present
+                return mergeWithInitialState(parsed);
             }
         }
         
-        return getInitialState();
+        const initialState = getInitialState();
+        saveState(initialState);
+        return initialState;
+
     } catch (error) {
         console.error("Could not load state from localStorage", error);
         return getInitialState();
