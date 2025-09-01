@@ -18,9 +18,7 @@ import {
   Calculator,
   Home,
   ChevronRight,
-  Target,
-  PlusCircle,
-  KeyRound
+  Target
 } from "lucide-react";
 
 import {
@@ -66,7 +64,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Incentives, getInitialState, Goals, AppState, Store, setAdminPassword } from "@/lib/storage";
+import { loadState, saveState, Seller, Incentives, getInitialState, Goals } from "@/lib/storage";
 
 
 const sellerSchema = z.object({
@@ -81,8 +79,6 @@ const sellerSchema = z.object({
 
 const formSchema = z.object({
   newSellerName: z.string(),
-  newStoreName: z.string(),
-  newAdminPassword: z.string(),
   goals: z.object({
     metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -143,7 +139,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeName, setStoreName] = useState('');
-  const [allStores, setAllStores] = useState<Store[]>([]);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -156,8 +151,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const state = loadState();
       return {
         newSellerName: "",
-        newStoreName: "",
-        newAdminPassword: "",
         goals: state.goals[storeId] || state.goals.default,
         sellers: state.sellers[storeId] || [],
       }
@@ -182,7 +175,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const state = loadState();
     const store = state.stores.find(s => s.id === storeId);
     setStoreName(store?.name || 'Loja não encontrada');
-    setAllStores(state.stores);
 
     const tab = getActiveTab();
     
@@ -259,7 +251,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       });
 
       setIncentives(storeIncentives);
-      setAllStores(state.stores);
       calculateRankings(storeSellers, storeIncentives);
 
     } catch (error) {
@@ -327,60 +318,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const newTab = updatedSellers.length > 0 ? updatedSellers[0].id : "admin";
     router.push(`/dashboard/${storeId}?tab=${newTab}`);
   }
-
-  const handleAddStore = () => {
-    const newStoreName = getValues("newStoreName");
-    if (!newStoreName.trim()) {
-        toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
-        return;
-    }
-    const state = loadState();
-    const newStoreId = new Date().toISOString();
-    const newStore: Store = { id: newStoreId, name: newStoreName };
-    const newState: AppState = {
-        ...state,
-        stores: [...state.stores, newStore],
-        sellers: { ...state.sellers, [newStoreId]: [] },
-        goals: { ...state.goals, [newStoreId]: state.goals.default || getInitialState().goals.default },
-        incentives: { ...state.incentives, [newStoreId]: {} }
-    };
-    saveState(newState);
-    setAllStores(newState.stores); // Update local state for UI
-    setValue("newStoreName", "");
-    toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
-    // No longer redirecting automatically to avoid race condition. User can click the new store.
-  };
-    
-  const handleRemoveStore = (id: string) => {
-    const state = loadState();
-    if (state.stores.length <= 1) {
-         toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-        return;
-    }
-    const newState = { ...state };
-    newState.stores = newState.stores.filter(s => s.id !== id);
-    delete newState.sellers[id];
-    delete newState.goals[id];
-    delete newState.incentives[id];
-    saveState(newState);
-    setAllStores(newState.stores); // Update UI
-    toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
-    if (storeId === id) {
-      router.push('/');
-    }
-  };
-
-  const handleChangePassword = () => {
-    const newPassword = getValues("newAdminPassword");
-    if (newPassword.length < 4) {
-      toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
-      return;
-    }
-    setAdminPassword(newPassword);
-    setValue("newAdminPassword", "");
-    toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
-  };
-
 
   const startEditing = (sellerId: string) => setEditingSellerId(sellerId);
   const cancelEditing = () => setEditingSellerId(null);
@@ -470,7 +407,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 {storeName}
               </h1>
               <p className="text-muted-foreground">
-                Acompanhe suas metas e maximize seus ganhos.
+                Acompanhe as metas e os ganhos da equipe.
               </p>
             </div>
         </div>
@@ -484,7 +421,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           <Button asChild variant="ghost">
             <Link href={`/loja/${storeId}`}>
               <ChevronRight className="mr-2 h-4 w-4" />
-              Página da Loja
+              Painel da Loja
             </Link>
           </Button>
         </div>
@@ -513,7 +450,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                 </TabsList>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Painel do Administrador</p>
+                                <p>Painel do Administrador da Loja</p>
                             </TooltipContent>
                         </Tooltip>
                     )}
@@ -632,56 +569,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                                     {isPending ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando...</>) : "Salvar Metas e Calcular Todos os Incentivos"}
                                     <Calculator className="ml-2 h-5 w-5"/>
                                 </Button>
-
-                                <Separator />
-
-                                <div>
-                                <CardTitle>Administração Global</CardTitle>
-                                <CardDescription>Gerencie todas as lojas e configurações do sistema.</CardDescription>
-                                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <Card>
-                                    <CardHeader><CardTitle>Gerenciar Lojas</CardTitle></CardHeader>
-                                    <CardContent>
-                                      <div className="space-y-2 mb-4">
-                                        <FormLabel htmlFor="new-store">Adicionar Nova Loja</FormLabel>
-                                        <div className="flex items-center gap-2">
-                                          <FormField control={form.control} name="newStoreName" render={({ field }) => ( <FormItem className="flex-grow"><FormControl><Input placeholder="Ex: SUPERMODA ITABUNA" {...field} /></FormControl></FormItem> )}/>
-                                          <Button type="button" onClick={handleAddStore}><PlusCircle/></Button>
-                                        </div>
-                                      </div>
-                                      <Separator className="my-4"/>
-                                      <FormLabel>Lojas Atuais</FormLabel>
-                                      <div className="space-y-2 mt-2 max-h-40 overflow-y-auto pr-2">
-                                          {allStores.map((store) => (
-                                              <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
-                                                  <span className="font-medium">{store.name}</span>
-                                                  <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                      <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
-                                                      <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                  </AlertDialog>
-                                              </div>
-                                          ))}
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                  <Card>
-                                    <CardHeader><CardTitle>Segurança</CardTitle></CardHeader>
-                                    <CardContent>
-                                      <div className="space-y-2">
-                                        <FormLabel htmlFor="new-password">Alterar Senha de Administrador</FormLabel>
-                                        <FormField control={form.control} name="newAdminPassword" render={({ field }) => (
-                                          <FormItem>
-                                            <FormControl><Input type="password" placeholder="Pelo menos 4 caracteres" {...field} /></FormControl>
-                                          </FormItem>
-                                        )}/>
-                                      </div>
-                                      <Button onClick={handleChangePassword} className="w-full mt-4"><KeyRound/> Alterar Senha</Button>
-                                    </CardContent>
-                                  </Card>
-                                </div>
-                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>

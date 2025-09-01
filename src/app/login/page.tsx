@@ -20,8 +20,24 @@ function LoginComponent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuthenticated');
+    toast({
+        title: 'Saída segura!',
+        description: 'Você saiu do modo de administrador.',
+    });
+    router.push('/');
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // If user clicks the button and is already logged in, log them out.
+    if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+        handleLogout();
+        return;
+    }
+    
     setIsSubmitting(true);
     
     const adminPassword = getAdminPassword();
@@ -37,14 +53,7 @@ function LoginComponent() {
       if (redirectUrl) {
         router.push(redirectUrl);
       } else {
-        const state = loadState();
-        // Redirect to the first store's dashboard as a default
-        const firstStoreId = state.stores.length > 0 ? state.stores[0].id : null;
-        if (firstStoreId) {
-            router.push(`/dashboard/${firstStoreId}?tab=admin`);
-        } else {
-            router.push('/'); // Fallback to home if no stores exist
-        }
+        router.push('/');
       }
     } else {
       toast({
@@ -55,6 +64,8 @@ function LoginComponent() {
       setIsSubmitting(false);
     }
   };
+
+  const isAdmin = typeof window !== 'undefined' && sessionStorage.getItem('adminAuthenticated') === 'true';
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
@@ -71,26 +82,28 @@ function LoginComponent() {
         <Logo />
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle>Acesso Restrito</CardTitle>
+            <CardTitle>{isAdmin ? "Modo Administrador" : "Acesso Restrito"}</CardTitle>
             <CardDescription>
-              Por favor, insira a senha de administrador para continuar.
+              {isAdmin ? "Você já está autenticado." : "Por favor, insira a senha de administrador para continuar."}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="********"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Verificando...' : 'Entrar'}
+             {!isAdmin && (
+               <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="********"
+                    required
+                  />
+                </div>
+              )}
+              <Button type="submit" className="w-full" disabled={isSubmitting && !isAdmin}>
+                {isAdmin ? 'Sair do Modo Administrador' : (isSubmitting ? 'Verificando...' : 'Entrar')}
                 <KeyRound className="ml-2 h-4 w-4" />
               </Button>
             </form>
