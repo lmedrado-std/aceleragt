@@ -88,42 +88,22 @@ const defaultGoals: Goals = {
   ticketMedioPrize4: 20,
 };
 
-const store1Id = 'supermoda-catu';
-const store2Id = 'supermoda-premium';
-
-const initialSellersStore1: Seller[] = [
-  { id: 'seller-1-uuid', name: 'Val', avatarId: 'avatar1', vendas: 9250, pa: 1.65, ticketMedio: 188, corridinhaDiaria: 50, password: 'val' },
-  { id: 'seller-2-uuid', name: 'Rose', avatarId: 'avatar2', vendas: 8100, pa: 1.55, ticketMedio: 182, corridinhaDiaria: 0, password: 'rose' },
-  { id: 'seller-3-uuid', name: 'Thays', avatarId: 'avatar3', vendas: 12500, pa: 2.1, ticketMedio: 205, corridinhaDiaria: 100, password: 'thays' },
-  { id: 'seller-4-uuid', name: 'Mercia', avatarId: 'avatar4', vendas: 7500, pa: 1.4, ticketMedio: 170, corridinhaDiaria: 20, password: 'mercia' },
-  { id: 'seller-5-uuid', name: 'Joisse', avatarId: 'avatar5', vendas: 10100, pa: 1.95, ticketMedio: 191, corridinhaDiaria: 0, password: 'joisse' },
-  { id: 'seller-6-uuid', name: 'Dajila', avatarId: 'avatar6', vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0, password: 'dajila' },
-];
-
-const initialSellersStore2: Seller[] = [
-    { id: 'seller-7-uuid', name: 'Carlos', avatarId: 'avatar7', vendas: 15000, pa: 2.5, ticketMedio: 220, corridinhaDiaria: 150, password: 'carlos' },
-    { id: 'seller-8-uuid', name: 'Beatriz', avatarId: 'avatar8', vendas: 9800, pa: 1.8, ticketMedio: 195, corridinhaDiaria: 0, password: 'beatriz' },
-];
-
 
 export function getInitialState(): AppState {
+    const store1Id = 'minha-primeira-loja';
     return {
         stores: [
-            { id: store1Id, name: 'SUPERMODA CATU', themeColor: '#ef4444' },
-            { id: store2Id, name: 'SUPERMODA PREMIUM', themeColor: '#8b5cf6' },
+            { id: store1Id, name: 'Minha Loja', themeColor: '#3b82f6' },
         ],
         sellers: {
-            [store1Id]: initialSellersStore1,
-            [store2Id]: initialSellersStore2,
+            [store1Id]: [],
         },
         goals: {
             'default': defaultGoals,
             [store1Id]: defaultGoals,
-            [store2Id]: { ...defaultGoals, metaMinha: 10000, meta: 12000, metona: 15000, metaLendaria: 20000 },
         },
         incentives: {
             [store1Id]: {},
-            [store2Id]: {},
         },
     }
 }
@@ -131,29 +111,24 @@ export function getInitialState(): AppState {
 function mergeWithInitialState(savedState: AppState): AppState {
     const initialState = getInitialState();
     
-    // Merge stores
-    const savedStoreIds = new Set(savedState.stores.map(s => s.id));
-    const storesToMerge = initialState.stores.filter(s => !savedStoreIds.has(s.id));
-    if (storesToMerge.length > 0) {
-        savedState.stores = [...savedState.stores, ...storesToMerge];
-        
-        for (const store of storesToMerge) {
-            if (!savedState.sellers[store.id]) {
-                savedState.sellers[store.id] = initialState.sellers[store.id] || [];
-            }
-            if (!savedState.goals[store.id]) {
-                savedState.goals[store.id] = initialState.goals[store.id] || defaultGoals;
-            }
-            if (!savedState.incentives[store.id]) {
-                savedState.incentives[store.id] = initialState.incentives[store.id] || {};
-            }
-        }
+    // If there are no stores, it's likely old state or fresh start, begin with initial.
+    if (!savedState.stores || savedState.stores.length === 0) {
+        return initialState;
     }
     
     // Ensure all entities have necessary fields
     savedState.stores.forEach(store => {
       if (!store.themeColor) {
         store.themeColor = '#3b82f6'; 
+      }
+      if (!savedState.sellers[store.id]) {
+        savedState.sellers[store.id] = [];
+      }
+      if (!savedState.goals[store.id]) {
+        savedState.goals[store.id] = defaultGoals;
+      }
+      if (!savedState.incentives[store.id]) {
+        savedState.incentives[store.id] = {};
       }
     });
 
@@ -220,5 +195,3 @@ export function setAdminPassword(password: string) {
     }
     localStorage.setItem(ADMIN_PASSWORD_KEY, password);
 }
-
-    
