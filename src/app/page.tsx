@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -7,7 +6,6 @@ import { ArrowRight, Store as StoreIcon, Lock, Loader2, FolderOpen } from "lucid
 import { useEffect, useState } from "react";
 import { AppState, loadState } from "@/lib/storage";
 import { motion } from "framer-motion";
-import Image from "next/image";
 
 export default function Home() {
   const [state, setState] = useState<AppState | null>(null);
@@ -21,23 +19,21 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary via-secondary to-primary/80">
-        <Loader2 className="h-16 w-16 animate-spin text-white" />
-        <p className="mt-4 text-white/80">Carregando...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Carregando...</p>
       </div>
     );
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary via-secondary to-neutral-light p-6">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
       <motion.div 
         className="flex flex-col items-center gap-8 max-w-4xl w-full"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Logo */}
-        <Image src="https://i.ibb.co/3kC2Vv8/corridinha-gt-banner.png" alt="Supermoda" width={180} height={80} priority />
 
         {/* Título */}
         <div className="text-center space-y-2">
