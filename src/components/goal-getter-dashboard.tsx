@@ -67,7 +67,7 @@ export const formSchema = z.object({
     paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -114,12 +114,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, reset, formState: { isDirty } } = form;
   const currentValues = watch();
 
-  const getActiveTab = useCallback(() => {
-    const sellers = form.getValues('sellers');
-    return searchParams.get('tab') || (sellers?.[0]?.id ?? 'admin');
-  }, [searchParams, form]);
-  
-  const [activeTab, setActiveTab] = useState(getActiveTab);
+  const [activeTab, setActiveTab] = useState(() => {
+    const state = loadState();
+    const sellers = state.sellers[storeId] || [];
+    return sellers?.[0]?.id ?? 'admin';
+  });
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -235,8 +234,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         return;
     }
     
-    setActiveTab(tabToActivate);
-  }, [storeId, router, toast, searchParams]);
+    if (tabToActivate !== activeTab) {
+        setActiveTab(tabToActivate);
+    }
+  }, [storeId, router, toast, searchParams, activeTab]);
 
   // Save state on change
   useEffect(() => {
@@ -414,3 +415,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
