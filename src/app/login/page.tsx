@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Logo } from '@/components/logo';
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
@@ -77,7 +76,6 @@ function LoginComponent() {
             </Button>
         </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Logo />
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle>Acesso Restrito</CardTitle>
