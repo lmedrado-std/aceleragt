@@ -413,5 +413,3 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     </Card>
   );
 }
-
-    
