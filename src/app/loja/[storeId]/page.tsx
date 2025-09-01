@@ -54,7 +54,8 @@ export default function StoreHomePage() {
 
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
+       <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: LOJA (loja/[storeId]/page.tsx)</div>
        <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
                 <Link href="/">

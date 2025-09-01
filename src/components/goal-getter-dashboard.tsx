@@ -453,7 +453,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
 
   return (
-    <div className="container mx-auto p-4 py-8 md:p-8">
+    <div className="container mx-auto p-4 py-8 md:p-8 relative">
+       <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: PAINEL (goal-getter-dashboard.tsx)</div>
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
             <Logo />
