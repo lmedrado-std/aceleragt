@@ -4,9 +4,9 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
-import { PlusCircle, KeyRound, Trash2, Home, ArrowRight } from "lucide-react";
+import { PlusCircle, KeyRound, Trash2, Home, ArrowRight, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState } from "@/lib/storage";
+import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,12 +63,12 @@ export default function AdminPage() {
     const newState: AppState = {
       ...currentState,
       stores: [...currentState.stores, newStore],
-      sellers: { ...currentState.sellers, [newStoreId]: [] },
+      sellers: { ...currentState.sellers, [newStoreId]: [] as Seller[] },
       goals: { ...currentState.goals, [newStoreId]: currentState.goals.default || getInitialState().goals.default },
       incentives: { ...currentState.incentives, [newStoreId]: {} }
     };
     saveState(newState);
-    reloadState(); // Force re-read from localStorage
+    reloadState(); 
     setNewStoreName("");
     toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
   };
@@ -85,7 +85,7 @@ export default function AdminPage() {
     delete newState.goals[id];
     delete newState.incentives[id];
     saveState(newState);
-    reloadState(); // Force re-read from localStorage
+    reloadState();
     toast({ title: "Loja removida", description: "A loja e todos os seus dados foram removidos." });
   };
 
@@ -99,6 +99,15 @@ export default function AdminPage() {
     toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuthenticated');
+    toast({
+        title: 'Saída segura!',
+        description: 'Você saiu do modo de administrador.',
+    });
+    router.push('/');
+  }
+
 
   if (loading) {
       return (
@@ -110,7 +119,7 @@ export default function AdminPage() {
 
   return (
     <main className="flex flex-col items-center min-h-screen bg-background p-8 relative">
-      <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: ADMIN GLOBAL (admin/page.tsx)</div>
+      <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: ADMIN GLOBAL (/admin/page.tsx)</div>
       <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
                 <Link href="/">
@@ -190,10 +199,9 @@ export default function AdminPage() {
         </Card>
         
         <div className="text-center mt-8">
-            <Button variant="link" asChild>
-            <Link href="/login" onClick={() => sessionStorage.removeItem('adminAuthenticated')} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+            <Button variant="link" onClick={handleLogout} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
                 Sair do Modo Administrador
-            </Link>
             </Button>
         </div>
       </div>

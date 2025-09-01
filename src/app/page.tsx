@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
-      <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: HOME (page.tsx)</div>
+      <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: HOME (/)</div>
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
         <Logo />
         <h1 className="text-5xl font-bold font-headline text-primary text-center">
@@ -56,7 +56,7 @@ export default function Home() {
 
         <div className="text-center mt-8">
           <Button variant="link" asChild>
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+            <Link href="/admin" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 Acesso Restrito de Administrador
             </Link>

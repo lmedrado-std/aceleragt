@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
-import { ArrowLeft, KeyRound } from 'lucide-react';
+import { ArrowLeft, KeyRound, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
 
@@ -20,32 +20,31 @@ function LoginComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  
+  const redirectUrl = searchParams.get('redirect') || '/admin';
 
   useEffect(() => {
-    // Check if admin is already logged in when component mounts
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
-  }, []);
+
+    // If user is already authenticated, redirect them away from the login page
+    if (adminAuthenticated) {
+        router.push(redirectUrl);
+    }
+  }, [router, redirectUrl]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuthenticated');
-    setIsAdmin(false); // Update state to reflect logout
+    setIsAdmin(false); 
     toast({
         title: 'Saída segura!',
         description: 'Você saiu do modo de administrador.',
     });
-    router.push('/');
+    router.push('/'); 
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // If user clicks the button and is already logged in, log them out.
-    if (isAdmin) {
-        handleLogout();
-        return;
-    }
-    
     setIsSubmitting(true);
     
     const adminPassword = getAdminPassword();
@@ -56,11 +55,7 @@ function LoginComponent() {
         title: 'Acesso concedido!',
         description: 'Bem-vindo, administrador.',
       });
-
-      // Default redirect to global admin page if no other redirect is specified
-      const redirectUrl = searchParams.get('redirect') || '/admin';
       router.push(redirectUrl);
-
     } else {
       toast({
         variant: 'destructive',
@@ -73,7 +68,7 @@ function LoginComponent() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
-       <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: LOGIN (login/page.tsx)</div>
+       <div className="absolute top-2 right-2 bg-yellow-200 text-yellow-800 text-xs font-bold p-1 rounded z-10">PÁGINA: LOGIN (/login/page.tsx)</div>
        <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
                 <Link href="/">
@@ -86,14 +81,13 @@ function LoginComponent() {
         <Logo />
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle>{isAdmin ? "Modo Administrador" : "Acesso Restrito"}</CardTitle>
+            <CardTitle>Acesso Restrito</CardTitle>
             <CardDescription>
-              {isAdmin ? "Você já está autenticado." : "Por favor, insira a senha de administrador para continuar."}
+                Por favor, insira a senha de administrador para continuar.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-             {!isAdmin && (
                <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
                   <Input
@@ -105,9 +99,8 @@ function LoginComponent() {
                     required
                   />
                 </div>
-              )}
-              <Button type="submit" className="w-full" disabled={isSubmitting && !isAdmin}>
-                {isAdmin ? 'Sair do Modo Administrador' : (isSubmitting ? 'Verificando...' : 'Entrar')}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? 'Verificando...' : 'Entrar'}
                 <KeyRound className="ml-2 h-4 w-4" />
               </Button>
             </form>
