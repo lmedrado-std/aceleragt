@@ -35,16 +35,16 @@ export default function Home() {
 
         <div className="text-center space-y-2">
           <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm">
-            Bem-vindo Corridinha GT
+             Corridinha GT 🚀
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Acompanhe o desempenho de suas vendas e impulsione suas metas!
+            Acompanhe o desempenho da sua loja e impulsione suas metas!
           </p>
         </div>
 
         <div className="w-full max-w-lg bg-white p-8 rounded-2xl shadow-lg border border-gray-200/80 mt-4">
           <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">
-            Selecione sua loja para começar 🚀
+            Selecione sua loja para começar
           </h2>
 
           {!state || state.stores.length === 0 ? (
