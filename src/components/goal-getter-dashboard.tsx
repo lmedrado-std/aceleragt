@@ -348,7 +348,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setAllStores(newState.stores); // Update local state for UI
     setValue("newStoreName", "");
     toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
-    router.push(`/loja/${newStoreId}`);
+    // No longer redirecting automatically to avoid race condition. User can click the new store.
   };
     
   const handleRemoveStore = (id: string) => {
@@ -476,15 +476,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline">
-            <Link href={`/loja/${storeId}`}>
-              <ChevronRight className="mr-2 h-4 w-4" />
-              Ir para a Loja
-            </Link>
-          </Button>
-          <Button asChild variant="ghost">
             <Link href="/">
               <Home className="mr-2 h-4 w-4" />
               Todas as Lojas
+            </Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href={`/loja/${storeId}`}>
+              <ChevronRight className="mr-2 h-4 w-4" />
+              Página da Loja
             </Link>
           </Button>
         </div>

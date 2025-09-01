@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { ArrowLeft, KeyRound } from 'lucide-react';
 import Link from 'next/link';
-import { getAdminPassword } from '@/lib/storage';
+import { getAdminPassword, loadState } from '@/lib/storage';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
@@ -32,9 +32,20 @@ function LoginComponent() {
         title: 'Acesso concedido!',
         description: 'Bem-vindo, administrador.',
       });
-      // Check if there's a redirect URL in the query params
+
       const redirectUrl = searchParams.get('redirect');
-      router.push(redirectUrl || '/'); // Redirect to the intended page or home
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else {
+        const state = loadState();
+        // Redirect to the first store's dashboard as a default
+        const firstStoreId = state.stores.length > 0 ? state.stores[0].id : null;
+        if (firstStoreId) {
+            router.push(`/dashboard/${firstStoreId}?tab=admin`);
+        } else {
+            router.push('/'); // Fallback to home if no stores exist
+        }
+      }
     } else {
       toast({
         variant: 'destructive',

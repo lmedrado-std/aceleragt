@@ -55,10 +55,10 @@ export default function StoreHomePage() {
 
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
+    const destination = `/dashboard/${storeId}?tab=admin`;
     if (isAdmin) {
-      router.push(`/dashboard/${storeId}?tab=admin`);
+      router.push(destination);
     } else {
-      const destination = `/dashboard/${storeId}?tab=admin`;
       router.push(`/login?redirect=${encodeURIComponent(destination)}`);
     }
   };
