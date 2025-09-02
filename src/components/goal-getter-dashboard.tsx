@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,12 +67,12 @@ export const formSchema = z.object({
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
   }),
   sellers: z.array(sellerSchema),
 });

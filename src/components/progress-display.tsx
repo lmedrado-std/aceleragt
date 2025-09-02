@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo } from "react";
@@ -34,7 +33,7 @@ export const ProgressDisplay: React.FC<Props> = ({ salesData, incentives }) => {
         </p>
       </div>
 
-      {incentives && (
+      {incentives ? (
         <div className="mt-4 space-y-3 border-t pt-4">
           <div className="flex justify-between items-center text-lg">
             <span className="font-semibold text-gray-700">🏆 Prêmio de Vendas:</span>
@@ -66,6 +65,11 @@ export const ProgressDisplay: React.FC<Props> = ({ salesData, incentives }) => {
               {formatCurrency(incentives.corridinhaDiariaBonus)}
             </strong>
           </div>
+        </div>
+      ) : (
+         <div className="text-center text-muted-foreground py-4">
+            <p>Nenhum incentivo calculado ainda.</p>
+            <p className="text-sm">Clique em "Salvar e Calcular" para ver os resultados.</p>
         </div>
       )}
     </div>

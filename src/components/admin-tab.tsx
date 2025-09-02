@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm, UseFormReturn, useWatch } from "react-hook-form";
@@ -11,11 +10,12 @@ import {
   Target,
   Eye,
   EyeOff,
-  Calculator
+  Calculator,
+  Loader2,
 } from "lucide-react";
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FormValues, formSchema } from "./goal-getter-dashboard";
+import { FormValues } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,8 +48,6 @@ import {
 import { Seller, Goals, Incentives } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
-import { Loader2 } from "lucide-react";
-
 
 const goalTiers = [
     { id: 'Nível 1', goal: 'paGoal1', prize: 'paPrize1'},
