@@ -20,7 +20,8 @@ import {
   Zap,
   Trophy,
   Target,
-  Rocket
+  Rocket,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -226,6 +227,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     vendas,
     pa,
     ticketMedio,
+    corridinhaDiaria,
     metaMinha,
     meta,
     metona,
@@ -435,6 +437,15 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                 formatValue={formatCurrency}
                 themeColor={themeColor}
               />
+               <ProgressItem
+                icon={<TrendingUp className="w-5 h-5" />}
+                title="Corridinha Diária"
+                currentValue={corridinhaDiaria}
+                goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1}
+                prizeValue={incentives?.corridinhaDiariaBonus || 0}
+                formatValue={formatCurrency}
+                themeColor={themeColor}
+              />
             </CardContent>
           </Card>
 
@@ -456,4 +467,3 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     </Card>
   );
 }
-
