@@ -66,7 +66,7 @@ export const formSchema = z.object({
     paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    paPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -130,25 +130,26 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   });
   
   function getInitialStateForForm(): FormValues {
-      const state = loadState();
+     if (typeof window === "undefined") {
       return {
         newSellerName: "",
         newSellerPassword: "",
-        goals: state.goals[storeId] || state.goals.default,
-        sellers: state.sellers[storeId] || [],
-      }
+        goals: getInitialState().goals.default,
+        sellers: [],
+      };
+    }
+    const state = loadState();
+    return {
+      newSellerName: "",
+      newSellerPassword: "",
+      goals: state.goals[storeId] || state.goals.default,
+      sellers: state.sellers[storeId] || [],
+    }
   }
 
   const { watch, reset, getValues } = form;
 
-  const [activeTab, setActiveTab] = useState(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl) return tabFromUrl;
-
-    const state = loadState();
-    const sellers = state.sellers[storeId] || [];
-    return sellers?.[0]?.id ?? 'admin';
-  });
+  const [activeTab, setActiveTab] = useState<string>("loading");
 
   const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
     const newRankings: Rankings = {};
@@ -203,7 +204,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         setIncentives(newIncentives);
         calculateRankings(values.sellers, newIncentives);
         
-        // Save state after calculation
         const currentState = loadState();
         currentState.sellers[storeId] = values.sellers || [];
         currentState.goals[storeId] = values.goals as Goals;
@@ -220,52 +220,31 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     });
   }, [storeId, calculateRankings, toast]);
   
+  useEffect(() => {
+    setMounted(true);
+    const state = loadState();
+    const store = state.stores.find(s => s.id === storeId);
 
-  const loadDataForStore = useCallback(() => {
-    try {
-      const state = loadState();
-      const store = state.stores.find(s => s.id === storeId);
-      if (!store) {
-        setTimeout(() => toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." }), 0);
-        router.push('/');
-        return;
-      }
-       setCurrentStore(store);
-      if (store.themeColor) {
-        document.documentElement.style.setProperty('--primary', '195 89% 52%');
-      }
-      
-      const storeSellers = state.sellers[storeId] || [];
-      const storeGoals = state.goals[storeId] || state.goals.default;
-      const storeIncentives = state.incentives[storeId] || {};
-
-      reset({
-        ...form.getValues(),
-        sellers: storeSellers,
-        goals: storeGoals,
-      });
-
-      setIncentives(storeIncentives);
-      calculateAllIncentives({ ...getValues(), sellers: storeSellers, goals: storeGoals, newSellerName: "", newSellerPassword: "" });
-
-    } catch (error) {
-        console.error("Failed to load state from localStorage", error);
+    if (!store) {
+      setTimeout(() => toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." }), 0);
+      router.push('/');
+      return;
     }
-  }, [storeId, reset, router, toast, form, getValues, calculateAllIncentives]);
-  
-  useEffect(() => {
-      loadDataForStore();
-  }, [loadDataForStore]);
+    
+    setCurrentStore(store);
+    
+    const initialFormValues = getInitialStateForForm();
+    reset(initialFormValues);
+    
+    const initialIncentives = state.incentives[storeId] || {};
+    setIncentives(initialIncentives);
+    calculateRankings(initialFormValues.sellers, initialIncentives);
 
-  // Auth and Tab logic
-  useEffect(() => {
+    // Auth and Tab logic
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
 
-    const state = loadState();
-    const tabFromUrl = searchParams.get('tab');
     let currentLoggedInSeller: string | null = null;
-
     if (!adminAuthenticated) {
         (state.sellers[storeId] || []).forEach(seller => {
             if(sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === 'true') {
@@ -274,13 +253,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         });
         setLoggedInSellerId(currentLoggedInSeller);
     }
-
+    
     const sellersForStore = state.sellers[storeId] || [];
+    const tabFromUrl = searchParams.get('tab');
     const tabToActivate = tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : 'admin');
     
-    const sellerIsAuthenticated = (sellerId: string) => {
-        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
-    }
+    const sellerIsAuthenticated = (sellerId: string) => sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
 
     if (tabToActivate === 'admin') {
         if (!adminAuthenticated) {
@@ -288,7 +266,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             router.push(`/login?redirect=${encodeURIComponent(destination)}`);
             return;
         }
-    } else { // It's a seller tab
+    } else {
         if (!sellersForStore.find(s => s.id === tabToActivate)) {
              router.push(`/dashboard/${storeId}?tab=${sellersForStore[0]?.id || 'admin'}`);
              return;
@@ -305,11 +283,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         }
     }
     
-    if (tabToActivate !== activeTab) {
-        setActiveTab(tabToActivate);
-    }
-    setMounted(true);
-  }, [storeId, router, toast, searchParams, activeTab]);
+    setActiveTab(tabToActivate);
+  }, [storeId, reset, router, toast, searchParams, getInitialStateForForm, calculateRankings]);
 
   // Recalculate on form change
   useEffect(() => {
