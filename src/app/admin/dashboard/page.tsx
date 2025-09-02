@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { loadState, AppState, Seller } from '@/lib/storage';
+import { loadState, AppState, Seller, Incentives } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -136,7 +136,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex flex-col items-center gap-6 w-full max-w-7xl">
                 
-                <h1 className="text-4xl font-bold font-headline text-primary text-center">
+                <h1 className="text-4xl font-bold font-headline text-primary text-center mt-12 sm:mt-0">
                     Dashboard Geral
                 </h1>
                 <p className="text-lg text-muted-foreground text-center max-w-2xl">
@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
                             },
                          }} className="min-h-[250px] w-full">
                             <ResponsiveContainer width="100%" height={250}>
-                                <BarChart layout="vertical" data={storePerformance}>
+                                <BarChart layout="vertical" data={storePerformance} margin={{ right: 20 }}>
                                     <XAxis type="number" dataKey="totalSales" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} />
                                     <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={150} />
                                     <Tooltip 

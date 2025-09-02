@@ -11,7 +11,8 @@ import {
   Eye,
   EyeOff,
   Calculator,
-  Loader2
+  Loader2,
+  LineChart,
 } from "lucide-react";
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -48,6 +49,7 @@ import {
 import { Seller, Goals, Incentives } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
+import Link from "next/link";
 
 
 const goalTiers = [
@@ -63,7 +65,6 @@ const ticketMedioTiers = [
     { id: 'Nível 3', goal: 'ticketMedioGoal3', prize: 'ticketMedioPrize3' },
     { id: 'Nível 4', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
 ];
-
 
 interface AdminTabProps {
     form: UseFormReturn<FormValues>;
@@ -190,17 +191,17 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
             const newIncentives: Incentives = {};
 
             const goalsAsNumbers = Object.entries(currentFormValues.goals).reduce((acc, [key, value]) => {
-                acc[key as keyof Goals] = Number(value);
+                acc[key as keyof Goals] = Number(value) || 0;
                 return acc;
             }, {} as Goals);
 
 
             for (const seller of currentFormValues.sellers) {
                 const result = await incentiveProjection({
-                    vendas: Number(seller.vendas),
-                    pa: Number(seller.pa),
-                    ticketMedio: Number(seller.ticketMedio),
-                    corridinhaDiaria: Number(seller.corridinhaDiaria),
+                    vendas: Number(seller.vendas) || 0,
+                    pa: Number(seller.pa) || 0,
+                    ticketMedio: Number(seller.ticketMedio) || 0,
+                    corridinhaDiaria: Number(seller.corridinhaDiaria) || 0,
                     ...goalsAsNumbers
                 });
                 newIncentives[seller.id] = result;
@@ -337,6 +338,21 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                         <Card>
                             <CardHeader><h3 className="font-semibold text-lg text-primary">Metas de PA e Ticket Médio</h3></CardHeader>
                             <CardContent className="space-y-6">{renderGoalInputs("Metas de PA", goalTiers)}<Separator />{renderGoalInputs("Metas de Ticket Médio", ticketMedioTiers)}</CardContent>
+                        </Card>
+                        
+                        <Card>
+                            <CardHeader>
+                                <h3 className="font-semibold text-lg text-primary flex items-center gap-2">
+                                    <LineChart /> Dashboard Geral
+                                </h3>
+                                </CardHeader>
+                            <CardContent>
+                                <Button asChild className="w-full">
+                                    <Link href="/admin/dashboard">
+                                        Ver Relatórios Consolidados
+                                    </Link>
+                                </Button>
+                            </CardContent>
                         </Card>
                     </div>
                 </div>
