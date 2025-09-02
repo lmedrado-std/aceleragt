@@ -1,119 +1,129 @@
-import React, { useEffect, useState } from "react";
-import { calcularIncentivos } from "@/services/genkit"; // Ajuste conforme seu caminho
-import { toast } from "react-toastify";
 
-interface Incentivos {
-  metaMinhaPrize: number;
-  metaPrize: number;
-  metonaPrize: number;
-  legendariaBonusValorPremio: number;
-  paPrize1: number;
-  paPrize2: number;
-  paPrize3: number;
-  paPrize4: number;
-  ticketMedioPrize1: number;
-  ticketMedioPrize2: number;
-  ticketMedioPrize3: number;
-  ticketMedioPrize4: number;
-  corridinhaDiaria: number;
-}
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Goals, Seller } from "@/lib/storage";
 
 interface Props {
-  vendas: string | number;
-  pa: string | number;
-  ticketMedio: string | number;
-  corridinhaDiaria: string | number;
-  metas: any;
+  salesData: Partial<Seller> & { goals: Goals };
 }
 
-const ProgressDisplay: React.FC<Props> = ({ vendas, pa, ticketMedio, corridinhaDiaria, metas }) => {
-  const [incentivos, setIncentivos] = useState<Incentivos | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
+  const [ganhoTotal, setGanhoTotal] = useState<number>(0);
+  const [paPremio, setPaPremio] = useState<number>(0);
+  const [ticketPremio, setTicketPremio] = useState<number>(0);
+  const [corridinhaPremio, setCorridinhaPremio] = useState<number>(0);
+  const [vendasPremio, setVendasPremio] = useState<number>(0);
+  const [lendariaPremio, setLendariaPremio] = useState<number>(0);
+  const { toast } = useToast();
+
 
   useEffect(() => {
-    if (!vendas && !pa && !ticketMedio && !corridinhaDiaria) return;
+    try {
+      const vendasAtual = Number(salesData.vendas) || 0;
+      const paAtual = Number(salesData.pa) || 0;
+      const ticketAtual = Number(salesData.ticketMedio) || 0;
+      const corridinhaAtual = Number(salesData.corridinhaDiaria) || 0;
+      const metas = salesData.goals;
 
-    const fetchIncentivos = async () => {
-      try {
-        setLoading(true);
-
-        // Conversão para número para evitar erros do Genkit
-        const payload = {
-          vendas: Number(vendas) || 0,
-          pa: Number(pa) || 0,
-          ticketMedio: Number(ticketMedio) || 0,
-          corridinhaDiaria: Number(corridinhaDiaria) || 0,
-          metaMinha: Number(metas?.metaMinha) || 0,
-          meta: Number(metas?.meta) || 0,
-          metona: Number(metas?.metona) || 0,
-          metaLendaria: Number(metas?.metaLendaria) || 0,
-          legendariaBonusValorVenda: Number(metas?.legendariaBonusValorVenda) || 0,
-          legendariaBonusValorPremio: Number(metas?.legendariaBonusValorPremio) || 0,
-          metaMinhaPrize: Number(metas?.metaMinhaPrize) || 0,
-          metaPrize: Number(metas?.metaPrize) || 0,
-          metonaPrize: Number(metas?.metonaPrize) || 0,
-          paGoal1: Number(metas?.paGoal1) || 0,
-          paGoal2: Number(metas?.paGoal2) || 0,
-          paGoal3: Number(metas?.paGoal3) || 0,
-          paGoal4: Number(metas?.paGoal4) || 0,
-          paPrize1: Number(metas?.paPrize1) || 0,
-          paPrize2: Number(metas?.paPrize2) || 0,
-          paPrize3: Number(metas?.paPrize3) || 0,
-          paPrize4: Number(metas?.paPrize4) || 0,
-          ticketMedioGoal1: Number(metas?.ticketMedioGoal1) || 0,
-          ticketMedioGoal2: Number(metas?.ticketMedioGoal2) || 0,
-          ticketMedioGoal3: Number(metas?.ticketMedioGoal3) || 0,
-          ticketMedioGoal4: Number(metas?.ticketMedioGoal4) || 0,
-          ticketMedioPrize1: Number(metas?.ticketMedioPrize1) || 0,
-          ticketMedioPrize2: Number(metas?.ticketMedioPrize2) || 0,
-          ticketMedioPrize3: Number(metas?.ticketMedioPrize3) || 0,
-          ticketMedioPrize4: Number(metas?.ticketMedioPrize4) || 0,
-        };
-
-        const result = await calcularIncentivos(payload);
-
-        if (result?.error) {
-          toast.error("Erro de Cálculo: Não foi possível calcular os incentivos.");
-        } else {
-          setIncentivos(result);
-        }
-      } catch (error) {
-        console.error("Erro ao calcular incentivos:", error);
-        toast.error("Erro inesperado. Tente novamente.");
-      } finally {
-        setLoading(false);
+      let total = 0;
+      
+      let premioVendas = 0;
+      if (vendasAtual >= metas.metona) {
+        premioVendas = metas.metonaPrize;
+      } else if (vendasAtual >= metas.meta) {
+        premioVendas = metas.metaPrize;
+      } else if (vendasAtual >= metas.metaMinha) {
+        premioVendas = metas.metaMinhaPrize;
       }
-    };
+      setVendasPremio(premioVendas);
+      total += premioVendas;
 
-    fetchIncentivos();
-  }, [vendas, pa, ticketMedio, corridinhaDiaria, metas]);
+      let bonusLendaria = 0;
+      if (vendasAtual >= metas.metaLendaria && metas.legendariaBonusValorVenda > 0) {
+        bonusLendaria = Math.floor((vendasAtual - metas.metaLendaria) / metas.legendariaBonusValorVenda) * metas.legendariaBonusValorPremio;
+      }
+      setLendariaPremio(bonusLendaria);
+      total += bonusLendaria;
+      
+      let premioPA = 0;
+      if (paAtual >= metas.paGoal4) premioPA = metas.paPrize4;
+      else if (paAtual >= metas.paGoal3) premioPA = metas.paPrize3;
+      else if (paAtual >= metas.paGoal2) premioPA = metas.paPrize2;
+      else if (paAtual >= metas.paGoal1) premioPA = metas.paPrize1;
+      total += premioPA;
+      setPaPremio(premioPA);
 
-  if (loading) {
-    return <p>Calculando incentivos...</p>;
+      let premioTicket = 0;
+      if (ticketAtual >= metas.ticketMedioGoal4) premioTicket = metas.ticketMedioPrize4;
+      else if (ticketAtual >= metas.ticketMedioGoal3) premioTicket = metas.ticketMedioPrize3;
+      else if (ticketAtual >= metas.ticketMedioGoal2) premioTicket = metas.ticketMedioPrize2;
+      else if (ticketAtual >= metas.ticketMedioGoal1) premioTicket = metas.ticketMedioPrize1;
+      total += premioTicket;
+      setTicketPremio(premioTicket);
+
+      const premioCorridinha = corridinhaAtual || 0;
+      total += premioCorridinha;
+      setCorridinhaPremio(premioCorridinha);
+
+      setGanhoTotal(total);
+    } catch (error) {
+      console.error("Erro ao calcular incentivos:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro de Cálculo",
+        description: "Não foi possível calcular os incentivos.",
+      });
+    }
+  }, [salesData, toast]);
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 
-  const ganhoTotal = (incentivos?.metaMinhaPrize || 0) +
-                     (incentivos?.metaPrize || 0) +
-                     (incentivos?.metonaPrize || 0) +
-                     (incentivos?.legendariaBonusValorPremio || 0) +
-                     (incentivos?.paPrize1 || 0) +
-                     (incentivos?.paPrize2 || 0) +
-                     (incentivos?.paPrize3 || 0) +
-                     (incentivos?.paPrize4 || 0) +
-                     (incentivos?.ticketMedioPrize1 || 0) +
-                     (incentivos?.ticketMedioPrize2 || 0) +
-                     (incentivos?.ticketMedioPrize3 || 0) +
-                     (incentivos?.ticketMedioPrize4 || 0) +
-                     (incentivos?.corridinhaDiaria || 0);
-
   return (
-    <div>
-      <h3>💰 Seu Ganho Total: R$ {ganhoTotal.toFixed(2)}</h3>
+    <div className="p-4 rounded-xl shadow-md bg-white border">
+      <div className="text-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-500">
+          Seu Ganho Total
+        </h3>
+        <p className="text-4xl font-bold text-green-600">
+          {formatCurrency(ganhoTotal)}
+        </p>
+      </div>
 
-      <div>
-        <p>🏆 PA: R$ {(incentivos?.paPrize1 || 0) + (incentivos?.paPrize2 || 0) + (incentivos?.paPrize3 || 0) + (incentivos?.paPrize4 || 0)}</p>
-        <p>🏆 Ticket Médio: R$ {(incentivos?.ticketMedioPrize1 || 0) + (incentivos?.ticketMedioPrize2 || 0) + (incentivos?.ticketMedioPrize3 || 0) + (incentivos?.ticketMedioPrize4 || 0)}</p>
-        <p>🏆 Corridinha: R$ {incentivos?.corridinhaDiaria || 0}</p>
+      <div className="mt-4 space-y-3 border-t pt-4">
+         <div className="flex justify-between items-center text-lg">
+          <span className="font-semibold text-gray-700">🏆 Prêmio de Vendas:</span>
+          <strong className="font-bold text-blue-600">
+            {formatCurrency(vendasPremio)}
+          </strong>
+        </div>
+         <div className="flex justify-between items-center text-lg">
+          <span className="font-semibold text-gray-700">✨ Bônus Lendária:</span>
+          <strong className="font-bold text-amber-500">
+            {formatCurrency(lendariaPremio)}
+          </strong>
+        </div>
+        <div className="flex justify-between items-center text-lg">
+          <span className="font-semibold text-gray-700">🏆 PA:</span>
+          <strong className="font-bold text-indigo-600">
+            {formatCurrency(paPremio)}
+          </strong>
+        </div>
+        <div className="flex justify-between items-center text-lg">
+          <span className="font-semibold text-gray-700">🏆 Ticket Médio:</span>
+          <strong className="font-bold text-purple-600">
+            {formatCurrency(ticketPremio)}
+          </strong>
+        </div>
+        <div className="flex justify-between items-center text-lg">
+          <span className="font-semibold text-gray-700">🏆 Corridinha:</span>
+          <strong className="font-bold text-pink-600">
+            {formatCurrency(corridinhaPremio)}
+          </strong>
+        </div>
       </div>
     </div>
   );
