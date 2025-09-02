@@ -49,6 +49,7 @@ import { Seller, Goals, Incentives } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
 
+
 const goalTiers = [
     { id: 'Nível 1', goal: 'paGoal1', prize: 'paPrize1'},
     { id: 'Nível 2', goal: 'paGoal2', prize: 'paPrize2' },
@@ -88,14 +89,18 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
         const newSellerName = getValues("newSellerName");
         const newSellerPassword = getValues("newSellerPassword");
 
-        if (newSellerName.trim() === "") {
+        let hasError = false;
+        if (!newSellerName?.trim()) {
             setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
-            return;
+            hasError = true;
         }
-        if (newSellerPassword.trim().length < 4) {
+        if (!newSellerPassword || newSellerPassword.trim().length < 4) {
             setError("newSellerPassword", { type: "manual", message: "Senha deve ter no mínimo 4 caracteres." });
-            return;
+            hasError = true;
         }
+        
+        if (hasError) return;
+
         clearErrors(["newSellerName", "newSellerPassword"]);
 
         const currentSellers = getValues("sellers") || [];
@@ -118,6 +123,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
         setValue("sellers", updatedSellers, { shouldDirty: true });
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
+        toast({ title: "Vendedor adicionado!", description: `${newSellerName} foi adicionado(a) com sucesso.` });
         router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
     };
 
@@ -249,14 +255,13 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
                                 )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
                             </CardContent>
                         </Card>
-
-                        <div className="px-6">
+                        
+                        <div className="px-1">
                             <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
                                 {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
                                 {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
                             </Button>
                         </div>
-
 
                         <Card>
                             <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3></CardHeader>
@@ -268,14 +273,14 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
                                             <FormItem>
                                                 <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
                                                 <FormControl><Input placeholder="Nome do Vendedor" {...field} /></FormControl>
-                                                <FormMessage>{errors.newSellerName?.message}</FormMessage>
+                                                <FormMessage />
                                             </FormItem>
                                         )} />
                                         <FormField control={control} name="newSellerPassword" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="sr-only">Senha</FormLabel>
                                                 <FormControl><Input type="password" placeholder="Senha" {...field} /></FormControl>
-                                                <FormMessage>{errors.newSellerPassword?.message}</FormMessage>
+                                                <FormMessage />
                                             </FormItem>
                                         )} />
                                     </div>
