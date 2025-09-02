@@ -21,6 +21,7 @@ import {
   Zap,
   Trophy,
   Target,
+  Rocket
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -86,7 +87,7 @@ const ProgressItem = ({
           </span>
         </div>
       </div>
-       <Progress value={percentage} style={progressStyle} />
+       <Progress value={percentage} indicatorStyle={progressStyle} />
     </div>
   );
 };
@@ -164,13 +165,14 @@ const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
   )
 };
 
-const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {label: string; goal: number; current: number; prize: number; achieved: boolean; isActive: boolean; }) => {
+const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive, isPulsing }: {label: string; goal: number; current: number; prize: number; achieved: boolean; isActive: boolean; isPulsing: boolean;}) => {
     return (
         <div className={cn(
             "flex justify-between items-center p-2 rounded-md transition-all",
             achieved && isActive ? "bg-green-100/80 dark:bg-green-900/30 ring-2 ring-green-500" :
             achieved ? "bg-green-100/50 dark:bg-green-900/20" : 
-            "bg-muted/30"
+            "bg-muted/30",
+            isPulsing && "animate-pulse ring-green-500"
         )}>
             <div className="flex items-center gap-2">
                 {achieved ? <CheckCircle className="w-5 h-5 text-green-500"/> : <Target className="w-5 h-5 text-muted-foreground"/>}
@@ -193,21 +195,28 @@ const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {l
     )
 }
 
-const EmptyIncentives = () => (
-    <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-4 rounded-lg bg-muted/50 p-6">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Award className="h-8 w-8 text-primary" />
-        </div>
-        <div>
-            <p className="font-semibold text-lg text-foreground">
-                Nenhuma meta atingida ainda
-            </p>
-            <p className="text-sm mt-1">
-                Continue no seu ritmo que você chega lá!
-            </p>
-        </div>
-    </div>
-);
+const NextGoalCard = ({ nextGoalName, amountLeft }: { nextGoalName: string | null; amountLeft: number | null }) => {
+    if (!nextGoalName || amountLeft === null || amountLeft <= 0) return null;
+
+    return (
+        <Card className="bg-gradient-to-r from-blue-100 to-indigo-50 border-blue-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-lg font-semibold text-blue-800">
+                    Próxima Meta
+                </CardTitle>
+                <Rocket className="h-6 w-6 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+                <p className="text-3xl font-bold text-blue-700">
+                    {nextGoalName}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                    Faltam apenas {formatCurrency(amountLeft)}!
+                </p>
+            </CardContent>
+        </Card>
+    );
+};
 
 export function ProgressDisplay({ salesData, incentives, rankings, loading, themeColor }: ProgressDisplayProps) {
   const {
@@ -216,11 +225,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     ticketMedio,
     corridinhaDiaria,
     metaMinha,
-    metaMinhaPrize,
     meta,
-    metaPrize,
     metona,
-    metonaPrize,
     metaLendaria,
     paGoal4,
     ticketMedioGoal4,
@@ -258,6 +264,30 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
   const metaAchieved = vendas >= meta;
   const metonaAchieved = vendas >= metona;
   const lendariaAchieved = vendas >= metaLendaria;
+  
+  let nextGoalName: string | null = null;
+  let amountLeft: number | null = null;
+
+  if (!lendariaAchieved) {
+    if (!metonaAchieved) {
+        if (!metaAchieved) {
+            if (!metinhaAchieved) {
+                nextGoalName = "Metinha";
+                amountLeft = metaMinha - vendas;
+            } else {
+                nextGoalName = "Meta";
+                amountLeft = meta - vendas;
+            }
+        } else {
+            nextGoalName = "Metona";
+            amountLeft = metona - vendas;
+        }
+    } else {
+        nextGoalName = "Lendária";
+        amountLeft = metaLendaria - vendas;
+    }
+  }
+
 
   const headerStyle = themeColor ? { color: themeColor } : {};
   
@@ -271,8 +301,8 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
       </CardHeader>
       <CardContent className="space-y-8" data-achieved={totalIncentives > 0}>
 
-        <div className="grid grid-cols-1 gap-6">
-            <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-lg font-semibold text-emerald-800">
                     Seu Ganho Total
@@ -288,6 +318,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                     </p>
                 </CardContent>
             </Card>
+            <NextGoalCard nextGoalName={nextGoalName} amountLeft={amountLeft} />
         </div>
 
 
@@ -338,16 +369,16 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
         
         {loading ? (
             <div className="space-y-2"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>
-        ) : incentives && metinhaAchieved ? (
+        ) : metinhaAchieved ? (
             <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
                 <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
-                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} achieved={metinhaAchieved} isActive={metinhaAchieved && !metaAchieved} />
-                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} achieved={metaAchieved} isActive={metaAchieved && !metonaAchieved} />
-                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} achieved={metonaAchieved} isActive={metonaAchieved} />
-                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} achieved={lendariaAchieved} isActive={lendariaAchieved} />
+                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={incentives?.metinhaPremio || 0} achieved={metinhaAchieved} isActive={metinhaAchieved && !metaAchieved} isPulsing={metinhaAchieved && !metaAchieved} />
+                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={incentives?.metaPremio || 0} achieved={metaAchieved} isActive={metaAchieved && !metonaAchieved} isPulsing={metaAchieved && !metonaAchieved}/>
+                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={incentives?.metonaPremio || 0} achieved={metonaAchieved} isActive={metonaAchieved && !lendariaAchieved} isPulsing={metonaAchieved && !lendariaAchieved}/>
+                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives?.legendariaBonus || 0} achieved={lendariaAchieved} isActive={lendariaAchieved} isPulsing={lendariaAchieved}/>
             </div>
         ) : (
-            <EmptyIncentives />
+             <></>
         )}
 
         <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 pt-4">
