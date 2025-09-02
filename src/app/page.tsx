@@ -39,7 +39,8 @@ export default function Home() {
         {/* Título */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-extrabold text-neutral-dark drop-shadow-sm">
-            Seja bem-vindo 🚀
+            Seja bem-vindo (a) ao
+             Acelera GT 🚀
           </h1>
         </div>
 
@@ -51,7 +52,7 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <h2 className="text-center text-xl font-semibold text-neutral-dark mb-6">
-            Selecione sua loja para começar
+            Selecione sua loja para começar. 
           </h2>
 
           {!state || state.stores.length === 0 ? (
