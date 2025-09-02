@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Goals, Store } from "@/lib/storage";
+import { loadState, saveState, Seller, Goals, Store, Incentives } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
@@ -66,12 +66,12 @@ export const formSchema = z.object({
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
     ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
   }),
   sellers: z.array(sellerSchema),
 });
@@ -111,6 +111,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [loggedInSellerId, setLoggedInSellerId] = useState<string | null>(null);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [incentives, setIncentives] = useState<Incentives>({});
   const searchParams = useSearchParams();
   const router = useRouter();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -126,6 +127,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   
   const { watch, reset, getValues } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
+
+  const handleIncentivesCalculated = (newIncentives: Incentives) => {
+    setIncentives(newIncentives);
+    const currentState = loadState();
+    currentState.incentives[storeId] = newIncentives;
+    saveState(currentState);
+  };
+
 
   useEffect(() => {
     setMounted(true);
@@ -147,6 +156,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       sellers: state.sellers[storeId] || [],
     };
     reset(initialFormValues);
+    setIncentives(state.incentives[storeId] || {});
     
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
@@ -321,7 +331,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 {isAdmin && (
                     <TabsContent value="admin">
-                        <AdminTab form={form} storeId={storeId} />
+                        <AdminTab 
+                          form={form} 
+                          storeId={storeId} 
+                          onIncentivesCalculated={handleIncentivesCalculated}
+                          incentives={incentives}
+                        />
                     </TabsContent>
                 )}
                 
@@ -330,6 +345,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <SellerTab
                             seller={seller}
                             goals={currentValues.goals}
+                            incentives={incentives[seller.id]}
                         />
                     </TabsContent>
                 ))}

@@ -10,11 +10,12 @@ import {
   X,
   Target,
   Eye,
-  EyeOff
+  EyeOff,
+  Calculator
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FormValues } from "./goal-getter-dashboard";
+import { FormValues, formSchema } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -44,8 +45,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Seller, Goals } from "@/lib/storage";
+import { Seller, Goals, Incentives } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
+import { incentiveProjection } from "@/ai/flows/incentive-projection";
+import { Loader2 } from "lucide-react";
+
 
 const goalTiers = [
     { id: 'Nível 1', goal: 'paGoal1', prize: 'paPrize1'},
@@ -66,17 +70,19 @@ const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5
 interface AdminTabProps {
     form: UseFormReturn<FormValues>;
     storeId: string;
+    onIncentivesCalculated: (incentives: Incentives) => void;
+    incentives: Incentives;
 }
 
-export function AdminTab({ form, storeId }: AdminTabProps) {
+export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: AdminTabProps) {
     const { toast } = useToast();
     const router = useRouter();
     const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+    const [isPending, startTransition] = useTransition();
 
     const { control, getValues, setValue, setError, clearErrors, formState: { errors } } = form;
     
-    // Usar useWatch para re-renderizar o componente quando sellers ou goals mudarem
     const sellers = useWatch({ control, name: 'sellers' });
     const goals = useWatch({ control, name: 'goals' });
 
@@ -171,28 +177,81 @@ export function AdminTab({ form, storeId }: AdminTabProps) {
         const currentSellers = sellers || [];
         const currentGoals = goals as Goals;
 
-        const totalSales = currentSellers.reduce((acc, s) => acc + (s.vendas || 0), 0);
-        const totalPa = currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.pa || 0), 0) / currentSellers.length : 0;
-        const totalTicketMedio = currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.ticketMedio || 0), 0) / currentSellers.length : 0;
-        const totalCorridinha = currentSellers.reduce((acc, s) => acc + (s.corridinhaDiaria || 0), 0);
-
         return {
-            vendas: totalSales,
-            pa: totalPa,
-            ticketMedio: totalTicketMedio,
-            corridinhaDiaria: totalCorridinha,
+            vendas: currentSellers.reduce((acc, s) => acc + (s.vendas || 0), 0),
+            pa: currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.pa || 0), 0) / currentSellers.length : 0,
+            ticketMedio: currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.ticketMedio || 0), 0) / currentSellers.length : 0,
+            corridinhaDiaria: currentSellers.reduce((acc, s) => acc + (s.corridinhaDiaria || 0), 0),
             goals: currentGoals,
         };
       }, [sellers, goals]);
+
+      const storeConsolidatedIncentives = useMemo(() => {
+        if (!incentives || Object.keys(incentives).length === 0) return null;
+        
+        return Object.values(incentives).reduce((acc, current) => {
+            if (!current) return acc;
+            return {
+                metinhaPremio: (acc.metinhaPremio || 0) + (current.metinhaPremio || 0),
+                metaPremio: (acc.metaPremio || 0) + (current.metaPremio || 0),
+                metonaPremio: (acc.metonaPremio || 0) + (current.metonaPremio || 0),
+                legendariaBonus: (acc.legendariaBonus || 0) + (current.legendariaBonus || 0),
+                paBonus: (acc.paBonus || 0) + (current.paBonus || 0),
+                ticketMedioBonus: (acc.ticketMedioBonus || 0) + (current.ticketMedioBonus || 0),
+                corridinhaDiariaBonus: (acc.corridinhaDiariaBonus || 0) + (current.corridinhaDiariaBonus || 0),
+            };
+        }, { metinhaPremio: 0, metaPremio: 0, metonaPremio: 0, legendariaBonus: 0, paBonus: 0, ticketMedioBonus: 0, corridinhaDiariaBonus: 0 });
+      }, [incentives]);
+
+      const handleCalculateIncentives = () => {
+        startTransition(async () => {
+            const currentFormValues = getValues();
+            const newIncentives: Incentives = {};
+
+            for (const seller of currentFormValues.sellers) {
+                const result = await incentiveProjection({
+                    vendas: seller.vendas,
+                    pa: seller.pa,
+                    ticketMedio: seller.ticketMedio,
+                    corridinhaDiaria: seller.corridinhaDiaria,
+                    ...currentFormValues.goals
+                });
+                newIncentives[seller.id] = result;
+            }
+            onIncentivesCalculated(newIncentives);
+            toast({
+                title: "Sucesso!",
+                description: "Incentivos de todos os vendedores foram calculados e salvos.",
+            });
+        });
+    };
 
     return (
         <Card className="mt-4">
             <CardHeader>
                 <CardTitle>Painel Administrativo da Loja</CardTitle>
+                 <CardDescription>Ajuste as metas, prêmios e gerencie os vendedores aqui. Salve para ver os resultados.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-10">
                 <div className="grid lg:grid-cols-2 gap-x-8 gap-y-10">
                     <div className="space-y-8">
+                        <Card>
+                            <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3></CardHeader>
+                            <CardContent className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                                {(sellers || []).length > 0 ? (sellers || []).map((seller, index) => (
+                                    <div key={seller.id}>
+                                        <h4 className="font-medium mb-2">{seller.name}</h4>
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                            <FormField control={control} name={`sellers.${index}.vendas`} render={({ field }) => (<FormItem><FormLabel className="text-xs">Vendas (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                            <FormField control={control} name={`sellers.${index}.pa`} render={({ field }) => (<FormItem><FormLabel className="text-xs">PA</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                            <FormField control={control} name={`sellers.${index}.ticketMedio`} render={({ field }) => (<FormItem><FormLabel className="text-xs">Ticket Médio</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                            <FormField control={control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => (<FormItem><FormLabel className="text-xs">Corridinha</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        </div>
+                                    </div>
+                                )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
+                            </CardContent>
+                        </Card>
+
                         <Card>
                             <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3></CardHeader>
                             <CardContent className="space-y-4">
@@ -261,23 +320,6 @@ export function AdminTab({ form, storeId }: AdminTabProps) {
                                 </div>
                             </CardContent>
                         </Card>
-
-                        <Card>
-                            <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3></CardHeader>
-                            <CardContent className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                                {(sellers || []).length > 0 ? (sellers || []).map((seller, index) => (
-                                    <div key={seller.id}>
-                                        <h4 className="font-medium mb-2">{seller.name}</h4>
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                                            <FormField control={control} name={`sellers.${index}.vendas`} render={({ field }) => (<FormItem><FormLabel className="text-xs">Vendas (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                            <FormField control={control} name={`sellers.${index}.pa`} render={({ field }) => (<FormItem><FormLabel className="text-xs">PA</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                            <FormField control={control} name={`sellers.${index}.ticketMedio`} render={({ field }) => (<FormItem><FormLabel className="text-xs">Ticket Médio</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                            <FormField control={control} name={`sellers.${index}.corridinhaDiaria`} render={({ field }) => (<FormItem><FormLabel className="text-xs">Corridinha</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                        </div>
-                                    </div>
-                                )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
-                            </CardContent>
-                        </Card>
                     </div>
 
                     <div className="space-y-8">
@@ -306,15 +348,21 @@ export function AdminTab({ form, storeId }: AdminTabProps) {
                 </div>
 
                 <Separator />
+                
+                <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
+                    {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
+                    {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
+                </Button>
 
                 <Card>
                     <CardHeader>
                         <CardTitle>Resumo da Loja</CardTitle>
-                        <CardDescription>Visão consolidada do desempenho da equipe.</CardDescription>
+                        <CardDescription>Visão consolidada do desempenho da equipe. Clique em "Salvar e Calcular" para atualizar.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ProgressDisplay
                             salesData={storeConsolidatedData}
+                            incentives={storeConsolidatedIncentives}
                         />
                     </CardContent>
                 </Card>
