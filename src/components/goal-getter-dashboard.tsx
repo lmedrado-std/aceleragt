@@ -1,9 +1,10 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState, useTransition, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
@@ -13,10 +14,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-import {
-  incentiveProjection,
-  type IncentiveProjectionOutput,
-} from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
@@ -29,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Incentives, getInitialState, Goals, Store } from "@/lib/storage";
+import { loadState, saveState, Seller, Goals, Store } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
@@ -80,8 +77,6 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
-export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
     <div className="container mx-auto p-4 py-8 md:p-8">
@@ -110,112 +105,28 @@ const DashboardSkeleton = () => (
 
 
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
-  const [isCalculating, startTransition] = useTransition();
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-  const [incentives, setIncentives] = useState<Incentives>({});
-  const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [loggedInSellerId, setLoggedInSellerId] = useState<string | null>(null);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const calculationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        newSellerName: "",
-        newSellerPassword: "",
-        goals: getInitialState().goals.default,
-        sellers: [],
-      }
-  });
-  
-  const getInitialStateForForm = useCallback(() => {
-    const state = loadState();
-    return {
       newSellerName: "",
       newSellerPassword: "",
-      goals: state.goals[storeId] || state.goals.default,
-      sellers: state.sellers[storeId] || [],
+      sellers: [],
     }
-  }, [storeId]);
-
+  });
+  
   const { watch, reset, getValues } = form;
-
   const [activeTab, setActiveTab] = useState<string>("loading");
 
-  const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
-    const newRankings: Rankings = {};
-    if (!sellers || sellers.length === 0) {
-        setRankings({});
-        return;
-    }
-    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria'];
-
-    metrics.forEach(metric => {
-        const sortedSellers = [...sellers]
-            .map(seller => {
-                let value = 0;
-                if (metric === 'corridinhaDiaria') {
-                    const incentiveData = currentIncentives[seller.id];
-                    value = incentiveData?.corridinhaDiariaBonus || 0;
-                }
-                else {
-                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId' | 'password'>] as number;
-                }
-                return { id: seller.id, value };
-            })
-            .sort((a, b) => b.value - a.value);
-
-        let rank = 1;
-        for (let i = 0; i < sortedSellers.length; i++) {
-            if (i > 0 && sortedSellers[i].value < sortedSellers[i - 1].value) {
-                rank = i + 1;
-            }
-            const sellerId = sortedSellers[i].id;
-            if (!newRankings[sellerId]) {
-                newRankings[sellerId] = {} as Record<RankingMetric, number>;
-            }
-            newRankings[sellerId][metric] = rank;
-        }
-    });
-
-    setRankings(newRankings);
-  }, []);
-
-  const calculateAllIncentives = useCallback((values: FormValues) => {
-    startTransition(async () => {
-      try {
-        const newIncentives: Record<string, IncentiveProjectionOutput | null> = {};
-        for (const seller of values.sellers) {
-          const result = await incentiveProjection({
-            vendas: seller.vendas, pa: seller.pa, ticketMedio: seller.ticketMedio, corridinhaDiaria: seller.corridinhaDiaria,
-            ...values.goals
-          });
-          newIncentives[seller.id] = result;
-        }
-        setIncentives(newIncentives);
-        calculateRankings(values.sellers, newIncentives);
-        
-        const currentState = loadState();
-        currentState.sellers[storeId] = values.sellers || [];
-        currentState.goals[storeId] = values.goals as Goals;
-        currentState.incentives[storeId] = newIncentives;
-        saveState(currentState);
-        
-        setIsSaving(true);
-        setTimeout(() => setIsSaving(false), 1500);
-
-      } catch (error) {
-        console.error("Calculation Error:", error);
-        toast({ variant: "destructive", title: "Erro de Cálculo", description: "Não foi possível calcular os incentivos. Tente novamente." });
-      }
-    });
-  }, [storeId, calculateRankings, toast]);
-  
   useEffect(() => {
     setMounted(true);
     const state = loadState();
@@ -229,15 +140,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     
     setCurrentStore(store);
     
-    const initialFormValues = getInitialStateForForm();
+    const initialFormValues = {
+      newSellerName: "",
+      newSellerPassword: "",
+      goals: state.goals[storeId] || state.goals.default,
+      sellers: state.sellers[storeId] || [],
+    };
     reset(initialFormValues);
     
-    const initialIncentives = state.incentives[storeId] || {};
-    setIncentives(initialIncentives);
-    calculateRankings(initialFormValues.sellers, initialIncentives);
-    calculateAllIncentives(initialFormValues);
-
-    // Auth and Tab logic
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
 
@@ -281,27 +191,29 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     
     setActiveTab(tabToActivate);
-  }, [storeId, reset, router, toast, searchParams, getInitialStateForForm, calculateRankings, calculateAllIncentives]);
-
-  // Recalculate on form change
-  const stableCalculateAllIncentives = useCallback(calculateAllIncentives, [calculateAllIncentives]);
+  }, [storeId, reset, router, toast, searchParams]);
 
   useEffect(() => {
     const subscription = watch((value) => {
-      if (calculationTimeoutRef.current) {
-          clearTimeout(calculationTimeoutRef.current);
+      if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
       }
-      calculationTimeoutRef.current = setTimeout(() => {
-        stableCalculateAllIncentives(value as FormValues);
-      }, 500); // Debounce
+      saveTimeoutRef.current = setTimeout(() => {
+        const currentState = loadState();
+        currentState.sellers[storeId] = value.sellers || [];
+        currentState.goals[storeId] = value.goals as Goals;
+        saveState(currentState);
+        setIsSaving(true);
+        setTimeout(() => setIsSaving(false), 1500);
+      }, 500);
     });
     return () => {
         subscription.unsubscribe();
-        if (calculationTimeoutRef.current) {
-            clearTimeout(calculationTimeoutRef.current);
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
         }
     };
-  }, [watch, stableCalculateAllIncentives]);
+  }, [watch, storeId]);
 
 
   const handleTabChange = (newTab: string) => {
@@ -383,13 +295,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     </TabsList>
                     
                     <div className="flex items-center gap-4">
-                         {isCalculating && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
-                                <Loader2 className="h-4 w-4 animate-spin"/>
-                                <span>Calculando...</span>
-                            </div>
-                        )}
-                        {isSaving && (
+                         {isSaving && (
                              <div className="flex items-center gap-2 text-sm text-green-600">
                                 <CheckCircle className="h-4 w-4"/>
                                 <span>Salvo!</span>
@@ -415,7 +321,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 {isAdmin && (
                     <TabsContent value="admin">
-                        <AdminTab form={form} storeId={storeId} setIncentives={setIncentives} incentives={incentives} />
+                        <AdminTab form={form} storeId={storeId} />
                     </TabsContent>
                 )}
                 
@@ -424,10 +330,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <SellerTab
                             seller={seller}
                             goals={currentValues.goals}
-                            incentives={incentives[seller.id]}
-                            rankings={rankings[seller.id]}
-                            loading={isCalculating}
-                            themeColor={currentStore?.themeColor}
                         />
                     </TabsContent>
                 ))}

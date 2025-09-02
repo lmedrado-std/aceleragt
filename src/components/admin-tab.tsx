@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm, UseFormReturn, useWatch } from "react-hook-form";
 import {
   UserPlus,
   Trash2,
@@ -12,7 +12,7 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { FormValues } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription
 } from "@/components/ui/card";
 import {
   FormField,
@@ -43,7 +44,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Seller, Incentives } from "@/lib/storage";
+import { Seller, Goals } from "@/lib/storage";
+import { ProgressDisplay } from "./progress-display";
 
 const goalTiers = [
     { id: 'Nível 1', goal: 'paGoal1', prize: 'paPrize1'},
@@ -64,17 +66,19 @@ const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5
 interface AdminTabProps {
     form: UseFormReturn<FormValues>;
     storeId: string;
-    setIncentives: Dispatch<SetStateAction<Incentives>>;
 }
 
-export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
+export function AdminTab({ form, storeId }: AdminTabProps) {
     const { toast } = useToast();
     const router = useRouter();
     const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
 
     const { control, getValues, setValue, setError, clearErrors, formState: { errors } } = form;
-    const currentValues = getValues();
+    
+    // Usar useWatch para re-renderizar o componente quando sellers ou goals mudarem
+    const sellers = useWatch({ control, name: 'sellers' });
+    const goals = useWatch({ control, name: 'goals' });
 
     const addSeller = () => {
         const newSellerName = getValues("newSellerName");
@@ -114,13 +118,8 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
     };
 
     const removeSeller = (sellerId: string) => {
-        const updatedSellers = (currentValues.sellers || []).filter(s => s.id !== sellerId);
+        const updatedSellers = (sellers || []).filter(s => s.id !== sellerId);
         setValue("sellers", updatedSellers, { shouldDirty: true });
-        setIncentives(prev => {
-            const newIncentives = { ...prev };
-            delete newIncentives[sellerId];
-            return newIncentives;
-        });
         const newTab = updatedSellers.length > 0 ? updatedSellers[0].id : "admin";
         router.push(`/dashboard/${storeId}?tab=${newTab}`);
     }
@@ -129,7 +128,7 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
     const cancelEditing = () => setEditingSellerId(null);
 
     const saveSellerName = (sellerId: string) => {
-        const sellerIndex = (currentValues.sellers || []).findIndex(s => s.id === sellerId);
+        const sellerIndex = (sellers || []).findIndex(s => s.id === sellerId);
         if (sellerIndex === -1) return;
 
         const newName = getValues(`sellers.${sellerIndex}.name`);
@@ -168,6 +167,24 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
         </div>
       )
 
+      const storeConsolidatedData = useMemo(() => {
+        const currentSellers = sellers || [];
+        const currentGoals = goals as Goals;
+
+        const totalSales = currentSellers.reduce((acc, s) => acc + (s.vendas || 0), 0);
+        const totalPa = currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.pa || 0), 0) / currentSellers.length : 0;
+        const totalTicketMedio = currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.ticketMedio || 0), 0) / currentSellers.length : 0;
+        const totalCorridinha = currentSellers.reduce((acc, s) => acc + (s.corridinhaDiaria || 0), 0);
+
+        return {
+            vendas: totalSales,
+            pa: totalPa,
+            ticketMedio: totalTicketMedio,
+            corridinhaDiaria: totalCorridinha,
+            goals: currentGoals,
+        };
+      }, [sellers, goals]);
+
     return (
         <Card className="mt-4">
             <CardHeader>
@@ -202,9 +219,9 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
                                 <Separator />
                                 <div className="space-y-2">
                                     <FormLabel>Vendedores Atuais</FormLabel>
-                                    {(currentValues.sellers || []).length > 0 ? (
+                                    {(sellers || []).length > 0 ? (
                                         <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                                            {(currentValues.sellers || []).map((seller, index) => (
+                                            {(sellers || []).map((seller, index) => (
                                                 <div key={seller.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
                                                     {editingSellerId === seller.id ? (
                                                         <>
@@ -248,7 +265,7 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
                         <Card>
                             <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><Target /> Lançar Vendas</h3></CardHeader>
                             <CardContent className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                                {(currentValues.sellers || []).length > 0 ? currentValues.sellers.map((seller, index) => (
+                                {(sellers || []).length > 0 ? (sellers || []).map((seller, index) => (
                                     <div key={seller.id}>
                                         <h4 className="font-medium mb-2">{seller.name}</h4>
                                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -287,9 +304,22 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
                         </Card>
                     </div>
                 </div>
+
+                <Separator />
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Resumo da Loja</CardTitle>
+                        <CardDescription>Visão consolidada do desempenho da equipe.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ProgressDisplay
+                            salesData={storeConsolidatedData}
+                        />
+                    </CardContent>
+                </Card>
+
             </CardContent>
         </Card>
     )
 }
-
-    

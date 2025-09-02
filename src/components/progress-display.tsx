@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -9,13 +8,13 @@ interface Props {
   salesData: Partial<Seller> & { goals: Goals };
 }
 
-const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
+export const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
   const [ganhoTotal, setGanhoTotal] = useState<number>(0);
+  const [vendasPremio, setVendasPremio] = useState<number>(0);
+  const [lendariaPremio, setLendariaPremio] = useState<number>(0);
   const [paPremio, setPaPremio] = useState<number>(0);
   const [ticketPremio, setTicketPremio] = useState<number>(0);
   const [corridinhaPremio, setCorridinhaPremio] = useState<number>(0);
-  const [vendasPremio, setVendasPremio] = useState<number>(0);
-  const [lendariaPremio, setLendariaPremio] = useState<number>(0);
   const { toast } = useToast();
 
 
@@ -29,6 +28,7 @@ const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
 
       let total = 0;
       
+      // Premiação não cumulativa para metas principais
       let premioVendas = 0;
       if (vendasAtual >= metas.metona) {
         premioVendas = metas.metonaPrize;
@@ -40,6 +40,7 @@ const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
       setVendasPremio(premioVendas);
       total += premioVendas;
 
+      // Bônus Lendária
       let bonusLendaria = 0;
       if (vendasAtual >= metas.metaLendaria && metas.legendariaBonusValorVenda > 0) {
         bonusLendaria = Math.floor((vendasAtual - metas.metaLendaria) / metas.legendariaBonusValorVenda) * metas.legendariaBonusValorPremio;
@@ -47,6 +48,7 @@ const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
       setLendariaPremio(bonusLendaria);
       total += bonusLendaria;
       
+      // PA — Produtos por Atendimento
       let premioPA = 0;
       if (paAtual >= metas.paGoal4) premioPA = metas.paPrize4;
       else if (paAtual >= metas.paGoal3) premioPA = metas.paPrize3;
@@ -55,6 +57,7 @@ const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
       total += premioPA;
       setPaPremio(premioPA);
 
+      // Ticket Médio
       let premioTicket = 0;
       if (ticketAtual >= metas.ticketMedioGoal4) premioTicket = metas.ticketMedioPrize4;
       else if (ticketAtual >= metas.ticketMedioGoal3) premioTicket = metas.ticketMedioPrize3;
@@ -63,6 +66,7 @@ const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
       total += premioTicket;
       setTicketPremio(premioTicket);
 
+      // Corridinha Diária
       const premioCorridinha = corridinhaAtual || 0;
       total += premioCorridinha;
       setCorridinhaPremio(premioCorridinha);
@@ -128,5 +132,3 @@ const ProgressDisplay: React.FC<Props> = ({ salesData }) => {
     </div>
   );
 };
-
-export default ProgressDisplay;
