@@ -11,7 +11,7 @@ import {
   Eye,
   EyeOff,
   Calculator,
-  Loader2,
+  Loader2
 } from "lucide-react";
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -64,16 +64,16 @@ const ticketMedioTiers = [
     { id: 'Nível 4', goal: 'ticketMedioGoal4', prize: 'ticketMedioPrize4' },
 ];
 
-const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9', 'avatar10'];
 
 interface AdminTabProps {
     form: UseFormReturn<FormValues>;
     storeId: string;
     onIncentivesCalculated: (incentives: Incentives) => void;
     incentives: Incentives;
+    addSeller: (name: string, pass: string) => void;
 }
 
-export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: AdminTabProps) {
+export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, addSeller }: AdminTabProps) {
     const { toast } = useToast();
     const router = useRouter();
     const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
@@ -85,46 +85,23 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
     const sellers = useWatch({ control, name: 'sellers' });
     const goals = useWatch({ control, name: 'goals' });
 
-    const addSeller = () => {
+    const handleAddSeller = () => {
         const newSellerName = getValues("newSellerName");
         const newSellerPassword = getValues("newSellerPassword");
 
-        let hasError = false;
-        if (!newSellerName?.trim()) {
+        if (newSellerName.trim() === "") {
             setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
-            hasError = true;
+            return;
         }
-        if (!newSellerPassword || newSellerPassword.trim().length < 4) {
+         if (newSellerPassword.trim().length < 4) {
             setError("newSellerPassword", { type: "manual", message: "Senha deve ter no mínimo 4 caracteres." });
-            hasError = true;
+            return;
         }
         
-        if (hasError) return;
-
         clearErrors(["newSellerName", "newSellerPassword"]);
-
-        const currentSellers = getValues("sellers") || [];
-        const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
-        let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
-
-        if (existingAvatarIds.size < availableAvatarIds.length) {
-            while (existingAvatarIds.has(randomAvatarId)) {
-                randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
-            }
-        }
-        const newSeller: Seller = {
-            id: crypto.randomUUID(),
-            name: newSellerName,
-            password: newSellerPassword,
-            avatarId: randomAvatarId,
-            vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0,
-        };
-        const updatedSellers = [...currentSellers, newSeller];
-        setValue("sellers", updatedSellers, { shouldDirty: true });
+        addSeller(newSellerName, newSellerPassword);
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
-        toast({ title: "Vendedor adicionado!", description: `${newSellerName} foi adicionado(a) com sucesso.` });
-        router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
     };
 
     const removeSeller = (sellerId: string) => {
@@ -255,12 +232,12 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
                                 )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
                             </CardContent>
                         </Card>
-                        
+
                         <div className="px-1">
-                            <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
-                                {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
-                                {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
-                            </Button>
+                          <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
+                              {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
+                              {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
+                          </Button>
                         </div>
 
                         <Card>
@@ -284,7 +261,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
                                             </FormItem>
                                         )} />
                                     </div>
-                                    <Button type="button" onClick={addSeller} className="w-full"><UserPlus className="mr-2" /> Adicionar Vendedor</Button>
+                                    <Button type="button" onClick={handleAddSeller} className="w-full"><UserPlus className="mr-2" /> Adicionar Vendedor</Button>
                                 </div>
                                 <Separator />
                                 <div className="space-y-2">

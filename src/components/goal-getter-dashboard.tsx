@@ -32,6 +32,7 @@ import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
 
+const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9', 'avatar10'];
 
 const sellerSchema = z.object({
   id: z.string(),
@@ -45,8 +46,8 @@ const sellerSchema = z.object({
 });
 
 export const formSchema = z.object({
-  newSellerName: z.string(),
-  newSellerPassword: z.string(),
+  newSellerName: z.string().optional(),
+  newSellerPassword: z.string().optional(),
   goals: z.object({
     metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -67,12 +68,12 @@ export const formSchema = z.object({
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
     ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
+    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
   }),
   sellers: z.array(sellerSchema),
 });
@@ -126,7 +127,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
   });
   
-  const { watch, reset, getValues } = form;
+  const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
   const handleIncentivesCalculated = (newIncentives: Incentives) => {
@@ -134,6 +135,29 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const currentState = loadState();
     currentState.incentives[storeId] = newIncentives;
     saveState(currentState);
+  };
+
+  const addSeller = (name: string, pass: string) => {
+    const currentSellers = getValues("sellers") || [];
+    const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
+    let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+
+    if (existingAvatarIds.size < availableAvatarIds.length) {
+        while (existingAvatarIds.has(randomAvatarId)) {
+            randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+        }
+    }
+    const newSeller: Seller = {
+        id: crypto.randomUUID(),
+        name,
+        password: pass,
+        avatarId: randomAvatarId,
+        vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0,
+    };
+    const updatedSellers = [...currentSellers, newSeller];
+    setValue("sellers", updatedSellers, { shouldDirty: true });
+    toast({ title: "Vendedor adicionado!", description: `${name} foi adicionado(a) com sucesso.` });
+    router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
   };
 
 
@@ -174,8 +198,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     
     const sellersForStore = state.sellers[storeId] || [];
     const tabFromUrl = searchParams.get('tab');
-    const tabToActivate = tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : 'admin');
+    let tabToActivate = tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : 'admin');
     
+    // Fallback if the tab points to a non-existent seller
+    if (tabToActivate !== 'admin' && !sellersForStore.some(s => s.id === tabToActivate)) {
+      tabToActivate = sellersForStore.length > 0 ? sellersForStore[0].id : 'admin';
+    }
+
+
     const sellerIsAuthenticated = (sellerId: string) => sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
 
     if (tabToActivate === 'admin') {
@@ -337,6 +367,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                           storeId={storeId} 
                           onIncentivesCalculated={handleIncentivesCalculated}
                           incentives={incentives}
+                          addSeller={addSeller}
                         />
                     </TabsContent>
                 )}
