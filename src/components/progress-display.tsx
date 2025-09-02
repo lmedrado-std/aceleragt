@@ -202,20 +202,24 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     metona,
     metaLendaria,
     paGoal4,
-    paPrize4,
     ticketMedioGoal4,
-    ticketMedioPrize4
   } = salesData;
 
   const totalIncentives = incentives
-    ? Object.values(incentives).reduce((sum, value) => sum + (value || 0), 0)
+    ? (incentives.metinhaPremio || 0) +
+      (incentives.metaPremio || 0) +
+      (incentives.metonaPremio || 0) +
+      (incentives.legendariaBonus || 0) +
+      (incentives.paBonus || 0) +
+      (incentives.ticketMedioBonus || 0) +
+      (incentives.corridinhaDiariaBonus || 0)
     : 0;
 
   const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
   
   let nextGoalName: string | null = null;
   let amountLeft: number | null = null;
-  
+
   const metinhaAchieved = vendas >= metaMinha;
   const metaAchieved = vendas >= meta;
   const metonaAchieved = vendas >= metona;
@@ -240,7 +244,6 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
         amountLeft = metaLendaria - vendas;
     }
   }
-
 
   const headerStyle = themeColor ? { color: themeColor } : {};
 
@@ -384,7 +387,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                         title="Produtos por Atendimento (PA)"
                         currentValue={pa}
                         goalValue={paGoal4}
-                        prizeValue={incentives?.paBonus || paPrize4}
+                        prizeValue={incentives?.paBonus || 0}
                         formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
                         themeColor={themeColor}
                     />
@@ -393,7 +396,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                         title="Ticket Médio"
                         currentValue={ticketMedio}
                         goalValue={ticketMedioGoal4}
-                        prizeValue={incentives?.ticketMedioBonus || ticketMedioPrize4}
+                        prizeValue={incentives?.ticketMedioBonus || 0}
                         formatValue={formatCurrency}
                         themeColor={themeColor}
                     />
@@ -401,7 +404,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                         icon={<TrendingUp className="w-5 h-5" />}
                         title="Corridinha Diária"
                         currentValue={corridinhaDiaria}
-                        goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1} // Goal is to reach the bonus amount
+                        goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1}
                         prizeValue={incentives?.corridinhaDiariaBonus || 0}
                         formatValue={formatCurrency}
                         themeColor={themeColor}
