@@ -208,10 +208,10 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
 
             for (const seller of currentFormValues.sellers) {
                 const result = await incentiveProjection({
-                    vendas: seller.vendas,
-                    pa: seller.pa,
-                    ticketMedio: seller.ticketMedio,
-                    corridinhaDiaria: seller.corridinhaDiaria,
+                    vendas: Number(seller.vendas),
+                    pa: Number(seller.pa),
+                    ticketMedio: Number(seller.ticketMedio),
+                    corridinhaDiaria: Number(seller.corridinhaDiaria),
                     ...currentFormValues.goals
                 });
                 newIncentives[seller.id] = result;
@@ -249,7 +249,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
                                 )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
                             </CardContent>
                         </Card>
-                        
+
                         <div className="px-6">
                             <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
                                 {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
