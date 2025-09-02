@@ -202,7 +202,9 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     metona,
     metaLendaria,
     paGoal4,
+    paPrize4,
     ticketMedioGoal4,
+    ticketMedioPrize4
   } = salesData;
 
   const totalIncentives = incentives
@@ -244,6 +246,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
         amountLeft = metaLendaria - vendas;
     }
   }
+
 
   const headerStyle = themeColor ? { color: themeColor } : {};
 
@@ -404,7 +407,7 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
                         icon={<TrendingUp className="w-5 h-5" />}
                         title="Corridinha Diária"
                         currentValue={corridinhaDiaria}
-                        goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1}
+                        goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1} // Goal is to reach the bonus amount
                         prizeValue={incentives?.corridinhaDiariaBonus || 0}
                         formatValue={formatCurrency}
                         themeColor={themeColor}
@@ -432,3 +435,5 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     </div>
   );
 }
+
+    

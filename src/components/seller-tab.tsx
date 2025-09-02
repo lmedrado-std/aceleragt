@@ -31,3 +31,5 @@ export function SellerTab({ seller, goals, incentives, rankings, loading, themeC
         />
     )
 }
+
+    

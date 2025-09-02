@@ -10,12 +10,11 @@ import {
   X,
   Target,
   Eye,
-  EyeOff,
-  Calculator
+  EyeOff
 } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FormValues, formSchema } from "./goal-getter-dashboard";
+import { FormValues } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -288,12 +287,9 @@ export function AdminTab({ form, storeId, setIncentives }: AdminTabProps) {
                         </Card>
                     </div>
                 </div>
-                 <Separator />
-                <Button type="submit" size="lg" className="w-full">
-                    Salvar Metas e Calcular Todos os Incentivos
-                    <Calculator className="ml-2 h-5 w-5"/>
-                </Button>
             </CardContent>
         </Card>
     )
 }
+
+    

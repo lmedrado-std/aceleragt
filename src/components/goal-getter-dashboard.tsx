@@ -4,13 +4,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState, useTransition, useEffect, useCallback } from "react";
+import { useState, useTransition, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ShieldCheck,
   Home,
   Loader2,
+  CheckCircle,
 } from "lucide-react";
 
 import {
@@ -110,7 +111,8 @@ const DashboardSkeleton = () => (
 
 
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
-  const [isPending, startTransition] = useTransition();
+  const [isCalculating, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const [incentives, setIncentives] = useState<Incentives>({});
   const [rankings, setRankings] = useState<Rankings>({});
@@ -120,6 +122,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const calculationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -136,8 +139,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       }
   }
 
-  const { watch, reset, formState: { isDirty } } = form;
-  const currentValues = watch();
+  const { watch, reset, getValues } = form;
 
   const [activeTab, setActiveTab] = useState(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -187,6 +189,38 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setRankings(newRankings);
   }, []);
 
+  const calculateAllIncentives = useCallback((values: FormValues) => {
+    startTransition(async () => {
+      try {
+        const newIncentives: Record<string, IncentiveProjectionOutput | null> = {};
+        for (const seller of values.sellers) {
+          const result = await incentiveProjection({
+            vendas: seller.vendas, pa: seller.pa, ticketMedio: seller.ticketMedio, corridinhaDiaria: seller.corridinhaDiaria,
+            ...values.goals
+          });
+          newIncentives[seller.id] = result;
+        }
+        setIncentives(newIncentives);
+        calculateRankings(values.sellers, newIncentives);
+        
+        // Save state after calculation
+        const currentState = loadState();
+        currentState.sellers[storeId] = values.sellers || [];
+        currentState.goals[storeId] = values.goals as Goals;
+        currentState.incentives[storeId] = newIncentives;
+        saveState(currentState);
+        
+        setIsSaving(true);
+        setTimeout(() => setIsSaving(false), 1500);
+
+      } catch (error) {
+        console.error("Calculation Error:", error);
+        toast({ variant: "destructive", title: "Erro de Cálculo", description: "Não foi possível calcular os incentivos. Tente novamente." });
+      }
+    });
+  }, [storeId, calculateRankings, toast]);
+  
+
   const loadDataForStore = useCallback(() => {
     try {
       const state = loadState();
@@ -212,12 +246,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       });
 
       setIncentives(storeIncentives);
-      calculateRankings(storeSellers, storeIncentives);
+      calculateAllIncentives({ ...getValues(), sellers: storeSellers, goals: storeGoals, newSellerName: "", newSellerPassword: "" });
 
     } catch (error) {
         console.error("Failed to load state from localStorage", error);
     }
-  }, [storeId, reset, router, calculateRankings, toast, form]);
+  }, [storeId, reset, router, toast, form, getValues, calculateAllIncentives]);
   
   useEffect(() => {
       loadDataForStore();
@@ -277,26 +311,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setMounted(true);
   }, [storeId, router, toast, searchParams, activeTab]);
 
-  // Save state on change
+  // Recalculate on form change
   useEffect(() => {
-    if (!isDirty || !mounted) return;
-    
     const subscription = watch((value) => {
-        try {
-            const state = loadState();
-            state.sellers[storeId] = value.sellers || [];
-            state.goals[storeId] = value.goals as Goals;
-            state.incentives[storeId] = incentives;
-            saveState(state);
-            if(value.sellers && incentives){
-                 calculateRankings(value.sellers, incentives);
-            }
-        } catch(error) {
-            console.error("Failed to save state to localStorage", error);
-        }
+      if (calculationTimeoutRef.current) {
+          clearTimeout(calculationTimeoutRef.current);
+      }
+      calculationTimeoutRef.current = setTimeout(() => {
+          calculateAllIncentives(value as FormValues);
+      }, 500); // Debounce
     });
-    return () => subscription.unsubscribe();
-  }, [watch, incentives, storeId, calculateRankings, isDirty, mounted]);
+    return () => {
+        subscription.unsubscribe();
+        if (calculationTimeoutRef.current) {
+            clearTimeout(calculationTimeoutRef.current);
+        }
+    };
+  }, [watch, calculateAllIncentives]);
 
 
   const handleTabChange = (newTab: string) => {
@@ -326,39 +357,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
   }
 
-  const calculateAllIncentives = (values: FormValues) => {
-    startTransition(async () => {
-      try {
-        const newIncentives: Record<string, IncentiveProjectionOutput | null> = {};
-        for (const seller of values.sellers) {
-          const result = await incentiveProjection({
-            vendas: seller.vendas, pa: seller.pa, ticketMedio: seller.ticketMedio, corridinhaDiaria: seller.corridinhaDiaria,
-            metaMinha: values.goals.metaMinha, meta: values.goals.meta, metona: values.goals.metona,
-            metaLendaria: values.goals.metaLendaria, legendariaBonusValorVenda: values.goals.legendariaBonusValorVenda,
-            legendariaBonusValorPremio: values.goals.legendariaBonusValorPremio, metaMinhaPrize: values.goals.metaMinhaPrize,
-            metaPrize: values.goals.metaPrize, metonaPrize: values.goals.metonaPrize, paGoal1: values.goals.paGoal1,
-            paGoal2: values.goals.paGoal2, paGoal3: values.goals.paGoal3, paGoal4: values.goals.paGoal4,
-            paPrize1: values.goals.paPrize1, paPrize2: values.goals.paPrize2, paPrize3: values.goals.paPrize3,
-            paPrize4: values.goals.paPrize4, ticketMedioGoal1: values.goals.ticketMedioGoal1,
-            ticketMedioGoal2: values.goals.ticketMedioGoal2, ticketMedioGoal3: values.goals.ticketMedioGoal3,
-            ticketMedioGoal4: values.goals.ticketMedioGoal4, ticketMedioPrize1: values.goals.ticketMedioPrize1,
-            ticketMedioPrize2: values.goals.ticketMedioPrize2, ticketMedioPrize3: values.goals.ticketMedioPrize3,
-            ticketMedioPrize4: values.goals.ticketMedioPrize4,
-          });
-          newIncentives[seller.id] = result;
-        }
-        setIncentives(newIncentives);
-        calculateRankings(values.sellers, newIncentives);
-        toast({ title: "Sucesso!", description: "Painel de todos os vendedores atualizado com sucesso." });
-      } catch (error) {
-        console.error("Calculation Error:", error);
-        toast({ variant: "destructive", title: "Erro de Cálculo", description: "Não foi possível calcular os incentivos. Tente novamente." });
-      }
-    });
-  };
-
-  const onSubmit = (values: FormValues) => calculateAllIncentives(values);
-  
+  const currentValues = getValues();
   const visibleSellers = isAdmin ? (currentValues.sellers || []) : (currentValues.sellers || []).filter(s => s.id === loggedInSellerId);
 
   if (!mounted) {
@@ -397,10 +396,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       </header>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
            <TooltipProvider>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <div className="flex items-center border-b">
+                <div className="flex items-center border-b justify-between">
                     <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
                         {visibleSellers.map(seller => (
                              <TabsTrigger key={seller.id} value={seller.id} className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-md">
@@ -408,21 +407,36 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             </TabsTrigger>
                         ))}
                     </TabsList>
-                    {isAdmin && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
-                                    <TabsTrigger value="admin" className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md">
-                                        <ShieldCheck className="h-5 w-5"/>
-                                        <span className="sr-only">Admin</span>
-                                    </TabsTrigger>
-                                </TabsList>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Painel do Administrador da Loja</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    )}
+                    
+                    <div className="flex items-center gap-4">
+                         {isCalculating && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+                                <Loader2 className="h-4 w-4 animate-spin"/>
+                                <span>Calculando...</span>
+                            </div>
+                        )}
+                        {isSaving && (
+                             <div className="flex items-center gap-2 text-sm text-green-600">
+                                <CheckCircle className="h-4 w-4"/>
+                                <span>Salvo!</span>
+                            </div>
+                        )}
+                        {isAdmin && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
+                                        <TabsTrigger value="admin" className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                                            <ShieldCheck className="h-5 w-5"/>
+                                            <span className="sr-only">Admin</span>
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Painel do Administrador da Loja</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                    </div>
                 </div>
 
                 {isAdmin && (
@@ -438,7 +452,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             goals={currentValues.goals}
                             incentives={incentives[seller.id]}
                             rankings={rankings[seller.id]}
-                            loading={isPending}
+                            loading={isCalculating}
                             themeColor={currentStore?.themeColor}
                         />
                     </TabsContent>
@@ -457,3 +471,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
