@@ -249,6 +249,14 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
                                 )) : (<p className="text-sm text-muted-foreground text-center py-4">Cadastre um vendedor para lançar as vendas.</p>)}
                             </CardContent>
                         </Card>
+                        
+                        <div className="px-6">
+                            <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
+                                {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
+                                {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
+                            </Button>
+                        </div>
+
 
                         <Card>
                             <CardHeader><h3 className="font-semibold text-lg text-primary flex items-center gap-2"><UserPlus /> Gerenciar Vendedores</h3></CardHeader>
@@ -347,11 +355,6 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives }: 
 
                 <Separator />
                 
-                <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
-                    {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
-                    {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
-                </Button>
-
                 <Card>
                     <CardHeader>
                         <CardTitle>Resumo da Loja</CardTitle>
