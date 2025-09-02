@@ -24,7 +24,6 @@ import {
   TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "./ui/skeleton";
 import { Goals } from "@/lib/storage";
 
@@ -169,36 +168,6 @@ const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
   )
 };
 
-const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive, isPulsing }: {label: string; goal: number; current: number; prize: number; achieved: boolean; isActive: boolean; isPulsing: boolean;}) => {
-    return (
-        <div className={cn(
-            "flex justify-between items-center p-2 rounded-md transition-all",
-            achieved && isActive ? "bg-green-100/80 dark:bg-green-900/30 ring-2 ring-green-500" :
-            achieved ? "bg-green-100/50 dark:bg-green-900/20" : 
-            "bg-muted/30",
-            isPulsing && "animate-pulse ring-green-500"
-        )}>
-            <div className="flex items-center gap-2">
-                {achieved ? <CheckCircle className="w-5 h-5 text-green-500"/> : <Target className="w-5 h-5 text-muted-foreground"/>}
-                <div>
-                    <p className={cn(
-                      "font-semibold", 
-                      achieved && "text-green-700 dark:text-green-300",
-                      !achieved && "text-muted-foreground"
-                    )}>{label}</p>
-                    <p className="text-xs text-muted-foreground">{formatCurrency(current)} / {formatCurrency(goal)}</p>
-                </div>
-            </div>
-            <p className={cn(
-                "font-bold text-lg", 
-                achieved && isActive ? "text-green-600 dark:text-green-400" :
-                achieved ? "text-green-500/70 dark:text-green-400/70" : 
-                "text-muted-foreground"
-              )}>{formatCurrency(prize)}</p>
-        </div>
-    )
-}
-
 const NextGoalCard = ({ nextGoalName, amountLeft }: { nextGoalName: string | null; amountLeft: number | null }) => {
     if (!nextGoalName || amountLeft === null || amountLeft <= 0) return null;
 
@@ -238,41 +207,19 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
     ticketMedioPrize4
   } = salesData;
 
-  const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
-  
   const totalIncentives = incentives
-    ? (incentives.metinhaPremio || 0) +
-      (incentives.metaPremio || 0) +
-      (incentives.metonaPremio || 0) +
-      (incentives.legendariaBonus || 0) +
-      (incentives.paBonus || 0) +
-      (incentives.ticketMedioBonus || 0) +
-      (incentives.corridinhaDiariaBonus || 0)
+    ? Object.values(incentives).reduce((sum, value) => sum + (value || 0), 0)
     : 0;
 
-  const renderSkeletons = () => (
-     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-12 w-1/4" />
-      </div>
-       <Separator/>
-      <div className="space-y-2 pt-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-      </div>
-    </div>
-  );
+  const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
+  
+  let nextGoalName: string | null = null;
+  let amountLeft: number | null = null;
   
   const metinhaAchieved = vendas >= metaMinha;
   const metaAchieved = vendas >= meta;
   const metonaAchieved = vendas >= metona;
   const lendariaAchieved = vendas >= metaLendaria;
-  
-  let nextGoalName: string | null = null;
-  let amountLeft: number | null = null;
 
   if (!lendariaAchieved) {
     if (!metonaAchieved) {
@@ -296,174 +243,189 @@ export function ProgressDisplay({ salesData, incentives, rankings, loading, them
 
 
   const headerStyle = themeColor ? { color: themeColor } : {};
-  
+
   return (
-    <Card className="shadow-lg border-2 border-transparent transition-all overflow-hidden">
-      <CardContent className="space-y-8 pt-6" data-achieved={totalIncentives > 0}>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold text-emerald-800">
-                    Seu Ganho Total
-                    </CardTitle>
-                    <DollarSign className="h-6 w-6 text-emerald-600" />
-                </CardHeader>
-                <CardContent>
-                    <p className="text-3xl font-bold text-emerald-700">
-                    {formatCurrency(totalIncentives)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                    Valor acumulado das metas
-                    </p>
-                </CardContent>
-            </Card>
-            <NextGoalCard nextGoalName={nextGoalName} amountLeft={amountLeft} />
-        </div>
-
-
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-6 h-6 text-primary" style={headerStyle} />
-            <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
-          </div>
-          <div className="relative pt-6">
-            <Progress value={salesPercentage} className="h-4" style={{background: 'hsl(var(--secondary))'}} indicatorStyle={{ background: `linear-gradient(to right, ${themeColor || 'hsl(var(--primary))'} , #34d399)`}}/>
-            {metaLendaria > 0 && (
-              <>
-                <div
-                  className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
-                  style={{ left: `${(metaMinha / metaLendaria) * 100}%` }}
-                  title={`Metinha: ${formatCurrency(metaMinha)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metinha</span>
+    <div className="w-full">
+        {loading ? (
+             <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-8 w-1/3" />
+                    <Skeleton className="h-12 w-1/4" />
                 </div>
-                <div
-                  className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
-                  style={{ left: `${(meta / metaLendaria) * 100}%` }}
-                  title={`Meta: ${formatCurrency(meta)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Meta</span>
+                <div className="space-y-2 pt-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
                 </div>
-                <div
-                  className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
-                  style={{ left: `${(metona / metaLendaria) * 100}%` }}
-                  title={`Metona: ${formatCurrency(metona)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metona</span>
+            </div>
+        ) : (
+        <Card className="shadow-lg border-2 border-transparent transition-all overflow-hidden">
+            <CardContent className="space-y-8 pt-6">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-lg font-semibold text-emerald-800">
+                            Seu Ganho Total
+                            </CardTitle>
+                            <DollarSign className="h-6 w-6 text-emerald-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-3xl font-bold text-emerald-700">
+                            {formatCurrency(totalIncentives)}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                            Valor acumulado das metas
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <NextGoalCard nextGoalName={nextGoalName} amountLeft={amountLeft} />
                 </div>
-                <div
-                  className="absolute top-0 h-full"
-                  style={{ left: `100%` }}
-                  title={`Lendária: ${formatCurrency(metaLendaria)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Lendária</span>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="text-right mt-2 font-bold text-lg text-primary" style={headerStyle}>
-            {formatCurrency(vendas)} / {formatCurrency(metaLendaria)}
-          </div>
-        </div>
-        
-       {loading ? (
-            <div className="space-y-2"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></div>
-        ) : incentives && totalIncentives > 0 ? (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2"><Award /> Ganhos Confirmados</CardTitle>
-                    <CardDescription>Parabéns! Aqui está o resumo dos seus prêmios e bônus.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    { (incentives.metinhaPremio > 0 || incentives.metaPremio > 0 || incentives.metonaPremio > 0 || incentives.legendariaBonus > 0) &&
-                        <IncentiveItem
-                        icon={<DollarSign className="w-5 h-5" />}
-                        label="Prêmio de Vendas"
-                        value={(incentives.metinhaPremio || 0) + (incentives.metaPremio || 0) + (incentives.metonaPremio || 0) + (incentives.legendariaBonus || 0)}
-                        achieved={true}
-                        />
-                    }
-                    { incentives.paBonus > 0 && 
-                        <IncentiveItem
-                            icon={<Package className="w-5 h-5" />}
-                            label="Bônus PA"
-                            value={incentives.paBonus}
-                            achieved={true}
-                        />
-                    }
-                    { incentives.ticketMedioBonus > 0 &&
-                        <IncentiveItem
-                            icon={<Ticket className="w-5 h-5" />}
-                            label="Bônus Ticket Médio"
-                            value={incentives.ticketMedioBonus}
-                            achieved={true}
-                        />
-                    }
-                    { incentives.corridinhaDiariaBonus > 0 &&
-                        <IncentiveItem
-                            icon={<Zap className="w-5 h-5" />}
-                            label="Bônus Corridinha"
-                            value={incentives.corridinhaDiariaBonus}
-                            achieved={true}
-                        />
-                    }
-                </CardContent>
-            </Card>
-        ) : null}
 
 
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2"><Package/> Desempenho Adicional</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ProgressItem
-                icon={<Package className="w-5 h-5" />}
-                title="Produtos por Atendimento (PA)"
-                currentValue={pa}
-                goalValue={paGoal4}
-                prizeValue={incentives?.paBonus || paPrize4}
-                formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
-                themeColor={themeColor}
-              />
-              <ProgressItem
-                icon={<Ticket className="w-5 h-5" />}
-                title="Ticket Médio"
-                currentValue={ticketMedio}
-                goalValue={ticketMedioGoal4}
-                prizeValue={incentives?.ticketMedioBonus || ticketMedioPrize4}
-                formatValue={formatCurrency}
-                themeColor={themeColor}
-              />
-               <ProgressItem
-                icon={<TrendingUp className="w-5 h-5" />}
-                title="Corridinha Diária"
-                currentValue={corridinhaDiaria}
-                goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1}
-                prizeValue={incentives?.corridinhaDiariaBonus || 0}
-                formatValue={formatCurrency}
-                themeColor={themeColor}
-              />
+                <div>
+                <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-6 h-6 text-primary" style={headerStyle} />
+                    <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
+                </div>
+                <div className="relative pt-6">
+                    <Progress value={salesPercentage} className="h-4" style={{background: 'hsl(var(--secondary))'}} indicatorStyle={{ background: `linear-gradient(to right, ${themeColor || 'hsl(var(--primary))'} , #34d399)`}}/>
+                    {metaLendaria > 0 && (
+                    <>
+                        <div
+                        className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
+                        style={{ left: `${(metaMinha / metaLendaria) * 100}%` }}
+                        title={`Metinha: ${formatCurrency(metaMinha)}`}
+                        >
+                        <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metinha</span>
+                        </div>
+                        <div
+                        className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
+                        style={{ left: `${(meta / metaLendaria) * 100}%` }}
+                        title={`Meta: ${formatCurrency(meta)}`}
+                        >
+                        <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Meta</span>
+                        </div>
+                        <div
+                        className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
+                        style={{ left: `${(metona / metaLendaria) * 100}%` }}
+                        title={`Metona: ${formatCurrency(metona)}`}
+                        >
+                        <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metona</span>
+                        </div>
+                        <div
+                        className="absolute top-0 h-full"
+                        style={{ left: `100%` }}
+                        title={`Lendária: ${formatCurrency(metaLendaria)}`}
+                        >
+                        <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Lendária</span>
+                        </div>
+                    </>
+                    )}
+                </div>
+                <div className="text-right mt-2 font-bold text-lg text-primary" style={headerStyle}>
+                    {formatCurrency(vendas)} / {formatCurrency(metaLendaria)}
+                </div>
+                </div>
+                
+                {incentives && totalIncentives > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2"><Award /> Ganhos Confirmados</CardTitle>
+                            <CardDescription>Parabéns! Aqui está o resumo dos seus prêmios e bônus.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            { (incentives.metinhaPremio > 0 || incentives.metaPremio > 0 || incentives.metonaPremio > 0 || incentives.legendariaBonus > 0) &&
+                                <IncentiveItem
+                                icon={<DollarSign className="w-5 h-5" />}
+                                label="Prêmio de Vendas"
+                                value={(incentives.metinhaPremio || 0) + (incentives.metaPremio || 0) + (incentives.metonaPremio || 0) + (incentives.legendariaBonus || 0)}
+                                achieved={true}
+                                />
+                            }
+                            { incentives.paBonus > 0 && 
+                                <IncentiveItem
+                                    icon={<Package className="w-5 h-5" />}
+                                    label="Bônus PA"
+                                    value={incentives.paBonus}
+                                    achieved={true}
+                                />
+                            }
+                            { incentives.ticketMedioBonus > 0 &&
+                                <IncentiveItem
+                                    icon={<Ticket className="w-5 h-5" />}
+                                    label="Bônus Ticket Médio"
+                                    value={incentives.ticketMedioBonus}
+                                    achieved={true}
+                                />
+                            }
+                            { incentives.corridinhaDiariaBonus > 0 &&
+                                <IncentiveItem
+                                    icon={<Zap className="w-5 h-5" />}
+                                    label="Bônus Corridinha"
+                                    value={incentives.corridinhaDiariaBonus}
+                                    achieved={true}
+                                />
+                            }
+                        </CardContent>
+                    </Card>
+                )}
+
+
+                <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <Card>
+                    <CardHeader className="pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2"><Package/> Desempenho Adicional</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                    <ProgressItem
+                        icon={<Package className="w-5 h-5" />}
+                        title="Produtos por Atendimento (PA)"
+                        currentValue={pa}
+                        goalValue={paGoal4}
+                        prizeValue={incentives?.paBonus || paPrize4}
+                        formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
+                        themeColor={themeColor}
+                    />
+                    <ProgressItem
+                        icon={<Ticket className="w-5 h-5" />}
+                        title="Ticket Médio"
+                        currentValue={ticketMedio}
+                        goalValue={ticketMedioGoal4}
+                        prizeValue={incentives?.ticketMedioBonus || ticketMedioPrize4}
+                        formatValue={formatCurrency}
+                        themeColor={themeColor}
+                    />
+                    <ProgressItem
+                        icon={<TrendingUp className="w-5 h-5" />}
+                        title="Corridinha Diária"
+                        currentValue={corridinhaDiaria}
+                        goalValue={corridinhaDiaria > 0 ? corridinhaDiaria : 1} // Goal is to reach the bonus amount
+                        prizeValue={incentives?.corridinhaDiariaBonus || 0}
+                        formatValue={formatCurrency}
+                        themeColor={themeColor}
+                    />
+                    </CardContent>
+                </Card>
+
+                {rankings && (
+                    <Card>
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-lg flex items-center gap-2"><Trophy/> Ranking Geral</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <RankingItem title="Vendas" rank={rankings.vendas} />
+                            <RankingItem title="PA" rank={rankings.pa} />
+                            <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
+                            <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
+                        </CardContent>
+                    </Card>
+                )}
+                </div>
             </CardContent>
-          </Card>
-
-          {rankings && (
-            <Card>
-                <CardHeader className="pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2"><Trophy/> Ranking Geral</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <RankingItem title="Vendas" rank={rankings.vendas} />
-                    <RankingItem title="PA" rank={rankings.pa} />
-                    <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
-                    <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
-                </CardContent>
-            </Card>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </Card>
+        )}
+    </div>
   );
 }

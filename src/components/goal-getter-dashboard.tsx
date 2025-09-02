@@ -10,6 +10,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ShieldCheck,
   Home,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -31,6 +32,7 @@ import {
 import { loadState, saveState, Seller, Incentives, getInitialState, Goals, Store } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
+import { Skeleton } from "./ui/skeleton";
 
 
 const sellerSchema = z.object({
@@ -63,7 +65,7 @@ export const formSchema = z.object({
     paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
+    paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
@@ -81,6 +83,32 @@ export type FormValues = z.infer<typeof formSchema>;
 export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
 export type Rankings = Record<string, Record<RankingMetric, number>>;
 
+const DashboardSkeleton = () => (
+    <div className="container mx-auto p-4 py-8 md:p-8">
+        <header className="flex items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+                <div>
+                    <Skeleton className="h-8 w-48 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                </div>
+            </div>
+             <div className="flex items-center gap-2">
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-32" />
+            </div>
+        </header>
+        <div className="border-b mb-4">
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-24" />
+            </div>
+        </div>
+        <Skeleton className="h-[500px] w-full" />
+    </div>
+);
+
+
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -89,6 +117,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loggedInSellerId, setLoggedInSellerId] = useState<string | null>(null);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
+  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -212,7 +241,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         setLoggedInSellerId(currentLoggedInSeller);
     }
 
-    const tabToActivate = tabFromUrl || (state.sellers[storeId]?.[0]?.id ?? 'admin');
+    const sellersForStore = state.sellers[storeId] || [];
+    const tabToActivate = tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : 'admin');
     
     const sellerIsAuthenticated = (sellerId: string) => {
         return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
@@ -225,6 +255,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             return;
         }
     } else { // It's a seller tab
+        if (!sellersForStore.find(s => s.id === tabToActivate)) {
+             router.push(`/dashboard/${storeId}?tab=${sellersForStore[0]?.id || 'admin'}`);
+             return;
+        }
         if (!adminAuthenticated && !sellerIsAuthenticated(tabToActivate)) {
             const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
             router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
@@ -240,11 +274,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     if (tabToActivate !== activeTab) {
         setActiveTab(tabToActivate);
     }
+    setMounted(true);
   }, [storeId, router, toast, searchParams, activeTab]);
 
   // Save state on change
   useEffect(() => {
-    if (!isDirty) return;
+    if (!isDirty || !mounted) return;
     
     const subscription = watch((value) => {
         try {
@@ -261,7 +296,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         }
     });
     return () => subscription.unsubscribe();
-  }, [watch, incentives, storeId, calculateRankings, isDirty]);
+  }, [watch, incentives, storeId, calculateRankings, isDirty, mounted]);
 
 
   const handleTabChange = (newTab: string) => {
@@ -325,6 +360,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const onSubmit = (values: FormValues) => calculateAllIncentives(values);
   
   const visibleSellers = isAdmin ? (currentValues.sellers || []) : (currentValues.sellers || []).filter(s => s.id === loggedInSellerId);
+
+  if (!mounted) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
@@ -392,7 +431,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     </TabsContent>
                 )}
                 
-                {(currentValues.sellers || []).map((seller, index) => (
+                {(currentValues.sellers || []).map((seller) => (
                     <TabsContent key={seller.id} value={seller.id} className="mt-4">
                         <SellerTab
                             seller={seller}
@@ -405,9 +444,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     </TabsContent>
                 ))}
 
-                {currentValues.sellers && currentValues.sellers.length === 0 && activeTab !== 'admin' && (
-                    <TabsContent value={activeTab} className="mt-4">
-                        <p>Sem vendedores</p>
+                 {(currentValues.sellers || []).length === 0 && activeTab !== 'admin' && (
+                     <TabsContent value={activeTab} className="mt-4 text-center text-muted-foreground py-10">
+                        <p>Esta loja ainda não tem vendedores.</p>
+                        <p>O administrador precisa adicionar vendedores no painel de administração.</p>
                     </TabsContent>
                 )}
             </Tabs>
