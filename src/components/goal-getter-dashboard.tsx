@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,6 +80,8 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
+export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
+export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
     <div className="container mx-auto p-4 py-8 md:p-8">
@@ -113,6 +114,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const [incentives, setIncentives] = useState<Incentives>({});
+  const [rankings, setRankings] = useState<Rankings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [loggedInSellerId, setLoggedInSellerId] = useState<string | null>(null);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
@@ -123,18 +125,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getInitialStateForForm(),
-  });
-  
-  function getInitialStateForForm(): FormValues {
-    if (typeof window === "undefined") {
-      return {
+    defaultValues: {
         newSellerName: "",
         newSellerPassword: "",
         goals: getInitialState().goals.default,
         sellers: [],
-      };
-    }
+      }
+  });
+  
+  const getInitialStateForForm = useCallback(() => {
     const state = loadState();
     return {
       newSellerName: "",
@@ -142,11 +141,50 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       goals: state.goals[storeId] || state.goals.default,
       sellers: state.sellers[storeId] || [],
     }
-  }
+  }, [storeId]);
 
   const { watch, reset, getValues } = form;
 
   const [activeTab, setActiveTab] = useState<string>("loading");
+
+  const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
+    const newRankings: Rankings = {};
+    if (!sellers || sellers.length === 0) {
+        setRankings({});
+        return;
+    }
+    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria'];
+
+    metrics.forEach(metric => {
+        const sortedSellers = [...sellers]
+            .map(seller => {
+                let value = 0;
+                if (metric === 'corridinhaDiaria') {
+                    const incentiveData = currentIncentives[seller.id];
+                    value = incentiveData?.corridinhaDiariaBonus || 0;
+                }
+                else {
+                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId' | 'password'>] as number;
+                }
+                return { id: seller.id, value };
+            })
+            .sort((a, b) => b.value - a.value);
+
+        let rank = 1;
+        for (let i = 0; i < sortedSellers.length; i++) {
+            if (i > 0 && sortedSellers[i].value < sortedSellers[i - 1].value) {
+                rank = i + 1;
+            }
+            const sellerId = sortedSellers[i].id;
+            if (!newRankings[sellerId]) {
+                newRankings[sellerId] = {} as Record<RankingMetric, number>;
+            }
+            newRankings[sellerId][metric] = rank;
+        }
+    });
+
+    setRankings(newRankings);
+  }, []);
 
   const calculateAllIncentives = useCallback((values: FormValues) => {
     startTransition(async () => {
@@ -160,6 +198,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           newIncentives[seller.id] = result;
         }
         setIncentives(newIncentives);
+        calculateRankings(values.sellers, newIncentives);
         
         const currentState = loadState();
         currentState.sellers[storeId] = values.sellers || [];
@@ -175,7 +214,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         toast({ variant: "destructive", title: "Erro de Cálculo", description: "Não foi possível calcular os incentivos. Tente novamente." });
       }
     });
-  }, [storeId, toast]);
+  }, [storeId, calculateRankings, toast]);
   
   useEffect(() => {
     setMounted(true);
@@ -195,6 +234,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     
     const initialIncentives = state.incentives[storeId] || {};
     setIncentives(initialIncentives);
+    calculateRankings(initialFormValues.sellers, initialIncentives);
 
     // Auth and Tab logic
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
@@ -240,8 +280,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     
     setActiveTab(tabToActivate);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId, reset, router, toast, searchParams]);
+  }, [storeId, reset, router, toast, searchParams, getInitialStateForForm, calculateRankings]);
 
   // Recalculate on form change
   const stableCalculateAllIncentives = useCallback(calculateAllIncentives, [calculateAllIncentives]);
@@ -252,7 +291,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           clearTimeout(calculationTimeoutRef.current);
       }
       calculationTimeoutRef.current = setTimeout(() => {
-          stableCalculateAllIncentives(value as FormValues);
+        stableCalculateAllIncentives(value as FormValues);
       }, 500); // Debounce
     });
     return () => {
@@ -385,6 +424,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             seller={seller}
                             goals={currentValues.goals}
                             incentives={incentives[seller.id]}
+                            rankings={rankings[seller.id]}
+                            loading={isCalculating}
                             themeColor={currentStore?.themeColor}
                         />
                     </TabsContent>
