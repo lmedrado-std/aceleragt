@@ -65,7 +65,7 @@ export const ProgressDisplay: React.FC<Props> = ({ salesData, incentives }) => {
             />
              <MetricCard 
                 title="Produtos por Atendimento (PA)"
-                value={String(pa?.toFixed(2) || '0.00')}
+                value={String(Number(pa || 0).toFixed(2))}
                 icon={<Package className="h-4 w-4 text-muted-foreground" />}
                  description="Média de itens por venda"
             />
