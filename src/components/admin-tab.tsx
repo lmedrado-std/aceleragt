@@ -89,17 +89,17 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
         const newSellerName = getValues("newSellerName");
         const newSellerPassword = getValues("newSellerPassword");
 
-        if (newSellerName.trim() === "") {
+        if (newSellerName && newSellerName.trim() === "") {
             setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
             return;
         }
-         if (newSellerPassword.trim().length < 4) {
+        if (newSellerPassword && newSellerPassword.trim().length < 4) {
             setError("newSellerPassword", { type: "manual", message: "Senha deve ter no mínimo 4 caracteres." });
             return;
         }
         
         clearErrors(["newSellerName", "newSellerPassword"]);
-        addSeller(newSellerName, newSellerPassword);
+        addSeller(newSellerName!, newSellerPassword!);
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
     };
@@ -189,13 +189,19 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
             const currentFormValues = getValues();
             const newIncentives: Incentives = {};
 
+            const goalsAsNumbers = Object.entries(currentFormValues.goals).reduce((acc, [key, value]) => {
+                acc[key as keyof Goals] = Number(value);
+                return acc;
+            }, {} as Goals);
+
+
             for (const seller of currentFormValues.sellers) {
                 const result = await incentiveProjection({
                     vendas: Number(seller.vendas),
                     pa: Number(seller.pa),
                     ticketMedio: Number(seller.ticketMedio),
                     corridinhaDiaria: Number(seller.corridinhaDiaria),
-                    ...currentFormValues.goals
+                    ...goalsAsNumbers
                 });
                 newIncentives[seller.id] = result;
             }
@@ -250,14 +256,14 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                                             <FormItem>
                                                 <FormLabel className="sr-only">Nome do Vendedor</FormLabel>
                                                 <FormControl><Input placeholder="Nome do Vendedor" {...field} /></FormControl>
-                                                <FormMessage />
+                                                <FormMessage>{errors.newSellerName?.message}</FormMessage>
                                             </FormItem>
                                         )} />
                                         <FormField control={control} name="newSellerPassword" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="sr-only">Senha</FormLabel>
                                                 <FormControl><Input type="password" placeholder="Senha" {...field} /></FormControl>
-                                                <FormMessage />
+                                                <FormMessage>{errors.newSellerPassword?.message}</FormMessage>
                                             </FormItem>
                                         )} />
                                     </div>
