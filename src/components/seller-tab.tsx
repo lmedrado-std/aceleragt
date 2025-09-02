@@ -3,18 +3,15 @@
 
 import { Seller, Goals, Incentives } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
-import { RankingMetric } from "./goal-getter-dashboard";
 
 interface SellerTabProps {
     seller: Seller;
     goals: Goals;
     incentives: Incentives[string];
-    rankings: Record<RankingMetric, number> | null;
-    loading: boolean;
     themeColor?: string | null;
 }
 
-export function SellerTab({ seller, goals, incentives, rankings, loading, themeColor }: SellerTabProps) {
+export function SellerTab({ seller, goals, incentives, themeColor }: SellerTabProps) {
     return (
         <ProgressDisplay
             salesData={{
@@ -25,8 +22,6 @@ export function SellerTab({ seller, goals, incentives, rankings, loading, themeC
                 ...goals
             }}
             incentives={incentives}
-            rankings={rankings}
-            loading={loading}
             themeColor={themeColor}
         />
     )
