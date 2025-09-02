@@ -235,6 +235,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const initialIncentives = state.incentives[storeId] || {};
     setIncentives(initialIncentives);
     calculateRankings(initialFormValues.sellers, initialIncentives);
+    calculateAllIncentives(initialFormValues);
 
     // Auth and Tab logic
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
@@ -280,7 +281,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     
     setActiveTab(tabToActivate);
-  }, [storeId, reset, router, toast, searchParams, getInitialStateForForm, calculateRankings]);
+  }, [storeId, reset, router, toast, searchParams, getInitialStateForForm, calculateRankings, calculateAllIncentives]);
 
   // Recalculate on form change
   const stableCalculateAllIncentives = useCallback(calculateAllIncentives, [calculateAllIncentives]);
@@ -414,7 +415,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 {isAdmin && (
                     <TabsContent value="admin">
-                        <AdminTab form={form} storeId={storeId} setIncentives={setIncentives} />
+                        <AdminTab form={form} storeId={storeId} setIncentives={setIncentives} incentives={incentives} />
                     </TabsContent>
                 )}
                 
