@@ -163,10 +163,10 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
         const currentGoals = goals as Goals;
 
         return {
-            vendas: currentSellers.reduce((acc, s) => acc + (s.vendas || 0), 0),
-            pa: currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.pa || 0), 0) / currentSellers.length : 0,
-            ticketMedio: currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + (s.ticketMedio || 0), 0) / currentSellers.length : 0,
-            corridinhaDiaria: currentSellers.reduce((acc, s) => acc + (s.corridinhaDiaria || 0), 0),
+            vendas: currentSellers.reduce((acc, s) => acc + Number(s.vendas || 0), 0),
+            pa: currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + Number(s.pa || 0), 0) / currentSellers.length : 0,
+            ticketMedio: currentSellers.length > 0 ? currentSellers.reduce((acc, s) => acc + Number(s.ticketMedio || 0), 0) / currentSellers.length : 0,
+            corridinhaDiaria: currentSellers.reduce((acc, s) => acc + Number(s.corridinhaDiaria || 0), 0),
             goals: currentGoals,
         };
       }, [sellers, goals]);
@@ -365,5 +365,3 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
         </Card>
     )
 }
-
-    
