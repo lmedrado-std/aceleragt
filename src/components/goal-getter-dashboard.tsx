@@ -53,7 +53,7 @@ export const formSchema = z.object({
     meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    legendariaBonusValorVenda: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(1, "Deve ser maior que zero"),
+    legendariaBonusValorVenda: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     legendariaBonusValorPremio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     metaMinhaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
     metaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),

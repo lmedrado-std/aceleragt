@@ -11,8 +11,7 @@ import {
   Eye,
   EyeOff,
   Calculator,
-  Loader2,
-  LineChart,
+  Loader2
 } from "lucide-react";
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -49,7 +48,6 @@ import {
 import { Seller, Goals, Incentives } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
-import Link from "next/link";
 
 
 const goalTiers = [
@@ -90,17 +88,21 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
         const newSellerName = getValues("newSellerName");
         const newSellerPassword = getValues("newSellerPassword");
 
-        if (newSellerName && newSellerName.trim() === "") {
+        if (!newSellerName || newSellerName.trim() === "") {
             setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
             return;
         }
-        if (newSellerPassword && newSellerPassword.trim().length < 4) {
-            setError("newSellerPassword", { type: "manual", message: "Senha deve ter no mínimo 4 caracteres." });
+
+        // Password is now optional
+        if (newSellerPassword && newSellerPassword.trim().length > 0 && newSellerPassword.trim().length < 4) {
+            setError("newSellerPassword", { type: "manual", message: "A senha deve ter no mínimo 4 caracteres." });
             return;
         }
         
         clearErrors(["newSellerName", "newSellerPassword"]);
-        addSeller(newSellerName!, newSellerPassword!);
+        // If password is not provided, default to the seller's name in lowercase
+        const finalPassword = newSellerPassword && newSellerPassword.trim().length > 0 ? newSellerPassword.trim() : newSellerName.trim().toLowerCase();
+        addSeller(newSellerName!, finalPassword);
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
     };
@@ -240,7 +242,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                             </CardContent>
                         </Card>
 
-                        <div className="px-1">
+                         <div className="px-1">
                           <Button onClick={handleCalculateIncentives} disabled={isPending} className="w-full" size="lg">
                               {isPending ? <Loader2 className="animate-spin mr-2" /> : <Calculator className="mr-2"/>}
                               {isPending ? "Calculando..." : "Salvar e Calcular Incentivos"}
@@ -263,7 +265,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                                         <FormField control={control} name="newSellerPassword" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="sr-only">Senha</FormLabel>
-                                                <FormControl><Input type="password" placeholder="Senha" {...field} /></FormControl>
+                                                <FormControl><Input type="password" placeholder="Senha (opcional)" {...field} /></FormControl>
                                                 <FormMessage>{errors.newSellerPassword?.message}</FormMessage>
                                             </FormItem>
                                         )} />
@@ -338,21 +340,6 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                         <Card>
                             <CardHeader><h3 className="font-semibold text-lg text-primary">Metas de PA e Ticket Médio</h3></CardHeader>
                             <CardContent className="space-y-6">{renderGoalInputs("Metas de PA", goalTiers)}<Separator />{renderGoalInputs("Metas de Ticket Médio", ticketMedioTiers)}</CardContent>
-                        </Card>
-                        
-                        <Card>
-                            <CardHeader>
-                                <h3 className="font-semibold text-lg text-primary flex items-center gap-2">
-                                    <LineChart /> Dashboard Geral
-                                </h3>
-                                </CardHeader>
-                            <CardContent>
-                                <Button asChild className="w-full">
-                                    <Link href="/admin/dashboard">
-                                        Ver Relatórios Consolidados
-                                    </Link>
-                                </Button>
-                            </CardContent>
                         </Card>
                     </div>
                 </div>
