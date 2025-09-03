@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -14,18 +15,18 @@ import {
   Package,
   Ticket,
   TrendingUp,
-  CheckCircle,
   Award,
-  Gift,
-  Zap,
-  Trophy,
-  Target,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "./ui/skeleton";
 import { Goals, Seller } from "@/lib/storage";
-import { RankingMetric, Rankings } from "./goal-getter-dashboard";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 
 type ProgressDisplaySalesData = Partial<Seller> & {
@@ -35,7 +36,7 @@ type ProgressDisplaySalesData = Partial<Seller> & {
 interface ProgressDisplayProps {
   salesData: ProgressDisplaySalesData;
   incentives: IncentiveProjectionOutput | null;
-  rankings: Record<RankingMetric, number> | null;
+  rankings: Record<string, number> | null;
 }
 
 const formatCurrency = (value: number) =>
@@ -57,8 +58,8 @@ const ProgressItem = ({
   goalValue: number;
   formatValue?: (value: number) => string;
 }) => {
-  const percentage = goalValue > 0 ? Math.min(((currentValue || 0) / goalValue) * 100, 100) : 0;
-
+  const percentage = goalValue > 0 ? Math.min((currentValue / goalValue) * 100, 100) : 0;
+  
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-baseline">
@@ -78,122 +79,26 @@ const ProgressItem = ({
 };
 
 
-const IncentiveItem = ({
-  icon,
-  label,
-  value,
-  achieved,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  achieved: boolean;
-}) => (
-  <div
-    className={cn(
-      "flex items-center justify-between p-3 rounded-lg transition-all",
-      achieved ? "bg-green-100 dark:bg-green-900/30" : "bg-muted/50"
-    )}
-  >
-    <div className="flex items-center gap-3">
-      <div
-        className={cn(
-          "p-1.5 rounded-full bg-opacity-10",
-          achieved
-            ? "bg-green-500 text-green-600"
-            : "bg-primary text-primary"
-        )}
-      >
-        {icon}
-      </div>
-      <span
-        className={cn(
-          "font-medium",
-          achieved ? "text-green-800 dark:text-green-300" : "text-muted-foreground"
-        )}
-      >
-        {label}
-      </span>
-    </div>
-    <div className="flex items-center gap-2">
-      {achieved && <CheckCircle className="w-5 h-5 text-green-500" />}
-      <span
-        className={cn(
-          "font-semibold text-lg",
-          achieved ? "text-green-600 dark:text-green-400" : "text-foreground"
-        )}
-      >
-        {formatCurrency(value)}
-      </span>
-    </div>
-  </div>
+const MetricCard = ({ title, value, icon, description }: { title: string, value: string, icon: React.ReactNode, description: string }) => (
+    <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            {icon}
+        </CardHeader>
+        <CardContent>
+            <div className="text-2xl font-bold">{value}</div>
+            <p className="text-xs text-muted-foreground">{description}</p>
+        </CardContent>
+    </Card>
 );
 
-const RankingItem = ({ title, rank }: { title: string; rank?: number }) => {
-  const getRankColor = (r?: number) => {
-    if (r === 1) return "text-amber-500";
-    if (r === 2) return "text-slate-500";
-    if (r === 3) return "text-amber-700";
-    return "text-muted-foreground";
-  };
-
-  return (
-    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-        <span className="font-medium text-muted-foreground">{title}</span>
-        <div className="flex items-center gap-2">
-            <Trophy className={cn("w-5 h-5", getRankColor(rank))} />
-            <span className={cn("font-bold text-xl", getRankColor(rank))}>
-                {rank ? `${rank}º` : "-"}
-            </span>
-        </div>
+const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
+     <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
+        <p className="font-medium">{label}</p>
+        <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(prize)}</p>
     </div>
-  )
-};
+)
 
-const SalesGoalDetail = ({ label, goal, current, prize, achieved, isActive }: {label: string; goal: number; current: number; prize: number; achieved: boolean; isActive: boolean; }) => {
-    return (
-        <div className={cn(
-            "flex justify-between items-center p-2 rounded-md transition-all",
-            achieved && isActive ? "bg-green-100/80 dark:bg-green-900/30 ring-2 ring-green-500" :
-            achieved ? "bg-green-100/50 dark:bg-green-900/20" : 
-            "bg-muted/30"
-        )}>
-            <div className="flex items-center gap-2">
-                {achieved ? <CheckCircle className="w-5 h-5 text-green-500"/> : <Target className="w-5 h-5 text-muted-foreground"/>}
-                <div>
-                    <p className={cn(
-                      "font-semibold", 
-                      achieved && "text-green-700 dark:text-green-300",
-                      !achieved && "text-muted-foreground"
-                    )}>{label}</p>
-                    <p className="text-xs text-muted-foreground">{formatCurrency(current)} / {formatCurrency(goal)}</p>
-                </div>
-            </div>
-            <p className={cn(
-                "font-bold text-lg", 
-                achieved && isActive ? "text-green-600 dark:text-green-400" :
-                achieved ? "text-green-500/70 dark:text-green-400/70" : 
-                "text-muted-foreground"
-              )}>{formatCurrency(prize)}</p>
-        </div>
-    )
-}
-
-const EmptyIncentives = () => (
-    <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-4 rounded-lg bg-muted/50 p-6">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Award className="h-8 w-8 text-primary" />
-        </div>
-        <div>
-            <p className="font-semibold text-lg text-foreground">
-                Nenhuma meta atingida ainda
-            </p>
-            <p className="text-sm mt-1">
-                Continue no seu ritmo que você chega lá!
-            </p>
-        </div>
-    </div>
-);
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
@@ -208,205 +113,106 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     return <div className="p-4">Carregando metas...</div>;
   }
 
-  const {
-    metaMinha,
-    metaMinhaPrize,
-    meta,
-    metaPrize,
-    metona,
-    metonaPrize,
-    metaLendaria,
-    paGoal4,
-    ticketMedioGoal4,
-  } = goals;
-
-  const salesPercentage = metaLendaria > 0 ? (vendas / metaLendaria) * 100 : 0;
-  
   const totalIncentives = incentives
-    ? (incentives.metinhaPremio || 0) +
-      (incentives.metaPremio || 0) +
-      (incentives.metonaPremio || 0) +
-      (incentives.legendariaBonus || 0) +
-      (incentives.paBonus || 0) +
-      (incentives.ticketMedioBonus || 0) +
-      (incentives.corridinhaDiariaBonus || 0)
+    ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
-  
-  const metinhaAchieved = vendas >= metaMinha;
-  const metaAchieved = vendas >= meta;
-  const metonaAchieved = vendas >= metona;
-  const lendariaAchieved = vendas >= metaLendaria;
 
-  const headerStyle = { color: `hsl(var(--primary-hsl))` };
-  
   return (
-    <Card className="shadow-lg border-2 border-transparent transition-all overflow-hidden">
-      <CardHeader>
-        <CardTitle>Dashboard de Progresso e Incentivos</CardTitle>
-        <CardDescription>
-          Sua jornada para o sucesso em tempo real.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8" data-achieved={totalIncentives > 0}>
-
-        <div className="grid grid-cols-1 gap-6">
-            <Card className="bg-gradient-to-r from-emerald-100 to-green-50 border-emerald-200 shadow-md hover:shadow-lg transition-all rounded-2xl">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold text-emerald-800">
-                    Seu Ganho Total
-                    </CardTitle>
-                    <DollarSign className="h-6 w-6 text-emerald-600" />
+    <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+             <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-primary text-primary-foreground">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-base font-semibold">Ganho Total Projetado</CardTitle>
+                    <Award className="h-5 w-5 text-primary-foreground/80" />
                 </CardHeader>
                 <CardContent>
-                    <p className="text-3xl font-bold text-emerald-700">
-                    {formatCurrency(totalIncentives)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                    Valor acumulado das metas
-                    </p>
+                    <div className="text-4xl font-bold">{formatCurrency(totalIncentives)}</div>
+                    <p className="text-xs text-primary-foreground/80">Soma de todos os prêmios e bônus alcançados.</p>
                 </CardContent>
             </Card>
-        </div>
-
-
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-6 h-6 text-primary" style={headerStyle} />
-            <h3 className="text-xl font-semibold">Progresso de Vendas</h3>
-          </div>
-          <div className="relative pt-6">
-            <Progress value={salesPercentage} className="h-4"/>
-            {metaLendaria > 0 && (
-              <>
-                <div
-                  className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
-                  style={{ left: `${(metaMinha / metaLendaria) * 100}%` }}
-                  title={`Metinha: ${formatCurrency(metaMinha)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metinha</span>
-                </div>
-                <div
-                  className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
-                  style={{ left: `${(meta / metaLendaria) * 100}%` }}
-                  title={`Meta: ${formatCurrency(meta)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Meta</span>
-                </div>
-                <div
-                  className="absolute top-0 h-full border-r-2 border-dashed border-foreground/20"
-                  style={{ left: `${(metona / metaLendaria) * 100}%` }}
-                  title={`Metona: ${formatCurrency(metona)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Metona</span>
-                </div>
-                <div
-                  className="absolute top-0 h-full"
-                  style={{ left: `100%` }}
-                  title={`Lendária: ${formatCurrency(metaLendaria)}`}
-                >
-                  <span className="absolute -top-6 -translate-x-1/2 text-xs font-bold text-muted-foreground">Lendária</span>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="text-right mt-2 font-bold text-lg text-primary" style={headerStyle}>
-            {formatCurrency(vendas)} / {formatCurrency(metaLendaria)}
-          </div>
+            <MetricCard 
+                title="Vendas Realizadas" 
+                value={formatCurrency(vendas)} 
+                icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
+                description="Total vendido no período"
+            />
+             <MetricCard 
+                title="Produtos por Atendimento (PA)"
+                value={String(Number(pa || 0).toFixed(2))}
+                icon={<Package className="h-4 w-4 text-muted-foreground" />}
+                 description="Média de itens por venda"
+            />
+            <MetricCard 
+                title="Ticket Médio" 
+                value={formatCurrency(ticketMedio)} 
+                icon={<Ticket className="h-4 w-4 text-muted-foreground" />}
+                description="Valor médio por venda"
+            />
+            <MetricCard 
+                title="Bônus Corridinha" 
+                value={formatCurrency(corridinhaDiaria)} 
+                icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+                description="Bônus diário direto"
+            />
         </div>
         
-        {incentives && metinhaAchieved ? (
-            <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
-                <h3 className="font-semibold text-center text-muted-foreground mb-2">Detalhes dos Prêmios de Vendas</h3>
-                <SalesGoalDetail label="Prêmio Metinha" goal={metaMinha} current={vendas} prize={metaMinhaPrize} achieved={metinhaAchieved} isActive={metinhaAchieved && !metaAchieved} />
-                <SalesGoalDetail label="Prêmio Meta" goal={meta} current={vendas} prize={metaPrize} achieved={metaAchieved} isActive={metaAchieved && !metonaAchieved} />
-                <SalesGoalDetail label="Prêmio Metona" goal={metona} current={vendas} prize={metonaPrize} achieved={metonaAchieved} isActive={metonaAchieved} />
-                <SalesGoalDetail label="Bônus Lendária" goal={metaLendaria} current={vendas} prize={incentives.legendariaBonus} achieved={lendariaAchieved} isActive={lendariaAchieved} />
-            </div>
-        ) : (
-            <EmptyIncentives />
-        )}
-
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2"><Package/> Desempenho Adicional</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ProgressItem
-                icon={<Package className="w-5 h-5" />}
-                title="Produtos por Atendimento (PA)"
-                currentValue={Number(pa)}
-                goalValue={Number(paGoal4)}
-                formatValue={(v) => (typeof v === 'number' ? v.toFixed(2) : Number(v || 0).toFixed(2))}
-              />
-              <ProgressItem
-                icon={<Ticket className="w-5 h-5" />}
-                title="Ticket Médio"
-                currentValue={Number(ticketMedio)}
-                goalValue={Number(ticketMedioGoal4)}
-                formatValue={formatCurrency}
-              />
-              <ProgressItem
-                icon={<TrendingUp className="w-5 h-5" />}
-                title="Corridinha Diária"
-                currentValue={Number(corridinhaDiaria)}
-                goalValue={Number(corridinhaDiaria) > 0 ? Number(corridinhaDiaria) : 1}
-                formatValue={formatCurrency}
-              />
-            </CardContent>
-          </Card>
-
-          {rankings && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
-                <CardHeader className="pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2"><Trophy/> Ranking Geral</CardTitle>
+                <CardHeader>
+                    <div className="flex justify-between items-center">
+                         <CardTitle className="text-xl">Progresso das Metas</CardTitle>
+                         <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Info className="h-5 w-5 text-muted-foreground cursor-help"/>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs" side="top">
+                                    <div className="text-sm font-bold mb-2">Metas Atuais</div>
+                                    <div className="space-y-1 text-xs">
+                                        <p><span className="font-semibold">Metinha:</span> {formatCurrency(goals.metaMinha)}</p>
+                                        <p><span className="font-semibold">Meta:</span> {formatCurrency(goals.meta)}</p>
+                                        <p><span className="font-semibold">Metona:</span> {formatCurrency(goals.metona)}</p>
+                                        <p><span className="font-semibold">Lendária:</span> {formatCurrency(goals.metaLendaria)}</p>
+                                        <Separator className="my-1"/>
+                                        <p><span className="font-semibold">PA Nível 4:</span> {goals.paGoal4}</p>
+                                        <p><span className="font-semibold">Ticket Médio Nível 4:</span> {formatCurrency(goals.ticketMedioGoal4)}</p>
+                                    </div>
+                                </TooltipContent>
+                            </Tooltip>
+                         </TooltipProvider>
+                    </div>
+                    <CardDescription>Veja o quão perto você está de bater suas metas.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <RankingItem title="Vendas" rank={rankings.vendas} />
-                    <RankingItem title="PA" rank={rankings.pa} />
-                    <RankingItem title="Ticket Médio" rank={rankings.ticketMedio} />
-                    <RankingItem title="Corridinha" rank={rankings.corridinhaDiaria} />
+                <CardContent>
+                    <div className="space-y-4">
+                        <ProgressItem title="Meta de Vendas" currentValue={vendas} goalValue={goals.metaLendaria} formatValue={formatCurrency}/>
+                    </div>
+                    <Separator className="my-4" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                         <ProgressItem title="Meta PA" currentValue={pa || 0} goalValue={goals.paGoal4} formatValue={(v) => Number(v || 0).toFixed(2)}/>
+                         <ProgressItem title="Meta Ticket Médio" currentValue={ticketMedio || 0} goalValue={goals.ticketMedioGoal4} formatValue={formatCurrency}/>
+                    </div>
                 </CardContent>
             </Card>
-          )}
+
+            <Card>
+                <CardHeader>
+                     <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
+                    <CardDescription>Seus prêmios e bônus detalhados.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <GoalDetail label="Prêmio Metinha" prize={incentives?.metinhaPremio || 0} achieved={(incentives?.metinhaPremio || 0) > 0} />
+                    <GoalDetail label="Prêmio Meta" prize={incentives?.metaPremio || 0} achieved={(incentives?.metaPremio || 0) > 0} />
+                    <GoalDetail label="Prêmio Metona" prize={incentives?.metonaPremio || 0} achieved={(incentives?.metonaPremio || 0) > 0} />
+                    <GoalDetail label="Bônus Lendária" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />
+                    <Separator/>
+                    <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
+                    <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
+                    <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
+                </CardContent>
+            </Card>
         </div>
-
-        <Separator/>
-
-        <div className="pt-4">
-          {incentives && totalIncentives > 0 ? (
-            <div className="space-y-4">
-               <h3 className="font-semibold text-center text-muted-foreground mb-4">Detalhes dos Outros Prêmios</h3>
-              <div className="space-y-2">
-                <IncentiveItem
-                  icon={<Gift className="w-5 h-5" />}
-                  label="Bônus PA"
-                  value={incentives.paBonus}
-                  achieved={incentives.paBonus > 0}
-                />
-                <IncentiveItem
-                  icon={<Gift className="w-5 h-5" />}
-                  label="Bônus Ticket Médio"
-                  value={incentives.ticketMedioBonus}
-                  achieved={incentives.ticketMedioBonus > 0}
-                />
-                <IncentiveItem
-                  icon={<Zap className="w-5 h-5" />}
-                  label="Bônus Corridinha"
-                  value={incentives.corridinhaDiariaBonus}
-                  achieved={incentives.corridinhaDiariaBonus > 0}
-                />
-              </div>
-            </div>
-          ) : (
-             <div></div>
-          )}
-        </div>
-
-
-      </CardContent>
-    </Card>
+    </div>
   );
 }
 
-    
