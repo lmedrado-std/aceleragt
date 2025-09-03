@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Palette } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart } from "lucide-react";
+import { useEffect, useState } from "react";
 import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ export default function AdminPage() {
   
   const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: ''});
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
-  const [editingStore, setEditingStore] = useState<{name: string, themeColor: string}>({ name: '', themeColor: '#3b82f6'});
+  const [editingStoreName, setEditingStoreName] = useState('');
 
   const { toast } = useToast();
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function AdminPage() {
       if (!currentState) return null;
 
       const newStoreId = crypto.randomUUID();
-      const newStore: Store = { id: newStoreId, name: newStoreName, themeColor: '#3b82f6' };
+      const newStore: Store = { id: newStoreId, name: newStoreName, themeColor: '217.2 32.6% 17.5%' };
       
       const newState: AppState = {
         ...currentState,
@@ -110,16 +110,16 @@ export default function AdminPage() {
 
   const handleStartEditingStore = (store: Store) => {
     setEditingStoreId(store.id);
-    setEditingStore({ name: store.name, themeColor: store.themeColor || '#3b82f6' });
+    setEditingStoreName(store.name);
   };
 
   const handleCancelEditingStore = () => {
     setEditingStoreId(null);
-    setEditingStore({ name: '', themeColor: '#3b82f6' });
+    setEditingStoreName('');
   };
 
   const handleSaveStore = (id: string) => {
-    if (!editingStore.name.trim()) {
+    if (!editingStoreName.trim()) {
       setTimeout(() => {
         toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       }, 0);
@@ -130,12 +130,12 @@ export default function AdminPage() {
       const newState = {
         ...currentState,
         stores: currentState.stores.map(store => 
-          store.id === id ? { ...store, name: editingStore.name, themeColor: editingStore.themeColor } : store
+          store.id === id ? { ...store, name: editingStoreName } : store
         )
       };
       saveState(newState);
       setTimeout(() => {
-        toast({ title: "Sucesso!", description: `Loja "${editingStore.name}" atualizada.` });
+        toast({ title: "Sucesso!", description: `Loja "${editingStoreName}" atualizada.` });
       }, 0);
       return newState;
     });
@@ -245,28 +245,19 @@ export default function AdminPage() {
                             {editingStoreId === store.id ? (
                               <>
                                 <Input 
-                                  value={editingStore.name}
-                                  onChange={(e) => setEditingStore(s => ({...s, name: e.target.value}))}
+                                  value={editingStoreName}
+                                  onChange={(e) => setEditingStoreName(e.target.value)}
                                   onKeyDown={(e) => e.key === 'Enter' && handleSaveStore(store.id)}
                                   autoFocus
                                   className="h-8"
                                 />
-                                <div className='relative'>
-                                    <Palette className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2"/>
-                                    <Input
-                                        type="color"
-                                        value={editingStore.themeColor}
-                                        onChange={(e) => setEditingStore(s => ({...s, themeColor: e.target.value}))}
-                                        className="h-8 w-16 p-1 pl-7"
-                                    />
-                                </div>
                                 <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
                                 <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
                               </>
                             ) : (
                               <>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-full" style={{backgroundColor: store.themeColor}}></div>
+                                    <div className="w-4 h-4 rounded-full" style={{backgroundColor: `hsl(${store.themeColor})`}}></div>
                                     <span className="font-medium">{store.name}</span>
                                 </div>
                                 <div className="flex items-center">
@@ -334,3 +325,5 @@ export default function AdminPage() {
     </main>
   );
 }
+
+    

@@ -35,6 +35,8 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
+        
+        <Image src="https://i.ibb.co/CVC62Fp/logo-acelera.png" alt="Logo Acelera GT" width={150} height={150} />
 
         {/* Título */}
         <div className="text-center space-y-2">

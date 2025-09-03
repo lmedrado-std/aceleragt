@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
@@ -23,7 +22,6 @@ function LoginComponent() {
   const redirectUrl = searchParams.get('redirect') || '/admin';
 
   useEffect(() => {
-    // This effect runs only on the client
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     if (adminAuthenticated) {
       router.push(redirectUrl);
@@ -120,3 +118,5 @@ export default function LoginPage() {
         </Suspense>
     )
 }
+
+    

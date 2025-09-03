@@ -1,4 +1,3 @@
-
 import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 
 const LOCAL_STORAGE_KEY = "goalGetterState_v2";
@@ -93,7 +92,7 @@ export function getInitialState(): AppState {
     const store1Id = 'minha-primeira-loja';
     return {
         stores: [
-            { id: store1Id, name: 'Minha Loja', themeColor: '#3b82f6' },
+            { id: store1Id, name: 'Minha Loja', themeColor: '217.2 32.6% 17.5%' },
         ],
         sellers: {
             [store1Id]: [],
@@ -111,15 +110,13 @@ export function getInitialState(): AppState {
 function mergeWithInitialState(savedState: AppState): AppState {
     const initialState = getInitialState();
     
-    // If there are no stores, it's likely old state or fresh start, begin with initial.
     if (!savedState.stores || savedState.stores.length === 0) {
         return initialState;
     }
     
-    // Ensure all entities have necessary fields
     savedState.stores.forEach(store => {
       if (!store.themeColor) {
-        store.themeColor = '#3b82f6'; 
+        store.themeColor = '217.2 32.6% 17.5%'; 
       }
       if (!savedState.sellers[store.id]) {
         savedState.sellers[store.id] = [];
@@ -198,3 +195,5 @@ export function setAdminPassword(password: string) {
     }
     localStorage.setItem(ADMIN_PASSWORD_KEY, password);
 }
+
+    

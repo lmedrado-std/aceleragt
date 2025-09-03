@@ -92,16 +92,17 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
             setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
             return;
         }
-
-        // Password is now optional
-        if (newSellerPassword && newSellerPassword.trim().length > 0 && newSellerPassword.trim().length < 4) {
-            setError("newSellerPassword", { type: "manual", message: "A senha deve ter no mínimo 4 caracteres." });
+        
+        clearErrors(["newSellerName", "newSellerPassword"]);
+        const finalPassword = newSellerPassword && newSellerPassword.trim().length > 0 
+            ? newSellerPassword.trim() 
+            : newSellerName.trim().toLowerCase();
+        
+        if (finalPassword.length < 4) {
+             setError("newSellerPassword", { type: "manual", message: "A senha deve ter no mínimo 4 caracteres." });
             return;
         }
         
-        clearErrors(["newSellerName", "newSellerPassword"]);
-        // If password is not provided, default to the seller's name in lowercase
-        const finalPassword = newSellerPassword && newSellerPassword.trim().length > 0 ? newSellerPassword.trim() : newSellerName.trim().toLowerCase();
         addSeller(newSellerName!, finalPassword);
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
@@ -265,7 +266,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                                         <FormField control={control} name="newSellerPassword" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="sr-only">Senha</FormLabel>
-                                                <FormControl><Input type="password" placeholder="Senha (opcional)" {...field} /></FormControl>
+                                                <FormControl><Input type="password" placeholder="Senha (mín. 4 caracteres)" {...field} /></FormControl>
                                                 <FormMessage>{errors.newSellerPassword?.message}</FormMessage>
                                             </FormItem>
                                         )} />
@@ -355,6 +356,7 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
                         <ProgressDisplay
                             salesData={storeConsolidatedData}
                             incentives={storeConsolidatedIncentives}
+                            rankings={null}
                         />
                     </CardContent>
                 </Card>
@@ -363,3 +365,5 @@ export function AdminTab({ form, storeId, onIncentivesCalculated, incentives, ad
         </Card>
     )
 }
+
+    

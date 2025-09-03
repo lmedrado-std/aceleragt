@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,10 +9,13 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ShieldCheck,
   Home,
-  Loader2,
   CheckCircle,
 } from "lucide-react";
 
+import {
+  incentiveProjection,
+  type IncentiveProjectionOutput,
+} from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
@@ -79,6 +80,8 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
+export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
+export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
     <div className="container mx-auto p-4 py-8 md:p-8">
@@ -114,6 +117,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [mounted, setMounted] = useState(false);
   const [incentives, setIncentives] = useState<Incentives>({});
+  const [rankings, setRankings] = useState<Rankings>({});
   const searchParams = useSearchParams();
   const router = useRouter();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -130,14 +134,55 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
-  const handleIncentivesCalculated = (newIncentives: Incentives) => {
+  const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
+    const newRankings: Rankings = {};
+    if (!sellers || sellers.length === 0) {
+        setRankings({});
+        return;
+    }
+    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria'];
+
+    metrics.forEach(metric => {
+        const sortedSellers = [...sellers]
+            .map(seller => {
+                let value = 0;
+                if (metric === 'corridinhaDiaria') {
+                    const incentiveData = currentIncentives[seller.id];
+                    value = incentiveData?.corridinhaDiariaBonus || 0;
+                }
+                else {
+                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId' | 'password'>] as number;
+                }
+                return { id: seller.id, value };
+            })
+            .sort((a, b) => b.value - a.value);
+
+        let rank = 1;
+        for (let i = 0; i < sortedSellers.length; i++) {
+            if (i > 0 && sortedSellers[i].value < sortedSellers[i - 1].value) {
+                rank = i + 1;
+            }
+            const sellerId = sortedSellers[i].id;
+            if (!newRankings[sellerId]) {
+                newRankings[sellerId] = {} as Record<RankingMetric, number>;
+            }
+            newRankings[sellerId][metric] = rank;
+        }
+    });
+
+    setRankings(newRankings);
+  }, []);
+
+  const handleIncentivesCalculated = useCallback((newIncentives: Incentives) => {
     setIncentives(newIncentives);
     const currentState = loadState();
     currentState.incentives[storeId] = newIncentives;
     saveState(currentState);
-  };
+    calculateRankings(getValues().sellers, newIncentives);
+  }, [storeId, calculateRankings, getValues]);
 
-  const addSeller = (name: string, pass: string) => {
+
+  const addSeller = useCallback((name: string, pass: string) => {
     const currentSellers = getValues("sellers") || [];
     const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
     let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
@@ -158,7 +203,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setValue("sellers", updatedSellers, { shouldDirty: true });
     toast({ title: "Vendedor adicionado!", description: `${name} foi adicionado(a) com sucesso.` });
     router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
-  };
+  }, [getValues, setValue, storeId, router, toast]);
 
 
   useEffect(() => {
@@ -173,6 +218,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     
     setCurrentStore(store);
+    if (store.themeColor) {
+      document.documentElement.style.setProperty('--primary-hsl', store.themeColor);
+    }
     
     const initialFormValues = {
       newSellerName: "",
@@ -181,7 +229,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       sellers: state.sellers[storeId] || [],
     };
     reset(initialFormValues);
-    setIncentives(state.incentives[storeId] || {});
+    const currentIncentives = state.incentives[storeId] || {};
+    setIncentives(currentIncentives);
+    calculateRankings(initialFormValues.sellers, currentIncentives);
     
     const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
     setIsAdmin(adminAuthenticated);
@@ -200,7 +250,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const tabFromUrl = searchParams.get('tab');
     let tabToActivate = tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : 'admin');
     
-    // Fallback if the tab points to a non-existent seller
     if (tabToActivate !== 'admin' && !sellersForStore.some(s => s.id === tabToActivate)) {
       tabToActivate = sellersForStore.length > 0 ? sellersForStore[0].id : 'admin';
     }
@@ -232,7 +281,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
     
     setActiveTab(tabToActivate);
-  }, [storeId, reset, router, toast, searchParams]);
+  }, [storeId, reset, router, toast, searchParams, calculateRankings]);
 
   useEffect(() => {
     const subscription = watch((value) => {
@@ -296,7 +345,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-headline" style={{color: currentStore?.themeColor}}>
+              <h1 className="text-3xl font-bold font-headline" style={{color: `hsl(var(--primary-hsl))`}}>
                 {currentStore?.name || 'Carregando...'}
               </h1>
               <p className="text-muted-foreground">
@@ -378,6 +427,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             seller={seller}
                             goals={currentValues.goals}
                             incentives={incentives[seller.id]}
+                            rankings={rankings[seller.id]}
                         />
                     </TabsContent>
                 ))}
@@ -395,3 +445,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
