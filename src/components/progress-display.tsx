@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useMemo } from "react";
@@ -18,7 +17,7 @@ interface Props {
 }
 
 const formatCurrency = (value: number) => {
-    return (value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    return (Number(value) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 const MetricCard = ({ title, value, icon, description }: { title: string, value: string, icon: React.ReactNode, description?: string }) => (
@@ -44,7 +43,7 @@ export const ProgressDisplay: React.FC<Props> = ({ salesData, incentives }) => {
 
   const { goals, vendas, pa, ticketMedio, corridinhaDiaria } = salesData;
 
-  const highestGoal = Math.max(goals.metaMinha, goals.meta, goals.metona, goals.metaLendaria) || 1;
+  const highestGoal = Math.max(goals?.metaMinha || 0, goals?.meta || 0, goals?.metona || 0, goals?.metaLendaria || 0) || 1;
   const salesProgress = (Number(vendas) / highestGoal) * 100;
 
   return (
@@ -121,8 +120,8 @@ export const ProgressDisplay: React.FC<Props> = ({ salesData, incentives }) => {
                 </div>
                 <Separator />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                     <ProgressItem title="Meta PA" currentValue={pa || 0} goalValue={goals.paGoal4} formatValue={(v) => v.toFixed(2)}/>
-                     <ProgressItem title="Meta Ticket Médio" currentValue={ticketMedio || 0} goalValue={goals.ticketMedioGoal4} formatValue={formatCurrency}/>
+                     <ProgressItem title="Meta PA" currentValue={pa || 0} goalValue={goals?.paGoal4 || 0} formatValue={(v) => Number(v || 0).toFixed(2)}/>
+                     <ProgressItem title="Meta Ticket Médio" currentValue={ticketMedio || 0} goalValue={goals?.ticketMedioGoal4 || 0} formatValue={formatCurrency}/>
                 </div>
             </CardContent>
         </Card>
@@ -131,13 +130,13 @@ export const ProgressDisplay: React.FC<Props> = ({ salesData, incentives }) => {
 };
 
 const ProgressItem = ({ title, currentValue, goalValue, formatValue }: { title: string, currentValue: number, goalValue: number, formatValue: (v: number) => string }) => {
-    const progress = goalValue > 0 ? (currentValue / goalValue) * 100 : 0;
-    const achieved = currentValue >= goalValue;
+    const progress = goalValue > 0 ? (Number(currentValue) / goalValue) * 100 : 0;
+    const achieved = Number(currentValue) >= goalValue;
     return (
         <div>
             <div className="flex justify-between text-sm mb-1">
                 <span className="font-medium">{title}</span>
-                <span className={cn("font-semibold", achieved ? "text-green-600" : "text-muted-foreground")}>{formatValue(currentValue)} / {formatValue(goalValue)}</span>
+                <span className={cn("font-semibold", achieved ? "text-green-600" : "text-muted-foreground")}>{formatValue(Number(currentValue))} / {formatValue(goalValue)}</span>
             </div>
             <Progress value={progress} className={achieved ? "[&>div]:bg-green-500" : ""} />
         </div>
