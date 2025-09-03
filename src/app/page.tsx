@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -72,9 +73,9 @@ export default function Home() {
                   asChild
                   size="lg"
                   key={store.id}
-                  className="justify-start h-auto py-4 px-5 rounded-xl border border-gray-200 
-                            bg-gradient-to-r from-primary/90 to-secondary/90 text-white
-                            hover:from-primary hover:to-secondary transition-all 
+                  className="justify-start h-auto py-4 px-5 rounded-xl border-transparent 
+                            bg-primary text-primary-foreground
+                            hover:bg-primary/90 transition-all 
                             shadow-sm hover:shadow-lg hover:-translate-y-1 group"
                 >
                   <Link href={`/loja/${store.id}`} className="flex items-center gap-4 w-full">
