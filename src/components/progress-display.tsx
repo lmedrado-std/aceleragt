@@ -16,17 +16,10 @@ import {
   Ticket,
   TrendingUp,
   Award,
-  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 
 type ProgressDisplaySalesData = Partial<Seller> & {
@@ -58,7 +51,7 @@ const ProgressItem = ({
   goalValue: number;
   formatValue?: (value: number) => string;
 }) => {
-  const percentage = goalValue > 0 ? Math.min((currentValue / goalValue) * 100, 100) : 0;
+  const percentage = goalValue > 0 ? Math.min((Number(currentValue) / goalValue) * 100, 100) : 0;
   
   return (
     <div className="space-y-2">
@@ -69,7 +62,7 @@ const ProgressItem = ({
         </div>
         <div className="font-semibold flex items-center gap-1 text-sm">
           <span>
-            {formatValue(currentValue)} / {formatValue(goalValue)}
+            {formatValue(Number(currentValue))} / {formatValue(goalValue)}
           </span>
         </div>
       </div>
@@ -159,28 +152,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-center">
-                         <CardTitle className="text-xl">Progresso das Metas</CardTitle>
-                         <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Info className="h-5 w-5 text-muted-foreground cursor-help"/>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs" side="top">
-                                    <div className="text-sm font-bold mb-2">Metas Atuais</div>
-                                    <div className="space-y-1 text-xs">
-                                        <p><span className="font-semibold">Metinha:</span> {formatCurrency(goals.metaMinha)}</p>
-                                        <p><span className="font-semibold">Meta:</span> {formatCurrency(goals.meta)}</p>
-                                        <p><span className="font-semibold">Metona:</span> {formatCurrency(goals.metona)}</p>
-                                        <p><span className="font-semibold">Lendária:</span> {formatCurrency(goals.metaLendaria)}</p>
-                                        <Separator className="my-1"/>
-                                        <p><span className="font-semibold">PA Nível 4:</span> {goals.paGoal4}</p>
-                                        <p><span className="font-semibold">Ticket Médio Nível 4:</span> {formatCurrency(goals.ticketMedioGoal4)}</p>
-                                    </div>
-                                </TooltipContent>
-                            </Tooltip>
-                         </TooltipProvider>
-                    </div>
+                     <CardTitle className="text-xl">Progresso das Metas</CardTitle>
                     <CardDescription>Veja o quão perto você está de bater suas metas.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -215,4 +187,3 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
-
