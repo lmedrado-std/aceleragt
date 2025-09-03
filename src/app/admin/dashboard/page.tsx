@@ -75,14 +75,15 @@ export default function AdminDashboardPage() {
             storeSellers.forEach(seller => {
                 const sellerIncentives = storeIncentives[seller.id];
                 const sellerTotalIncentives = sellerIncentives 
-                    ? Object.values(sellerIncentives).reduce((sum, val) => sum + (val || 0), 0)
+                    ? Object.values(sellerIncentives).reduce((sum, val) => sum + (Number(val) || 0), 0)
                     : 0;
 
-                storeTotalSales += seller.vendas;
+                storeTotalSales += Number(seller.vendas) || 0;
                 storeTotalIncentives += sellerTotalIncentives;
 
                 allSellers.push({
                     ...seller,
+                    vendas: Number(seller.vendas) || 0,
                     storeName: store.name,
                     totalIncentives: sellerTotalIncentives,
                 });
@@ -296,4 +297,5 @@ export default function AdminDashboardPage() {
             </div>
         </main>
     )
-}
+
+    
