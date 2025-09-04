@@ -122,13 +122,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
-  useEffect(() => {
-    if (currentStore?.themeColor) {
-      document.documentElement.style.setProperty('--primary', currentStore.themeColor);
-    }
-  }, [currentStore]);
-
-
   // 📊 Rankings
   const calculateRankings = useCallback(
     (sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
@@ -391,6 +384,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
 
   return (
+    <>
+    {currentStore?.themeColor && (
+      <style>{`:root { --primary: ${currentStore.themeColor}; }`}</style>
+    )}
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
@@ -502,5 +499,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         </form>
       </Form>
     </div>
+    </>
   );
 }

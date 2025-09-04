@@ -58,6 +58,13 @@ export default function StoreHomePage() {
     loadStoreData();
   }, [loadStoreData]);
 
+  // Reset theme when leaving the page
+  useEffect(() => {
+    return () => {
+      document.documentElement.style.removeProperty('--primary');
+    };
+  }, []);
+
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
     const destination = `/dashboard/${storeId}?tab=admin`;
@@ -89,6 +96,10 @@ export default function StoreHomePage() {
   }
 
   return (
+    <>
+    {store?.themeColor && (
+        <style>{`:root { --primary: ${store.themeColor}; }`}</style>
+    )}
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
        <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
@@ -100,8 +111,7 @@ export default function StoreHomePage() {
         </div>
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
         <h1 
-          className="text-5xl font-extrabold tracking-wide text-center"
-          style={{ color: store?.themeColor ? `hsl(${store.themeColor})` : 'inherit' }}
+          className="text-5xl font-extrabold tracking-wide text-center text-primary"
         >
           {error ? "Erro" : store?.name}
         </h1>
@@ -152,5 +162,6 @@ export default function StoreHomePage() {
         )}
       </div>
     </main>
+    </>
   );
 }

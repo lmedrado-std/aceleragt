@@ -87,7 +87,6 @@ export default function Home() {
               ))}
             </div>
           )}
-           <p className="text-center text-xs text-muted-foreground mt-6">versão 1.0</p>
         </motion.div>
 
         <div className="text-center mt-6">
@@ -103,6 +102,7 @@ export default function Home() {
           </Button>
         </div>
       </motion.div>
+       <p className="absolute bottom-4 left-4 text-xs text-muted-foreground">versão 1.0</p>
     </main>
   );
 }
