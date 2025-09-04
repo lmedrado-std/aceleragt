@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -45,6 +46,9 @@ export default function AdminPage() {
       setState(loadState());
       setLoading(false);
     }
+
+    // Reset theme when on the global admin page
+    document.documentElement.style.removeProperty('--primary');
   }, [router]);
 
   const handleAddStore = () => {

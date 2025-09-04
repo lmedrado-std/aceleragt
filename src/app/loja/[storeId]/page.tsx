@@ -36,9 +36,6 @@ export default function StoreHomePage() {
         
         if (foundStore) {
             setStore(foundStore);
-            if (foundStore.themeColor) {
-              document.documentElement.style.setProperty('--primary', foundStore.themeColor);
-            }
             setSellers(savedState.sellers[decodedStoreId] || []);
             setError(null); // Clear previous errors if found
         } else {
@@ -59,17 +56,18 @@ export default function StoreHomePage() {
 
   useEffect(() => {
     loadStoreData();
-
-    const handleStorageUpdate = () => {
-      loadStoreData();
-    };
-
-    window.addEventListener('storage_updated', handleStorageUpdate);
-
+    // Reset theme when leaving the page
     return () => {
-      window.removeEventListener('storage_updated', handleStorageUpdate);
-    };
+        document.documentElement.style.removeProperty('--primary');
+    }
   }, [loadStoreData]);
+
+  useEffect(() => {
+    if (store?.themeColor) {
+      document.documentElement.style.setProperty('--primary', store.themeColor);
+    }
+  }, [store]);
+
 
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';

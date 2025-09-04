@@ -122,6 +122,17 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
+  useEffect(() => {
+    if (currentStore?.themeColor) {
+      document.documentElement.style.setProperty('--primary', currentStore.themeColor);
+    }
+    // Cleanup function to reset the theme when the component unmounts
+    return () => {
+      document.documentElement.style.removeProperty('--primary');
+    };
+  }, [currentStore]);
+
+
   // 📊 Rankings
   const calculateRankings = useCallback(
     (sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
