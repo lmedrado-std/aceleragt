@@ -11,7 +11,6 @@ import {
   Eye,
   EyeOff,
   Calculator,
-  Target,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -234,7 +233,7 @@ export function AdminTab({
             <CardContent className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium mb-4">Adicionar Novo Vendedor</h3>
-                 <div className="space-y-4 p-4 border rounded-lg">
+                 <div className="space-y-4 p-4 border rounded-lg bg-card">
                     <FormField control={control} name="newSellerName"
                       render={({ field }) => (
                         <FormItem>
@@ -262,7 +261,7 @@ export function AdminTab({
                 <div className="space-y-2">
                   {sellers.length === 0 ? <p className="text-muted-foreground text-sm">Nenhum vendedor cadastrado ainda.</p> :
                   sellers.map((seller, index) => (
-                    <div key={seller.id} className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted/50">
+                    <div key={seller.id} className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted">
                       {editingSellerId === seller.id ? (
                         <>
                           <div className="flex-grow space-y-2">
@@ -312,8 +311,8 @@ export function AdminTab({
               {sellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
                 <div className="space-y-6">
                   {sellers.map((seller, index) => (
-                    <div key={seller.id} className="p-4 border rounded-lg space-y-4">
-                      <h3 className="font-semibold text-lg">{seller.name}</h3>
+                    <div key={seller.id} className="p-4 border rounded-lg space-y-4 bg-card">
+                      <h3 className="font-semibold text-lg text-card-foreground">{seller.name}</h3>
                       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
                         <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
@@ -340,7 +339,7 @@ export function AdminTab({
             </CardHeader>
             <CardContent className="space-y-8">
                 <div>
-                    <h3 className="font-semibold text-lg mb-4">Metas de Vendas e Prêmios</h3>
+                    <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Vendas e Prêmios</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                         <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metinha (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
@@ -350,7 +349,7 @@ export function AdminTab({
                         <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metona (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                     </div>
                      <div className="mt-4 pt-4 border-t">
-                        <h4 className="font-medium mb-2">Bônus Lendária</h4>
+                        <h4 className="font-medium mb-2 text-card-foreground">Bônus Lendária</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                            <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                            <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
@@ -360,7 +359,7 @@ export function AdminTab({
                 </div>
                  <Separator/>
                  <div>
-                    <h3 className="font-semibold text-lg mb-4">Metas de Produtos por Atendimento (PA)</h3>
+                    <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Produtos por Atendimento (PA)</h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                         {goalTiers.map(tier => (
                             <div key={tier.id} className="space-y-2">
@@ -372,7 +371,7 @@ export function AdminTab({
                 </div>
                  <Separator/>
                 <div>
-                    <h3 className="font-semibold text-lg mb-4">Metas de Ticket Médio</h3>
+                    <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Ticket Médio</h3>
                      <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                         {ticketMedioTiers.map(tier => (
                             <div key={tier.id} className="space-y-2">

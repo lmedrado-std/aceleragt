@@ -7,12 +7,13 @@ import { ArrowRight, Home, Shield, Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
-import { loadState, Seller } from "@/lib/storage";
+import { loadState, Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 
 export default function StoreHomePage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
-  const [storeName, setStoreName] = useState('');
+  const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -31,10 +32,13 @@ export default function StoreHomePage() {
     try {
         const decodedStoreId = decodeURIComponent(storeId);
         const savedState = loadState();
-        const store = savedState.stores.find(s => s.id === decodedStoreId);
+        const foundStore = savedState.stores.find(s => s.id === decodedStoreId);
         
-        if (store) {
-            setStoreName(store.name);
+        if (foundStore) {
+            setStore(foundStore);
+            if (foundStore.themeColor) {
+              document.documentElement.style.setProperty('--primary', foundStore.themeColor);
+            }
             setSellers(savedState.sellers[decodedStoreId] || []);
             setError(null); // Clear previous errors if found
         } else {
@@ -90,7 +94,7 @@ export default function StoreHomePage() {
 
   if (loading) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background">
             <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
             <p className="mt-4 text-muted-foreground">Carregando dados da loja...</p>
         </div>
@@ -109,7 +113,7 @@ export default function StoreHomePage() {
         </div>
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
         <h1 className="text-5xl font-extrabold text-primary tracking-wide text-center">
-          {error ? "Erro" : storeName}
+          {error ? "Erro" : store?.name}
         </h1>
 
         {error && (
@@ -121,17 +125,17 @@ export default function StoreHomePage() {
                 <p className="text-xl text-muted-foreground text-center">
                 Selecione seu usuário para começar.
                 </p>
-                <div className="w-full max-w-md bg-card p-6 rounded-2xl shadow-lg mt-8 border">
+                <Card className="w-full max-w-md bg-card p-6 rounded-2xl shadow-lg mt-8 border">
                     <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Acessar Painel</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Button size="lg" variant="secondary" className="justify-start h-auto py-3 rounded-lg font-semibold transition-transform transform hover:scale-105" onClick={handleAdminAccess}>
                         <div className="flex items-center gap-4 w-full">
-                            <Shield className="h-6 w-6" />
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10"><Shield className="h-6 w-6 text-primary" /></div>
                             <div className="flex flex-col items-start">
-                            <span className="font-semibold text-base">Administrador</span>
-                            <span className="text-sm opacity-90 font-normal">Ver painel de controle</span>
+                            <span className="font-semibold text-base text-foreground">Administrador</span>
+                            <span className="text-sm text-muted-foreground font-normal">Ver painel de controle</span>
                             </div>
-                            <ArrowRight className="ml-auto h-5 w-5" />
+                            <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground" />
                         </div>
                         </Button>
                         {sellers.map((seller) => (
@@ -139,7 +143,7 @@ export default function StoreHomePage() {
                             size="lg" 
                             variant="outline" 
                             key={seller.id} 
-                            className="justify-start h-auto py-3 rounded-lg transition-transform transform hover:scale-105 hover:bg-muted/50"
+                            className="justify-start h-auto py-3 rounded-lg transition-transform transform hover:scale-105 hover:bg-accent hover:text-accent-foreground"
                             onClick={() => handleSellerAccess(seller.id)}
                         >
                             <div className="flex items-center gap-4 w-full">
@@ -153,7 +157,7 @@ export default function StoreHomePage() {
                         </Button>
                         ))}
                     </div>
-                </div>
+                </Card>
             </>
         )}
       </div>
