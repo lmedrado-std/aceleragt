@@ -125,24 +125,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   // Dynamically apply and clean up the store's theme
   useEffect(() => {
     if (currentStore?.themeColor) {
-      const styleId = `store-theme-${storeId}`;
-      let styleElement = document.getElementById(styleId) as HTMLStyleElement | null;
-      if (!styleElement) {
-        styleElement = document.createElement('style');
-        styleElement.id = styleId;
-        document.head.appendChild(styleElement);
-      }
-      styleElement.innerHTML = `:root { --primary: ${currentStore.themeColor}; }`;
-
-      // Cleanup function to remove the style when the component unmounts
-      return () => {
-        const styleToRemove = document.getElementById(styleId);
-        if (styleToRemove) {
-          styleToRemove.remove();
-        }
-      };
+      document.documentElement.style.setProperty('--primary', currentStore.themeColor);
     }
-  }, [currentStore, storeId]);
+  
+    // Cleanup function to remove the style when the component unmounts
+    return () => {
+      document.documentElement.style.removeProperty('--primary');
+    };
+  }, [currentStore]);
 
 
   // 📊 Rankings

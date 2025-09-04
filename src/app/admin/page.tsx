@@ -39,9 +39,6 @@ export default function AdminPage() {
 
 
   useEffect(() => {
-    // Reset theme to default when on global admin page
-    document.documentElement.style.removeProperty('--primary');
-    
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
     if (!isAdmin) {
       router.push('/login?redirect=/admin');

@@ -13,9 +13,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Reset theme to default when on home page
-    document.documentElement.style.removeProperty('--primary');
-    
     const loadedState = loadState();
     setState(loadedState);
     setLoading(false);
