@@ -129,26 +129,27 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         setRankings({});
         return;
       }
-      const metrics: RankingMetric[] = [
-        "vendas",
-        "pa",
-        "ticketMedio",
-      ];
-      
+      const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
       const totalGains: Record<string, number> = {};
-        sellers.forEach(seller => {
-            const sellerIncentives = currentIncentives[seller.id];
-            totalGains[seller.id] = sellerIncentives 
-                ? Object.values(sellerIncentives).reduce((sum, val) => sum + (val || 0), 0)
-                : 0;
-        });
 
+      sellers.forEach(seller => {
+        const sellerIncentives = currentIncentives[seller.id];
+        totalGains[seller.id] = sellerIncentives
+          ? Object.values(sellerIncentives).reduce((sum, val) => sum + (val || 0), 0)
+          : 0;
+      });
 
       metrics.forEach((metric) => {
         const sortedSellers = [...sellers].sort((a, b) => {
-            const valueA = metric === 'corridinhaDiaria' ? (totalGains[a.id] || 0) : (a[metric as keyof Omit<Seller, 'id'|'name'|'avatarId'|'password'>] || 0);
-            const valueB = metric === 'corridinhaDiaria' ? (totalGains[b.id] || 0) : (b[metric as keyof Omit<Seller, 'id'|'name'|'avatarId'|'password'>] || 0);
-            return valueB - valueA;
+          const valueA =
+            metric === "corridinhaDiaria"
+              ? (totalGains[a.id] || 0)
+              : (a[metric as keyof Omit<Seller, "id" | "name" | "avatarId" | "password">] || 0);
+          const valueB =
+            metric === "corridinhaDiaria"
+              ? (totalGains[b.id] || 0)
+              : (b[metric as keyof Omit<Seller, "id" | "name" | "avatarId" | "password">] || 0);
+          return valueB - valueA;
         });
 
         let rank = 1;
@@ -181,24 +182,21 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     [storeId, calculateRankings, getValues]
   );
 
-  // ➕ Adicionar vendedor
+  // ➕ Adicionar vendedor (corrigido para salvar imediatamente)
   const addSeller = useCallback(
     (name: string, pass: string) => {
       const currentSellers = getValues("sellers") || [];
       const existingAvatarIds = new Set(currentSellers.map((s) => s.avatarId));
       let randomAvatarId =
-        availableAvatarIds[
-          Math.floor(Math.random() * availableAvatarIds.length)
-        ];
+        availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
 
       if (existingAvatarIds.size < availableAvatarIds.length) {
         while (existingAvatarIds.has(randomAvatarId)) {
           randomAvatarId =
-            availableAvatarIds[
-              Math.floor(Math.random() * availableAvatarIds.length)
-            ];
+            availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
         }
       }
+
       const newSeller: Seller = {
         id: crypto.randomUUID(),
         name,
@@ -209,11 +207,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         ticketMedio: 0,
         corridinhaDiaria: 0,
       };
+
       const updatedSellers = [...currentSellers, newSeller];
       setValue("sellers", updatedSellers, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
-      
-      const newIncentives = {...incentives, [newSeller.id]: null };
-      setIncentives(newIncentives);
+
+      // ✅ salva imediatamente no storage
+      const currentState = loadState();
+      currentState.sellers[storeId] = updatedSellers;
+      currentState.goals[storeId] = getValues("goals") as Goals;
+      currentState.incentives[storeId] = { ...incentives, [newSeller.id]: null };
+      saveState(currentState);
+
+      setIncentives(currentState.incentives[storeId]);
 
       toast({
         title: "Vendedor adicionado!",
@@ -247,10 +252,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     setCurrentStore(store);
     if (store.themeColor) {
-      document.documentElement.style.setProperty(
-        "--primary",
-        store.themeColor
-      );
+      document.documentElement.style.setProperty("--primary", store.themeColor);
     }
 
     const initialFormValues = {
@@ -264,16 +266,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setIncentives(currentIncentives);
     calculateRankings(initialFormValues.sellers, currentIncentives);
 
-    const adminAuthenticated =
-      sessionStorage.getItem("adminAuthenticated") === "true";
+    const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
 
     let currentLoggedInSeller: string | null = null;
     if (!adminAuthenticated) {
       (state.sellers[storeId] || []).forEach((seller) => {
-        if (
-          sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === "true"
-        ) {
+        if (sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === "true") {
           currentLoggedInSeller = seller.id;
         }
       });
@@ -282,10 +281,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     const sellersForStore = state.sellers[storeId] || [];
     const tabFromUrl = searchParams.get("tab");
-    let tabToActivate = tabFromUrl || (isAdmin ? "admin" : (sellersForStore.length > 0 ? sellersForStore[0].id : "admin"));
-    
-    if (tabToActivate !== 'admin' && !sellersForStore.some(s => s.id === tabToActivate)) {
-       tabToActivate = isAdmin ? "admin" : (sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
+    let tabToActivate =
+      tabFromUrl || (isAdmin ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
+
+    if (tabToActivate !== "admin" && !sellersForStore.some((s) => s.id === tabToActivate)) {
+      tabToActivate = isAdmin ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
     }
 
     if (tabToActivate === "admin") {
@@ -296,10 +296,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       }
     } else {
       if (!sellersForStore.find((s) => s.id === tabToActivate)) {
-        const fallbackTab = isAdmin ? "admin" : (sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
-        router.push(
-          `/dashboard/${storeId}?tab=${fallbackTab}`
-        );
+        const fallbackTab = isAdmin ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
+        router.push(`/dashboard/${storeId}?tab=${fallbackTab}`);
         return;
       }
       if (
@@ -308,17 +306,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       ) {
         const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
         router.push(
-          `/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(
-            destination
-          )}`
-        );
+          `/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
         return;
       }
-      if (
-        !adminAuthenticated &&
-        currentLoggedInSeller &&
-        tabToActivate !== currentLoggedInSeller
-      ) {
+      if (!adminAuthenticated && currentLoggedInSeller && tabToActivate !== currentLoggedInSeller) {
         toast({
           variant: "destructive",
           title: "Acesso Negado",
@@ -332,9 +323,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setActiveTab(tabToActivate);
   }, [storeId, reset, router, toast, searchParams, calculateRankings, isAdmin]);
 
-  // 💾 Auto-salvar alterações
+  // 💾 Auto-salvar alterações (continua funcionando junto com o save imediato)
   useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
+    const subscription = watch((value) => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
@@ -372,16 +363,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       return;
     }
 
-    if (
-      newTab !== "admin" &&
-      !isAdmin &&
-      !sessionStorage.getItem(`sellerAuthenticated-${newTab}`)
-    ) {
+    if (newTab !== "admin" && !isAdmin && !sessionStorage.getItem(`sellerAuthenticated-${newTab}`)) {
       const destination = `/dashboard/${storeId}?tab=${newTab}`;
       router.push(
-        `/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(
-          destination
-        )}`, { scroll: false }
+        `/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(destination)}`,
+        { scroll: false }
       );
       return;
     }
@@ -395,7 +381,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     ? currentValues.sellers || []
     : (currentValues.sellers || []).filter((s) => s.id === loggedInSellerId);
 
-  if (!mounted || activeTab === 'loading') {
+  if (!mounted || activeTab === "loading") {
     return <DashboardSkeleton />;
   }
 
@@ -404,14 +390,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
           <div>
-            <h1
-              className="text-3xl font-bold font-headline text-primary"
-            >
+            <h1 className="text-3xl font-bold font-headline text-primary">
               {currentStore?.name || "Carregando..."}
             </h1>
-            <p className="text-muted-foreground">
-              Acompanhe as metas e os ganhos da equipe.
-            </p>
+            <p className="text-muted-foreground">Acompanhe as metas e os ganhos da equipe.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -437,12 +419,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           <TooltipProvider>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <div className="flex items-center border-b justify-between">
-                 <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
+                <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
                   {visibleSellers.map((seller) => (
                     <TabsTrigger
                       key={seller.id}
                       value={seller.id}
-                       className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:shadow-none"
+                      className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:shadow-none"
                     >
                       {seller.name}
                     </TabsTrigger>
@@ -491,22 +473,25 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
               {(currentValues.sellers || []).map((seller) => (
                 <TabsContent key={seller.id} value={seller.id} className="mt-6">
-                   <SellerTab
-                        seller={seller}
-                        goals={currentValues.goals as Goals}
-                        incentives={incentives[seller.id]}
-                        rankings={rankings[seller.id]}
-                    />
+                  <SellerTab
+                    seller={seller}
+                    goals={currentValues.goals as Goals}
+                    incentives={incentives[seller.id]}
+                    rankings={rankings[seller.id]}
+                  />
                 </TabsContent>
               ))}
-              
-               {(currentValues.sellers || []).length === 0 && !isAdmin && (
-                     <TabsContent value={activeTab} className="mt-10 text-center text-muted-foreground py-10">
-                        <p className="text-lg">Bem-vindo!</p>
-                        <p>Parece que não há vendedores cadastrados nesta loja ainda.</p>
-                        <p>Peça ao administrador para adicioná-lo.</p>
-                    </TabsContent>
-                )}
+
+              {(currentValues.sellers || []).length === 0 && !isAdmin && (
+                <TabsContent
+                  value={activeTab}
+                  className="mt-10 text-center text-muted-foreground py-10"
+                >
+                  <p className="text-lg">Bem-vindo!</p>
+                  <p>Parece que não há vendedores cadastrados nesta loja ainda.</p>
+                  <p>Peça ao administrador para adicioná-lo.</p>
+                </TabsContent>
+              )}
             </Tabs>
           </TooltipProvider>
         </form>

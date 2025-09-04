@@ -44,8 +44,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Seller, Goals, Incentives } from "@/lib/storage";
-import { ProgressDisplay } from "./progress-display";
+import { Seller, Goals, Incentives, loadState, saveState } from "@/lib/storage";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -62,6 +61,7 @@ const ticketMedioTiers = [
   { id: "Nível 3", goal: "ticketMedioGoal3", prize: "ticketMedioPrize3" },
   { id: "Nível 4", goal: "ticketMedioGoal4", prize: "ticketMedioPrize4" },
 ];
+
 
 interface AdminTabProps {
   form: UseFormReturn<FormValues>;
@@ -134,7 +134,13 @@ export function AdminTab({
     const newIncentives = { ...incentives };
     delete newIncentives[sellerId];
     onIncentivesCalculated(newIncentives);
-    
+
+    const currentState = loadState();
+    currentState.sellers[storeId] = updatedSellers;
+    currentState.goals[storeId] = goals;
+    currentState.incentives[storeId] = newIncentives;
+    saveState(currentState);
+
     const newTab = updatedSellers.length > 0 ? updatedSellers[0].id : "admin";
     router.push(`/dashboard/${storeId}?tab=${newTab}`);
   };
@@ -158,9 +164,17 @@ export function AdminTab({
       return;
     }
     
-    // Dispara a atualização do formulário que o useEffect no dashboard irá salvar.
     setValue(`sellers.${sellerIndex}.name`, newName);
     setValue(`sellers.${sellerIndex}.password`, newPassword);
+
+    const updatedSellers = [...sellers];
+    updatedSellers[sellerIndex] = { ...updatedSellers[sellerIndex], name: newName, password: newPassword };
+
+    const currentState = loadState();
+    currentState.sellers[storeId] = updatedSellers;
+    currentState.goals[storeId] = goals;
+    currentState.incentives[storeId] = incentives;
+    saveState(currentState);
 
     setEditingSellerId(null);
     toast({ title: "Sucesso!", description: "Dados do vendedor atualizados." });
@@ -185,6 +199,13 @@ export function AdminTab({
       }
       
       onIncentivesCalculated(allIncentives);
+
+      const currentState = loadState();
+      currentState.sellers[storeId] = sellersData;
+      currentState.goals[storeId] = goals;
+      currentState.incentives[storeId] = allIncentives;
+      saveState(currentState);
+
       toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados." });
     } catch (err) {
       console.error(err);
@@ -203,7 +224,6 @@ export function AdminTab({
           <TabsTrigger value="metas">🎯 Metas & Prêmios</TabsTrigger>
         </TabsList>
         
-        {/* ================== Vendedores ================== */}
         <TabsContent value="vendedores">
           <Card>
             <CardHeader>
@@ -281,7 +301,6 @@ export function AdminTab({
           </Card>
         </TabsContent>
 
-        {/* ================== Lançamentos ================== */}
         <TabsContent value="lancamentos">
           <Card>
             <CardHeader>
@@ -312,7 +331,6 @@ export function AdminTab({
           </Card>
         </TabsContent>
         
-        {/* ================== Metas & Prêmios ================== */}
         <TabsContent value="metas">
            <Card>
             <CardHeader>
