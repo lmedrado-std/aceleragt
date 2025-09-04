@@ -187,13 +187,14 @@ export function AdminTab({
   const handleCalculateIncentives = async () => {
     setIsCalculating(true);
     try {
-      const sellersData = getValues().sellers;
+      const currentSellers = getValues().sellers;
+      const currentGoals = getValues().goals as Goals;
       const allIncentives: Incentives = {};
 
-      for (const seller of sellersData) {
+      for (const seller of currentSellers) {
         const result = await incentiveProjection({
-          ...seller,
-          ...goals,
+          seller: seller,
+          goals: currentGoals,
         });
         allIncentives[seller.id] = result;
       }
@@ -201,15 +202,16 @@ export function AdminTab({
       onIncentivesCalculated(allIncentives);
 
       const currentState = loadState();
-      currentState.sellers[storeId] = sellersData;
-      currentState.goals[storeId] = goals;
+      currentState.sellers[storeId] = currentSellers;
+      currentState.goals[storeId] = currentGoals;
       currentState.incentives[storeId] = allIncentives;
       saveState(currentState);
 
       toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados." });
     } catch (err) {
       console.error(err);
-      toast({ variant: "destructive", title: "Erro", description: "Falha ao calcular incentivos." });
+      const errorMessage = err instanceof Error ? err.message : "Falha ao calcular incentivos.";
+      toast({ variant: "destructive", title: "Erro de Cálculo", description: errorMessage });
     } finally {
       setIsCalculating(false);
     }
@@ -388,3 +390,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -12,37 +13,52 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { Seller, Goals } from '@/lib/storage';
+
+
+const SellerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  avatarId: z.string(),
+  vendas: z.coerce.number().default(0),
+  pa: z.coerce.number().default(0),
+  ticketMedio: z.coerce.number().default(0),
+  corridinhaDiaria: z.coerce.number().default(0),
+  password: z.string().optional(),
+});
+
+const GoalsSchema = z.object({
+  metaMinha: z.coerce.number().default(0),
+  meta: z.coerce.number().default(0),
+  metona: z.coerce.number().default(0),
+  metaLendaria: z.coerce.number().default(0),
+  legendariaBonusValorVenda: z.coerce.number().default(0),
+  legendariaBonusValorPremio: z.coerce.number().default(0),
+  metaMinhaPrize: z.coerce.number().default(0),
+  metaPrize: z.coerce.number().default(0),
+  metonaPrize: z.coerce.number().default(0),
+  paGoal1: z.coerce.number().default(0),
+  paGoal2: z.coerce.number().default(0),
+  paGoal3: z.coerce.number().default(0),
+  paGoal4: z.coerce.number().default(0),
+  paPrize1: z.coerce.number().default(0),
+  paPrize2: z.coerce.number().default(0),
+  paPrize3: z.coerce.number().default(0),
+  paPrize4: z.coerce.number().default(0),
+  ticketMedioGoal1: z.coerce.number().default(0),
+  ticketMedioGoal2: z.coerce.number().default(0),
+  ticketMedioGoal3: z.coerce.number().default(0),
+  ticketMedioGoal4: z.coerce.number().default(0),
+  ticketMedioPrize1: z.coerce.number().default(0),
+  ticketMedioPrize2: z.coerce.number().default(0),
+  ticketMedioPrize3: z.coerce.number().default(0),
+  ticketMedioPrize4: z.coerce.number().default(0),
+});
+
 
 const IncentiveProjectionInputSchema = z.object({
-  vendas: z.number().describe('The current sales amount of the salesperson.'),
-  metaMinha: z.number().describe('The Metinha sales goal.'),
-  meta: z.number().describe('The Meta sales goal.'),
-  metona: z.number().describe('The Metona sales goal.'),
-  metaLendaria: z.number().describe('The Legendaria sales goal.'),
-  metaMinhaPrize: z.number().describe('The Metinha prize.'),
-  metaPrize: z.number().describe('The Meta prize.'),
-  metonaPrize: z.number().describe('The Metona prize.'),
-  legendariaBonusValorVenda: z.number().describe('The sales amount for the Legendaria bonus rule.'),
-  legendariaBonusValorPremio: z.number().describe('The prize amount for the Legendaria bonus rule.'),
-  pa: z.number().describe('Products per customer.'),
-  paGoal1: z.number().describe('PA Goal 1.'),
-  paGoal2: z.number().describe('PA Goal 2.'),
-  paGoal3: z.number().describe('PA Goal 3.'),
-  paGoal4: z.number().describe('PA Goal 4.'),
-  paPrize1: z.number().describe('PA Prize 1.'),
-  paPrize2: z.number().describe('PA Prize 2.'),
-  paPrize3: z.number().describe('PA Prize 3.'),
-  paPrize4: z.number().describe('PA Prize 4.'),
-  ticketMedio: z.number().describe('Average ticket.'),
-  ticketMedioGoal1: z.number().describe('Ticket Medio Goal 1.'),
-  ticketMedioGoal2: z.number().describe('Ticket Medio Goal 2.'),
-  ticketMedioGoal3: z.number().describe('Ticket Medio Goal 3.'),
-  ticketMedioGoal4: z.number().describe('Ticket Medio Goal 4.'),
-  ticketMedioPrize1: z.number().describe('Ticket Medio Prize 1.'),
-  ticketMedioPrize2: z.number().describe('Ticket Medio Prize 2.'),
-  ticketMedioPrize3: z.number().describe('Ticket Medio Prize 3.'),
-  ticketMedioPrize4: z.number().describe('Ticket Medio Prize 4.'),
-  corridinhaDiaria: z.number().describe('Daily sales target for Corridinha Diaria.'),
+  seller: SellerSchema,
+  goals: GoalsSchema
 });
 export type IncentiveProjectionInput = z.infer<typeof IncentiveProjectionInputSchema>;
 
@@ -67,75 +83,71 @@ const incentiveProjectionFlow = ai.defineFlow(
     inputSchema: IncentiveProjectionInputSchema,
     outputSchema: IncentiveProjectionOutputSchema,
   },
-  async input => {
+  async ({ seller, goals }) => {
     let metinhaPremio = 0;
     let metaPremio = 0;
     let metonaPremio = 0;
     let legendariaBonus = 0;
     let paBonus = 0;
     let ticketMedioBonus = 0;
-    let corridinhaDiariaBonus = 0;
     
     // Calculate sales prize based on highest achieved tier
     let salesPrize = 0;
-    if (input.vendas >= input.metaMinha) {
-      salesPrize = input.metaMinhaPrize;
+    if (seller.vendas >= goals.metaMinha) {
+      salesPrize = goals.metaMinhaPrize;
     }
-    if (input.vendas >= input.meta) {
-      salesPrize = input.metaPrize;
+    if (seller.vendas >= goals.meta) {
+      salesPrize = goals.metaPrize;
     }
-    if (input.vendas >= input.metona) {
-      salesPrize = input.metonaPrize;
+    if (seller.vendas >= goals.metona) {
+      salesPrize = goals.metonaPrize;
     }
     
     // Assign the prize to the correct tier for display, zeroing out the others.
-    if (input.vendas >= input.metona) {
+    if (seller.vendas >= goals.metona) {
       metonaPremio = salesPrize;
-    } else if (input.vendas >= input.meta) {
+    } else if (seller.vendas >= goals.meta) {
       metaPremio = salesPrize;
-    } else if (input.vendas >= input.metaMinha) {
+    } else if (seller.vendas >= goals.metaMinha) {
       metinhaPremio = salesPrize;
     }
 
-
-    if (input.vendas >= input.metaLendaria && input.legendariaBonusValorVenda > 0) {
-      legendariaBonus = Math.floor((input.vendas - input.metaLendaria) / input.legendariaBonusValorVenda) * input.legendariaBonusValorPremio;
+    if (seller.vendas >= goals.metaLendaria && goals.legendariaBonusValorVenda > 0) {
+      legendariaBonus = Math.floor((seller.vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda) * goals.legendariaBonusValorPremio;
     }
 
-    if (input.pa >= input.paGoal4) {
-      paBonus = input.paPrize4;
-    } else if (input.pa >= input.paGoal3) {
-      paBonus = input.paPrize3;
-    } else if (input.pa >= input.paGoal2) {
-      paBonus = input.paPrize2;
-    } else if (input.pa >= input.paGoal1) {
-      paBonus = input.paPrize1;
+    if (seller.pa >= goals.paGoal4) {
+      paBonus = goals.paPrize4;
+    } else if (seller.pa >= goals.paGoal3) {
+      paBonus = goals.paPrize3;
+    } else if (seller.pa >= goals.paGoal2) {
+      paBonus = goals.paPrize2;
+    } else if (seller.pa >= goals.paGoal1) {
+      paBonus = goals.paPrize1;
     }
 
-
-    if (input.ticketMedio >= input.ticketMedioGoal4) {
-      ticketMedioBonus = input.ticketMedioPrize4;
-    } else if (input.ticketMedio >= input.ticketMedioGoal3) {
-      ticketMedioBonus = input.ticketMedioPrize3;
-    } else if (input.ticketMedio >= input.ticketMedioGoal2) {
-      ticketMedioBonus = input.ticketMedioPrize2;
-    } else if (input.ticketMedio >= input.ticketMedioGoal1) {
-      ticketMedioBonus = input.ticketMedioPrize1;
+    if (seller.ticketMedio >= goals.ticketMedioGoal4) {
+      ticketMedioBonus = goals.ticketMedioPrize4;
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal3) {
+      ticketMedioBonus = goals.ticketMedioPrize3;
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal2) {
+      ticketMedioBonus = goals.ticketMedioPrize2;
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal1) {
+      ticketMedioBonus = goals.ticketMedioPrize1;
     }
 
-
-    corridinhaDiariaBonus = input.corridinhaDiaria;
-
+    const corridinhaDiariaBonus = seller.corridinhaDiaria;
 
     return {
-      metinhaPremio: metinhaPremio,
-      metaPremio: metaPremio,
-      metonaPremio: metonaPremio,
-      legendariaBonus: legendariaBonus,
-      paBonus: paBonus,
-      ticketMedioBonus: ticketMedioBonus,
-      corridinhaDiariaBonus: corridinhaDiariaBonus,
+      metinhaPremio,
+      metaPremio,
+      metonaPremio,
+      legendariaBonus,
+      paBonus,
+      ticketMedioBonus,
+      corridinhaDiariaBonus,
     };
-
   }
 );
+
+    
