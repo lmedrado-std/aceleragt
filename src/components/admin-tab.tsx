@@ -192,8 +192,17 @@ export function AdminTab({
       const allIncentives: Incentives = {};
 
       for (const seller of currentSellers) {
+        // Ensure numeric conversion before sending to the flow
+        const numericSeller = {
+          ...seller,
+          vendas: Number(seller.vendas),
+          pa: Number(seller.pa),
+          ticketMedio: Number(seller.ticketMedio),
+          corridinhaDiaria: Number(seller.corridinhaDiaria),
+        };
+
         const result = await incentiveProjection({
-          seller: seller,
+          seller: numericSeller,
           goals: currentGoals,
         });
         allIncentives[seller.id] = result;
@@ -390,5 +399,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
