@@ -46,10 +46,12 @@ export default function AdminPage() {
       setState(loadState());
       setLoading(false);
     }
-
-    // Reset theme when on the global admin page
-    document.documentElement.style.removeProperty('--primary');
   }, [router]);
+
+  // Reset theme when on the global admin page
+  useEffect(() => {
+    document.documentElement.style.removeProperty('--primary');
+  }, []);
 
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
@@ -329,5 +331,3 @@ export default function AdminPage() {
     </main>
   );
 }
-
-    

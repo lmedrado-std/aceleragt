@@ -13,6 +13,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Reset theme when on the home page
+    document.documentElement.style.removeProperty('--primary');
     const loadedState = loadState();
     setState(loadedState);
     setLoading(false);
@@ -67,24 +69,25 @@ export default function Home() {
                   asChild
                   size="lg"
                   key={store.id}
-                  variant="outline"
+                  variant="default"
                   className="justify-start h-auto py-4 px-5 rounded-xl transition-all 
-                            hover:bg-accent hover:text-accent-foreground
+                            hover:bg-primary/90
                             shadow-sm hover:shadow-lg hover:-translate-y-1 group"
                 >
                   <Link href={`/loja/${store.id}`} className="flex items-center gap-4 w-full">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10">
-                      <StoreIcon className="h-5 w-5 text-primary" />
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-background/20">
+                      <StoreIcon className="h-5 w-5 text-primary-foreground" />
                     </div>
-                    <span className="font-semibold text-base flex-grow text-left text-foreground">
+                    <span className="font-semibold text-base flex-grow text-left text-primary-foreground">
                       {store.name}
                     </span>
-                    <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <ArrowRight className="ml-auto h-5 w-5 text-primary-foreground/70 group-hover:text-primary-foreground transition-colors" />
                   </Link>
                 </Button>
               ))}
             </div>
           )}
+           <p className="text-center text-xs text-muted-foreground mt-6">versão 1.0</p>
         </motion.div>
 
         <div className="text-center mt-6">
