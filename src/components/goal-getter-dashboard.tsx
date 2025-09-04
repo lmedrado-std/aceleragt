@@ -126,10 +126,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     if (currentStore?.themeColor) {
       document.documentElement.style.setProperty('--primary', currentStore.themeColor);
     }
-    // Cleanup function to reset the theme when the component unmounts
-    return () => {
-      document.documentElement.style.removeProperty('--primary');
-    };
   }, [currentStore]);
 
 

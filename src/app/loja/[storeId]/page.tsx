@@ -56,16 +56,14 @@ export default function StoreHomePage() {
 
   useEffect(() => {
     loadStoreData();
-    // Reset theme when leaving the page
-    return () => {
-        document.documentElement.style.removeProperty('--primary');
-    }
   }, [loadStoreData]);
 
   useEffect(() => {
     if (store?.themeColor) {
       document.documentElement.style.setProperty('--primary', store.themeColor);
     }
+    // Cleanup on component unmount is not strictly necessary here
+    // as other pages will set their own theme.
   }, [store]);
 
 
