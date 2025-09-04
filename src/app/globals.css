@@ -3,14 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', 'PT Sans', sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', 'PT Sans', 'sans-serif';
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;        /* branco */
@@ -92,3 +84,12 @@ h1, h2, h3, h4, h5, h6 {
     @apply bg-background text-foreground;
   }
 }
+
+body {
+  font-family: 'Inter', 'PT Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'PT Sans', 'sans-serif';
+}
+
