@@ -191,8 +191,12 @@ export function AdminTab({
       const currentGoals = getValues().goals as Goals;
       const allIncentives: Incentives = {};
 
+      const numericGoals = Object.entries(currentGoals).reduce((acc, [key, value]) => {
+          acc[key as keyof Goals] = Number(value);
+          return acc;
+      }, {} as Goals);
+
       for (const seller of currentSellers) {
-        // Ensure numeric conversion before sending to the flow
         const numericSeller = {
           ...seller,
           vendas: Number(seller.vendas),
@@ -203,7 +207,7 @@ export function AdminTab({
 
         const result = await incentiveProjection({
           seller: numericSeller,
-          goals: currentGoals,
+          goals: numericGoals,
         });
         allIncentives[seller.id] = result;
       }
