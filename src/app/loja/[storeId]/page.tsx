@@ -1,15 +1,15 @@
-
 "use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Home, Shield, Loader2 } from "lucide-react";
+import { ArrowRight, Home, Shield, Loader2, User } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
 import { loadState, Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 export default function StoreHomePage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -37,7 +37,6 @@ export default function StoreHomePage() {
         if (foundStore) {
             setStore(foundStore);
             setSellers(savedState.sellers[decodedStoreId] || []);
-            document.documentElement.style.removeProperty('--primary');
             setError(null);
         } else {
             setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
@@ -88,6 +87,21 @@ export default function StoreHomePage() {
         </div>
     )
   }
+  
+  if (error) {
+     return (
+        <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
+             <h1 className="text-3xl font-bold text-destructive mb-4">Erro ao Carregar Loja</h1>
+             <p className="text-xl text-destructive text-center mb-8">{error}</p>
+             <Button asChild variant="secondary">
+                <Link href="/">
+                <Home className="h-5 w-5 mr-2" />
+                Voltar para Todas as Lojas
+                </Link>
+            </Button>
+        </main>
+     )
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-8">
@@ -96,7 +110,7 @@ export default function StoreHomePage() {
           className="text-3xl font-bold"
           style={{ color: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
         >
-          {error ? "Erro" : store?.name}
+          {store?.name}
         </h1>
         <Button asChild variant="secondary" className="flex items-center gap-2">
             <Link href="/">
@@ -106,64 +120,52 @@ export default function StoreHomePage() {
         </Button>
       </div>
 
-        {error && (
-            <p className="text-xl text-destructive text-center">{error}</p>
-        )}
-      
-       {!loading && !error && (
-        <>
-            <p className="text-gray-600 text-center mb-6 text-lg">
-                Selecione seu usuário para começar.
-            </p>
+      <p className="text-gray-600 text-center mb-6 text-lg">
+        Selecione seu usuário para começar.
+      </p>
 
-            <Card className="w-full max-w-md shadow-xl rounded-2xl">
-                <CardContent className="p-6 space-y-5">
-                <h2 className="text-xl font-semibold text-gray-700">Acessar Painel</h2>
+      <Card className="w-full max-w-md shadow-xl rounded-2xl">
+          <CardContent className="p-6 space-y-5">
+          <h2 className="text-xl font-semibold text-gray-700">Acessar Painel</h2>
 
-                 <Button 
-                    size="lg" 
-                    className="w-full justify-between h-auto py-3 px-4 rounded-xl shadow font-semibold transition-transform transform hover:scale-[1.02]" 
-                    onClick={handleAdminAccess}
-                    style={store ? {
-                        backgroundColor: `hsl(${store.themeColor})`,
-                        color: 'hsl(var(--primary-foreground))',
-                    } : {}}
-                    >
+            <motion.div
+                whileHover={{ scale: 1.03 }}
+                onClick={handleAdminAccess}
+                style={{ backgroundColor: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
+                className="text-white flex items-center justify-between px-4 py-4 rounded-xl shadow cursor-pointer transition"
+            >
+                <div className="flex items-center gap-3">
+                    <Shield className="h-6 w-6" />
+                    <div>
+                        <p className="text-lg font-semibold">Administrador</p>
+                        <p className="text-sm opacity-80">Ver painel de controle</p>
+                    </div>
+                </div>
+                <ArrowRight className="h-5 w-5" />
+            </motion.div>
+
+
+          <div className="space-y-3">
+            {sellers.map((seller) => (
+                <motion.div
+                    key={seller.id}
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => handleSellerAccess(seller.id)}
+                    className="flex items-center justify-between p-4 rounded-xl shadow-sm border hover:shadow-lg transition cursor-pointer bg-white"
+                >
                     <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5" />
+                       <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
                         <div>
-                            <p className="text-base font-semibold text-left">Administrador</p>
-                            <p className="text-sm opacity-80 font-normal text-left">Ver painel de controle</p>
+                            <p className="text-base font-semibold text-gray-800">{seller.name}</p>
+                            <p className="text-sm text-gray-500">Ver meu desempenho</p>
                         </div>
                     </div>
-                    <ArrowRight className="h-5 w-5" />
-                </Button>
-
-                <div className="space-y-3">
-                    {sellers.map((seller) => (
-                    <Button 
-                        size="lg" 
-                        variant="outline"
-                        key={seller.id} 
-                        className="w-full justify-between p-4 rounded-xl shadow-sm border hover:shadow-md transition cursor-pointer bg-white h-auto"
-                        onClick={() => handleSellerAccess(seller.id)}
-                    >
-                        <div className="flex items-center gap-3">
-                            <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
-                            <div>
-                                <p className="text-base font-semibold text-gray-800 text-left">{seller.name}</p>
-                                <p className="text-sm text-gray-500 text-left">Ver meu desempenho</p>
-                            </div>
-                        </div>
-                        <ArrowRight className="h-5 w-5 text-gray-400" />
-                    </Button>
-                    ))}
-                </div>
-                </CardContent>
-            </Card>
-        </>
-      )}
+                    <ArrowRight className="h-5 w-5 text-gray-400" />
+                </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </main>
   );
 }
-
