@@ -62,10 +62,23 @@ export default function StoreHomePage() {
   
   useEffect(() => {
     const body = document.body;
-    if(darkMode) {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(isDark);
+    if(isDark) {
       body.classList.add('dark');
     } else {
       body.classList.remove('dark');
+    }
+  }, [])
+  
+  useEffect(() => {
+    const body = document.body;
+    if(darkMode) {
+      body.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      body.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
     }
   }, [darkMode])
 
@@ -116,12 +129,12 @@ export default function StoreHomePage() {
   }
 
   return (
-    <div className={`${darkMode ? "dark bg-gray-900" : "bg-gray-50"} min-h-screen flex flex-col items-center px-4 py-8 transition-colors duration-300`}>
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center px-4 py-8 transition-colors duration-300">
       {/* Header */}
       <div className="w-full max-w-2xl flex justify-between items-center mb-8">
         <h1 
             className="text-3xl font-bold dark:text-gray-100"
-            style={{ color: !darkMode && store ? `hsl(${store.themeColor})` : '' }}
+            style={{ color: store ? `hsl(${store.themeColor})` : 'inherit' }}
         >
           {store?.name || "Carregando..."}
         </h1>
@@ -161,7 +174,7 @@ export default function StoreHomePage() {
           <motion.div
             whileHover={{ scale: 1.03 }}
             onClick={handleAdminAccess}
-            style={{ backgroundColor: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
+            style={{ backgroundColor: 'hsl(var(--primary))' }}
             className="text-white flex items-center justify-between px-4 py-4 rounded-xl shadow cursor-pointer transition"
           >
             <div className="flex items-center gap-3">
@@ -176,7 +189,7 @@ export default function StoreHomePage() {
 
           {/* Lista de usuários */}
           <div className="space-y-3">
-            {sellers.map((seller) => (
+            {(sellers || []).map((seller) => (
               <motion.div
                 key={seller.id}
                 onClick={() => handleSellerAccess(seller.id)}
@@ -203,3 +216,4 @@ export default function StoreHomePage() {
     </div>
   );
 }
+

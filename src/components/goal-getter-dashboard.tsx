@@ -124,13 +124,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   // Dynamically apply and clean up the store's theme
   useEffect(() => {
+    let styleElement: HTMLStyleElement | null = null;
     if (currentStore?.themeColor) {
-      document.documentElement.style.setProperty('--primary', currentStore.themeColor);
+      styleElement = document.createElement('style');
+      styleElement.innerHTML = `:root { --primary: ${currentStore.themeColor}; }`;
+      document.head.appendChild(styleElement);
     }
   
     // Cleanup function to remove the style when the component unmounts
     return () => {
-        document.documentElement.style.removeProperty('--primary');
+        if (styleElement) {
+          document.head.removeChild(styleElement);
+        }
     };
   }, [currentStore]);
 
@@ -510,3 +515,4 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
