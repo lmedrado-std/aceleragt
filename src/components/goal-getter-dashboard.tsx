@@ -250,12 +250,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       router.push("/");
       return;
     }
-    
+
     setCurrentStore(store);
     
-    if (store.themeColor) {
-      document.documentElement.style.setProperty("--primary", store.themeColor);
-    }
+    // A cor agora é definida globalmente em globals.css e não mais aqui
 
     const initialFormValues = {
       newSellerName: "",
