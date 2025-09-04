@@ -510,5 +510,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

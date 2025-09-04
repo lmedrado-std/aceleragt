@@ -46,6 +46,8 @@ export default function AdminPage() {
       setState(loadState());
       setLoading(false);
     }
+     // Reset theme to default when on this page
+    document.documentElement.style.removeProperty('--primary');
   }, [router]);
 
   const handleAddStore = () => {
