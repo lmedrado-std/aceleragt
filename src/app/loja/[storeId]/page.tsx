@@ -101,7 +101,7 @@ export default function StoreHomePage() {
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
         <h1 
           className="text-5xl font-extrabold tracking-wide text-center"
-          style={{ color: store ? `hsl(${store.themeColor})` : 'inherit' }}
+          style={{ color: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
         >
           {error ? "Erro" : store?.name}
         </h1>
@@ -162,3 +162,5 @@ export default function StoreHomePage() {
     </main>
   );
 }
+
+    
