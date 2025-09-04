@@ -210,7 +210,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         corridinhaDiaria: 0,
       };
       const updatedSellers = [...currentSellers, newSeller];
-      setValue("sellers", updatedSellers, { shouldDirty: true });
+      setValue("sellers", updatedSellers, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
       
       const newIncentives = {...incentives, [newSeller.id]: null };
       setIncentives(newIncentives);
