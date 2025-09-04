@@ -124,13 +124,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   // Dynamically apply and clean up the store's theme
   useEffect(() => {
+    const originalPrimaryColor = document.documentElement.style.getPropertyValue('--primary');
+    
     if (currentStore?.themeColor) {
       document.documentElement.style.setProperty('--primary', currentStore.themeColor);
     }
   
     // Cleanup function to remove the style when the component unmounts
     return () => {
-      document.documentElement.style.removeProperty('--primary');
+        if (originalPrimaryColor) {
+             document.documentElement.style.setProperty('--primary', originalPrimaryColor);
+        } else {
+            document.documentElement.style.removeProperty('--primary');
+        }
     };
   }, [currentStore]);
 
