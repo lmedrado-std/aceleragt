@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Home, Shield, Loader2, User } from "lucide-react";
+import { Home, Shield, Loader2, ArrowRight, Sun, Moon } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
@@ -16,6 +17,7 @@ export default function StoreHomePage() {
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
   
   const params = useParams();
   const router = useRouter();
@@ -57,6 +59,16 @@ export default function StoreHomePage() {
   useEffect(() => {
     loadStoreData();
   }, [loadStoreData]);
+  
+  useEffect(() => {
+    const body = document.body;
+    if(darkMode) {
+      body.classList.add('dark');
+    } else {
+      body.classList.remove('dark');
+    }
+  }, [darkMode])
+
 
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
@@ -104,68 +116,90 @@ export default function StoreHomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-8">
+    <div className={`${darkMode ? "dark bg-gray-900" : "bg-gray-50"} min-h-screen flex flex-col items-center px-4 py-8 transition-colors duration-300`}>
+      {/* Header */}
       <div className="w-full max-w-2xl flex justify-between items-center mb-8">
-         <h1 
-          className="text-3xl font-bold"
-          style={{ color: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
+        <h1 
+            className="text-3xl font-bold dark:text-gray-100"
+            style={{ color: !darkMode && store ? `hsl(${store.themeColor})` : '' }}
         >
-          {store?.name}
+          {store?.name || "Carregando..."}
         </h1>
-        <Button asChild variant="secondary" className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
+          {/* Dark mode toggle */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setDarkMode(!darkMode)}
+            className="rounded-full"
+          >
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+
+          {/* Botão todas as lojas */}
+          <Button asChild variant="secondary" className="flex items-center gap-2 shadow">
             <Link href="/">
-              <Home className="h-5 w-5" />
-              Todas as Lojas
+                <Home className="h-5 w-5" />
+                Todas as Lojas
             </Link>
-        </Button>
+          </Button>
+        </div>
       </div>
 
-      <p className="text-gray-600 text-center mb-6 text-lg">
+      {/* Subtítulo */}
+      <p className="text-gray-600 dark:text-gray-300 text-center mb-6 text-lg">
         Selecione seu usuário para começar.
       </p>
 
-      <Card className="w-full max-w-md shadow-xl rounded-2xl">
-          <CardContent className="p-6 space-y-5">
-          <h2 className="text-xl font-semibold text-gray-700">Acessar Painel</h2>
+      {/* Card principal */}
+      <Card className="w-full max-w-md shadow-2xl rounded-2xl dark:bg-gray-800">
+        <CardContent className="p-6 space-y-5">
+          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-100">Acessar Painel</h2>
 
-            <motion.div
-                whileHover={{ scale: 1.03 }}
-                onClick={handleAdminAccess}
-                style={{ backgroundColor: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
-                className="text-white flex items-center justify-between px-4 py-4 rounded-xl shadow cursor-pointer transition"
-            >
-                <div className="flex items-center gap-3">
-                    <Shield className="h-6 w-6" />
-                    <div>
-                        <p className="text-lg font-semibold">Administrador</p>
-                        <p className="text-sm opacity-80">Ver painel de controle</p>
-                    </div>
-                </div>
-                <ArrowRight className="h-5 w-5" />
-            </motion.div>
+          {/* Administrador com destaque */}
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            onClick={handleAdminAccess}
+            style={{ backgroundColor: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
+            className="text-white flex items-center justify-between px-4 py-4 rounded-xl shadow cursor-pointer transition"
+          >
+            <div className="flex items-center gap-3">
+              <Shield className="h-6 w-6" />
+              <div>
+                <p className="text-lg font-semibold">Administrador</p>
+                <p className="text-sm opacity-80">Ver painel de controle</p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5" />
+          </motion.div>
 
-
+          {/* Lista de usuários */}
           <div className="space-y-3">
             {sellers.map((seller) => (
-                <motion.div
-                    key={seller.id}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => handleSellerAccess(seller.id)}
-                    className="flex items-center justify-between p-4 rounded-xl shadow-sm border hover:shadow-lg transition cursor-pointer bg-white"
-                >
-                    <div className="flex items-center gap-3">
-                       <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
-                        <div>
-                            <p className="text-base font-semibold text-gray-800">{seller.name}</p>
-                            <p className="text-sm text-gray-500">Ver meu desempenho</p>
-                        </div>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-gray-400" />
-                </motion.div>
+              <motion.div
+                key={seller.id}
+                onClick={() => handleSellerAccess(seller.id)}
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center justify-between p-4 rounded-xl shadow-sm border hover:shadow-lg transition cursor-pointer dark:bg-gray-700 bg-white"
+              >
+                <div className="flex items-center gap-3">
+                    <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
+                  <div>
+                    <p className="text-base font-semibold text-gray-800 dark:text-gray-100">
+                      {seller.name}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                      Ver meu desempenho
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="h-5 w-5 text-gray-400" />
+              </motion.div>
             ))}
           </div>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
