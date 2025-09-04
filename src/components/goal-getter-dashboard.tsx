@@ -5,12 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from 'next/navigation';
-import {
-  ShieldCheck,
-  Home,
-  CheckCircle,
-} from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { ShieldCheck, Home, CheckCircle } from "lucide-react";
 
 import {
   incentiveProjection,
@@ -18,7 +14,6 @@ import {
 } from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-
 import { useToast } from "@/hooks/use-toast";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,86 +23,77 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { loadState, saveState, Seller, Goals, Store, Incentives } from "@/lib/storage";
+import {
+  loadState,
+  saveState,
+  Seller,
+  Goals,
+  Store,
+  Incentives,
+} from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
 
-const availableAvatarIds = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9', 'avatar10'];
+const availableAvatarIds = [
+  "avatar1",
+  "avatar2",
+  "avatar3",
+  "avatar4",
+  "avatar5",
+  "avatar6",
+  "avatar7",
+  "avatar8",
+  "avatar9",
+  "avatar10",
+];
 
 const sellerSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Nome é obrigatório"),
   password: z.string().min(4, "A senha deve ter pelo menos 4 caracteres"),
   avatarId: z.string(),
-  vendas: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
-  pa: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
-  ticketMedio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
-  corridinhaDiaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0).default(0),
+  vendas: z.coerce.number().min(0).default(0),
+  pa: z.coerce.number().min(0).default(0),
+  ticketMedio: z.coerce.number().min(0).default(0),
+  corridinhaDiaria: z.coerce.number().min(0).default(0),
 });
 
 export const formSchema = z.object({
   newSellerName: z.string().optional(),
   newSellerPassword: z.string().optional(),
-  goals: z.object({
-    metaMinha: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    meta: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    metona: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    metaLendaria: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    legendariaBonusValorVenda: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    legendariaBonusValorPremio: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    metaMinhaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    metaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    metonaPrize: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paGoal3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize3: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    paPrize4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal2: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioGoal3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioGoal4: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize1: z.coerce.number({ invalid_type_error: "Deve ser um número" }).min(0),
-    ticketMedioPrize2: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize3: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-    ticketMedioPrize4: z.coerce.number({ invalid_type_error: "Deve be um número" }).min(0),
-  }),
+  goals: z.record(z.any()), // mantém flexível para várias metas
   sellers: z.array(sellerSchema),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type RankingMetric = 'vendas' | 'pa' | 'ticketMedio' | 'corridinhaDiaria';
+export type RankingMetric = "vendas" | "pa" | "ticketMedio" | "corridinhaDiaria";
 export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
-    <div className="container mx-auto p-4 py-8 md:p-8">
-        <header className="flex items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4">
-                <div>
-                    <Skeleton className="h-8 w-48 mb-2" />
-                    <Skeleton className="h-4 w-64" />
-                </div>
-            </div>
-             <div className="flex items-center gap-2">
-                <Skeleton className="h-10 w-32" />
-                <Skeleton className="h-10 w-32" />
-            </div>
-        </header>
-        <div className="border-b mb-4">
-            <div className="flex items-center gap-2">
-                <Skeleton className="h-10 w-24" />
-                <Skeleton className="h-10 w-24" />
-                <Skeleton className="h-10 w-24" />
-            </div>
+  <div className="container mx-auto p-4 py-8 md:p-8">
+    <header className="flex items-center justify-between gap-4 mb-8">
+      <div className="flex items-center gap-4">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
         </div>
-        <Skeleton className="h-[500px] w-full" />
+      </div>
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-10 w-32" />
+      </div>
+    </header>
+    <div className="border-b mb-4">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+      </div>
     </div>
+    <Skeleton className="h-[500px] w-full" />
+  </div>
 );
-
 
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [isSaving, setIsSaving] = useState(false);
@@ -128,100 +114,151 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       newSellerName: "",
       newSellerPassword: "",
       sellers: [],
-    }
+    },
   });
-  
+
   const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
-  const calculateRankings = useCallback((sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
-    const newRankings: Rankings = {};
-    if (!sellers || sellers.length === 0) {
+  // 📊 Rankings
+  const calculateRankings = useCallback(
+    (sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
+      const newRankings: Rankings = {};
+      if (!sellers || sellers.length === 0) {
         setRankings({});
         return;
-    }
-    const metrics: RankingMetric[] = ['vendas', 'pa', 'ticketMedio', 'corridinhaDiaria'];
+      }
+      const metrics: RankingMetric[] = [
+        "vendas",
+        "pa",
+        "ticketMedio",
+        "corridinhaDiaria",
+      ];
 
-    metrics.forEach(metric => {
+      metrics.forEach((metric) => {
         const sortedSellers = [...sellers]
-            .map(seller => {
-                let value = 0;
-                if (metric === 'corridinhaDiaria') {
-                    const incentiveData = currentIncentives[seller.id];
-                    value = incentiveData?.corridinhaDiariaBonus || 0;
-                }
-                else {
-                    value = seller[metric as keyof Omit<Seller, 'id' | 'name' | 'avatarId' | 'password'>] as number;
-                }
-                return { id: seller.id, value };
-            })
-            .sort((a, b) => b.value - a.value);
+          .map((seller) => {
+            let value = 0;
+            if (metric === "corridinhaDiaria") {
+              const incentiveData = currentIncentives[seller.id];
+              value = incentiveData?.corridinhaDiariaBonus || 0;
+            } else {
+              value =
+                seller[
+                  metric as keyof Omit<
+                    Seller,
+                    "id" | "name" | "avatarId" | "password"
+                  >
+                ] as number;
+            }
+            return { id: seller.id, value };
+          })
+          .sort((a, b) => b.value - a.value);
 
         let rank = 1;
         for (let i = 0; i < sortedSellers.length; i++) {
-            if (i > 0 && sortedSellers[i].value < sortedSellers[i - 1].value) {
-                rank = i + 1;
-            }
-            const sellerId = sortedSellers[i].id;
-            if (!newRankings[sellerId]) {
-                newRankings[sellerId] = {} as Record<RankingMetric, number>;
-            }
-            newRankings[sellerId][metric] = rank;
+          if (i > 0 && sortedSellers[i].value < sortedSellers[i - 1].value) {
+            rank = i + 1;
+          }
+          const sellerId = sortedSellers[i].id;
+          if (!newRankings[sellerId]) {
+            newRankings[sellerId] = {} as Record<RankingMetric, number>;
+          }
+          newRankings[sellerId][metric] = rank;
         }
-    });
+      });
 
-    setRankings(newRankings);
-  }, []);
+      setRankings(newRankings);
+    },
+    []
+  );
 
-  const handleIncentivesCalculated = useCallback((newIncentives: Incentives) => {
-    setIncentives(newIncentives);
-    const currentState = loadState();
-    currentState.incentives[storeId] = newIncentives;
-    saveState(currentState);
-    calculateRankings(getValues().sellers, newIncentives);
-  }, [storeId, calculateRankings, getValues]);
+  // 🎯 Incentivos
+  const handleIncentivesCalculated = useCallback(
+    (newIncentives: Incentives) => {
+      setIncentives(newIncentives);
+      const currentState = loadState();
+      currentState.incentives[storeId] = newIncentives;
+      saveState(currentState);
+      calculateRankings(getValues().sellers, newIncentives);
+    },
+    [storeId, calculateRankings, getValues]
+  );
 
+  // ➕ Adicionar vendedor
+  const addSeller = useCallback(
+    (name: string, pass: string) => {
+      const currentSellers = getValues("sellers") || [];
+      const existingAvatarIds = new Set(currentSellers.map((s) => s.avatarId));
+      let randomAvatarId =
+        availableAvatarIds[
+          Math.floor(Math.random() * availableAvatarIds.length)
+        ];
 
-  const addSeller = useCallback((name: string, pass: string) => {
-    const currentSellers = getValues("sellers") || [];
-    const existingAvatarIds = new Set(currentSellers.map(s => s.avatarId));
-    let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
-
-    if (existingAvatarIds.size < availableAvatarIds.length) {
+      if (existingAvatarIds.size < availableAvatarIds.length) {
         while (existingAvatarIds.has(randomAvatarId)) {
-            randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+          randomAvatarId =
+            availableAvatarIds[
+              Math.floor(Math.random() * availableAvatarIds.length)
+            ];
         }
-    }
-    const newSeller: Seller = {
+      }
+      const newSeller: Seller = {
         id: crypto.randomUUID(),
         name,
         password: pass,
         avatarId: randomAvatarId,
-        vendas: 0, pa: 0, ticketMedio: 0, corridinhaDiaria: 0,
-    };
-    const updatedSellers = [...currentSellers, newSeller];
-    setValue("sellers", updatedSellers, { shouldDirty: true });
-    toast({ title: "Vendedor adicionado!", description: `${name} foi adicionado(a) com sucesso.` });
-    router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
-  }, [getValues, setValue, storeId, router, toast]);
+        vendas: 0,
+        pa: 0,
+        ticketMedio: 0,
+        corridinhaDiaria: 0,
+      };
+      const updatedSellers = [...currentSellers, newSeller];
+      setValue("sellers", updatedSellers, { shouldDirty: true });
 
+      // salvar no estado global
+      const currentState = loadState();
+      currentState.sellers[storeId] = updatedSellers;
+      saveState(currentState);
 
+      toast({
+        title: "Vendedor adicionado!",
+        description: `${name} foi adicionado(a) com sucesso.`,
+      });
+
+      router.push(`/dashboard/${storeId}?tab=${newSeller.id}`);
+    },
+    [getValues, setValue, storeId, router, toast]
+  );
+
+  // 🔄 Carregar dados iniciais
   useEffect(() => {
     setMounted(true);
     const state = loadState();
-    const store = state.stores.find(s => s.id === storeId);
+    const store = state.stores.find((s) => s.id === storeId);
 
     if (!store) {
-      setTimeout(() => toast({ variant: "destructive", title: "Erro", description: "Loja não encontrada." }), 0);
-      router.push('/');
+      setTimeout(
+        () =>
+          toast({
+            variant: "destructive",
+            title: "Erro",
+            description: "Loja não encontrada.",
+          }),
+        0
+      );
+      router.push("/");
       return;
     }
-    
+
     setCurrentStore(store);
     if (store.themeColor) {
-      document.documentElement.style.setProperty('--primary-hsl', store.themeColor);
+      document.documentElement.style.setProperty(
+        "--primary-hsl",
+        store.themeColor
+      );
     }
-    
+
     const initialFormValues = {
       newSellerName: "",
       newSellerPassword: "",
@@ -232,61 +269,84 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const currentIncentives = state.incentives[storeId] || {};
     setIncentives(currentIncentives);
     calculateRankings(initialFormValues.sellers, currentIncentives);
-    
-    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+
+    const adminAuthenticated =
+      sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
 
     let currentLoggedInSeller: string | null = null;
     if (!adminAuthenticated) {
-        (state.sellers[storeId] || []).forEach(seller => {
-            if(sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === 'true') {
-                currentLoggedInSeller = seller.id;
-            }
-        });
-        setLoggedInSellerId(currentLoggedInSeller);
+      (state.sellers[storeId] || []).forEach((seller) => {
+        if (
+          sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === "true"
+        ) {
+          currentLoggedInSeller = seller.id;
+        }
+      });
+      setLoggedInSellerId(currentLoggedInSeller);
     }
-    
+
     const sellersForStore = state.sellers[storeId] || [];
-    const tabFromUrl = searchParams.get('tab');
-    let tabToActivate = tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : 'admin');
-    
-    if (tabToActivate !== 'admin' && !sellersForStore.some(s => s.id === tabToActivate)) {
-      tabToActivate = sellersForStore.length > 0 ? sellersForStore[0].id : 'admin';
+    const tabFromUrl = searchParams.get("tab");
+    let tabToActivate =
+      tabFromUrl || (sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
+
+    if (
+      tabToActivate !== "admin" &&
+      !sellersForStore.some((s) => s.id === tabToActivate)
+    ) {
+      tabToActivate =
+        sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
     }
 
-
-    const sellerIsAuthenticated = (sellerId: string) => sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
-
-    if (tabToActivate === 'admin') {
-        if (!adminAuthenticated) {
-            const destination = `/dashboard/${storeId}?tab=admin`;
-            router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-            return;
-        }
+    if (tabToActivate === "admin") {
+      if (!adminAuthenticated) {
+        const destination = `/dashboard/${storeId}?tab=admin`;
+        router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+        return;
+      }
     } else {
-        if (!sellersForStore.find(s => s.id === tabToActivate)) {
-             router.push(`/dashboard/${storeId}?tab=${sellersForStore[0]?.id || 'admin'}`);
-             return;
-        }
-        if (!adminAuthenticated && !sellerIsAuthenticated(tabToActivate)) {
-            const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
-            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
-            return;
-        }
-        if (!adminAuthenticated && currentLoggedInSeller && tabToActivate !== currentLoggedInSeller) {
-            toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você só pode ver seu próprio painel.' });
-            router.push(`/dashboard/${storeId}?tab=${currentLoggedInSeller}`);
-            return;
-        }
+      if (!sellersForStore.find((s) => s.id === tabToActivate)) {
+        router.push(
+          `/dashboard/${storeId}?tab=${sellersForStore[0]?.id || "admin"}`
+        );
+        return;
+      }
+      if (
+        !adminAuthenticated &&
+        !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)
+      ) {
+        const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
+        router.push(
+          `/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(
+            destination
+          )}`
+        );
+        return;
+      }
+      if (
+        !adminAuthenticated &&
+        currentLoggedInSeller &&
+        tabToActivate !== currentLoggedInSeller
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Acesso Negado",
+          description: "Você só pode ver seu próprio painel.",
+        });
+        router.push(`/dashboard/${storeId}?tab=${currentLoggedInSeller}`);
+        return;
+      }
     }
-    
+
     setActiveTab(tabToActivate);
   }, [storeId, reset, router, toast, searchParams, calculateRankings]);
 
+  // 💾 Auto-salvar alterações no form
   useEffect(() => {
     const subscription = watch((value) => {
       if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current);
+        clearTimeout(saveTimeoutRef.current);
       }
       saveTimeoutRef.current = setTimeout(() => {
         const currentState = loadState();
@@ -298,43 +358,57 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       }, 500);
     });
     return () => {
-        subscription.unsubscribe();
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
+      subscription.unsubscribe();
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
     };
   }, [watch, storeId]);
 
-
+  // Troca de abas
   const handleTabChange = (newTab: string) => {
-      if (!isAdmin && loggedInSellerId && newTab !== loggedInSellerId) {
-          toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você só pode acessar o seu painel.' });
-          router.push(`/dashboard/${storeId}?tab=${loggedInSellerId}`);
-          return;
-      }
-       if (newTab === 'admin' && !isAdmin) {
-          toast({ variant: 'destructive', title: 'Acesso Negado', description: 'Você precisa ser um administrador.'})
-          const destination = `/dashboard/${storeId}?tab=admin`;
-          router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-          return;
-      }
-      
-      const sellerIsAuthenticated = (sellerId: string) => {
-        return sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
-      }
+    if (!isAdmin && loggedInSellerId && newTab !== loggedInSellerId) {
+      toast({
+        variant: "destructive",
+        title: "Acesso Negado",
+        description: "Você só pode acessar o seu painel.",
+      });
+      router.push(`/dashboard/${storeId}?tab=${loggedInSellerId}`);
+      return;
+    }
+    if (newTab === "admin" && !isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Acesso Negado",
+        description: "Você precisa ser um administrador.",
+      });
+      const destination = `/dashboard/${storeId}?tab=admin`;
+      router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+      return;
+    }
 
-      if(newTab !== 'admin' && !isAdmin && !sellerIsAuthenticated(newTab)){
-        const destination = `/dashboard/${storeId}?tab=${newTab}`;
-        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(destination)}`);
-        return;
-      }
+    if (
+      newTab !== "admin" &&
+      !isAdmin &&
+      !sessionStorage.getItem(`sellerAuthenticated-${newTab}`)
+    ) {
+      const destination = `/dashboard/${storeId}?tab=${newTab}`;
+      router.push(
+        `/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(
+          destination
+        )}`
+      );
+      return;
+    }
 
-      setActiveTab(newTab);
-      router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
-  }
+    setActiveTab(newTab);
+    router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
+  };
 
   const currentValues = getValues();
-  const visibleSellers = isAdmin ? (currentValues.sellers || []) : (currentValues.sellers || []).filter(s => s.id === loggedInSellerId);
+  const visibleSellers = isAdmin
+    ? currentValues.sellers || []
+    : (currentValues.sellers || []).filter((s) => s.id === loggedInSellerId);
 
   if (!mounted) {
     return <DashboardSkeleton />;
@@ -344,14 +418,17 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold font-headline" style={{color: `hsl(var(--primary-hsl))`}}>
-                {currentStore?.name || 'Carregando...'}
-              </h1>
-              <p className="text-muted-foreground">
-                Acompanhe as metas e os ganhos da equipe.
-              </p>
-            </div>
+          <div>
+            <h1
+              className="text-3xl font-bold font-headline"
+              style={{ color: `hsl(var(--primary-hsl))` }}
+            >
+              {currentStore?.name || "Carregando..."}
+            </h1>
+            <p className="text-muted-foreground">
+              Acompanhe as metas e os ganhos da equipe.
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline">
@@ -362,10 +439,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           </Button>
           {isAdmin && (
             <Button asChild variant="outline">
-                <Link href="/admin">
-                    <ShieldCheck className="mr-2 h-4 w-4" />
-                    Admin Global
-                </Link>
+              <Link href="/admin">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Admin Global
+              </Link>
             </Button>
           )}
         </div>
@@ -373,77 +450,82 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
       <Form {...form}>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-           <TooltipProvider>
+          <TooltipProvider>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <div className="flex items-center border-b justify-between">
-                    <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
-                        {visibleSellers.map(seller => (
-                             <TabsTrigger key={seller.id} value={seller.id} className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-md">
-                                {seller.name}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                    
-                    <div className="flex items-center gap-4">
-                         {isSaving && (
-                             <div className="flex items-center gap-2 text-sm text-green-600">
-                                <CheckCircle className="h-4 w-4"/>
-                                <span>Salvo!</span>
-                            </div>
-                        )}
-                        {isAdmin && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
-                                        <TabsTrigger value="admin" className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md">
-                                            <ShieldCheck className="h-5 w-5"/>
-                                            <span className="sr-only">Admin</span>
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Painel do Administrador da Loja</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
+              <div className="flex items-center border-b justify-between">
+                <TabsList className="flex-grow h-auto p-0 bg-transparent border-0 rounded-none">
+                  {visibleSellers.map((seller) => (
+                    <TabsTrigger
+                      key={seller.id}
+                      value={seller.id}
+                      className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-md"
+                    >
+                      {seller.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                <div className="flex items-center gap-4">
+                  {isSaving && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Salvo!</span>
                     </div>
+                  )}
+                  {isAdmin && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsList className="h-auto p-0 bg-transparent border-0 rounded-none">
+                          <TabsTrigger
+                            value="admin"
+                            className="rounded-lg px-3 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md"
+                          >
+                            <ShieldCheck className="h-5 w-5" />
+                            <span className="sr-only">Admin</span>
+                          </TabsTrigger>
+                        </TabsList>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Painel do Administrador da Loja</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
+              </div>
 
-                {isAdmin && (
-                    <TabsContent value="admin">
-                        <AdminTab 
-                          form={form} 
-                          storeId={storeId} 
-                          onIncentivesCalculated={handleIncentivesCalculated}
-                          incentives={incentives}
-                          addSeller={addSeller}
-                        />
-                    </TabsContent>
-                )}
-                
-                {(currentValues.sellers || []).map((seller) => (
-                    <TabsContent key={seller.id} value={seller.id} className="mt-4">
-                        <SellerTab
-                            seller={seller}
-                            goals={currentValues.goals}
-                            incentives={incentives[seller.id]}
-                            rankings={rankings[seller.id]}
-                        />
-                    </TabsContent>
-                ))}
+              {isAdmin && (
+                <TabsContent value="admin">
+                  <AdminTab
+                    form={form}
+                    storeId={storeId}
+                    onIncentivesCalculated={handleIncentivesCalculated}
+                    incentives={incentives}
+                    addSeller={addSeller}
+                  />
+                </TabsContent>
+              )}
 
-                 {(currentValues.sellers || []).length === 0 && activeTab !== 'admin' && (
+              {(currentValues.sellers || []).map((seller) => (
+                <TabsContent key={seller.id} value={seller.id} className="mt-4">
+                   <SellerTab
+                        seller={seller}
+                        goals={currentValues.goals as Goals}
+                        incentives={incentives[seller.id]}
+                        rankings={rankings[seller.id]}
+                    />
+                </TabsContent>
+              ))}
+              
+               {(currentValues.sellers || []).length === 0 && activeTab !== 'admin' && (
                      <TabsContent value={activeTab} className="mt-4 text-center text-muted-foreground py-10">
                         <p>Esta loja ainda não tem vendedores.</p>
                         <p>O administrador precisa adicionar vendedores no painel de administração.</p>
                     </TabsContent>
                 )}
             </Tabs>
-           </TooltipProvider>
+          </TooltipProvider>
         </form>
       </Form>
     </div>
   );
 }
-
-    
