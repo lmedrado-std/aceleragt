@@ -141,16 +141,16 @@ export default function StoreHomePage() {
                             size="lg" 
                             variant="outline" 
                             key={seller.id} 
-                            className="justify-start h-auto py-3 rounded-lg transition-transform transform hover:scale-105 hover:bg-accent hover:text-accent-foreground"
+                            className="justify-start h-auto py-3 rounded-lg transition-transform transform hover:scale-105 hover:bg-accent hover:text-accent-foreground group"
                             onClick={() => handleSellerAccess(seller.id)}
                         >
                             <div className="flex items-center gap-4 w-full">
                                 <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
                                 <div className="flex flex-col items-start">
-                                    <span className="font-semibold text-base text-foreground">{seller.name}</span>
-                                    <span className="text-sm text-muted-foreground font-normal">Ver meu desempenho</span>
+                                    <span className="font-semibold text-base text-card-foreground group-hover:text-accent-foreground">{seller.name}</span>
+                                    <span className="text-sm text-muted-foreground font-normal group-hover:text-accent-foreground/80">Ver meu desempenho</span>
                                 </div>
-                                <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground" />
+                                <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground group-hover:text-accent-foreground/80" />
                             </div>
                         </Button>
                         ))}
