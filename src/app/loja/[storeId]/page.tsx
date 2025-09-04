@@ -9,7 +9,7 @@ import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
 import { loadState, Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function StoreHomePage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -37,6 +37,7 @@ export default function StoreHomePage() {
         if (foundStore) {
             setStore(foundStore);
             setSellers(savedState.sellers[decodedStoreId] || []);
+            document.documentElement.style.removeProperty('--primary');
             setError(null);
         } else {
             setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
@@ -89,76 +90,80 @@ export default function StoreHomePage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
-       <div className="absolute top-4 left-4">
-            <Button asChild variant="outline">
-                <Link href="/">
-                    <Home className="mr-2 h-4 w-4" />
-                    Todas as Lojas
-                </Link>
-            </Button>
-        </div>
-      <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
-        <h1 
-          className="text-5xl font-extrabold tracking-wide text-center"
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center px-4 py-8">
+      <div className="w-full max-w-2xl flex justify-between items-center mb-8">
+         <h1 
+          className="text-3xl font-bold"
           style={{ color: store ? `hsl(${store.themeColor})` : 'hsl(var(--primary))' }}
         >
           {error ? "Erro" : store?.name}
         </h1>
+        <Button asChild variant="secondary" className="flex items-center gap-2">
+            <Link href="/">
+              <Home className="h-5 w-5" />
+              Todas as Lojas
+            </Link>
+        </Button>
+      </div>
 
         {error && (
             <p className="text-xl text-destructive text-center">{error}</p>
         )}
-        
-        {!loading && !error && (
-            <>
-                <p className="text-xl text-muted-foreground text-center">
+      
+       {!loading && !error && (
+        <>
+            <p className="text-gray-600 text-center mb-6 text-lg">
                 Selecione seu usuário para começar.
-                </p>
-                <Card className="w-full max-w-md bg-card p-6 rounded-2xl shadow-lg mt-8 border">
-                    <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Acessar Painel</h2>
-                    <div className="grid grid-cols-1 gap-4">
-                        <Button 
-                          size="lg" 
-                          className="justify-start h-auto py-3 rounded-lg font-semibold transition-transform transform hover:scale-105" 
-                          onClick={handleAdminAccess}
-                          style={store ? {
-                              backgroundColor: `hsl(${store.themeColor})`,
-                              color: 'hsl(var(--primary-foreground))',
-                          } : {}}
-                          >
-                        <div className="flex items-center gap-4 w-full">
-                            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10" style={{backgroundColor: 'hsla(var(--primary-foreground), 0.1)'}}><Shield className="h-6 w-6" /></div>
-                            <div className="flex flex-col items-start">
-                            <span className="font-semibold text-base">Administrador</span>
-                            <span className="text-sm opacity-80 font-normal">Ver painel de controle</span>
-                            </div>
-                            <ArrowRight className="ml-auto h-5 w-5 opacity-80" />
+            </p>
+
+            <Card className="w-full max-w-md shadow-xl rounded-2xl">
+                <CardContent className="p-6 space-y-5">
+                <h2 className="text-xl font-semibold text-gray-700">Acessar Painel</h2>
+
+                 <Button 
+                    size="lg" 
+                    className="w-full justify-between h-auto py-3 px-4 rounded-xl shadow font-semibold transition-transform transform hover:scale-[1.02]" 
+                    onClick={handleAdminAccess}
+                    style={store ? {
+                        backgroundColor: `hsl(${store.themeColor})`,
+                        color: 'hsl(var(--primary-foreground))',
+                    } : {}}
+                    >
+                    <div className="flex items-center gap-3">
+                        <Shield className="h-5 w-5" />
+                        <div>
+                            <p className="text-base font-semibold text-left">Administrador</p>
+                            <p className="text-sm opacity-80 font-normal text-left">Ver painel de controle</p>
                         </div>
-                        </Button>
-                        {sellers.map((seller) => (
-                        <Button 
-                            size="lg" 
-                            variant="outline" 
-                            key={seller.id} 
-                            className="justify-start h-auto py-3 rounded-lg transition-transform transform hover:scale-105 hover:bg-accent hover:text-accent-foreground group"
-                            onClick={() => handleSellerAccess(seller.id)}
-                        >
-                            <div className="flex items-center gap-4 w-full">
-                                <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
-                                <div className="flex flex-col items-start">
-                                    <span className="font-semibold text-base text-card-foreground group-hover:text-accent-foreground">{seller.name}</span>
-                                    <span className="text-sm text-muted-foreground font-normal group-hover:text-accent-foreground/80">Ver meu desempenho</span>
-                                </div>
-                                <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground group-hover:text-accent-foreground/80" />
-                            </div>
-                        </Button>
-                        ))}
                     </div>
-                </Card>
-            </>
-        )}
-      </div>
+                    <ArrowRight className="h-5 w-5" />
+                </Button>
+
+                <div className="space-y-3">
+                    {sellers.map((seller) => (
+                    <Button 
+                        size="lg" 
+                        variant="outline"
+                        key={seller.id} 
+                        className="w-full justify-between p-4 rounded-xl shadow-sm border hover:shadow-md transition cursor-pointer bg-white h-auto"
+                        onClick={() => handleSellerAccess(seller.id)}
+                    >
+                        <div className="flex items-center gap-3">
+                            <SellerAvatar avatarId={seller.avatarId} className="h-10 w-10" />
+                            <div>
+                                <p className="text-base font-semibold text-gray-800 text-left">{seller.name}</p>
+                                <p className="text-sm text-gray-500 text-left">Ver meu desempenho</p>
+                            </div>
+                        </div>
+                        <ArrowRight className="h-5 w-5 text-gray-400" />
+                    </Button>
+                    ))}
+                </div>
+                </CardContent>
+            </Card>
+        </>
+      )}
     </main>
   );
 }
+
