@@ -133,8 +133,7 @@ export default function StoreHomePage() {
       {/* Header */}
       <div className="w-full max-w-2xl flex justify-between items-center mb-8">
         <h1 
-            className="text-3xl font-bold dark:text-gray-100"
-            style={{ color: store ? `hsl(${store.themeColor})` : 'inherit' }}
+            className="text-3xl font-bold text-primary dark:text-gray-100"
         >
           {store?.name || "Carregando..."}
         </h1>
@@ -216,4 +215,5 @@ export default function StoreHomePage() {
     </div>
   );
 }
+
 

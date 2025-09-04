@@ -122,24 +122,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
-  // Dynamically apply and clean up the store's theme
-  useEffect(() => {
-    let styleElement: HTMLStyleElement | null = null;
-    if (currentStore?.themeColor) {
-      styleElement = document.createElement('style');
-      styleElement.innerHTML = `:root { --primary: ${currentStore.themeColor}; }`;
-      document.head.appendChild(styleElement);
-    }
-  
-    // Cleanup function to remove the style when the component unmounts
-    return () => {
-        if (styleElement) {
-          document.head.removeChild(styleElement);
-        }
-    };
-  }, [currentStore]);
-
-
   // 📊 Rankings
   const calculateRankings = useCallback(
     (sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
