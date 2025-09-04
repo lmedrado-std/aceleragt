@@ -13,46 +13,40 @@ h1, h2, h3, h4, h5, h6 {
 
 @layer base {
   :root {
-    --background: 220 20% 97%; /* #f5f6fa - Light Cool Gray */
-    --foreground: 222 88% 12%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 88% 12%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 88% 12%;
-
-    /* Blue from image */
-    --primary: 197 76% 52%; 
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 215.4 16.3% 46.9%;
-    
+    --background: 0 0% 100%;        /* branco */
+    --foreground: 222.2 84% 4.9%;   /* quase preto */
+  
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    
-    /* Green for Success */
-    --accent: 145 63% 49%;
-    --accent-foreground: 0 0% 100%;
-    
-    /* Red for Destructive */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-
+  
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+  
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+  
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 197 76% 52%;
-    
-    --chart-1: 197 76% 52%;
-    --chart-2: 145 63% 49%;
-    --chart-3: 0 84% 60%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    
+  
+    /* 🔹 Cor primária como fallback global */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+  
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+  
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+  
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+  
+    --ring: 221.2 83.2% 53.3%;
+  
     --radius: 0.5rem;
   }
-
+  
+  
   .dark {
     --background: 222 88% 12%;
     --foreground: 210 40% 98%;

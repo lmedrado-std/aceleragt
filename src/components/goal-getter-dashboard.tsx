@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -249,9 +250,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       router.push("/");
       return;
     }
-
+    
     setCurrentStore(store);
-
+    
     if (store.themeColor) {
       document.documentElement.style.setProperty("--primary", store.themeColor);
     }
