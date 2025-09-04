@@ -122,6 +122,29 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { watch, reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
+  // Dynamically apply and clean up the store's theme
+  useEffect(() => {
+    if (currentStore?.themeColor) {
+      const styleId = `store-theme-${storeId}`;
+      let styleElement = document.getElementById(styleId) as HTMLStyleElement | null;
+      if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = styleId;
+        document.head.appendChild(styleElement);
+      }
+      styleElement.innerHTML = `:root { --primary: ${currentStore.themeColor}; }`;
+
+      // Cleanup function to remove the style when the component unmounts
+      return () => {
+        const styleToRemove = document.getElementById(styleId);
+        if (styleToRemove) {
+          styleToRemove.remove();
+        }
+      };
+    }
+  }, [currentStore, storeId]);
+
+
   // 📊 Rankings
   const calculateRankings = useCallback(
     (sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
@@ -384,10 +407,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
 
   return (
-    <>
-    {currentStore?.themeColor && (
-      <style>{`:root { --primary: ${currentStore.themeColor}; }`}</style>
-    )}
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
@@ -499,6 +518,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         </form>
       </Form>
     </div>
-    </>
   );
 }

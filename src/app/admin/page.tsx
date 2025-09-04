@@ -48,11 +48,6 @@ export default function AdminPage() {
     }
   }, [router]);
 
-  // Reset theme when on the global admin page
-  useEffect(() => {
-    document.documentElement.style.removeProperty('--primary');
-  }, []);
-
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
        setTimeout(() => {

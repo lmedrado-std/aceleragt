@@ -37,7 +37,7 @@ export default function StoreHomePage() {
         if (foundStore) {
             setStore(foundStore);
             setSellers(savedState.sellers[decodedStoreId] || []);
-            setError(null); // Clear previous errors if found
+            setError(null);
         } else {
             setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
             toast({
@@ -57,13 +57,6 @@ export default function StoreHomePage() {
   useEffect(() => {
     loadStoreData();
   }, [loadStoreData]);
-
-  // Reset theme when leaving the page
-  useEffect(() => {
-    return () => {
-      document.documentElement.style.removeProperty('--primary');
-    };
-  }, []);
 
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
@@ -96,10 +89,6 @@ export default function StoreHomePage() {
   }
 
   return (
-    <>
-    {store?.themeColor && (
-        <style>{`:root { --primary: ${store.themeColor}; }`}</style>
-    )}
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
        <div className="absolute top-4 left-4">
             <Button asChild variant="outline">
@@ -111,7 +100,8 @@ export default function StoreHomePage() {
         </div>
       <div className="flex flex-col items-center gap-6 max-w-4xl w-full">
         <h1 
-          className="text-5xl font-extrabold tracking-wide text-center text-primary"
+          className="text-5xl font-extrabold tracking-wide text-center"
+          style={{ color: store ? `hsl(${store.themeColor})` : 'inherit' }}
         >
           {error ? "Erro" : store?.name}
         </h1>
@@ -128,14 +118,22 @@ export default function StoreHomePage() {
                 <Card className="w-full max-w-md bg-card p-6 rounded-2xl shadow-lg mt-8 border">
                     <h2 className="text-center text-lg font-semibold text-card-foreground mb-6">Acessar Painel</h2>
                     <div className="grid grid-cols-1 gap-4">
-                        <Button size="lg" className="justify-start h-auto py-3 rounded-lg font-semibold transition-transform transform hover:scale-105" onClick={handleAdminAccess}>
+                        <Button 
+                          size="lg" 
+                          className="justify-start h-auto py-3 rounded-lg font-semibold transition-transform transform hover:scale-105" 
+                          onClick={handleAdminAccess}
+                          style={store ? {
+                              backgroundColor: `hsl(${store.themeColor})`,
+                              color: 'hsl(var(--primary-foreground))',
+                          } : {}}
+                          >
                         <div className="flex items-center gap-4 w-full">
-                            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10"><Shield className="h-6 w-6 text-primary" /></div>
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10" style={{backgroundColor: 'hsla(var(--primary-foreground), 0.1)'}}><Shield className="h-6 w-6" /></div>
                             <div className="flex flex-col items-start">
-                            <span className="font-semibold text-base text-primary-foreground">Administrador</span>
-                            <span className="text-sm text-muted-foreground font-normal">Ver painel de controle</span>
+                            <span className="font-semibold text-base">Administrador</span>
+                            <span className="text-sm opacity-80 font-normal">Ver painel de controle</span>
                             </div>
-                            <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground" />
+                            <ArrowRight className="ml-auto h-5 w-5 opacity-80" />
                         </div>
                         </Button>
                         {sellers.map((seller) => (
@@ -162,6 +160,5 @@ export default function StoreHomePage() {
         )}
       </div>
     </main>
-    </>
   );
 }
