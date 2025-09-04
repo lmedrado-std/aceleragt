@@ -251,6 +251,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
 
     setCurrentStore(store);
+
     if (store.themeColor) {
       document.documentElement.style.setProperty("--primary", store.themeColor);
     }
