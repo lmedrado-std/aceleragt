@@ -444,7 +444,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <TabsList className="h-auto p-0 bg-transparent border-b-0">
                           <TabsTrigger
                             value="admin"
-                            className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:shadow-none"
+                            className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                           >
                             <ShieldCheck className="h-5 w-5 mr-2" />
                             Admin
