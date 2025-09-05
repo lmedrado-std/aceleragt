@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ShieldCheck, Home, CheckCircle } from "lucide-react";
+import { ShieldCheck, Home, CheckCircle, Save } from "lucide-react";
 
 import {
   incentiveProjection,
@@ -183,6 +183,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     [storeId, calculateRankings, getValues]
   );
 
+  // 💾 Salvar Metas Manualmente
+  const handleSaveGoals = () => {
+      const currentState = loadState();
+      currentState.goals[storeId] = getValues().goals as Goals;
+      saveState(currentState);
+      toast({
+          title: "Metas Salvas!",
+          description: "As novas metas e prêmios foram salvos com sucesso.",
+          action: <CheckCircle className="text-green-500" />
+      })
+  }
+
   // ➕ Adicionar vendedor (corrigido para salvar imediatamente)
   const addSeller = useCallback(
     (name: string, pass: string) => {
@@ -321,30 +333,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setActiveTab(tabToActivate);
   }, [storeId, reset, router, toast, searchParams, calculateRankings, isAdmin]);
 
-  // 💾 Auto-salvar alterações (continua funcionando junto com o save imediato)
-  useEffect(() => {
-    const subscription = watch((value) => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      saveTimeoutRef.current = setTimeout(() => {
-        const currentState = loadState();
-        currentState.sellers[storeId] = value.sellers || [];
-        currentState.goals[storeId] = value.goals as Goals;
-        currentState.incentives[storeId] = incentives;
-        saveState(currentState);
-        setIsSaving(true);
-        setTimeout(() => setIsSaving(false), 1500);
-      }, 500);
-    });
-    return () => {
-      subscription.unsubscribe();
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [watch, storeId, incentives]);
-
+  
   const handleTabChange = (newTab: string) => {
     if (!isAdmin && loggedInSellerId && newTab !== loggedInSellerId) {
       toast({
@@ -465,6 +454,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     onIncentivesCalculated={handleIncentivesCalculated}
                     incentives={incentives}
                     addSeller={addSeller}
+                    handleSaveGoals={handleSaveGoals}
                   />
                 </TabsContent>
               )}
@@ -497,4 +487,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-

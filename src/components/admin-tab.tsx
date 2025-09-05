@@ -22,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   FormField,
@@ -69,6 +70,7 @@ interface AdminTabProps {
   onIncentivesCalculated: (incentives: Incentives) => void;
   incentives: Incentives;
   addSeller: (name: string, pass: string) => void;
+  handleSaveGoals: () => void;
 }
 
 export function AdminTab({
@@ -77,6 +79,7 @@ export function AdminTab({
   onIncentivesCalculated,
   incentives,
   addSeller,
+  handleSaveGoals,
 }: AdminTabProps) {
   const { toast } = useToast();
   const router = useRouter();
@@ -397,6 +400,12 @@ export function AdminTab({
                     </div>
                 </div>
             </CardContent>
+            <CardFooter>
+                 <Button onClick={handleSaveGoals} >
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar Metas
+                 </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
