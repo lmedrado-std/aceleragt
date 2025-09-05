@@ -100,8 +100,8 @@ export default function Home() {
           </Button>
         </div>
       </motion.div>
-       <div className="absolute bottom-4 right-4 text-right text-xs text-muted-foreground space-y-1">
-        <p>versão 1.1</p>
+       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full text-center text-xs text-muted-foreground space-y-1">
+        <p>build 0.01</p>
         <p>RyannBreston desenvolvedor</p>
         <p>&copy; {new Date().getFullYear()} Acelera GT. Todos os direitos reservados.</p>
       </div>
