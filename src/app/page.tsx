@@ -37,7 +37,7 @@ export default function Home() {
           >
             <Link href="/login?redirect=/admin">
               <Lock className="h-4 w-4" />
-              Acesso Restrito de Administrador
+              Admin
             </Link>
           </Button>
       </div>
