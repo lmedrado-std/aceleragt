@@ -1,0 +1,16 @@
+name: Neon Branch Management
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+jobs:
+  manage_neon_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage Neon Branch
+        uses: neondatabase/branching-action@v4
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: pr-${{ github.head_ref }}
+          api_key: ${{ secrets.NEON_API_KEY }}
