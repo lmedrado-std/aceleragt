@@ -28,7 +28,20 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-6 relative">
+       <div className="absolute top-4 left-4">
+          <Button
+            variant="ghost"
+            asChild
+            className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+          >
+            <Link href="/login?redirect=/admin">
+              <Lock className="h-4 w-4" />
+              Acesso Restrito de Administrador
+            </Link>
+          </Button>
+      </div>
+
       <motion.div 
         className="flex flex-col items-center gap-8 max-w-4xl w-full"
         initial={{ opacity: 0, y: 20 }}
@@ -86,19 +99,6 @@ export default function Home() {
             </div>
           )}
         </motion.div>
-
-        <div className="text-center mt-6">
-          <Button
-            variant="ghost"
-            asChild
-            className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
-          >
-            <Link href="/login?redirect=/admin">
-              <Lock className="h-4 w-4" />
-              Acesso Restrito de Administrador
-            </Link>
-          </Button>
-        </div>
       </motion.div>
        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full text-center text-xs text-muted-foreground space-y-1">
         <p>build tete 0.0.1 version</p>
