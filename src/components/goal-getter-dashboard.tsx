@@ -97,18 +97,15 @@ const DashboardSkeleton = () => (
 );
 
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
-  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loggedInSellerId, setLoggedInSellerId] = useState<string | null>(null);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [mounted, setMounted] = useState(false);
   const [incentives, setIncentives] = useState<Incentives>({});
   const [rankings, setRankings] = useState<Rankings>({});
   const searchParams = useSearchParams();
   const router = useRouter();
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -119,7 +116,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     },
   });
 
-  const { watch, reset, getValues, setValue } = form;
+  const { reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
 
   // 📊 Rankings
@@ -279,23 +276,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
 
-    let currentLoggedInSeller: string | null = null;
-    if (!adminAuthenticated) {
-      (state.sellers[storeId] || []).forEach((seller) => {
-        if (sessionStorage.getItem(`sellerAuthenticated-${seller.id}`) === "true") {
-          currentLoggedInSeller = seller.id;
-        }
-      });
-      setLoggedInSellerId(currentLoggedInSeller);
-    }
-
     const sellersForStore = state.sellers[storeId] || [];
     const tabFromUrl = searchParams.get("tab");
     let tabToActivate =
-      tabFromUrl || (isAdmin ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
+      tabFromUrl || (adminAuthenticated ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
 
     if (tabToActivate !== "admin" && !sellersForStore.some((s) => s.id === tabToActivate)) {
-      tabToActivate = isAdmin ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
+      tabToActivate = adminAuthenticated ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
     }
 
     if (tabToActivate === "admin") {
@@ -306,7 +293,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       }
     } else {
       if (!sellersForStore.find((s) => s.id === tabToActivate)) {
-        const fallbackTab = isAdmin ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
+        const fallbackTab = adminAuthenticated ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
         router.push(`/dashboard/${storeId}?tab=${fallbackTab}`);
         return;
       }
@@ -319,38 +306,21 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           `/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
         return;
       }
-      if (!adminAuthenticated && currentLoggedInSeller && tabToActivate !== currentLoggedInSeller) {
-        toast({
-          variant: "destructive",
-          title: "Acesso Negado",
-          description: "Você só pode ver seu próprio painel.",
-        });
-        router.push(`/dashboard/${storeId}?tab=${currentLoggedInSeller}`);
-        return;
-      }
     }
-
     setActiveTab(tabToActivate);
-  }, [storeId, reset, router, toast, searchParams, calculateRankings, isAdmin]);
+  }, [storeId, reset, router, toast, searchParams, calculateRankings]);
 
   
   const handleTabChange = (newTab: string) => {
-    if (!isAdmin && loggedInSellerId && newTab !== loggedInSellerId) {
-      toast({
-        variant: "destructive",
-        title: "Acesso Negado",
-        description: "Você só pode acessar o seu painel.",
-      });
-      router.push(`/dashboard/${storeId}?tab=${loggedInSellerId}`, { scroll: false });
-      return;
-    }
-    if (newTab === "admin" && !isAdmin) {
+    const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
+
+    if (newTab === "admin" && !adminAuthenticated) {
       const destination = `/dashboard/${storeId}?tab=admin`;
       router.push(`/login?redirect=${encodeURIComponent(destination)}`);
       return;
     }
 
-    if (newTab !== "admin" && !isAdmin && !sessionStorage.getItem(`sellerAuthenticated-${newTab}`)) {
+    if (newTab !== "admin" && !adminAuthenticated && !sessionStorage.getItem(`sellerAuthenticated-${newTab}`)) {
       const destination = `/dashboard/${storeId}?tab=${newTab}`;
       router.push(
         `/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(destination)}`,
@@ -364,10 +334,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   };
 
   const currentValues = getValues();
-  const visibleSellers = isAdmin
-    ? currentValues.sellers || []
-    : (currentValues.sellers || []).filter((s) => s.id === loggedInSellerId);
-
+  
   if (!mounted || activeTab === "loading") {
     return <DashboardSkeleton />;
   }
@@ -407,7 +374,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <div className="flex items-center border-b justify-between">
                 <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
-                  {visibleSellers.map((seller) => (
+                  {(currentValues.sellers || []).map((seller) => (
                     <TabsTrigger
                       key={seller.id}
                       value={seller.id}
@@ -419,12 +386,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 </TabsList>
 
                 <div className="flex items-center gap-4">
-                  {isSaving && (
-                    <div className="flex items-center gap-2 text-sm text-green-600 animate-pulse">
-                      <CheckCircle className="h-4 w-4" />
-                      <span>Salvando...</span>
-                    </div>
-                  )}
+                  
                   {isAdmin && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -487,3 +449,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
