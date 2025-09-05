@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -99,7 +100,7 @@ export default function Home() {
           </Button>
         </div>
       </motion.div>
-       <p className="absolute bottom-8 left-4 text-xs text-muted-foreground">versão 1.0</p>
+       <p className="absolute bottom-8 left-4 text-xs text-muted-foreground">versão 1.1</p>
     </main>
   );
 }
