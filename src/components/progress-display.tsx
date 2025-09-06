@@ -136,7 +136,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
                 description="Total vendido no período"
             />
-             <MetricCard LAG
+             <MetricCard 
                 title="Produtos por Atendimento (PA)"
                 value={String(Number(pa || 0).toFixed(2))}
                 icon={<Package className="h-4 w-4 text-muted-foreground" />}
@@ -194,10 +194,10 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                      <div>
                         <h4 className="font-semibold mb-2 text-sm">Metas de PA</h4>
                          <div className="space-y-2 text-sm">
-                            <TargetGoalItem label="Nível 1" value={goals.paGoal1.toFixed(2)} />
-                            <TargetGoalItem label="Nível 2" value={goals.paGoal2.toFixed(2)} />
-                            <TargetGoalItem label="Nível 3" value={goals.paGoal3.toFixed(2)} />
-                            <TargetGoalItem label="Nível 4" value={goals.paGoal4.toFixed(2)} />
+                            <TargetGoalItem label="Nível 1" value={Number(goals.paGoal1).toFixed(2)} />
+                            <TargetGoalItem label="Nível 2" value={Number(goals.paGoal2).toFixed(2)} />
+                            <TargetGoalItem label="Nível 3" value={Number(goals.paGoal3).toFixed(2)} />
+                            <TargetGoalItem label="Nível 4" value={Number(goals.paGoal4).toFixed(2)} />
                         </div>
                     </div>
                      <Separator />
