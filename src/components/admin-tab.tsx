@@ -359,12 +359,12 @@ export function AdminTab({
                 <div>
                     <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Vendas e Prêmios</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metinha (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                         <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Meta (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metona (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Meta 1 (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Meta 1 (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                         <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Meta 2 (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Meta 2 (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Meta 3 (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Meta 3 (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                     </div>
                      <div className="mt-4 pt-4 border-t">
                         <h4 className="font-medium mb-2 text-card-foreground">Bônus Lendária</h4>
