@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { loadState, AppState, Seller, Incentives } from '@/lib/storage';
+import { loadStateFromStorage, AppState, Seller, Incentives } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
         if (!isAdmin) {
             router.push('/login?redirect=/admin/dashboard');
         } else {
-            setState(loadState());
+            setState(loadStateFromStorage());
             setLoading(false);
         }
     }, [router]);

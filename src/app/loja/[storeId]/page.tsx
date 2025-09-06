@@ -7,7 +7,7 @@ import { Home, Shield, Loader2, ArrowRight, Sun, Moon } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
-import { loadState, Seller, Store } from "@/lib/storage";
+import { loadStateFromStorage, Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -33,7 +33,7 @@ export default function StoreHomePage() {
 
     try {
         const decodedStoreId = decodeURIComponent(storeId);
-        const savedState = loadState();
+        const savedState = loadStateFromStorage();
         const foundStore = savedState.stores.find(s => s.id === decodedStoreId);
         
         if (foundStore) {
@@ -215,5 +215,3 @@ export default function StoreHomePage() {
     </div>
   );
 }
-
-

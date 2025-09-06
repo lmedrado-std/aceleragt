@@ -45,7 +45,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Seller, Goals, Incentives, loadState, saveState } from "@/lib/storage";
+import { Seller, Goals, Incentives, loadStateFromStorage, saveState } from "@/lib/storage";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -138,7 +138,7 @@ export function AdminTab({
     delete newIncentives[sellerId];
     onIncentivesCalculated(newIncentives);
 
-    const currentState = loadState();
+    const currentState = loadStateFromStorage();
     currentState.sellers[storeId] = updatedSellers;
     currentState.goals[storeId] = goals;
     currentState.incentives[storeId] = newIncentives;
@@ -173,7 +173,7 @@ export function AdminTab({
     const updatedSellers = [...sellers];
     updatedSellers[sellerIndex] = { ...updatedSellers[sellerIndex], name: newName, password: newPassword };
 
-    const currentState = loadState();
+    const currentState = loadStateFromStorage();
     currentState.sellers[storeId] = updatedSellers;
     currentState.goals[storeId] = goals;
     currentState.incentives[storeId] = incentives;
@@ -217,7 +217,7 @@ export function AdminTab({
       
       onIncentivesCalculated(allIncentives);
 
-      const currentState = loadState();
+      const currentState = loadStateFromStorage();
       currentState.sellers[storeId] = currentSellers;
       currentState.goals[storeId] = currentGoals;
       currentState.incentives[storeId] = allIncentives;

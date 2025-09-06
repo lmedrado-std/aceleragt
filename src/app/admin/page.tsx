@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadState, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
+import { AppState, loadStateFromStorage, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +43,7 @@ export default function AdminPage() {
     if (!isAdmin) {
       router.push('/login?redirect=/admin');
     } else {
-      setState(loadState());
+      setState(loadStateFromStorage());
       setLoading(false);
     }
      // Reset theme to default when on this page
@@ -328,5 +328,3 @@ export default function AdminPage() {
     </main>
   );
 }
-
-    

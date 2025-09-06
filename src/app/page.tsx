@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Store as StoreIcon, Lock, Loader2, FolderOpen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadState } from "@/lib/storage";
+import { AppState, loadStateFromStorage } from "@/lib/storage";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadedState = loadState();
+    const loadedState = loadStateFromStorage();
     setState(loadedState);
     setLoading(false);
   }, []);

@@ -25,7 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  loadState,
+  loadStateFromStorage,
   saveState,
   Seller,
   Goals,
@@ -172,7 +172,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const handleIncentivesCalculated = useCallback(
     (newIncentives: Incentives) => {
       setIncentives(newIncentives);
-      const currentState = loadState();
+      const currentState = loadStateFromStorage();
       currentState.incentives[storeId] = newIncentives;
       saveState(currentState);
       calculateRankings(getValues().sellers, newIncentives);
@@ -182,7 +182,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   // 💾 Salvar Metas Manualmente
   const handleSaveGoals = () => {
-      const currentState = loadState();
+      const currentState = loadStateFromStorage();
       currentState.goals[storeId] = getValues().goals as Goals;
       saveState(currentState);
       toast({
@@ -222,7 +222,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       setValue("sellers", updatedSellers, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
 
       // ✅ salva imediatamente no storage
-      const currentState = loadState();
+      const currentState = loadStateFromStorage();
       currentState.sellers[storeId] = updatedSellers;
       currentState.goals[storeId] = getValues("goals") as Goals;
       currentState.incentives[storeId] = { ...incentives, [newSeller.id]: null };
@@ -243,7 +243,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   // 🔄 Carregar dados iniciais
   useEffect(() => {
     setMounted(true);
-    const state = loadState();
+    const state = loadStateFromStorage();
     const store = state.stores.find((s) => s.id === storeId);
 
     if (!store) {
@@ -449,5 +449,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

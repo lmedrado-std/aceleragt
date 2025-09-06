@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { loadState, Seller } from '@/lib/storage';
+import { loadStateFromStorage, Seller } from '@/lib/storage';
 import { SellerAvatar } from '@/components/seller-avatar';
 
 function SellerLoginComponent() {
@@ -35,7 +36,7 @@ function SellerLoginComponent() {
     }
 
     setStoreId(currentStoreId);
-    const state = loadState();
+    const state = loadStateFromStorage();
     const currentSeller = state.sellers[currentStoreId]?.find(s => s.id === sellerId);
 
     if (currentSeller) {
@@ -141,5 +142,3 @@ export default function SellerLoginPage() {
         </Suspense>
     )
 }
-
-    
