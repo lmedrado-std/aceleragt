@@ -1,3 +1,4 @@
+
 import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 
 const LOCAL_STORAGE_KEY = "goalGetterState_v2";
@@ -195,5 +196,3 @@ export function setAdminPassword(password: string) {
     }
     localStorage.setItem(ADMIN_PASSWORD_KEY, password);
 }
-
-    
