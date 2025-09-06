@@ -101,7 +101,7 @@ export default function Home() {
         </motion.div>
       </motion.div>
        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full text-center text-xs text-muted-foreground space-y-1">
-             <p>Build Teste 0.0.1 Version</p>
+             <p>Versao 1.1</p>
         <p>RyannBreston desenvolvedor</p>
         <p>&copy; {new Date().getFullYear()} Acelera GT. Todos os direitos reservados.</p>
       </div>
