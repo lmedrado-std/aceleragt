@@ -207,7 +207,7 @@ export default function AdminPage() {
 
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-xl">Visão Geral</CardTitle>
+            <CardTitle className="text-xl text-primary">Visão Geral</CardTitle>
             <CardDescription>Acesse o dashboard com dados consolidados de todas as lojas.</CardDescription>
           </CardHeader>
           <CardContent>
