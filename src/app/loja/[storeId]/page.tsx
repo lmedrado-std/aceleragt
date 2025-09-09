@@ -175,7 +175,7 @@ export default function StoreHomePage() {
         {/* Card dos Vendedores */}
         <Card className="w-full shadow-2xl rounded-2xl dark:bg-gray-800">
           <CardHeader>
-            <CardTitle>Vendedores</CardTitle>
+            <CardTitle className="text-primary">Vendedores</CardTitle>
             <CardDescription>Selecione seu usuário para continuar</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
