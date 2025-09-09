@@ -97,7 +97,10 @@ export function AdminTab({
     register,
   } = form;
 
-  const sellers: Seller[] = useWatch<Seller[]>({ control, name: "sellers" }) ?? [];
+  const sellers: Partial<Seller>[] = useWatch<Partial<Seller>[]>({
+    control,
+    name: "sellers",
+  }) ?? [];
   const goals: Goals = useWatch<Goals>({ control, name: "goals" });
 
   const handleAddSeller = () => {
@@ -108,7 +111,7 @@ export function AdminTab({
       setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
       return;
     }
-    if (sellers.some(s => s.name.toLowerCase() === newSellerName.toLowerCase())) {
+    if (sellers.some(s => s.name?.toLowerCase() === newSellerName.toLowerCase())) {
         setError("newSellerName", { type: "manual", message: "Este nome de vendedor já existe."});
         return;
     }
@@ -131,7 +134,7 @@ export function AdminTab({
   };
 
   const removeSeller = (sellerId: string) => {
-    const updatedSellers = sellers.filter((s) => s.id !== sellerId);
+    const updatedSellers = (getValues().sellers || []).filter((s) => s.id !== sellerId);
     setValue("sellers", updatedSellers, { shouldDirty: true });
 
     const newIncentives = { ...incentives };
@@ -144,7 +147,7 @@ export function AdminTab({
     currentState.incentives[storeId] = newIncentives;
     saveState(currentState);
 
-    const newTab = updatedSellers.length > 0 ? updatedSellers[0].id : "admin";
+    const newTab = updatedSellers.length > 0 && updatedSellers[0].id ? updatedSellers[0].id : "admin";
     router.push(`/dashboard/${storeId}?tab=${newTab}`);
   };
 
@@ -152,7 +155,8 @@ export function AdminTab({
   const cancelEditing = () => setEditingSellerId(null);
 
   const saveSeller = (sellerId: string) => {
-    const sellerIndex = sellers.findIndex((s) => s.id === sellerId);
+    const currentSellers = getValues().sellers || [];
+    const sellerIndex = currentSellers.findIndex((s) => s.id === sellerId);
     if (sellerIndex === -1) return;
 
     const newName = getValues(`sellers.${sellerIndex}.name`);
@@ -166,15 +170,14 @@ export function AdminTab({
       toast({ variant: "destructive", title: "Erro", description: "A senha deve ter pelo menos 4 caracteres." });
       return;
     }
-    
-    setValue(`sellers.${sellerIndex}.name`, newName);
-    setValue(`sellers.${sellerIndex}.password`, newPassword);
 
-    const updatedSellers = [...sellers];
+    const updatedSellers = [...currentSellers];
     updatedSellers[sellerIndex] = { ...updatedSellers[sellerIndex], name: newName, password: newPassword };
+    
+    setValue("sellers", updatedSellers, { shouldDirty: true });
 
     const currentState = loadStateFromStorage();
-    currentState.sellers[storeId] = updatedSellers;
+    currentState.sellers[storeId] = updatedSellers as Seller[];
     currentState.goals[storeId] = goals;
     currentState.incentives[storeId] = incentives;
     saveState(currentState);
@@ -194,6 +197,11 @@ export function AdminTab({
       const currentGoals = getValues().goals as Goals;
       const allIncentives: Incentives = {};
 
+      if (!currentSellers || currentSellers.some(s => !s.id)) {
+          toast({ variant: "destructive", title: "Erro", description: "Dados de vendedores incompletos. Salve todas as alterações antes de calcular." });
+          return;
+      }
+
       const numericGoals = Object.entries(currentGoals).reduce((acc, [key, value]) => {
           acc[key as keyof Goals] = Number(value);
           return acc;
@@ -209,7 +217,7 @@ export function AdminTab({
         };
 
         const result = await incentiveProjection({
-          seller: numericSeller,
+          seller: numericSeller as Seller,
           goals: numericGoals,
         });
         allIncentives[seller.id] = result;
@@ -232,6 +240,8 @@ export function AdminTab({
       setIsCalculating(false);
     }
   };
+  
+  const validSellers = (sellers || []).filter((s): s is Seller => !!s && !!s.id);
 
   return (
     <div className="space-y-8">
@@ -277,8 +287,8 @@ export function AdminTab({
                <div>
                 <h3 className="text-lg font-medium mb-4">Vendedores Atuais</h3>
                 <div className="space-y-2">
-                  {sellers.length === 0 ? <p className="text-muted-foreground text-sm">Nenhum vendedor cadastrado ainda.</p> :
-                  sellers.map((seller, index) => (
+                  {validSellers.length === 0 ? <p className="text-muted-foreground text-sm">Nenhum vendedor cadastrado ainda.</p> :
+                  validSellers.map((seller, index) => (
                     <div key={seller.id} className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted">
                       {editingSellerId === seller.id ? (
                         <>
@@ -298,13 +308,13 @@ export function AdminTab({
                         </>
                       ) : (
                         <>
-                          <span className="font-medium">{seller.name}</span>
+                          <span className="font-medium">{seller.name ?? 'Vendedor sem nome'}</span>
                           <div className="flex items-center">
                             <Button size="icon" variant="ghost" type="button" onClick={() => startEditing(seller.id)}><Edit/></Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" type="button"><Trash2 /></Button></AlertDialogTrigger>
                               <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Remover "{seller.name}"?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Todos os dados deste vendedor serão perdidos.</AlertDialogDescription></AlertDialogHeader>
+                                <AlertDialogHeader><AlertDialogTitle>Remover "{seller.name ?? 'Vendedor'}"?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Todos os dados deste vendedor serão perdidos.</AlertDialogDescription></AlertDialogHeader>
                                 <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => removeSeller(seller.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
@@ -326,11 +336,11 @@ export function AdminTab({
               <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
             </CardHeader>
             <CardContent>
-              {sellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
+              {validSellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
                 <div className="space-y-6">
-                  {sellers.map((seller, index) => (
+                  {validSellers.map((seller, index) => (
                     <div key={seller.id} className="p-4 border rounded-lg space-y-4 bg-card">
-                      <h3 className="font-semibold text-lg text-card-foreground">{seller.name}</h3>
+                      <h3 className="font-semibold text-lg text-card-foreground">{seller.name ?? 'Vendedor sem nome'}</h3>
                       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
                         <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
@@ -396,19 +406,19 @@ export function AdminTab({
                                 <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                                 <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </CardContent>
-            <CardFooter>
-                 <Button onClick={handleSaveGoals} >
-                    <Save className="mr-2 h-4 w-4" />
-                    Salvar Metas
-                 </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+                        ))}\
+                    </div>\
+                </div>\
+            </CardContent>\
+            <CardFooter>\
+                 <Button onClick={handleSaveGoals} >\
+                    <Save className="mr-2 h-4 w-4" />\
+                    Salvar Metas\
+                 </Button>\
+            </CardFooter>\
+          </Card>\
+        </TabsContent>\
+      </Tabs>\
+    </div>\
+  );\
+}\
