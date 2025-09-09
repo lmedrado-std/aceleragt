@@ -406,19 +406,19 @@ export function AdminTab({
                                 <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                                 <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
                             </div>
-                        ))}\
-                    </div>\
-                </div>\
-            </CardContent>\
-            <CardFooter>\
-                 <Button onClick={handleSaveGoals} >\
-                    <Save className="mr-2 h-4 w-4" />\
-                    Salvar Metas\
-                 </Button>\
-            </CardFooter>\
-          </Card>\
-        </TabsContent>\
-      </Tabs>\
-    </div>\
-  );\
-}\
+                        ))}
+                    </div>
+                </div>
+            </CardContent>
+            <CardFooter>
+                 <Button onClick={handleSaveGoals} >
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar Metas
+                 </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
