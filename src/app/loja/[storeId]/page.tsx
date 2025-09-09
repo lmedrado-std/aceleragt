@@ -9,7 +9,7 @@ import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
 import { loadStateFromStorage, Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 export default function StoreHomePage() {
@@ -131,25 +131,16 @@ export default function StoreHomePage() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center px-4 py-8 transition-colors duration-300">
       {/* Header */}
-      <div className="w-full max-w-2xl flex justify-between items-center mb-8">
-        <h1 
-            className="text-3xl font-bold text-primary dark:text-gray-100"
-        >
+      <header className="w-full max-w-2xl flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-primary dark:text-gray-100">
           {store?.name || "Carregando..."}
         </h1>
 
         <div className="flex items-center gap-3">
-          {/* Dark mode toggle */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setDarkMode(!darkMode)}
-            className="rounded-full"
-          >
+          <Button variant="outline" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full">
             {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          {/* Botão todas as lojas */}
           <Button asChild variant="secondary" className="flex items-center gap-2 shadow">
             <Link href="/">
                 <Home className="h-5 w-5" />
@@ -157,37 +148,37 @@ export default function StoreHomePage() {
             </Link>
           </Button>
         </div>
-      </div>
+      </header>
 
       {/* Subtítulo */}
       <p className="text-gray-600 dark:text-gray-300 text-center mb-6 text-lg">
         Selecione seu usuário para começar.
       </p>
 
-      {/* Card principal */}
-      <Card className="w-full max-w-md shadow-2xl rounded-2xl dark:bg-gray-800">
-        <CardContent className="p-6 space-y-5">
-          <h2 className="text-xl font-semibold text-primary">Acessar Painel</h2>
-
-          {/* Administrador com destaque */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            onClick={handleAdminAccess}
-            style={{ backgroundColor: 'hsl(var(--primary))' }}
-            className="text-white flex items-center justify-between px-4 py-4 rounded-xl shadow cursor-pointer transition"
-          >
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6" />
-              <div>
-                <p className="text-lg font-semibold">Administrador</p>
-                <p className="text-sm opacity-80">Ver painel de controle</p>
+      <div className="w-full max-w-md space-y-6">
+        {/* Card do Administrador */}
+        <motion.div whileHover={{ scale: 1.03 }} onClick={handleAdminAccess}>
+          <Card className="w-full shadow-2xl rounded-2xl dark:bg-gray-800 cursor-pointer overflow-hidden">
+            <div style={{ backgroundColor: 'hsl(var(--primary))' }} className="text-white flex items-center justify-between px-6 py-4 transition">
+              <div className="flex items-center gap-3">
+                <Shield className="h-7 w-7" />
+                <div>
+                  <p className="text-lg font-semibold">Administrador</p>
+                  <p className="text-sm opacity-80">Acessar painel de controle</p>
+                </div>
               </div>
+              <ArrowRight className="h-6 w-6" />
             </div>
-            <ArrowRight className="h-5 w-5" />
-          </motion.div>
+          </Card>
+        </motion.div>
 
-          {/* Lista de usuários */}
-          <div className="space-y-3">
+        {/* Card dos Vendedores */}
+        <Card className="w-full shadow-2xl rounded-2xl dark:bg-gray-800">
+          <CardHeader>
+            <CardTitle>Vendedores</CardTitle>
+            <CardDescription>Selecione seu usuário para continuar</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {(sellers || []).map((seller) => (
               <motion.div
                 key={seller.id}
@@ -209,9 +200,15 @@ export default function StoreHomePage() {
                 <ArrowRight className="h-5 w-5 text-gray-400" />
               </motion.div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+             {sellers.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground pt-4">
+                  Nenhum vendedor cadastrado nesta loja ainda.
+                </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
     </div>
   );
 }
