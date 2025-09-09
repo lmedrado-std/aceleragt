@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Loader2, DollarSign, Users, Award, Trophy, BarChartHorizontal } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import ClientOnly from '@/components/client-only';
 
 
 type SellerWithStore = Seller & { storeName: string; totalIncentives: number };
@@ -29,7 +30,7 @@ const formatCurrency = (value: number) =>
   }).format(value || 0);
 
 
-export default function AdminDashboardPage() {
+function AdminDashboard() {
     const [state, setState] = useState<AppState | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -298,4 +299,11 @@ export default function AdminDashboardPage() {
         </main>
     );
 }
-    
+
+export default function AdminDashboardPage() {
+    return (
+        <ClientOnly>
+            <AdminDashboard />
+        </ClientOnly>
+    )
+}

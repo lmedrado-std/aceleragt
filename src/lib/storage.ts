@@ -144,10 +144,6 @@ function mergeWithInitialState(savedState: AppState): AppState {
     return savedState;
 }
 
-export function loadState(): AppState {
-    return getInitialState();
-}
-
 export function loadStateFromStorage(): AppState {
     if (typeof window === 'undefined') {
         return getInitialState();
