@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
+import DbStatus from '@/components/DbStatus';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
@@ -101,6 +102,7 @@ function LoginComponent() {
             </form>
           </CardContent>
         </Card>
+        <DbStatus />
       </div>
     </main>
   );
