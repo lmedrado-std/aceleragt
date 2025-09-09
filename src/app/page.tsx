@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -13,7 +14,7 @@ export default function HomePage() {
   useEffect(() => {
     const state = loadStateFromStorage();
     const existingStores = state.stores || [];
-    const supermodaStore: Store = { id: 'supermoda', name: 'Supermoda' };
+    const supermodaStore: Store = { id: 'supermoda', name: 'Supermoda', themeColor: '' };
 
     // Garante que a loja Supermoda esteja sempre presente e no topo, sem duplicatas
     const otherStores = existingStores.filter(store => store.id !== supermodaStore.id);
@@ -51,11 +52,10 @@ export default function HomePage() {
                             </div>
                             <div>
                                 <CardTitle>{store.name}</CardTitle>
-                                <CardDescription>ID: {store.id}</CardDescription>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <Link href={`/admin/loja/${encodeURIComponent(store.id)}`} passHref>
+                            <Link href={`/loja/${encodeURIComponent(store.id)}`} passHref>
                                 <Button className="w-full">Acessar Painel</Button>
                             </Link>
                         </CardContent>
