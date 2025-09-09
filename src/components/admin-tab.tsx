@@ -49,14 +49,14 @@ import { Seller, Goals, Incentives, loadStateFromStorage, saveState } from "@/li
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const goalTiers = [
+const goalTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
   { id: "Nível 2", goal: "paGoal2", prize: "paPrize2" },
   { id: "Nível 3", goal: "paGoal3", prize: "paPrize3" },
   { id: "Nível 4", goal: "paGoal4", prize: "paPrize4" },
 ];
 
-const ticketMedioTiers = [
+const ticketMedioTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
   { id: "Nível 1", goal: "ticketMedioGoal1", prize: "ticketMedioPrize1" },
   { id: "Nível 2", goal: "ticketMedioGoal2", prize: "ticketMedioPrize2" },
   { id: "Nível 3", goal: "ticketMedioGoal3", prize: "ticketMedioPrize3" },
