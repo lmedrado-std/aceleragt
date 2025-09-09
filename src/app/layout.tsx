@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import Footer from '@/components/footer';
 
 export const metadata: Metadata = {
   title: 'Corridinha GT',
@@ -27,8 +28,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased bg-background text-foreground">
-        {children}
+      <body className="font-body antialiased bg-background text-foreground flex flex-col min-h-screen">
+        <main className="flex-grow">{children}</main>
+        <Footer />
         <Toaster />
       </body>
     </html>
