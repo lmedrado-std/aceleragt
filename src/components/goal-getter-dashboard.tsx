@@ -1,4 +1,4 @@
-
+  
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,10 +60,38 @@ const sellerSchema = z.object({
   corridinhaDiaria: z.coerce.number().min(0).default(0),
 });
 
+const goalsSchema = z.object({
+  metaMinha: z.coerce.number().default(0),
+  metaMinhaPrize: z.coerce.number().default(0),
+  meta: z.coerce.number().default(0),
+  metaPrize: z.coerce.number().default(0),
+  metona: z.coerce.number().default(0),
+  metonaPrize: z.coerce.number().default(0),
+  metaLendaria: z.coerce.number().default(0),
+  legendariaBonusValorVenda: z.coerce.number().default(0),
+  legendariaBonusValorPremio: z.coerce.number().default(0),
+  paGoal1: z.coerce.number().default(0),
+  paPrize1: z.coerce.number().default(0),
+  paGoal2: z.coerce.number().default(0),
+  paPrize2: z.coerce.number().default(0),
+  paGoal3: z.coerce.number().default(0),
+  paPrize3: z.coerce.number().default(0),
+  paGoal4: z.coerce.number().default(0),
+  paPrize4: z.coerce.number().default(0),
+  ticketMedioGoal1: z.coerce.number().default(0),
+  ticketMedioPrize1: z.coerce.number().default(0),
+  ticketMedioGoal2: z.coerce.number().default(0),
+  ticketMedioPrize2: z.coerce.number().default(0),
+  ticketMedioGoal3: z.coerce.number().default(0),
+  ticketMedioPrize3: z.coerce.number().default(0),
+  ticketMedioGoal4: z.coerce.number().default(0),
+  ticketMedioPrize4: z.coerce.number().default(0),
+})
+
 export const formSchema = z.object({
   newSellerName: z.string().optional(),
   newSellerPassword: z.string().optional(),
-  goals: z.record(z.any()), // metas flexíveis
+  goals: goalsSchema,
   sellers: z.array(sellerSchema.partial()),
 });
 
@@ -189,7 +217,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   // 💾 Salvar Metas Manualmente
   const handleSaveGoals = () => {
       const currentState = loadStateFromStorage();
-      currentState.goals[storeId] = getValues().goals as Goals;
+      currentState.goals[storeId] = getValues().goals;
       saveState(currentState);
       toast({
           title: "Metas Salvas!",
@@ -230,7 +258,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       // ✅ salva imediatamente no storage
       const currentState = loadStateFromStorage();
       currentState.sellers[storeId] = updatedSellers as Seller[];
-      currentState.goals[storeId] = getValues("goals") as Goals;
+      currentState.goals[storeId] = getValues("goals");
       currentState.incentives[storeId] = { ...incentives, [newSeller.id]: null };
       saveState(currentState);
 
@@ -433,7 +461,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 <TabsContent key={seller.id} value={seller.id!} className="mt-6">
                   <SellerTab
                     seller={seller as Seller}
-                    goals={currentValues.goals as Goals}
+                    goals={currentValues.goals}
                     incentives={incentives[seller.id!]}
                     rankings={rankings[seller.id!]}
                   />

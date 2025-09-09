@@ -98,7 +98,7 @@ export function AdminTab({
   } = form;
 
   const sellers = useWatch({ control, name: "sellers" }) ?? [];
-  const goals: Goals = useWatch<Goals>({ control, name: "goals" });
+  const goals = useWatch({ control, name: "goals" });
 
   const handleAddSeller = () => {
     const newSellerName = getValues("newSellerName");
@@ -191,31 +191,18 @@ export function AdminTab({
     setIsCalculating(true);
     try {
       const currentSellers = getValues().sellers;
-      const currentGoals = getValues().goals as Goals;
+      const currentGoals = getValues().goals;
       const allIncentives: Incentives = {};
 
       if (!currentSellers || currentSellers.some(s => !s.id)) {
           toast({ variant: "destructive", title: "Erro", description: "Dados de vendedores incompletos. Salve todas as alterações antes de calcular." });
           return;
       }
-
-      const numericGoals = Object.entries(currentGoals).reduce((acc, [key, value]) => {
-          acc[key as keyof Goals] = Number(value);
-          return acc;
-      }, {} as Goals);
-
+      
       for (const seller of currentSellers) {
-        const numericSeller = {
-          ...seller,
-          vendas: Number(seller.vendas),
-          pa: Number(seller.pa),
-          ticketMedio: Number(seller.ticketMedio),
-          corridinhaDiaria: Number(seller.corridinhaDiaria),
-        };
-
         const result = await incentiveProjection({
-          seller: numericSeller as Seller,
-          goals: numericGoals,
+          seller: seller as Seller, // Now safe because we filter for valid sellers
+          goals: currentGoals, // Now safe because the schema enforces the type
         });
         allIncentives[seller.id!] = result;
       }
