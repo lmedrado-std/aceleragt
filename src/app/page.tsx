@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -45,7 +46,7 @@ export default function HomePage() {
                                 <StoreIcon className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <CardTitle>{store.name}</CardTitle>
+                                <CardTitle className="text-destructive">{store.name}</CardTitle>
                             </div>
                         </CardHeader>
                         <CardContent>
