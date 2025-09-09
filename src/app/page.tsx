@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { loadStateFromStorage, Store } from '@/lib/storage';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Rocket, Store as StoreIcon, Building } from 'lucide-react';
 
@@ -31,7 +30,7 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
                 <Rocket className="h-12 w-12 text-primary" />
                 <h1 className="text-4xl sm:text-5xl font-bold font-headline text-primary text-center">
-                    Bem-vindo(a) ao Acelera GT
+                    Bem-vindo(a) ao <span className="text-destructive">Acelera GT</span>
                 </h1>
             </div>
             <p className="text-lg text-muted-foreground text-center max-w-2xl">
