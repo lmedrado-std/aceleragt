@@ -19,7 +19,7 @@ export default function HomePage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-4 sm:p-8 relative">
         <div className="absolute top-4 left-4">
-            <Button asChild variant="outline">
+            <Button asChild>
                 <Link href="/admin">
                     <Building className="mr-2 h-4 w-4" />
                     Admin
