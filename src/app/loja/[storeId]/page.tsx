@@ -167,7 +167,7 @@ export default function StoreHomePage() {
       {/* Card principal */}
       <Card className="w-full max-w-md shadow-2xl rounded-2xl dark:bg-gray-800">
         <CardContent className="p-6 space-y-5">
-          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-100">Acessar Painel</h2>
+          <h2 className="text-xl font-semibold text-primary">Acessar Painel</h2>
 
           {/* Administrador com destaque */}
           <motion.div
