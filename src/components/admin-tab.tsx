@@ -97,10 +97,7 @@ export function AdminTab({
     register,
   } = form;
 
-  const sellers: Partial<Seller>[] = useWatch<Partial<Seller>[]>({
-    control,
-    name: "sellers",
-  }) ?? [];
+  const sellers = useWatch({ control, name: "sellers" }) ?? [];
   const goals: Goals = useWatch<Goals>({ control, name: "goals" });
 
   const handleAddSeller = () => {
@@ -142,7 +139,7 @@ export function AdminTab({
     onIncentivesCalculated(newIncentives);
 
     const currentState = loadStateFromStorage();
-    currentState.sellers[storeId] = updatedSellers;
+    currentState.sellers[storeId] = updatedSellers as Seller[];
     currentState.goals[storeId] = goals;
     currentState.incentives[storeId] = newIncentives;
     saveState(currentState);
@@ -220,13 +217,13 @@ export function AdminTab({
           seller: numericSeller as Seller,
           goals: numericGoals,
         });
-        allIncentives[seller.id] = result;
+        allIncentives[seller.id!] = result;
       }
       
       onIncentivesCalculated(allIncentives);
 
       const currentState = loadStateFromStorage();
-      currentState.sellers[storeId] = currentSellers;
+      currentState.sellers[storeId] = currentSellers as Seller[];
       currentState.goals[storeId] = currentGoals;
       currentState.incentives[storeId] = allIncentives;
       saveState(currentState);

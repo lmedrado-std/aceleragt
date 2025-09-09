@@ -64,7 +64,7 @@ export const formSchema = z.object({
   newSellerName: z.string().optional(),
   newSellerPassword: z.string().optional(),
   goals: z.record(z.any()), // metas flexíveis
-  sellers: z.array(sellerSchema),
+  sellers: z.array(sellerSchema.partial()),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
@@ -121,7 +121,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   // 📊 Rankings
   const calculateRankings = useCallback(
-    (sellers: Seller[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
+    (sellers: Partial<Seller>[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
       const newRankings: Rankings = {};
       if (!sellers || sellers.length === 0) {
         setRankings({});
@@ -131,6 +131,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const totalGains: Record<string, number> = {};
 
       sellers.forEach(seller => {
+        if (!seller.id) return;
         const sellerIncentives = currentIncentives[seller.id];
         totalGains[seller.id] = sellerIncentives
           ? Object.values(sellerIncentives).reduce((sum, val) => sum + (val || 0), 0)
@@ -139,6 +140,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
       metrics.forEach((metric) => {
         const sortedSellers = [...sellers].sort((a, b) => {
+          if (!a.id || !b.id) return 0;
           const valueA =
             metric === "corridinhaDiaria"
               ? (totalGains[a.id] || 0)
@@ -152,10 +154,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         let rank = 1;
         for (let i = 0; i < sortedSellers.length; i++) {
-          if (i > 0 && sortedSellers[i][metric as keyof Seller]! < sortedSellers[i - 1][metric as keyof Seller]!) {
+          const currentSeller = sortedSellers[i];
+          const previousSeller = i > 0 ? sortedSellers[i - 1] : null;
+
+          if (previousSeller && currentSeller[metric as keyof Seller]! < previousSeller[metric as keyof Seller]!) {
             rank = i + 1;
           }
-          const sellerId = sortedSellers[i].id;
+          const sellerId = currentSeller.id;
+          if (!sellerId) continue;
           if (!newRankings[sellerId]) {
             newRankings[sellerId] = {} as Record<RankingMetric, number>;
           }
@@ -175,7 +181,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const currentState = loadStateFromStorage();
       currentState.incentives[storeId] = newIncentives;
       saveState(currentState);
-      calculateRankings(getValues().sellers, newIncentives);
+      calculateRankings(getValues().sellers ?? [], newIncentives);
     },
     [storeId, calculateRankings, getValues]
   );
@@ -223,7 +229,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
       // ✅ salva imediatamente no storage
       const currentState = loadStateFromStorage();
-      currentState.sellers[storeId] = updatedSellers;
+      currentState.sellers[storeId] = updatedSellers as Seller[];
       currentState.goals[storeId] = getValues("goals") as Goals;
       currentState.incentives[storeId] = { ...incentives, [newSeller.id]: null };
       saveState(currentState);
@@ -262,27 +268,28 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     setCurrentStore(store);
 
-    const initialFormValues = {
+    const initialSellers = state.sellers[storeId] || [];
+    const initialFormValues: FormValues = {
       newSellerName: "",
       newSellerPassword: "",
       goals: state.goals[storeId] || state.goals.default,
-      sellers: state.sellers[storeId] || [],
+      sellers: initialSellers,
     };
     reset(initialFormValues);
     const currentIncentives = state.incentives[storeId] || {};
     setIncentives(currentIncentives);
-    calculateRankings(initialFormValues.sellers, currentIncentives);
+    calculateRankings(initialSellers, currentIncentives);
 
     const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
 
-    const sellersForStore = state.sellers[storeId] || [];
+    const sellersForStore = initialSellers;
     const tabFromUrl = searchParams.get("tab");
     let tabToActivate =
-      tabFromUrl || (adminAuthenticated ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin");
+      tabFromUrl || (adminAuthenticated ? "admin" : sellersForStore.length > 0 && sellersForStore[0].id ? sellersForStore[0].id : "admin");
 
     if (tabToActivate !== "admin" && !sellersForStore.some((s) => s.id === tabToActivate)) {
-      tabToActivate = adminAuthenticated ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
+      tabToActivate = adminAuthenticated ? "admin" : sellersForStore.length > 0 && sellersForStore[0].id ? sellersForStore[0].id : "admin";
     }
 
     if (tabToActivate === "admin") {
@@ -293,7 +300,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       }
     } else {
       if (!sellersForStore.find((s) => s.id === tabToActivate)) {
-        const fallbackTab = adminAuthenticated ? "admin" : sellersForStore.length > 0 ? sellersForStore[0].id : "admin";
+        const fallbackTab = adminAuthenticated ? "admin" : sellersForStore.length > 0 && sellersForStore[0].id ? sellersForStore[0].id : "admin";
         router.push(`/dashboard/${storeId}?tab=${fallbackTab}`);
         return;
       }
@@ -334,6 +341,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   };
 
   const currentValues = getValues();
+  const validSellers = (currentValues.sellers || []).filter(s => s && s.id);
   
   if (!mounted || activeTab === "loading") {
     return <DashboardSkeleton />;
@@ -374,10 +382,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <div className="flex items-center border-b justify-between">
                 <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
-                  {(currentValues.sellers || []).map((seller) => (
+                  {validSellers.map((seller) => (
                     <TabsTrigger
                       key={seller.id}
-                      value={seller.id}
+                      value={seller.id!}
                       className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                     >
                       {seller.name}
@@ -421,18 +429,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 </TabsContent>
               )}
 
-              {(currentValues.sellers || []).map((seller) => (
-                <TabsContent key={seller.id} value={seller.id} className="mt-6">
+              {validSellers.map((seller) => (
+                <TabsContent key={seller.id} value={seller.id!} className="mt-6">
                   <SellerTab
-                    seller={seller}
+                    seller={seller as Seller}
                     goals={currentValues.goals as Goals}
-                    incentives={incentives[seller.id]}
-                    rankings={rankings[seller.id]}
+                    incentives={incentives[seller.id!]}
+                    rankings={rankings[seller.id!]}
                   />
                 </TabsContent>
               ))}
 
-              {(currentValues.sellers || []).length === 0 && !isAdmin && (
+              {validSellers.length === 0 && !isAdmin && (
                 <TabsContent
                   value={activeTab}
                   className="mt-10 text-center text-muted-foreground py-10"
