@@ -201,8 +201,14 @@ export function AdminTab({
       
       for (const seller of currentSellers) {
         const result = await incentiveProjection({
-          seller: seller as Seller, // Now safe because we filter for valid sellers
-          goals: currentGoals, // Now safe because the schema enforces the type
+           seller: {
+              ...seller,
+              vendas: Number(seller.vendas || 0),
+              pa: Number(seller.pa || 0),
+              ticketMedio: Number(seller.ticketMedio || 0),
+              corridinhaDiaria: Number(seller.corridinhaDiaria || 0),
+            } as Seller,
+          goals: currentGoals,
         });
         allIncentives[seller.id!] = result;
       }
