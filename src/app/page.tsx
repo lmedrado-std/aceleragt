@@ -13,12 +13,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const state = loadStateFromStorage();
-    const existingStores = state.stores || [];
-    const supermodaStore: Store = { id: 'supermoda', name: 'Supermoda', themeColor: '' };
-
-    // Garante que a loja Supermoda esteja sempre presente e no topo, sem duplicatas
-    const otherStores = existingStores.filter(store => store.id !== supermodaStore.id);
-    setStores([supermodaStore, ...otherStores]);
+    setStores(state.stores || []);
   }, []);
 
   return (
@@ -27,7 +22,7 @@ export default function HomePage() {
             <Button asChild variant="outline">
                 <Link href="/admin">
                     <Building className="mr-2 h-4 w-4" />
-                    Painel Global
+                    Admin
                 </Link>
             </Button>
         </div>
@@ -56,7 +51,7 @@ export default function HomePage() {
                         </CardHeader>
                         <CardContent>
                             <Link href={`/loja/${encodeURIComponent(store.id)}`} passHref>
-                                <Button className="w-full">Acessar Painel</Button>
+                                <Button className="w-full">Acessar Loja</Button>
                             </Link>
                         </CardContent>
                     </Card>
