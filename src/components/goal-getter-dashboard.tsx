@@ -167,6 +167,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 if (index > 0 && (seller[metric] || 0) < (rankedSellers[index - 1][metric] || 0)) {
                     rank = index + 1;
+                } else if (index > 0 && (seller[metric] || 0) === (rankedSellers[index - 1][metric] || 0)) {
+                    rank = newRankings[rankedSellers[index - 1].id!][metric];
                 }
                 
                 if (!newRankings[seller.id]) {
