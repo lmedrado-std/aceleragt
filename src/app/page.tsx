@@ -71,21 +71,7 @@ export default function HomePage() {
                   </h1>
               </div>
 
-              {stores.length > 0 ? (
-                 <Card className="mt-8 w-full max-w-lg">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><StoreIcon className="text-primary"/> Acessar Loja</CardTitle>
-                        <CardDescription>Selecione uma loja abaixo para ver o painel de metas.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {stores.map((store) => (
-                        <Button asChild key={store.id} variant="outline">
-                            <Link href={`/loja/${encodeURIComponent(store.id)}`}>{store.name}</Link>
-                        </Button>
-                        ))}
-                    </CardContent>
-                </Card>
-              ) : (
+              {stores.length === 0 && (
                   <Card className="mt-8 text-center">
                       <CardHeader>
                           <CardTitle>Nenhuma loja encontrada!</CardTitle>
