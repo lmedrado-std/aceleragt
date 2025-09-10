@@ -11,6 +11,7 @@ import { loadStateFromStorage, Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function StoreHomePage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -121,7 +122,7 @@ export default function StoreHomePage() {
              <Button asChild variant="secondary">
                 <Link href="/">
                 <Home className="h-5 w-5 mr-2" />
-                Voltar para Todas as Lojas
+                Voltar para Página Inicial
                 </Link>
             </Button>
         </main>
@@ -129,10 +130,9 @@ export default function StoreHomePage() {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center px-4 py-8 transition-colors duration-300">
-      {/* Header */}
-      <header className="w-full max-w-2xl flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-primary dark:text-gray-100">
+    <div className="bg-background min-h-screen flex flex-col items-center p-4 sm:p-8 transition-colors duration-300 w-full">
+      <header className="w-full max-w-4xl flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold font-headline text-primary">
           {store?.name || "Carregando..."}
         </h1>
 
@@ -141,74 +141,79 @@ export default function StoreHomePage() {
             {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          <Button asChild variant="secondary" className="flex items-center gap-2 shadow">
+          <Button asChild variant="secondary" className="hidden sm:flex items-center gap-2 shadow">
             <Link href="/">
                 <Home className="h-5 w-5" />
-                Todas as Lojas
+                Página Inicial
             </Link>
           </Button>
         </div>
       </header>
 
-      {/* Subtítulo */}
-      <p className="text-gray-600 dark:text-gray-300 text-center mb-6 text-lg">
-        Selecione seu usuário para começar.
+      <p className="text-muted-foreground text-center mb-6 text-lg max-w-2xl">
+        Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.
       </p>
 
-      <div className="w-full max-w-md space-y-6">
-        {/* Card do Administrador */}
-        <motion.div whileHover={{ scale: 1.03 }} onClick={handleAdminAccess}>
-          <Card className="w-full shadow-2xl rounded-2xl dark:bg-gray-800 cursor-pointer overflow-hidden">
-            <div style={{ backgroundColor: 'hsl(var(--primary))' }} className="text-white flex items-center justify-between px-6 py-4 transition">
-              <div className="flex items-center gap-3">
-                <Shield className="h-7 w-7" />
-                <div>
-                  <p className="text-lg font-semibold">Administrador</p>
-                  <p className="text-sm opacity-80">Acessar painel de controle</p>
-                </div>
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
+        <motion.div whileHover={{ y: -5 }} onClick={handleAdminAccess} className="cursor-pointer">
+          <Card className="h-full shadow-lg rounded-xl bg-primary text-primary-foreground flex flex-col justify-center">
+            <CardHeader className="flex-row items-center gap-4">
+              <Shield className="h-10 w-10" />
+              <div>
+                <CardTitle className="text-2xl">Administrador</CardTitle>
+                <CardDescription className="text-primary-foreground/80">Painel de controle da loja</CardDescription>
               </div>
-              <ArrowRight className="h-6 w-6" />
-            </div>
+            </CardHeader>
+            <CardContent>
+                <Button variant="secondary" className="w-full">
+                    Acessar Painel <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </CardContent>
           </Card>
         </motion.div>
 
-        {/* Card dos Vendedores */}
-        <Card className="w-full shadow-2xl rounded-2xl dark:bg-gray-800">
+        <Card className="shadow-lg rounded-xl flex flex-col">
           <CardHeader>
-            <CardTitle className="text-primary">Vendedores</CardTitle>
-            <CardDescription>Selecione seu usuário para continuar</CardDescription>
+            <CardTitle>Vendedores</CardTitle>
+            <CardDescription>Selecione seu usuário para ver seu desempenho</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {(sellers || []).map((seller) => (
-              <motion.div
-                key={seller.id}
-                onClick={() => handleSellerAccess(seller.id)}
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center justify-between p-4 rounded-xl shadow-sm border hover:shadow-lg transition cursor-pointer dark:bg-gray-700 bg-white"
-              >
-                <div className="flex items-center gap-3">
-                    <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
-                  <div>
-                    <p className="text-base font-semibold text-gray-800 dark:text-gray-100">
-                      {seller.name}
+          <CardContent className="flex-1 flex flex-col">
+            <ScrollArea className="flex-1 pr-4 -mr-4">
+              <div className="space-y-3">
+                {(sellers || []).map((seller) => (
+                  <motion.div
+                    key={seller.id}
+                    onClick={() => handleSellerAccess(seller.id)}
+                    whileHover={{ scale: 1.03, x: 4 }}
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                        <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
+                      <div>
+                        <p className="text-base font-semibold text-foreground">
+                          {seller.name}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </motion.div>
+                ))}
+                 {sellers.length === 0 && (
+                    <p className="text-center text-sm text-muted-foreground pt-4">
+                      Nenhum vendedor cadastrado nesta loja ainda.
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">
-                      Ver meu desempenho
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-5 w-5 text-gray-400" />
-              </motion.div>
-            ))}
-             {sellers.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground pt-4">
-                  Nenhum vendedor cadastrado nesta loja ainda.
-                </p>
-            )}
+                )}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
-
+      <Button asChild variant="link" className="mt-8 sm:hidden">
+          <Link href="/">
+              <Home className="mr-2 h-4 w-4" />
+              Página Inicial
+          </Link>
+      </Button>
     </div>
   );
 }
