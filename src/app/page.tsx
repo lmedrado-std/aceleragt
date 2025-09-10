@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -55,7 +54,7 @@ export default function HomePage() {
            )}
         </nav>
         <div className="mt-auto text-center text-xs text-white/50">
-          <p>Versão: 1.0.0-beta</p>
+          <p>verificar nota da versao anterior</p>
         </div>
       </aside>
 
