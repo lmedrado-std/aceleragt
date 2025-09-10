@@ -149,38 +149,43 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const calculateRankings = useCallback((sellers: Partial<Seller>[]) => {
     const newRankings: Rankings = {};
     if (!sellers || sellers.length === 0) {
-        setRankings({});
-        return;
+      setRankings({});
+      return;
     }
 
     const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
 
     metrics.forEach((metric) => {
-        const rankedSellers = sellers
-            .filter(s => (s[metric] || 0) > 0)
-            .sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
+      // 🔹 Apenas vendedores com vendas > 0 entram no ranking
+      const rankedSellers = sellers
+        .filter(s => (s[metric] || 0) > 0)
+        .sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
 
-        if (rankedSellers.length > 0) {
-            let rank = 1;
-            rankedSellers.forEach((seller, index) => {
-                if (!seller.id) return;
+      let rank = 1;
 
-                if (index > 0 && (seller[metric] || 0) < (rankedSellers[index - 1][metric] || 0)) {
-                    rank = index + 1;
-                } else if (index > 0 && (seller[metric] || 0) === (rankedSellers[index - 1][metric] || 0)) {
-                    rank = newRankings[rankedSellers[index - 1].id!][metric];
-                }
-                
-                if (!newRankings[seller.id]) {
-                    newRankings[seller.id] = {} as Record<RankingMetric, number>;
-                }
-                newRankings[seller.id][metric] = rank;
-            });
+      rankedSellers.forEach((seller, index) => {
+        if (!seller.id) return;
+
+        // Se não existir posição anterior ou o valor é diferente → avança rank
+        if (index > 0 && (seller[metric] || 0) < (rankedSellers[index - 1][metric] || 0)) {
+          rank = index + 1;
+        } else if (index > 0 && (seller[metric] || 0) === (rankedSellers[index - 1][metric] || 0)) {
+          // 🔹 Empate → mantém o mesmo rank do anterior
+          rank = newRankings[rankedSellers[index - 1].id!][metric];
         }
+
+        // Cria o objeto do vendedor se não existir
+        if (!newRankings[seller.id]) {
+          newRankings[seller.id] = {} as Record<RankingMetric, number>;
+        }
+
+        // Salva a posição final
+        newRankings[seller.id][metric] = rank;
+      });
     });
 
     setRankings(newRankings);
-}, []);
+  }, []);
 
 
   // 🎯 Incentivos

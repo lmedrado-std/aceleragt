@@ -136,8 +136,8 @@ const BronzeMedal = () => (
         <path d="M16 12L18 6" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
 )
-const RankingBadge = ({ rank }: { rank: number }) => {
-    if (rank <= 0) return null;
+const RankingBadge = ({ rank }: { rank: number | undefined }) => {
+    if (!rank || rank <= 0) return null;
 
     let Medal = null;
     if (rank === 1) Medal = GoldMedal;
@@ -174,12 +174,12 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
 
-  const salesRank = rankings?.vendas || 0;
+  const salesRank = rankings?.vendas;
   
   let rankMedal = "";
   let rankMessage = "";
 
-  if (salesRank > 0) {
+  if (salesRank && salesRank > 0) {
       if (salesRank === 1) {
           rankMedal = "🥇";
           rankMessage = `Parabéns, ${name}! Você está em 1º lugar, liderando com excelência!`;
@@ -205,8 +205,8 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
                     </div>
                 </div>
-                {salesRank > 0 && (
-                    <div className="text-right">
+                {salesRank && salesRank > 0 && (
+                     <div className="text-right">
                         <div className="flex items-center justify-end gap-2 font-bold">
                             <Trophy className="h-5 w-5" />
                             <span>{salesRank}º Lugar em Vendas</span>
