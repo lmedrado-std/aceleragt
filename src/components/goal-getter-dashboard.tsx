@@ -101,18 +101,16 @@ export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
   <div className="container mx-auto p-4 py-8 md:p-8">
-    <header className="flex items-center justify-between gap-4 mb-8">
-      <div className="flex items-center gap-4">
-        <div>
+     <div className="w-full bg-gradient-to-r from-primary to-destructive text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+       <header className="flex flex-wrap items-center justify-between gap-4">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-64" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-32" />
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-10 w-32" />
-        <Skeleton className="h-10 w-32" />
-      </div>
-    </header>
+      </header>
+    </div>
     <div className="border-b mb-4">
       <div className="flex items-center gap-2">
         <Skeleton className="h-10 w-24" />
@@ -377,32 +375,34 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
-      <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold font-headline text-primary">
-              {currentStore?.name || "Carregando..."}
-            </h1>
-            <p className="text-muted-foreground">Acompanhe as metas e os ganhos da equipe.</p>
+       <div className="w-full bg-gradient-to-r from-primary to-destructive text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold font-headline">
+                {currentStore?.name || "Carregando..."}
+              </h1>
+              <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="outline">
-            <Link href="/">
-              <Home className="mr-2 h-4 w-4" />
-              Todas as Lojas
-            </Link>
-          </Button>
-          {isAdmin && (
-            <Button asChild variant="outline">
-              <Link href="/admin">
-                <ShieldCheck className="mr-2 h-4 w-4" />
-                Admin Global
+          <div className="flex items-center gap-2">
+            <Button asChild variant="secondary" className="shadow">
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                Todas as Lojas
               </Link>
             </Button>
-          )}
-        </div>
-      </header>
+            {isAdmin && (
+              <Button asChild variant="secondary" className="shadow">
+                <Link href="/admin">
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Admin Global
+                </Link>
+              </Button>
+            )}
+          </div>
+        </header>
+      </div>
 
       <Form {...form}>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
