@@ -86,6 +86,46 @@ const MetricCard = ({ title, value, icon, description }: { title: string, value:
     </Card>
 );
 
+const RankingCard = ({rank, name}: {rank:number, name:string}) => {
+    let medal = null;
+    let message = "";
+    let cardClasses = "bg-card";
+
+    if (rank === 1) {
+        medal = "🥇";
+        message = `Parabéns, ${name}! Você está em 1º lugar, liderando com excelência!`;
+        cardClasses = "bg-amber-100/50 dark:bg-amber-900/20 border-amber-300"
+    } else if (rank === 2) {
+        medal = "🥈";
+        message = `Mandou bem, ${name}! Você está no 2º lugar, continue assim!`;
+        cardClasses = "bg-slate-100/50 dark:bg-slate-800/20 border-slate-300"
+    } else if (rank === 3) {
+        medal = "🥉";
+        message = `Muito bom, ${name}! Você conquistou o 3º lugar, bora buscar o topo!`;
+        cardClasses = "bg-orange-100/50 dark:bg-orange-900/20 border-orange-300"
+    } else {
+        message = `Bora subir, ${name}! Continue se esforçando, o pódio te espera!`;
+    }
+
+    return (
+        <Card className={cn(cardClasses, "col-span-1 md:col-span-2 lg:col-span-4")}>
+            <CardHeader>
+                <div className="flex justify-between items-center">
+                    <CardTitle className="flex items-center gap-2">
+                        <Trophy className="text-primary"/>
+                        Ranking (Vendas)
+                    </CardTitle>
+                    {medal && <span className="text-2xl">{medal}</span>}
+                </div>
+            </CardHeader>
+            <CardContent>
+                <p className="text-2xl font-bold">{rank}º Lugar</p>
+                <p className="text-sm text-muted-foreground">{message}</p>
+            </CardContent>
+        </Card>
+    )
+}
+
 const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
      <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
         <p className="font-medium">{label}</p>
@@ -103,6 +143,7 @@ const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
+    name = "Vendedor",
     vendas = 0,
     pa = 0,
     ticketMedio = 0,
@@ -117,6 +158,8 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   const totalIncentives = incentives
     ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
+
+  const salesRank = rankings?.vendas || 0;
 
   return (
     <div className="space-y-6">
@@ -140,6 +183,9 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     <div className="text-4xl font-bold">{formatCurrency(totalIncentives)}</div>
                 </CardContent>
             </Card>
+            
+            { salesRank > 0 && <RankingCard rank={salesRank} name={name} /> }
+
             <MetricCard 
                 title="Vendas Realizadas" 
                 value={formatCurrency(vendas)} 
