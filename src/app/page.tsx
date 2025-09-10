@@ -40,7 +40,7 @@ export default function HomePage() {
         </div>
         <nav className="space-y-3">
           <SidebarLink href="/admin" icon={Building}>
-            Admin Global
+            Admin
           </SidebarLink>
            {stores.length > 0 && (
              <div className="pt-4 mt-4 border-t border-white/20">
@@ -70,7 +70,7 @@ export default function HomePage() {
                   </h1>
               </div>
               <p className="text-lg text-muted-foreground text-center max-w-2xl">
-                  Selecione uma loja na barra lateral para começar ou acesse o painel de Admin Global.
+                  Selecione uma loja na barra lateral para começar ou acesse o painel de Admin.
               </p>
 
               {stores.length > 0 ? (
