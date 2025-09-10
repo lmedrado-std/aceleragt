@@ -159,7 +159,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         // Filtra apenas vendedores com valor maior que 0 para a métrica atual
         const rankedSellers = sellers.filter(s => (s[metric] || 0) > 0);
         
-        // Ordena os vendedores qualificados
+        // Ordena os vendedores por métrica decrescente
         const sortedSellers = [...rankedSellers].sort(
             (a, b) => (b[metric] || 0) - (a[metric] || 0)
         );
@@ -173,7 +173,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 const currentValue = seller[metric] || 0;
                 
-                // Se o valor atual for menor que o anterior, a posição (rank) é o índice + 1
+                // Se valor atual menor que o anterior, rank é a posição índice + 1
                 if (currentValue < prevValue) {
                     rank = index + 1;
                 }
@@ -477,4 +477,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   );
 }
 
-    
