@@ -19,6 +19,12 @@ if (!connectionString) {
   throw new Error("A variável de ambiente DATABASE_URL não está definida.");
 }
 
+// Configura o SSL apenas para produção (necessário para Neon), desabilitando em desenvolvimento.
+const sslConfig = process.env.NODE_ENV === 'production' 
+    ? { rejectUnauthorized: false } 
+    : undefined;
+
+
 // Lógica para evitar múltiplas conexões em ambiente de desenvolvimento (hot-reload).
 if (process.env.NODE_ENV === "development") {
   // Se a instância global do pool ainda não existe, cria uma nova.
@@ -26,9 +32,7 @@ if (process.env.NODE_ENV === "development") {
     console.log("🔹 Criando novo pool de conexão para desenvolvimento.");
     global.pgPool = new Pool({
       connectionString: connectionString,
-      ssl: {
-        rejectUnauthorized: false, // Necessário para algumas configurações do Neon
-      },
+      ssl: sslConfig,
     });
   }
   // Atribui a instância global (nova ou existente) à conexão.
@@ -37,9 +41,7 @@ if (process.env.NODE_ENV === "development") {
   // Em produção, sempre cria uma nova instância do pool.
   conn = new Pool({
     connectionString: connectionString,
-    ssl: {
-      rejectUnauthorized: false, // Necessário para Neon
-    },
+    ssl: sslConfig,
   });
 }
 
