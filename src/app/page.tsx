@@ -97,7 +97,7 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col items-center justify-center p-8 sm:p-16 bg-background">
         <Card className="shadow-2xl rounded-2xl">
             <CardContent className="flex flex-col items-center justify-center p-10 sm:p-16">
-                 <div className="flex items-center gap-6">
+                 <div className="flex flex-col items-center text-center gap-4">
                     <Rocket className="h-16 w-16 sm:h-20 sm:w-20 text-primary animate-pulse" />
                     <h1 className="text-4xl sm:text-5xl font-bold font-headline text-primary">
                         Bem-vindo(a) ao <br/> <span className="text-destructive">Acelera GT</span>
