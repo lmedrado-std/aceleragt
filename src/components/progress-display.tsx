@@ -205,7 +205,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
                     </div>
                 </div>
-                 {salesRank && salesRank > 0 && (
+                 {vendas > 0 && salesRank && salesRank > 0 && (
                      <div className="text-right">
                         <div className="flex items-center justify-end gap-2 font-bold">
                             <Trophy className="h-5 w-5" />
