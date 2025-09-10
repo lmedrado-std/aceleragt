@@ -123,16 +123,21 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   
   let rankMedal = "";
   let rankMessage = "";
+  let rankColorClass = "bg-black/20"; // Cor padrão
+
   if (salesRank > 0) {
       if (salesRank === 1) {
           rankMedal = "🥇";
           rankMessage = `Parabéns, ${name}! Você está em 1º lugar, liderando com excelência!`;
+          rankColorClass = "bg-amber-400/30 text-amber-900 dark:text-amber-200 border border-amber-500/50 font-bold";
       } else if (salesRank === 2) {
           rankMedal = "🥈";
           rankMessage = `Mandou bem, ${name}! Você está no 2º lugar, continue assim!`;
+          rankColorClass = "bg-slate-400/30 text-slate-900 dark:text-slate-200 border border-slate-500/50 font-semibold";
       } else if (salesRank === 3) {
           rankMedal = "🥉";
           rankMessage = `Muito bom, ${name}! Você conquistou o 3º lugar, bora buscar o topo!`;
+          rankColorClass = "bg-orange-400/30 text-orange-900 dark:text-orange-200 border border-orange-500/50 font-semibold";
       } else {
           rankMessage = `Bora subir, ${name}! Continue se esforçando, o pódio te espera!`;
       }
@@ -149,7 +154,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                             <CardTitle className="text-base font-semibold">Ganho Total Projetado</CardTitle>
                         </div>
                         {salesRank > 0 && (
-                             <div className="flex items-center gap-2 text-sm bg-black/20 px-3 py-1 rounded-full">
+                             <div className={cn("flex items-center gap-2 text-sm px-3 py-1 rounded-full", rankColorClass)}>
                                 <Trophy className="h-4 w-4" />
                                 <span>{salesRank}º Lugar em Vendas</span>
                             </div>
