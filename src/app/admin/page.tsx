@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Building, Rocket, LayoutDashboard } from "lucide-react";
+import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Building, Rocket, LayoutDashboard, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppState, loadStateFromStorage, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [state, setState] = useState<AppState | null>(null);
   const [loading, setLoading] = useState(true);
   const [newStoreName, setNewStoreName] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
   
   const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: ''});
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
@@ -61,7 +62,28 @@ export default function AdminPage() {
     }
      // Reset theme to default when on this page
     document.documentElement.style.removeProperty('--primary');
+
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(isDark);
+    if(isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
   }, [router]);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    if(newDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
+    }
+  };
 
   const handleAddStore = () => {
     if (!newStoreName.trim()) {
@@ -221,8 +243,16 @@ export default function AdminPage() {
              </div>
            )}
         </nav>
-        <div className="mt-auto text-center">
-            <Button variant="link" onClick={handleLogout} className="text-sm text-white/80 hover:text-white transition-colors flex items-center gap-2">
+        <div className="mt-auto">
+             <motion.button
+              onClick={toggleDarkMode}
+              whileHover={{ scale: 1.05, x: 5 }}
+              className="flex items-center gap-3 px-4 py-2 w-full text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+            >
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              <span>{darkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
+            </motion.button>
+            <Button variant="link" onClick={handleLogout} className="text-sm text-white/80 hover:text-white transition-colors flex items-center gap-2 mt-4">
                 <LogOut className="h-4 w-4" />
                 Sair do Modo Admin
             </Button>
