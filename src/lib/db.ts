@@ -14,37 +14,34 @@ let conn: Pool;
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  // Alerta o desenvolvedor se a variável não estiver configurada.
-  console.warn("⚠️ A variável de ambiente DATABASE_URL não está definida. A conexão com o banco de dados não será estabelecida.");
+  // Lança um erro se a DATABASE_URL não estiver definida.
+  // Isso garante que a aplicação falhe rapidamente se a configuração estiver incompleta.
+  throw new Error("A variável de ambiente DATABASE_URL não está definida.");
 }
 
-// Previne múltiplas conexões em desenvolvimento durante o "hot-reload".
+// Lógica para evitar múltiplas conexões em ambiente de desenvolvimento (hot-reload).
 if (process.env.NODE_ENV === "development") {
-  if (connectionString) {
-    if (!global.pgPool) {
-      console.log("🔹 Criando novo pool de conexão para desenvolvimento.");
-      global.pgPool = new Pool({
-        connectionString: connectionString,
-        ssl: {
-          rejectUnauthorized: false, // Necessário para algumas configurações do Neon
-        },
-      });
-    }
-    conn = global.pgPool;
-  }
-} else {
-  // Em produção, cria uma única instância se a string de conexão existir.
-  if (connectionString) {
-    conn = new Pool({
+  // Se a instância global do pool ainda não existe, cria uma nova.
+  if (!global.pgPool) {
+    console.log("🔹 Criando novo pool de conexão para desenvolvimento.");
+    global.pgPool = new Pool({
       connectionString: connectionString,
       ssl: {
-        rejectUnauthorized: false, // Necessário para Neon
+        rejectUnauthorized: false, // Necessário para algumas configurações do Neon
       },
     });
   }
+  // Atribui a instância global (nova ou existente) à conexão.
+  conn = global.pgPool;
+} else {
+  // Em produção, sempre cria uma nova instância do pool.
+  conn = new Pool({
+    connectionString: connectionString,
+    ssl: {
+      rejectUnauthorized: false, // Necessário para Neon
+    },
+  });
 }
 
 // Exporta a conexão para ser usada em outras partes da aplicação.
-// Se a conexão não foi estabelecida (por falta de DATABASE_URL), `conn` será undefined.
-// O código que a utiliza deverá tratar esse caso para evitar erros em tempo de execução.
 export { conn };
