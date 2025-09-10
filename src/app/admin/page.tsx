@@ -210,9 +210,6 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold">Acelera GT</h1>
         </div>
         <nav className="space-y-3">
-          <SidebarLink href="/admin" icon={Building}>
-            Admin
-          </SidebarLink>
            {state.stores.length > 0 && (
              <div className="pt-4 mt-4 border-t border-white/20">
                  <h2 className="px-4 mb-2 text-xs font-semibold tracking-wider text-white/50 uppercase">Lojas</h2>
@@ -357,3 +354,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
