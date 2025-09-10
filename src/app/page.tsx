@@ -6,16 +6,38 @@ import Link from 'next/link';
 import { loadStateFromStorage, Store } from '@/lib/storage';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Rocket, Store as StoreIcon, Building, LayoutDashboard } from 'lucide-react';
+import { Rocket, Store as StoreIcon, Building, LayoutDashboard, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const [stores, setStores] = useState<Store[]>([]);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const state = loadStateFromStorage();
     setStores(state.stores || []);
+    
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(isDark);
+    if(isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    if(newDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
+    }
+  };
+
 
   const SidebarLink = ({ href, icon: Icon, children }: { href: string, icon: React.ElementType, children: React.ReactNode}) => (
     <Link href={href} passHref>
@@ -54,19 +76,29 @@ export default function HomePage() {
              </div>
            )}
         </nav>
-        <div className="mt-auto text-center text-xs text-white/50 space-y-1">
-          <p>Build Teste 0.0.1 Version</p>
-          <p>RyannBreston desenvolvedor</p>
-          <p>© {new Date().getFullYear()} Acelera GT. Todos os direitos reservados.</p>
+        <div className="mt-auto">
+           <motion.button
+            onClick={toggleDarkMode}
+            whileHover={{ scale: 1.05, x: 5 }}
+            className="flex items-center gap-3 px-4 py-2 w-full text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+          >
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <span>{darkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
+          </motion.button>
+          <div className="text-center text-xs text-white/50 space-y-1 mt-6">
+            <p>Build Teste 0.0.1 Version</p>
+            <p>RyannBreston desenvolvedor</p>
+            <p>© {new Date().getFullYear()} Acelera GT. Todos os direitos reservados.</p>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-8 sm:p-16 bg-background">
-          <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
-              <div className="flex items-center gap-4">
-                  <Rocket className="h-16 w-16 text-primary animate-pulse" />
-                  <h1 className="text-4xl sm:text-5xl font-bold font-headline text-primary text-center">
+          <div className="flex flex-col items-center gap-6 w-full max-w-4xl text-center">
+              <div className="flex items-center gap-6">
+                  <Rocket className="h-20 w-20 text-primary animate-pulse" />
+                  <h1 className="text-5xl sm:text-6xl font-bold font-headline text-primary">
                       Bem-vindo(a) ao <br/> <span className="text-destructive">Acelera GT</span>
                   </h1>
               </div>
