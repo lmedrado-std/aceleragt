@@ -28,9 +28,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased bg-background text-foreground flex flex-col min-h-screen">
-        <main className="flex-grow">{children}</main>
-        <Footer />
+      <body className="font-body antialiased bg-muted/40 text-foreground flex flex-col min-h-screen items-center justify-center p-4">
+        {children}
         <Toaster />
       </body>
     </html>
