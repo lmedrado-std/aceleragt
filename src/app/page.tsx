@@ -53,8 +53,10 @@ export default function HomePage() {
              </div>
            )}
         </nav>
-        <div className="mt-auto text-center text-xs text-white/50">
-          <p>verificar nota da versao anterior</p>
+        <div className="mt-auto text-center text-xs text-white/50 space-y-1">
+          <p>Build Teste 0.0.1 Version</p>
+          <p>RyannBreston desenvolvedor</p>
+          <p>© {new Date().getFullYear()} Acelera GT. Todos os direitos reservados.</p>
         </div>
       </aside>
 
@@ -71,7 +73,21 @@ export default function HomePage() {
                   Selecione uma loja na barra lateral para começar ou acesse o painel de Admin Global.
               </p>
 
-              {stores.length === 0 && (
+              {stores.length > 0 ? (
+                 <Card className="mt-8 w-full max-w-lg">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><StoreIcon className="text-primary"/> Acessar Loja</CardTitle>
+                        <CardDescription>Selecione uma loja abaixo para ver o painel de metas.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {stores.map((store) => (
+                        <Button asChild key={store.id} variant="outline">
+                            <Link href={`/loja/${encodeURIComponent(store.id)}`}>{store.name}</Link>
+                        </Button>
+                        ))}
+                    </CardContent>
+                </Card>
+              ) : (
                   <Card className="mt-8 text-center">
                       <CardHeader>
                           <CardTitle>Nenhuma loja encontrada!</CardTitle>
