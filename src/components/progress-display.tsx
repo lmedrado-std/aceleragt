@@ -197,22 +197,27 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
 
   return (
     <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-             <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-primary text-primary-foreground">
-                <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle className="text-base font-semibold">Ganho Total Projetado</CardTitle>
-                        </div>
-                        {salesRank > 0 && <RankingBadge rank={salesRank} />}
+       <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-primary text-primary-foreground">
+            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div>
+                        <p className="text-sm font-semibold text-primary-foreground/80">Ganho Total Projetado</p>
+                        <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
                     </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    <div className="text-4xl font-bold">{formatCurrency(totalIncentives)}</div>
-                    {rankMessage && <p className="text-sm text-primary-foreground/80 mt-1">{rankMedal} {rankMessage}</p>}
-                </CardContent>
-            </Card>
+                </div>
+                {salesRank > 0 && (
+                    <div className="text-right">
+                        <div className="flex items-center justify-end gap-2 font-bold">
+                            <Trophy className="h-5 w-5" />
+                            <span>{salesRank}º Lugar em Vendas</span>
+                        </div>
+                        {rankMessage && <p className="text-sm text-primary-foreground/80 mt-1">{rankMedal} {rankMessage}</p>}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
 
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard 
                 title="Vendas Realizadas" 
                 value={formatCurrency(vendas)} 
@@ -315,3 +320,4 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
+
