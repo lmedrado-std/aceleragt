@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -5,7 +6,7 @@ import Link from 'next/link';
 import { loadStateFromStorage, Store } from '@/lib/storage';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Rocket, Store as StoreIcon, Building, Shield, LayoutDashboard } from 'lucide-react';
+import { Rocket, Store as StoreIcon, Building, LayoutDashboard } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
@@ -34,7 +35,7 @@ export default function HomePage() {
       <aside className="w-64 bg-gradient-to-b from-primary to-destructive text-primary-foreground p-6 flex flex-col">
         <div className="flex items-center gap-3 mb-12">
           <div className="bg-white/20 p-2 rounded-lg">
-            <Shield className="h-6 w-6 text-white" />
+            <Rocket className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-xl font-bold">Acelera GT</h1>
         </div>
