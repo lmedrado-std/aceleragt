@@ -156,33 +156,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
 
     metrics.forEach((metric) => {
-        // Filtra apenas vendedores com valor maior que 0 para a métrica atual
-        const rankedSellers = sellers.filter(s => (s[metric] || 0) > 0);
-        
-        // Ordena os vendedores por métrica decrescente
-        const sortedSellers = [...rankedSellers].sort(
-            (a, b) => (b[metric] || 0) - (a[metric] || 0)
-        );
+        const rankedSellers = sellers
+            .filter(s => (s[metric] || 0) > 0)
+            .sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
 
-        if (sortedSellers.length > 0) {
+        if (rankedSellers.length > 0) {
             let rank = 1;
-            let prevValue = sortedSellers[0][metric] || 0;
-
-            sortedSellers.forEach((seller, index) => {
+            rankedSellers.forEach((seller, index) => {
                 if (!seller.id) return;
 
-                const currentValue = seller[metric] || 0;
-                
-                // Se valor atual menor que o anterior, rank é a posição índice + 1
-                if (currentValue < prevValue) {
+                if (index > 0 && (seller[metric] || 0) < (rankedSellers[index - 1][metric] || 0)) {
                     rank = index + 1;
                 }
-
+                
                 if (!newRankings[seller.id]) {
                     newRankings[seller.id] = {} as Record<RankingMetric, number>;
                 }
                 newRankings[seller.id][metric] = rank;
-                prevValue = currentValue;
             });
         }
     });
