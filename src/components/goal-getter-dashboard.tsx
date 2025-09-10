@@ -160,23 +160,25 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         (a, b) => (b[metric] || 0) - (a[metric] || 0)
       );
   
-      let rank = 1;
-      let prevValue: number | null = null;
+      if (sortedSellers.length > 0) {
+        let rank = 1;
+        let prevValue = sortedSellers[0][metric] || 0;
   
-      sortedSellers.forEach((seller, index) => {
-        if (!seller.id) return;
-        const currentValue = seller[metric] || 0;
+        sortedSellers.forEach((seller) => {
+          if (!seller.id) return;
   
-        if (prevValue !== null && currentValue < prevValue) {
-          rank = index + 1;
-        }
+          const currentValue = seller[metric] || 0;
+          if (currentValue < prevValue) {
+            rank++;
+          }
   
-        if (!newRankings[seller.id]) {
-          newRankings[seller.id] = {} as Record<RankingMetric, number>;
-        }
-        newRankings[seller.id][metric] = rank;
-        prevValue = currentValue;
-      });
+          if (!newRankings[seller.id]) {
+            newRankings[seller.id] = {} as Record<RankingMetric, number>;
+          }
+          newRankings[seller.id][metric] = rank;
+          prevValue = currentValue;
+        });
+      }
     });
   
     setRankings(newRankings);
