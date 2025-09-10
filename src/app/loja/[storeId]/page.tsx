@@ -131,24 +131,27 @@ export default function StoreHomePage() {
 
   return (
     <div className="bg-background min-h-screen flex flex-col items-center p-4 sm:p-8 transition-colors duration-300 w-full">
-      <header className="w-full max-w-4xl flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold font-headline text-primary">
-          {store?.name || "Carregando..."}
-        </h1>
+      <div className="w-full max-w-4xl bg-gradient-to-r from-primary to-destructive text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+        <header className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold font-headline">
+            {store?.name || "Carregando..."}
+          </h1>
 
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full">
-            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full bg-transparent text-primary-foreground border-primary-foreground/50 hover:bg-primary-foreground/10 hover:text-primary-foreground">
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
 
-          <Button asChild variant="secondary" className="hidden sm:flex items-center gap-2 shadow">
-            <Link href="/">
-                <Home className="h-5 w-5" />
-                Página Inicial
-            </Link>
-          </Button>
-        </div>
-      </header>
+            <Button asChild variant="secondary" className="hidden sm:flex items-center gap-2 shadow">
+              <Link href="/">
+                  <Home className="h-5 w-5" />
+                  Página Inicial
+              </Link>
+            </Button>
+          </div>
+        </header>
+      </div>
+
 
       <p className="text-muted-foreground text-center mb-6 text-lg max-w-2xl">
         Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.
