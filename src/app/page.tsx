@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { loadStateFromStorage, Store } from '@/lib/storage';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Rocket, Store as StoreIcon, Building, LayoutDashboard, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -52,10 +52,10 @@ export default function HomePage() {
   )
 
   return (
-    <div className="w-full max-w-6xl mx-auto h-[80vh] min-h-[600px] flex rounded-2xl shadow-2xl overflow-hidden bg-card">
+    <div className="w-full max-w-6xl mx-auto md:h-[80vh] md:min-h-[600px] flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden bg-card">
       {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-b from-primary to-destructive text-primary-foreground p-6 flex flex-col">
-        <div className="flex items-center gap-3 mb-12">
+      <aside className="w-full md:w-64 bg-gradient-to-b from-primary to-destructive text-primary-foreground p-6 flex flex-col">
+        <div className="flex items-center gap-3 mb-8 md:mb-12">
           <div className="bg-white/20 p-2 rounded-lg">
             <Rocket className="h-6 w-6 text-white" />
           </div>
@@ -95,7 +95,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-8 sm:p-16 bg-background">
-        <Card className="shadow-2xl rounded-2xl">
+        <Card className="shadow-2xl rounded-2xl w-full">
             <CardContent className="flex flex-col items-center justify-center p-10 sm:p-16">
                  <div className="flex flex-col items-center text-center gap-4">
                     <Rocket className="h-16 w-16 sm:h-20 sm:w-20 text-primary animate-pulse" />
