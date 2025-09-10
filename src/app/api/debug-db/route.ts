@@ -1,39 +1,24 @@
-import { NextResponse } from "next/server";
-import { Pool } from "pg";
+
+import { conn } from '../../../../lib/db';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const dbUrl = process.env.DATABASE_URL;
-
-  if (!dbUrl) {
-    return NextResponse.json({
-      status: "❌ ERRO",
-      message: "DATABASE_URL não encontrada. Configure no painel da Vercel.",
-    });
-  }
-
-  const pool = new Pool({
-    connectionString: dbUrl,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
-    // Teste 1: Verifica conexão
-    const result = await pool.query("SELECT NOW()");
-    // Teste 2: Mostra informações do banco
-    const dbInfo = await pool.query("SELECT current_database(), current_user;");
+    // Consulta simples para pegar a hora atual do banco
+    const result = await conn.query('SELECT NOW() as current_time');
+    
+    return NextResponse.json({
+      status: '✅ Conexão com Neon OK',
+      currentTime: result.rows[0].current_time,
+    }, { status: 200 });
 
+  } catch (error) {
+    // A asserção de tipo é uma boa prática em blocos catch no TypeScript
+    const message = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido';
+    
     return NextResponse.json({
-      status: "✅ Conexão com Neon funcionando",
-      database: dbInfo.rows[0].current_database,
-      user: dbInfo.rows[0].current_user,
-      server_time: result.rows[0],
-    });
-  } catch (error: any) {
-    return NextResponse.json({
-      status: "❌ Falha na conexão",
-      message: error.message,
-    });
-  } finally {
-    await pool.end();
+      status: '❌ Erro na conexão',
+      message: message,
+    }, { status: 500 });
   }
 }
