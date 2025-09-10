@@ -70,9 +70,6 @@ export default function HomePage() {
                       Bem-vindo(a) ao <br/> <span className="text-destructive">Acelera GT</span>
                   </h1>
               </div>
-              <p className="text-lg text-muted-foreground text-center max-w-2xl">
-                  Selecione uma loja na barra lateral para começar ou acesse o painel de Admin.
-              </p>
 
               {stores.length > 0 ? (
                  <Card className="mt-8 w-full max-w-lg">
