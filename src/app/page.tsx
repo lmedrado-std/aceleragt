@@ -95,31 +95,28 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-8 sm:p-16 bg-background">
-          <div className="flex flex-col items-center gap-6 w-full max-w-4xl text-center">
-              <div className="flex items-center gap-6">
-                  <Rocket className="h-20 w-20 text-primary animate-pulse" />
-                  <h1 className="text-5xl sm:text-6xl font-bold font-headline text-primary">
-                      Bem-vindo(a) ao <br/> <span className="text-destructive">Acelera GT</span>
-                  </h1>
-              </div>
+        <Card className="shadow-2xl rounded-2xl">
+            <CardContent className="flex flex-col items-center justify-center p-10 sm:p-16">
+                 <div className="flex items-center gap-6">
+                    <Rocket className="h-16 w-16 sm:h-20 sm:w-20 text-primary animate-pulse" />
+                    <h1 className="text-4xl sm:text-5xl font-bold font-headline text-primary">
+                        Bem-vindo(a) ao <br/> <span className="text-destructive">Acelera GT</span>
+                    </h1>
+                </div>
 
-              {stores.length === 0 && (
-                  <Card className="mt-8 text-center">
-                      <CardHeader>
-                          <CardTitle>Nenhuma loja encontrada!</CardTitle>
-                          <CardDescription>Parece que nenhuma loja foi criada ainda.</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                          <Button asChild>
-                              <Link href="/admin">
-                                  <Building className="mr-2 h-4 w-4" />
-                                  Ir para o Admin e criar uma loja
-                              </Link>
-                          </Button>
-                      </CardContent>
-                  </Card>
-              )}
-          </div>
+                {stores.length === 0 && (
+                  <div className="mt-8 text-center">
+                    <CardDescription>Parece que nenhuma loja foi criada ainda.</CardDescription>
+                    <Button asChild className="mt-4">
+                        <Link href="/admin">
+                            <Building className="mr-2 h-4 w-4" />
+                            Ir para o Admin e criar uma loja
+                        </Link>
+                    </Button>
+                  </div>
+                )}
+            </CardContent>
+        </Card>
       </main>
     </div>
   );
