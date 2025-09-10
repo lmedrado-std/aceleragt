@@ -177,7 +177,7 @@ export default function StoreHomePage() {
 
         <Card className="shadow-lg rounded-xl flex flex-col">
           <CardHeader>
-            <CardTitle>Vendedores</CardTitle>
+            <CardTitle className="text-primary">Vendedores</CardTitle>
             <CardDescription>Selecione seu usuário para ver seu desempenho</CardDescription>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col">
