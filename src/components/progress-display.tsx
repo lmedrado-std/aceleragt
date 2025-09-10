@@ -16,7 +16,8 @@ import {
   Ticket,
   Award,
   Target,
-  Rocket
+  Rocket,
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -121,13 +122,22 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
              <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-primary text-primary-foreground">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-base font-semibold">Ganho Total Projetado</CardTitle>
-                    <Award className="h-5 w-5 text-primary-foreground/80" />
+                <CardHeader>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle className="text-base font-semibold">Ganho Total Projetado</CardTitle>
+                            <p className="text-xs text-primary-foreground/80">Soma de todos os prêmios e bônus alcançados.</p>
+                        </div>
+                        {rankings?.vendas && (
+                             <div className="flex items-center gap-2 text-sm bg-black/20 px-3 py-1 rounded-full">
+                                <Trophy className="h-4 w-4" />
+                                <span>{rankings.vendas}º Lugar em Vendas</span>
+                            </div>
+                        )}
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0">
                     <div className="text-4xl font-bold">{formatCurrency(totalIncentives)}</div>
-                    <p className="text-xs text-primary-foreground/80">Soma de todos os prêmios e bônus alcançados.</p>
                 </CardContent>
             </Card>
             <MetricCard 
@@ -164,7 +174,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        <ProgressItem title="Meta de Vendas" currentValue={vendas} goalValue={goals.metaLendaria} formatValue={formatCurrency}/>
+                        <ProgressItem title="Meta de Vendas" currentValue={vendas} goalValue={goals.metona} formatValue={formatCurrency}/>
                     </div>
                     <Separator className="my-4" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">

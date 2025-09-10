@@ -1,4 +1,4 @@
-  
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,7 +96,7 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type RankingMetric = "vendas" | "pa" | "ticketMedio" | "corridinhaDiaria";
+export type RankingMetric = "vendas" | "pa" | "ticketMedio";
 export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
@@ -146,59 +146,41 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [activeTab, setActiveTab] = useState<string>("loading");
 
   // 📊 Rankings
-  const calculateRankings = useCallback(
-    (sellers: Partial<Seller>[], currentIncentives: Record<string, IncentiveProjectionOutput | null>) => {
-      const newRankings: Rankings = {};
-      if (!sellers || sellers.length === 0) {
-        setRankings({});
-        return;
-      }
-      const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
-      const totalGains: Record<string, number> = {};
-
-      sellers.forEach(seller => {
+  const calculateRankings = useCallback((sellers: Partial<Seller>[]) => {
+    const newRankings: Rankings = {};
+    if (!sellers || sellers.length === 0) {
+      setRankings({});
+      return;
+    }
+  
+    const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
+  
+    metrics.forEach((metric) => {
+      const sortedSellers = [...sellers].sort(
+        (a, b) => (b[metric] || 0) - (a[metric] || 0)
+      );
+  
+      let rank = 1;
+      let prevValue: number | null = null;
+  
+      sortedSellers.forEach((seller, index) => {
         if (!seller.id) return;
-        const sellerIncentives = currentIncentives[seller.id];
-        totalGains[seller.id] = sellerIncentives
-          ? Object.values(sellerIncentives).reduce((sum, val) => sum + (val || 0), 0)
-          : 0;
-      });
-
-      metrics.forEach((metric) => {
-        const sortedSellers = [...sellers].sort((a, b) => {
-          if (!a.id || !b.id) return 0;
-          const valueA =
-            metric === "corridinhaDiaria"
-              ? (totalGains[a.id] || 0)
-              : (a[metric as keyof Omit<Seller, "id" | "name" | "avatarId" | "password">] || 0);
-          const valueB =
-            metric === "corridinhaDiaria"
-              ? (totalGains[b.id] || 0)
-              : (b[metric as keyof Omit<Seller, "id" | "name" | "avatarId" | "password">] || 0);
-          return valueB - valueA;
-        });
-
-        let rank = 1;
-        for (let i = 0; i < sortedSellers.length; i++) {
-          const currentSeller = sortedSellers[i];
-          const previousSeller = i > 0 ? sortedSellers[i - 1] : null;
-
-          if (previousSeller && currentSeller[metric as keyof Seller]! < previousSeller[metric as keyof Seller]!) {
-            rank = i + 1;
-          }
-          const sellerId = currentSeller.id;
-          if (!sellerId) continue;
-          if (!newRankings[sellerId]) {
-            newRankings[sellerId] = {} as Record<RankingMetric, number>;
-          }
-          newRankings[sellerId][metric] = rank;
+        const currentValue = seller[metric] || 0;
+  
+        if (prevValue !== null && currentValue < prevValue) {
+          rank = index + 1;
         }
+  
+        if (!newRankings[seller.id]) {
+          newRankings[seller.id] = {} as Record<RankingMetric, number>;
+        }
+        newRankings[seller.id][metric] = rank;
+        prevValue = currentValue;
       });
-
-      setRankings(newRankings);
-    },
-    []
-  );
+    });
+  
+    setRankings(newRankings);
+  }, []);
 
   // 🎯 Incentivos
   const handleIncentivesCalculated = useCallback(
@@ -207,7 +189,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const currentState = loadStateFromStorage();
       currentState.incentives[storeId] = newIncentives;
       saveState(currentState);
-      calculateRankings(getValues().sellers ?? [], newIncentives);
+      calculateRankings(getValues().sellers ?? []);
     },
     [storeId, calculateRankings, getValues]
   );
@@ -304,7 +286,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     reset(initialFormValues);
     const currentIncentives = state.incentives[storeId] || {};
     setIncentives(currentIncentives);
-    calculateRankings(initialSellers, currentIncentives);
+    calculateRankings(initialSellers);
 
     const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
