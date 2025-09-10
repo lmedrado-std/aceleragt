@@ -156,31 +156,29 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
 
     metrics.forEach((metric) => {
-      // 🔹 Apenas vendedores com vendas > 0 entram no ranking
       const rankedSellers = sellers
-        .filter(s => (s[metric] || 0) > 0)
+        .filter(s => (s[metric] || 0) > 0) // apenas vendedores com vendas
         .sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
 
-      let rank = 1;
+      let currentRank = 0;
+      let lastValue: number | null = null;
 
       rankedSellers.forEach((seller, index) => {
         if (!seller.id) return;
 
-        // Se não existir posição anterior ou o valor é diferente → avança rank
-        if (index > 0 && (seller[metric] || 0) < (rankedSellers[index - 1][metric] || 0)) {
-          rank = index + 1;
-        } else if (index > 0 && (seller[metric] || 0) === (rankedSellers[index - 1][metric] || 0)) {
-          // 🔹 Empate → mantém o mesmo rank do anterior
-          rank = newRankings[rankedSellers[index - 1].id!][metric];
+        const currentValue = seller[metric] || 0;
+
+        // 🔹 Se a venda for diferente, atualiza posição
+        if (currentValue !== lastValue) {
+          currentRank = index + 1;
+          lastValue = currentValue;
         }
 
-        // Cria o objeto do vendedor se não existir
         if (!newRankings[seller.id]) {
           newRankings[seller.id] = {} as Record<RankingMetric, number>;
         }
 
-        // Salva a posição final
-        newRankings[seller.id][metric] = rank;
+        newRankings[seller.id][metric] = currentRank;
       });
     });
 
@@ -473,4 +471,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-

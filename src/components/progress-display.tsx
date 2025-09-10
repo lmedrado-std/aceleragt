@@ -174,7 +174,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
 
-  const salesRank = rankings?.vendas;
+  const salesRank = vendas > 0 ? rankings?.vendas : undefined;
   
   let rankMedal = "";
   let rankMessage = "";
@@ -205,7 +205,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
                     </div>
                 </div>
-                {salesRank && salesRank > 0 && (
+                 {salesRank && salesRank > 0 && (
                      <div className="text-right">
                         <div className="flex items-center justify-end gap-2 font-bold">
                             <Trophy className="h-5 w-5" />
@@ -320,4 +320,3 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
-
