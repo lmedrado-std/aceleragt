@@ -205,26 +205,20 @@ export default function AdminPage() {
             Gerencie todas as lojas e configurações do sistema aqui.
         </p>
 
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-xl text-primary">Visão Geral</CardTitle>
-            <CardDescription>Acesse o dashboard com dados consolidados de todas as lojas.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/admin/dashboard">
-                <LineChart className="mr-2 h-4 w-4"/>
-                Acessar Dashboard Geral
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="w-full mt-4">
+          <Button asChild size="lg" className="w-full md:w-auto">
+            <Link href="/admin/dashboard">
+              <LineChart className="mr-2 h-5 w-5"/>
+              Acessar Dashboard Geral
+            </Link>
+          </Button>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-6">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-xl">Gerenciar Lojas</CardTitle>
-                    <CardDescription>Adicione, renomeie e defina um tema para cada loja.</CardDescription>
+                    <CardDescription>Adicione, renomeie ou remova lojas.</CardDescription>
                 </CardHeader>
                 <CardContent>
                 <div className="space-y-2 mb-4">
@@ -313,7 +307,7 @@ export default function AdminPage() {
                         />
                     </div>
                 </div>
-                <Button onClick={handleChangePassword} className="w-full mt-4"><KeyRound/> Alterar Senha</Button>
+                <Button onClick={handleChangePassword} className="w-full mt-6"><KeyRound/> Alterar Senha</Button>
                 </CardContent>
             </Card>
         </div>
