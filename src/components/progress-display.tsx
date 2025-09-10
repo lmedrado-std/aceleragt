@@ -100,6 +100,61 @@ const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
     </div>
 );
 
+const GoldMedal = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 13.5L6 18H18L15 13.5" fill="#FFC700"/>
+        <path d="M9 13.5L6 18H18L15 13.5" stroke="#E6B300" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="12" cy="9" r="5" fill="#FFD700" stroke="#E6B300" strokeWidth="1.5"/>
+        <path d="M12 9L11 8L12 11L13 8L12 9Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M8 12L6 6" fill="#D20000"/>
+        <path d="M16 12L18 6" fill="#D20000"/>
+        <path d="M8 12L6 6" stroke="#C00" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M16 12L18 6" stroke="#C00" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+)
+
+const SilverMedal = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 13.5L6 18H18L15 13.5" fill="#C0C0C0" stroke="#A9A9A9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="12" cy="9" r="5" fill="#D3D3D3" stroke="#A9A9A9" strokeWidth="1.5"/>
+        <path d="M12 9L11 8L12 11L13 8L12 9Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M8 12L6 6" fill="#005B96"/>
+        <path d="M16 12L18 6" fill="#005B96"/>
+        <path d="M8 12L6 6" stroke="#004080" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M16 12L18 6" stroke="#004080" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+)
+
+const BronzeMedal = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 13.5L6 18H18L15 13.5" fill="#CD7F32" stroke="#B8732E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="12" cy="9" r="5" fill="#D28C3A" stroke="#B8732E" strokeWidth="1.5"/>
+        <path d="M12 9L11 8L12 11L13 8L12 9Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M8 12L6 6" fill="#A52A2A"/>
+        <path d="M16 12L18 6" fill="#A52A2A"/>
+        <path d="M8 12L6 6" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M16 12L18 6" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+)
+const RankingBadge = ({ rank }: { rank: number }) => {
+    if (rank <= 0) return null;
+
+    let Medal = null;
+    if (rank === 1) Medal = GoldMedal;
+    if (rank === 2) Medal = SilverMedal;
+    if (rank === 3) Medal = BronzeMedal;
+
+    return (
+        <div className={cn("flex items-center justify-center gap-4 rounded-lg px-4 py-2 bg-primary/90 text-primary-foreground shadow-md")}>
+            <Trophy className="h-8 w-8" />
+            <div className="text-center">
+                <p className="font-bold text-lg">{rank}º Lugar em Vendas</p>
+                {Medal && <div className="flex justify-center"><Medal/></div>}
+            </div>
+        </div>
+    );
+};
+
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
@@ -123,21 +178,17 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   
   let rankMedal = "";
   let rankMessage = "";
-  let rankColorClass = "bg-black/20"; // Cor padrão
 
   if (salesRank > 0) {
       if (salesRank === 1) {
           rankMedal = "🥇";
           rankMessage = `Parabéns, ${name}! Você está em 1º lugar, liderando com excelência!`;
-          rankColorClass = "bg-amber-400/30 text-amber-900 dark:text-amber-200 border border-amber-500/50 font-bold";
       } else if (salesRank === 2) {
           rankMedal = "🥈";
           rankMessage = `Mandou bem, ${name}! Você está no 2º lugar, continue assim!`;
-          rankColorClass = "bg-slate-400/30 text-slate-900 dark:text-slate-200 border border-slate-500/50 font-semibold";
       } else if (salesRank === 3) {
           rankMedal = "🥉";
           rankMessage = `Muito bom, ${name}! Você conquistou o 3º lugar, bora buscar o topo!`;
-          rankColorClass = "bg-orange-400/30 text-orange-900 dark:text-orange-200 border border-orange-500/50 font-semibold";
       } else {
           rankMessage = `Bora subir, ${name}! Continue se esforçando, o pódio te espera!`;
       }
@@ -153,12 +204,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         <div>
                             <CardTitle className="text-base font-semibold">Ganho Total Projetado</CardTitle>
                         </div>
-                        {salesRank > 0 && (
-                             <div className={cn("flex items-center gap-2 text-sm px-3 py-1 rounded-full", rankColorClass)}>
-                                <Trophy className="h-4 w-4" />
-                                <span>{salesRank}º Lugar em Vendas</span>
-                            </div>
-                        )}
+                        {salesRank > 0 && <RankingBadge rank={salesRank} />}
                     </div>
                 </CardHeader>
                 <CardContent className="pt-0">
