@@ -42,7 +42,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     if (fieldsToUpdate.length === 0) {
-      return NextResponse.json({ status: 'info', message: 'Nenhum campo para atualizar.' }, { status: 200 });
+      return NextResponse.json({ info: 'Nenhum campo para atualizar.' }, { status: 200 });
     }
     
     values.push(id);
@@ -53,14 +53,14 @@ export async function PUT(request: Request, { params }: RouteParams) {
     );
 
     if (result.rowCount === 0) {
-      return NextResponse.json({ status: 'erro', message: 'Vendedor não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'Vendedor não encontrado.' }, { status: 404 });
     }
 
     return NextResponse.json(result.rows[0], { status: 200 });
 
   } catch (error) {
     console.error(`[API /api/sellers/[id]] ERRO no PUT (id: ${params.id}):`, error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao atualizar vendedor.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao atualizar vendedor.' }, { status: 500 });
   }
 }
 
@@ -72,13 +72,13 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     const result = await conn.query('DELETE FROM sellers WHERE id = $1', [id]);
 
     if (result.rowCount === 0) {
-      return NextResponse.json({ status: 'erro', message: 'Vendedor não encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'Vendedor não encontrado.' }, { status: 404 });
     }
 
-    return NextResponse.json({ status: 'sucesso', message: 'Vendedor removido.' }, { status: 200 });
+    return NextResponse.json({ message: 'Vendedor removido.' }, { status: 200 });
 
   } catch (error) {
     console.error(`[API /api/sellers/[id]] ERRO no DELETE (id: ${params.id}):`, error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao remover vendedor.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao remover vendedor.' }, { status: 500 });
   }
 }

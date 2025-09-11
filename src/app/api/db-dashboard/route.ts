@@ -33,10 +33,11 @@ export async function GET() {
       },
     });
   } catch (error: any) {
+    console.error("[API /api/db-dashboard] ERRO no GET:", error);
     return NextResponse.json(
       {
         status: "❌ Erro ao conectar ao banco",
-        message: error.message,
+        error: error instanceof Error ? error.message : 'Erro interno desconhecido'
       },
       { status: 500 }
     );

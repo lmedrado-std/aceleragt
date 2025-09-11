@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     const { storeId } = params;
 
     if (!storeId) {
-      return NextResponse.json({ status: 'erro', message: 'O ID da loja é obrigatório.' }, { status: 400 });
+      return NextResponse.json({ error: 'O ID da loja é obrigatório.' }, { status: 400 });
     }
 
     const result = await conn.query('SELECT * FROM goals WHERE store_id = $1', [storeId]);
@@ -32,6 +32,6 @@ export async function GET(request: Request, { params }: RouteParams) {
     
   } catch (error) {
     console.error(`[API /api/goals/[storeId]] ERRO no GET (storeId: ${params.storeId}):`, error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao buscar metas da loja' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao buscar metas da loja' }, { status: 500 });
   }
 }

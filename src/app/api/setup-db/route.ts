@@ -69,8 +69,7 @@ export async function GET() {
 
   } catch (error) {
     await conn.query('ROLLBACK');
-    const errorMessage = error instanceof Error ? error.message : 'Um erro desconhecido ocorreu.';
     console.error('Erro ao configurar o banco de dados:', error);
-    return NextResponse.json({ message: 'Erro ao configurar o banco de dados.', error: errorMessage }, { status: 500 });
+    return NextResponse.json({ message: 'Erro ao configurar o banco de dados.', error: error instanceof Error ? error.message : 'Um erro desconhecido ocorreu.' }, { status: 500 });
   }
 }

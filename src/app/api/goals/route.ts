@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     } = goalsData;
 
     if (!store_id) {
-        return NextResponse.json({ status: 'erro', message: 'O ID da loja é obrigatório.' }, { status: 400 });
+        return NextResponse.json({ error: 'O ID da loja é obrigatório.' }, { status: 400 });
     }
 
     const query = `
@@ -69,6 +69,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("[API /api/goals] ERRO no POST:", error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao salvar metas' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao salvar metas' }, { status: 500 });
   }
 }

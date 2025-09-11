@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     console.error('[API /api/stores] ERRO no GET:', error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao buscar lojas' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao buscar lojas' }, { status: 500 });
   }
 }
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     try {
         const { name } = await request.json();
         if (!name) {
-            return NextResponse.json({ status: 'erro', message: 'O nome da loja é obrigatório.' }, { status: 400 });
+            return NextResponse.json({ error: 'O nome da loja é obrigatório.' }, { status: 400 });
         }
 
         const id = uuidv4();
@@ -43,6 +43,6 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error('[API /api/stores] ERRO no POST:', error);
-        return NextResponse.json({ status: 'erro', message: 'Erro ao criar loja' }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao criar loja' }, { status: 500 });
     }
 }

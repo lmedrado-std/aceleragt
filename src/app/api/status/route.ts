@@ -15,10 +15,11 @@ export async function GET() {
 
     return NextResponse.json({ status: "ok" });
   } catch (error: any) {
+    console.error("[API /api/status] ERRO no GET:", error);
     return NextResponse.json(
       {
         status: "error",
-        message: error.message,
+        error: error instanceof Error ? error.message : "Erro interno desconhecido",
       },
       { status: 500 }
     );

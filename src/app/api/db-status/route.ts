@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
 
@@ -18,10 +19,11 @@ export async function GET() {
       server_time: result.rows[0].now,
     });
   } catch (error: any) {
+    console.error("[API /api/db-status] ERRO no GET:", error);
     return NextResponse.json(
       {
         status: "❌ Erro ao conectar ao banco",
-        message: error.message,
+        error: error instanceof Error ? error.message : "Erro interno desconhecido"
       },
       { status: 500 }
     );

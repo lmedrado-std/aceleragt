@@ -13,12 +13,10 @@ export async function GET() {
     }, { status: 200 });
 
   } catch (error) {
-    // A asserção de tipo é uma boa prática em blocos catch no TypeScript
-    const message = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido';
-    
+    console.error("[API /api/debug-db] ERRO no GET:", error);
     return NextResponse.json({
       status: '❌ Erro na conexão',
-      message: message,
+      error: error instanceof Error ? error.message : 'Ocorreu um erro desconhecido',
     }, { status: 500 });
   }
 }

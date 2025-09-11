@@ -12,7 +12,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const { name } = await request.json();
 
     if (!name) {
-      return NextResponse.json({ status: 'erro', message: 'O nome é obrigatório.' }, { status: 400 });
+      return NextResponse.json({ error: 'O nome é obrigatório.' }, { status: 400 });
     }
 
     const result = await conn.query(
@@ -21,13 +21,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
     );
 
     if (result.rowCount === 0) {
-      return NextResponse.json({ status: 'erro', message: 'Loja não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'Loja não encontrada.' }, { status: 404 });
     }
 
     return NextResponse.json(result.rows[0], { status: 200 });
   } catch (error) {
     console.error(`[API /api/stores/[id]] ERRO no PUT (id: ${params.id}):`, error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao atualizar a loja.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao atualizar a loja.' }, { status: 500 });
   }
 }
 
@@ -36,7 +36,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     const { id } = params;
 
     if (!id) {
-       return NextResponse.json({ status: 'erro', message: 'O ID da loja é inválido.' }, { status: 400 });
+       return NextResponse.json({ error: 'O ID da loja é inválido.' }, { status: 400 });
     }
 
     // Iniciar uma transação para garantir a integridade dos dados
@@ -54,15 +54,15 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     if (result.rowCount === 0) {
       // Mesmo que o commit tenha ocorrido, se nenhuma loja foi deletada, informamos.
       // O rollback aqui não é necessário, pois o commit já finalizou a transação.
-      return NextResponse.json({ status: 'erro', message: 'Loja não encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'Loja não encontrada.' }, { status: 404 });
     }
 
-    return NextResponse.json({ status: 'sucesso', message: 'Loja e todos os seus dados foram removidos.' }, { status: 200 });
+    return NextResponse.json({ message: 'Loja e todos os seus dados foram removidos.' }, { status: 200 });
 
   } catch (error) {
     // Se qualquer um dos comandos falhar, faz o rollback
     await conn.query('ROLLBACK');
     console.error(`[API /api/stores/[id]] ERRO no DELETE (id: ${params.id}):`, error);
-    return NextResponse.json({ status: 'erro', message: 'Erro ao remover a loja.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao remover a loja.' }, { status: 500 });
   }
 }
