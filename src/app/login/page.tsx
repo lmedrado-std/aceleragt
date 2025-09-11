@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
+import { ArrowLeft, KeyRound, Loader2, Database } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
 import DbStatus from '@/components/DbStatus';
@@ -103,6 +104,20 @@ function LoginComponent() {
           </CardContent>
         </Card>
         <DbStatus />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Primeira Vez Aqui?</CardTitle>
+            <CardDescription className="text-xs">Se este for o primeiro uso, clique abaixo para configurar o banco de dados.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/api/setup-db" target="_blank">
+                <Database className="mr-2 h-4 w-4" />
+                Configurar Banco de Dados
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );
