@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Building, Rocket, LayoutDashboard, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AppState, loadStateFromStorage, saveState, Store, setAdminPassword, getInitialState, Seller, Goals } from "@/lib/storage";
+import { Store, setAdminPassword, Seller, Goals } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,7 @@ const SidebarLink = ({ href, icon: Icon, children }: { href: string, icon: React
   )
 
 export default function AdminPage() {
-  const [state, setState] = useState<AppState | null>(null);
+  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [newStoreName, setNewStoreName] = useState("");
   const [darkMode, setDarkMode] = useState(false);
@@ -51,14 +51,26 @@ export default function AdminPage() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const fetchStores = async () => {
+    try {
+      const res = await fetch('/api/stores');
+      if (!res.ok) throw new Error('Falha ao buscar lojas');
+      const data = await res.json();
+      setStores(data);
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível carregar as lojas.' });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
     if (!isAdmin) {
       router.push('/login?redirect=/admin');
     } else {
-      setState(loadStateFromStorage());
-      setLoading(false);
+      fetchStores();
     }
      // Reset theme to default when on this page
     document.documentElement.style.removeProperty('--primary');
@@ -85,64 +97,48 @@ export default function AdminPage() {
     }
   };
 
-  const handleAddStore = () => {
+  const handleAddStore = async () => {
     if (!newStoreName.trim()) {
-       setTimeout(() => {
-        toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
-      }, 0);
+       toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       return;
     }
 
-    setState(currentState => {
-      if (!currentState) return null;
-
-      const newStoreId = crypto.randomUUID();
-      const newStore: Store = { id: newStoreId, name: newStoreName, themeColor: '217.2 32.6% 17.5%' };
-      
-      const newState: AppState = {
-        ...currentState,
-        stores: [...currentState.stores, newStore],
-        sellers: { ...currentState.sellers, [newStoreId]: [] as Seller[] },
-        goals: { ...currentState.goals, [newStoreId]: currentState.goals.default || getInitialState().goals.default as Goals },
-        incentives: { ...currentState.incentives, [newStoreId]: {} }
-      };
-
-      saveState(newState);
-       setTimeout(() => {
-          toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
-       }, 0);
-      
+    try {
+      const res = await fetch('/api/stores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newStoreName }),
+      });
+      if (!res.ok) throw new Error('Falha ao adicionar loja');
+      const newStore = await res.json();
+      setStores(prevStores => [...prevStores, newStore]);
       setNewStoreName("");
-      
-      return newState;
-    });
+      toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+    } catch (error) {
+       console.error(error);
+       toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível adicionar a loja.' });
+    }
   };
 
-  const handleRemoveStore = (id: string) => {
-    const currentState = state;
-    if (!currentState) return;
-
-    if (currentState.stores.length <= 1) {
-        setTimeout(() => {
-            toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-        }, 0);
+  const handleRemoveStore = async (id: string) => {
+    if (stores.length <= 1) {
+        toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
         return;
     }
 
-    const storeToRemove = currentState.stores.find(s => s.id === id);
-    const newState: AppState = { ...currentState };
-    newState.stores = currentState.stores.filter(s => s.id !== id);
-    delete newState.sellers[id];
-    delete newState.goals[id];
-    delete newState.incentives[id];
-    
-    saveState(newState);
-    setState(newState);
-    
-    if (storeToRemove) {
-      setTimeout(() => {
+    const storeToRemove = stores.find(s => s.id === id);
+    try {
+      const res = await fetch(`/api/stores/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Falha ao remover loja');
+
+      setStores(prevStores => prevStores.filter(s => s.id !== id));
+      
+      if (storeToRemove) {
         toast({ title: "Loja removida", description: `A loja "${storeToRemove.name}" foi removida.` });
-      }, 0);
+      }
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível remover a loja.' });
     }
   };
 
@@ -156,64 +152,58 @@ export default function AdminPage() {
     setEditingStoreName('');
   };
 
-  const handleSaveStore = (id: string) => {
+  const handleSaveStore = async (id: string) => {
     if (!editingStoreName.trim()) {
-      setTimeout(() => {
-        toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
-      }, 0);
+      toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       return;
     }
-    setState(currentState => {
-      if (!currentState) return null;
-      const newState = {
-        ...currentState,
-        stores: currentState.stores.map(store => 
-          store.id === id ? { ...store, name: editingStoreName } : store
-        )
-      };
-      saveState(newState);
-      setTimeout(() => {
-        toast({ title: "Sucesso!", description: `Loja "${editingStoreName}" atualizada.` });
-      }, 0);
-      return newState;
-    });
-    handleCancelEditingStore();
+    
+    try {
+      const res = await fetch(`/api/stores/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingStoreName }),
+      });
+      if (!res.ok) throw new Error('Falha ao atualizar loja');
+      const updatedStore = await res.json();
+      
+      setStores(stores.map(store => store.id === id ? updatedStore : store));
+      toast({ title: "Sucesso!", description: `Loja "${updatedStore.name}" atualizada.` });
+      
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível atualizar a loja.' });
+    } finally {
+      handleCancelEditingStore();
+    }
   };
 
 
   const handleChangePassword = () => {
     if (adminPasswords.new.length < 4) {
-      setTimeout(() => {
-        toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
-      }, 0);
+      toast({ variant: "destructive", title: "Senha muito curta", description: "A senha deve ter pelo menos 4 caracteres." });
       return;
     }
      if (adminPasswords.new !== adminPasswords.confirm) {
-      setTimeout(() => {
-        toast({ variant: "destructive", title: "Senhas não conferem", description: "As senhas digitadas não são iguais." });
-      }, 0);
+      toast({ variant: "destructive", title: "Senhas não conferem", description: "As senhas digitadas não são iguais." });
       return;
     }
     setAdminPassword(adminPasswords.new);
     setAdminPasswords({ new: '', confirm: ''});
-    setTimeout(() => {
-      toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
-    }, 0);
+    toast({ title: "Sucesso!", description: "Sua senha de administrador foi alterada." });
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuthenticated');
-    setTimeout(() => {
-      toast({
-          title: 'Saída segura!',
-          description: 'Você saiu do modo de administrador.',
-      });
-    }, 0);
+    toast({
+        title: 'Saída segura!',
+        description: 'Você saiu do modo de administrador.',
+    });
     router.push('/');
   }
 
 
-  if (loading || !state) {
+  if (loading) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen">
           <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
@@ -232,10 +222,10 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold">Acelera GT</h1>
         </div>
         <nav className="space-y-3">
-           {state.stores.length > 0 && (
+           {stores.length > 0 && (
              <div className="pt-4 mt-4 border-t border-white/20">
                  <h2 className="px-4 mb-2 text-xs font-semibold tracking-wider text-white/50 uppercase">Lojas</h2>
-                  {state.stores.map((store) => (
+                  {stores.map((store) => (
                     <SidebarLink key={store.id} href={`/loja/${encodeURIComponent(store.id)}`} icon={LayoutDashboard}>
                       {store.name}
                     </SidebarLink>
@@ -305,7 +295,7 @@ export default function AdminPage() {
                     <Separator className="my-4"/>
                     <Label>Lojas Atuais</Label>
                     <div className="space-y-2 mt-2 max-h-60 overflow-y-auto pr-2">
-                        {state?.stores.map((store) => (
+                        {stores.map((store) => (
                             <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
                                 {editingStoreId === store.id ? (
                                 <>
@@ -384,5 +374,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    

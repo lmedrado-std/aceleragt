@@ -3,19 +3,34 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { loadStateFromStorage, Store } from '@/lib/storage';
+import { Store } from '@/lib/storage';
 import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Rocket, Store as StoreIcon, Building, LayoutDashboard, Moon, Sun } from 'lucide-react';
+import { Rocket, Store as StoreIcon, Building, LayoutDashboard, Moon, Sun, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const [stores, setStores] = useState<Store[]>([]);
+  const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    const state = loadStateFromStorage();
-    setStores(state.stores || []);
+    async function fetchStores() {
+      try {
+        const res = await fetch("/api/stores");
+        if (!res.ok) {
+          console.error("Falha ao buscar lojas");
+          return;
+        }
+        const data = await res.json();
+        setStores(data);
+      } catch (error) {
+        console.error("Erro de rede ao buscar lojas:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStores();
     
     const isDark = localStorage.getItem('darkMode') === 'true';
     setDarkMode(isDark);
@@ -104,7 +119,12 @@ export default function HomePage() {
                     </h1>
                 </div>
 
-                {stores.length === 0 && (
+                {loading ? (
+                    <div className="mt-8 text-center">
+                        <Loader2 className="mr-2 h-6 w-6 animate-spin inline" />
+                        <p className="inline">Carregando lojas...</p>
+                    </div>
+                ) : stores.length === 0 && (
                   <div className="mt-8 text-center">
                     <CardDescription>Parece que nenhuma loja foi criada ainda.</CardDescription>
                     <Button asChild className="mt-4">
