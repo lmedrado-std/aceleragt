@@ -9,22 +9,18 @@ interface RouteParams {
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { id } = params;
-    const { name, password, vendas, pa, ticketMedio, corridinhaDiaria } = await request.json();
-
-    if (!name || !password) {
-      return NextResponse.json({ status: 'erro', message: 'Nome e senha são obrigatórios.' }, { status: 400 });
-    }
+    const body = await request.json();
+    const { name, password, vendas, pa, ticketMedio, corridinhaDiaria } = body;
     
-    // Constrói a query dinamicamente para atualizar apenas os campos fornecidos
     const fieldsToUpdate = [];
     const values = [];
     let queryIndex = 1;
 
-    if (name) {
+    if (name !== undefined) {
         fieldsToUpdate.push(`name = $${queryIndex++}`);
         values.push(name);
     }
-    if (password) {
+    if (password !== undefined) {
         fieldsToUpdate.push(`password = $${queryIndex++}`);
         values.push(password);
     }
@@ -43,6 +39,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
     if (corridinhaDiaria !== undefined) {
         fieldsToUpdate.push(`corridinha_diaria = $${queryIndex++}`);
         values.push(corridinhaDiaria);
+    }
+
+    if (fieldsToUpdate.length === 0) {
+      return NextResponse.json({ status: 'info', message: 'Nenhum campo para atualizar.' }, { status: 200 });
     }
     
     values.push(id);

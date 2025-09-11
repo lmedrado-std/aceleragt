@@ -127,7 +127,7 @@ export function AdminTab({
     
     // Gera um avatar aleatório que ainda não está em uso
     const availableAvatarIds = Array.from({length: 10}, (_, i) => `avatar${i + 1}`);
-    const usedAvatarIds = new Set(sellers.map(s => s.avatarId));
+    const usedAvatarIds = new Set(sellers.map(s => s.avatar_id));
     let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
     if(usedAvatarIds.size < availableAvatarIds.length) {
         while(usedAvatarIds.has(randomAvatarId)) {
@@ -231,25 +231,28 @@ export function AdminTab({
 
       for (const seller of sellers) {
         // Atualiza os dados do vendedor no backend ANTES de calcular
+        const sellerIndex = sellers.findIndex(s => s.id === seller.id);
+        const sellerDataForUpdate = {
+            vendas: getValues(`sellers.${sellerIndex}.vendas`),
+            pa: getValues(`sellers.${sellerIndex}.pa`),
+            ticketMedio: getValues(`sellers.${sellerIndex}.ticket_medio`),
+            corridinhaDiaria: getValues(`sellers.${sellerIndex}.corridinha_diaria`),
+        };
+
         await fetch(`/api/sellers/${seller.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                vendas: getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.vendas`),
-                pa: getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.pa`),
-                ticketMedio: getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.ticketMedio`),
-                corridinhaDiaria: getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.corridinhaDiaria`),
-            })
+            body: JSON.stringify(sellerDataForUpdate)
         });
 
         const result = await incentiveProjection({
            seller: {
               ...seller,
-              vendas: Number(getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.vendas`) || 0),
-              pa: Number(getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.pa`) || 0),
-              ticketMedio: Number(getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.ticketMedio`) || 0),
-              corridinhaDiaria: Number(getValues(`sellers.${sellers.findIndex(s => s.id === seller.id)}.corridinhaDiaria`) || 0),
-            } as Seller,
+              vendas: Number(sellerDataForUpdate.vendas || 0),
+              pa: Number(sellerDataForUpdate.pa || 0),
+              ticketMedio: Number(sellerDataForUpdate.ticketMedio || 0),
+              corridinhaDiaria: Number(sellerDataForUpdate.corridinhaDiaria || 0),
+            },
           goals: fixedGoals,
         });
         allIncentives[seller.id!] = result;
@@ -386,8 +389,8 @@ export function AdminTab({
                       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
                         <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
-                        <FormField control={control} name={`sellers.${index}.ticketMedio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
-                        <FormField control={control} name={`sellers.${index}.corridinhaDiaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
+                        <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
+                        <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
                       </div>
                     </div>
                   ))}

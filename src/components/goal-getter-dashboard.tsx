@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ShieldCheck, Home, CheckCircle, Save } from "lucide-react";
+import { ShieldCheck, Home, CheckCircle, Save, Loader2 } from "lucide-react";
 
 import { type IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
@@ -35,11 +35,11 @@ const sellerSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Nome é obrigatório"),
   password: z.string().min(4, "A senha deve ter pelo menos 4 caracteres"),
-  avatarId: z.string(),
+  avatar_id: z.string(),
   vendas: z.coerce.number().min(0).default(0),
   pa: z.coerce.number().min(0).default(0),
-  ticketMedio: z.coerce.number().min(0).default(0),
-  corridinhaDiaria: z.coerce.number().min(0).default(0),
+  ticket_medio: z.coerce.number().min(0).default(0),
+  corridinha_diaria: z.coerce.number().min(0).default(0),
 });
 
 const goalsSchema = z.object({
@@ -78,7 +78,7 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type RankingMetric = "vendas" | "pa" | "ticketMedio";
+export type RankingMetric = "vendas" | "pa" | "ticket_medio";
 export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
@@ -115,7 +115,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+  const [isLoading, setIsLoading] = useState(true);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -128,34 +129,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const { reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
-
-  const fetchSellers = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/sellers?storeId=${storeId}`);
-      if (!res.ok) throw new Error("Falha ao carregar vendedores");
-      const data = await res.json();
-      setSellers(data);
-      setValue("sellers", data);
-      calculateRankings(data);
-    } catch (error) {
-      console.error(error);
-      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível carregar os vendedores.' });
-    }
-  }, [storeId, setValue, toast]);
-
-
-  // 📊 Rankings
-  const calculateRankings = useCallback((sellers: Partial<Seller>[]) => {
+  
+  const calculateRankings = useCallback((currentSellers: Partial<Seller>[]) => {
     const newRankings: Rankings = {};
-    if (!sellers || sellers.length === 0) {
+    if (!currentSellers || currentSellers.length === 0) {
       setRankings({});
       return;
     }
 
-    const metrics: RankingMetric[] = ["vendas", "pa", "ticketMedio"];
+    const metrics: RankingMetric[] = ["vendas", "pa", "ticket_medio"];
 
     metrics.forEach((metric) => {
-      const rankedSellers = sellers
+      const rankedSellers = currentSellers
         .filter(s => (s[metric] || 0) > 0)
         .sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
 
@@ -164,18 +149,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
       rankedSellers.forEach((seller, index) => {
         if (!seller.id) return;
-
         const currentValue = seller[metric] || 0;
-
         if (currentValue !== lastValue) {
           currentRank = index + 1;
           lastValue = currentValue;
         }
-
         if (!newRankings[seller.id]) {
           newRankings[seller.id] = {} as Record<RankingMetric, number>;
         }
-
         newRankings[seller.id][metric] = currentRank;
       });
     });
@@ -183,62 +164,111 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setRankings(newRankings);
   }, []);
 
+  const fetchSellersAndGoals = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Fetch sellers
+      const sellersRes = await fetch(`/api/sellers?storeId=${storeId}`);
+      if (!sellersRes.ok) throw new Error("Falha ao carregar vendedores");
+      const sellersData = await sellersRes.json();
+      setSellers(sellersData);
+      
+      // Fetch goals
+      const goalsRes = await fetch(`/api/goals/${storeId}`);
+      if (!goalsRes.ok) {
+        if (goalsRes.status === 404) {
+             console.log("Nenhuma meta encontrada para esta loja. Usando valores padrão.");
+             setValue("goals", {});
+        } else {
+            throw new Error("Falha ao carregar metas");
+        }
+      } else {
+        const goalsData = await goalsRes.json();
+        setValue("goals", goalsData);
+      }
+      
+      // Set form values after data is fetched
+      setValue("sellers", sellersData);
 
-  // 🎯 Incentivos
+      calculateRankings(sellersData);
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível carregar os dados da loja.' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [storeId, setValue, toast, calculateRankings]);
+
+
   const handleIncentivesCalculated = useCallback(
     (newIncentives: Incentives, newLastUpdated: string) => {
       setIncentives(newIncentives);
       setLastUpdated(newLastUpdated);
-      // TODO: Salvar incentivos e lastUpdated no banco
       calculateRankings(getValues().sellers ?? []);
     },
     [calculateRankings, getValues]
   );
 
-  // 💾 Salvar Metas Manualmente
-  const handleSaveGoals = () => {
-      // TODO: Salvar metas no banco via API
-      console.log("Saving goals:", getValues().goals);
-      toast({
-          title: "Metas Salvas!",
-          description: "As novas metas e prêmios foram salvos com sucesso.",
-          action: <CheckCircle className="text-green-500" />
-      })
+  const handleSaveGoals = async () => {
+      try {
+        const currentGoals = getValues().goals;
+        const res = await fetch('/api/goals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...currentGoals, store_id: storeId }),
+        });
+
+        if (!res.ok) throw new Error('Falha ao salvar metas');
+        
+        toast({
+            title: "Metas Salvas!",
+            description: "As novas metas e prêmios foram salvos com sucesso.",
+            action: <CheckCircle className="text-green-500" />
+        })
+
+      } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível salvar as metas.' });
+      }
   }
 
-  // 🔄 Carregar dados iniciais
   useEffect(() => {
     setMounted(true);
     const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
 
-    // TODO: Carregar dados da loja, metas, etc. via API
-    fetchSellers();
+    fetchSellersAndGoals();
 
     const tabFromUrl = searchParams.get("tab");
-    let tabToActivate = tabFromUrl || (adminAuthenticated ? "admin" : sellers.length > 0 && sellers[0].id ? sellers[0].id : "admin");
+    let tabToActivate = tabFromUrl || (adminAuthenticated ? "admin" : "loading");
     
-    // Lógica de autenticação e redirecionamento
-    if (tabToActivate === "admin") {
-      if (!adminAuthenticated) {
-        const destination = `/dashboard/${storeId}?tab=admin`;
-        router.push(`/login?redirect=${encodeURIComponent(destination)}`);
-        return;
-      }
-    } else if (tabToActivate) {
-       if (
-        !adminAuthenticated &&
-        !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)
-      ) {
-        const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
-        router.push(
-          `/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
-        return;
+    if (!isLoading && sellers.length > 0 && tabToActivate === 'loading') {
+       tabToActivate = sellers[0].id;
+    }
+    
+    // Auth & redirect logic
+    if (tabToActivate !== "loading") {
+      if (tabToActivate === "admin") {
+        if (!adminAuthenticated) {
+          const destination = `/dashboard/${storeId}?tab=admin`;
+          router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+          return;
+        }
+      } else if (sellers.some(s => s.id === tabToActivate)) {
+         if (
+          !adminAuthenticated &&
+          !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)
+        ) {
+          const destination = `/dashboard/${storeId}?tab=${tabToActivate}`;
+          router.push(
+            `/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(destination)}`);
+          return;
+        }
       }
     }
-    setActiveTab(tabToActivate || 'admin');
+    setActiveTab(tabToActivate);
 
-  }, [storeId, router, searchParams, fetchSellers]);
+  }, [storeId, router, searchParams, fetchSellersAndGoals, isLoading, sellers]);
 
   
   const handleTabChange = (newTab: string) => {
@@ -263,7 +293,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
   };
   
-  if (!mounted || activeTab === "loading") {
+  if (!mounted || activeTab === "loading" || isLoading) {
     return <DashboardSkeleton />;
   }
 
@@ -281,9 +311,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="secondary" className="shadow">
-              <Link href="/">
+              <Link href={`/loja/${storeId}`}>
                 <Home className="mr-2 h-4 w-4" />
-                Todas as Lojas
+                Página da Loja
               </Link>
             </Button>
             {isAdmin && (
@@ -344,7 +374,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     form={form}
                     storeId={storeId}
                     sellers={sellers}
-                    onSellersChange={fetchSellers}
+                    onSellersChange={fetchSellersAndGoals}
                     onIncentivesCalculated={handleIncentivesCalculated}
                     handleSaveGoals={handleSaveGoals}
                     lastUpdated={lastUpdated}
@@ -365,7 +395,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
               {sellers.length === 0 && !isAdmin && (
                 <TabsContent
-                  value={activeTab}
+                  value="no-sellers"
                   className="mt-10 text-center text-muted-foreground py-10"
                 >
                   <p className="text-lg">Bem-vindo!</p>

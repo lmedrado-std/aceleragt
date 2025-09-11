@@ -74,6 +74,8 @@ export default function AdminPage() {
     }
      // Reset theme to default when on this page
     document.documentElement.style.removeProperty('--primary');
+    document.documentElement.style.removeProperty('--primary-raw');
+
 
     const isDark = localStorage.getItem('darkMode') === 'true';
     setDarkMode(isDark);
@@ -209,7 +211,7 @@ export default function AdminPage() {
 
   return (
     <div className="w-full max-w-6xl mx-auto h-[80vh] min-h-[600px] flex rounded-2xl shadow-2xl overflow-hidden bg-card">
-       <aside className="w-64 bg-gradient-to-b from-primary to-destructive text-primary-foreground p-6 flex flex-col">
+       <aside className="w-64 bg-gradient-to-b from-primary to-destructive text-primary-foreground p-6 flex-col hidden md:flex">
         <div className="flex items-center gap-3 mb-12">
           <div className="bg-white/20 p-2 rounded-lg">
             <Rocket className="h-6 w-6 text-white" />
@@ -307,7 +309,7 @@ export default function AdminPage() {
                                 ) : (
                                 <>
                                     <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 rounded-full" style={{backgroundColor: `hsl(${store.themeColor})`}}></div>
+                                        <div className="w-4 h-4 rounded-full" style={{backgroundColor: `hsl(${store.theme_color})`}}></div>
                                         <span className="font-medium">{store.name}</span>
                                     </div>
                                     <div className="flex items-center">

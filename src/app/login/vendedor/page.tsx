@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { loadStateFromStorage, Seller } from '@/lib/storage';
+import { Seller } from '@/lib/storage';
 import { SellerAvatar } from '@/components/seller-avatar';
 
 function SellerLoginComponent() {
@@ -34,25 +34,36 @@ function SellerLoginComponent() {
         router.push('/');
         return;
     }
-
     setStoreId(currentStoreId);
-    const state = loadStateFromStorage();
-    const currentSeller = state.sellers[currentStoreId]?.find(s => s.id === sellerId);
+    
+    async function fetchSeller() {
+        try {
+            const res = await fetch(`/api/sellers?storeId=${currentStoreId}`);
+            if (!res.ok) throw new Error('Falha ao buscar vendedor');
+            const sellers = await res.json();
+            const currentSeller = sellers.find((s: Seller) => s.id === sellerId);
+            
+            if (currentSeller) {
+                setSeller(currentSeller);
+            } else {
+                throw new Error('Vendedor não encontrado.');
+            }
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Erro", description: error.message });
+            router.push(`/loja/${currentStoreId}`);
+            return;
+        }
 
-    if (currentSeller) {
-        setSeller(currentSeller);
-    } else {
-        toast({ variant: "destructive", title: "Erro", description: "Vendedor não encontrado." });
-        router.push(`/loja/${currentStoreId}`);
-        return;
+        const sellerAuthenticated = sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
+        if (sellerAuthenticated) {
+            router.push(redirectUrl);
+        } else {
+            setLoading(false);
+        }
     }
 
-    const sellerAuthenticated = sessionStorage.getItem(`sellerAuthenticated-${sellerId}`) === 'true';
-    if (sellerAuthenticated) {
-      router.push(redirectUrl);
-    } else {
-      setLoading(false);
-    }
+    fetchSeller();
+
   }, [router, redirectUrl, sellerId, toast, searchParams]);
 
 
@@ -99,7 +110,7 @@ function SellerLoginComponent() {
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
         <Card className="w-full">
           <CardHeader className="items-center text-center">
-            <SellerAvatar avatarId={seller.avatarId} className="h-20 w-20 mb-4" />
+            <SellerAvatar avatarId={seller.avatar_id} className="h-20 w-20 mb-4" />
             <CardTitle>Olá, {seller.name}!</CardTitle>
             <CardDescription>
                 Por favor, insira sua senha para acessar seu painel.

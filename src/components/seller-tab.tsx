@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Seller, Goals, Incentives } from "@/lib/storage";
@@ -14,7 +15,11 @@ interface SellerTabProps {
 
 export function SellerTab({ seller, goals, incentives, rankings }: SellerTabProps) {
     const salesData = {
-        ...seller,
+        name: seller.name,
+        vendas: seller.vendas,
+        pa: seller.pa,
+        ticketMedio: seller.ticket_medio,
+        corridinhaDiaria: seller.corridinha_diaria,
         goals,
     };
     
@@ -26,5 +31,3 @@ export function SellerTab({ seller, goals, incentives, rankings }: SellerTabProp
         />
     )
 }
-
-    

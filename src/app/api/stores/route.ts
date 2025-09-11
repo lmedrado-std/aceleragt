@@ -26,12 +26,19 @@ export async function POST(request: Request) {
         // Gera uma cor HSL aleatória com boa saturação e luminosidade
         const themeColor = `${Math.floor(Math.random() * 360)}, 70%, 60%`;
 
-        const result = await conn.query(
+        const storeResult = await conn.query(
             'INSERT INTO stores (id, name, theme_color) VALUES ($1, $2, $3) RETURNING *',
             [id, name, themeColor]
         );
+        
+        // Também cria uma entrada de metas padrão para a nova loja
+        await conn.query(
+          'INSERT INTO goals (store_id) VALUES ($1)',
+          [id]
+        );
 
-        return NextResponse.json(result.rows[0], { status: 201 });
+
+        return NextResponse.json(storeResult.rows[0], { status: 201 });
 
     } catch (error) {
         console.error('[API /api/stores] ERRO no POST:', error);

@@ -21,10 +21,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { Goals, Seller } from "@/lib/storage";
+import { Goals } from "@/lib/storage";
 
-
-type ProgressDisplaySalesData = Partial<Seller> & {
+type ProgressDisplaySalesData = {
+    name?: string;
+    vendas?: number;
+    pa?: number;
+    ticketMedio?: number;
+    corridinhaDiaria?: number;
     goals: Goals;
 };
 

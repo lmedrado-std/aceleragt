@@ -7,7 +7,7 @@ import { Home, Shield, Loader2, ArrowRight, Sun, Moon, Clock } from "lucide-reac
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
-import { loadStateFromStorage, Seller, Store } from "@/lib/storage";
+import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -19,14 +19,13 @@ export default function StoreHomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const storeId = params.storeId as string;
 
-  const loadStoreData = useCallback(() => {
+  const loadStoreData = useCallback(async () => {
     if (!storeId) {
       setError("ID da loja não encontrado na URL.");
       setLoading(false);
@@ -35,25 +34,35 @@ export default function StoreHomePage() {
 
     try {
         const decodedStoreId = decodeURIComponent(storeId);
-        const savedState = loadStateFromStorage();
-        const foundStore = savedState.stores.find(s => s.id === decodedStoreId);
         
+        // Fetch Store info
+        const storeRes = await fetch('/api/stores');
+        if (!storeRes.ok) throw new Error('Falha ao buscar dados da loja.');
+        const allStores = await storeRes.json();
+        const foundStore = allStores.find((s: Store) => s.id === decodedStoreId);
+
         if (foundStore) {
             setStore(foundStore);
-            setSellers(savedState.sellers[decodedStoreId] || []);
-            setLastUpdated(savedState.lastUpdated?.[decodedStoreId] || null);
-            setError(null);
+            document.documentElement.style.setProperty('--primary-raw', foundStore.theme_color);
         } else {
-            setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
-            toast({
-              variant: "destructive",
-              title: "Erro ao carregar",
-              description: `A loja que você está tentando acessar não foi encontrada.`,
-            });
+             throw new Error(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
         }
-    } catch (e) {
-        console.error("Failed to load state from localStorage", e);
-        setError("Ocorreu um erro ao carregar os dados da loja.");
+        
+        // Fetch Sellers for that store
+        const sellersRes = await fetch(`/api/sellers?storeId=${decodedStoreId}`);
+        if (!sellersRes.ok) throw new Error('Falha ao buscar vendedores.');
+        const sellersData = await sellersRes.json();
+        setSellers(sellersData);
+        
+        setError(null);
+    } catch (e: any) {
+        console.error("Failed to load data from API", e);
+        setError(e.message || "Ocorreu um erro ao carregar os dados da loja.");
+        toast({
+            variant: "destructive",
+            title: "Erro ao carregar",
+            description: e.message || `A loja que você está tentando acessar não foi encontrada.`,
+        });
     } finally {
         setLoading(false);
     }
@@ -64,26 +73,24 @@ export default function StoreHomePage() {
   }, [loadStoreData]);
   
   useEffect(() => {
-    const body = document.body;
     const isDark = localStorage.getItem('darkMode') === 'true';
     setDarkMode(isDark);
     if(isDark) {
-      body.classList.add('dark');
+      document.documentElement.classList.add('dark');
     } else {
-      body.classList.remove('dark');
+      document.documentElement.classList.remove('dark');
     }
-  }, [])
+  }, []);
   
   useEffect(() => {
-    const body = document.body;
     if(darkMode) {
-      body.classList.add('dark');
+      document.documentElement.classList.add('dark');
       localStorage.setItem('darkMode', 'true');
     } else {
-      body.classList.remove('dark');
+      document.documentElement.classList.remove('dark');
       localStorage.setItem('darkMode', 'false');
     }
-  }, [darkMode])
+  }, [darkMode]);
 
 
   const handleAdminAccess = () => {
@@ -107,16 +114,6 @@ export default function StoreHomePage() {
     }
   };
 
-    const formattedLastUpdated = lastUpdated
-    ? new Date(lastUpdated).toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
-
   if (loading) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-background">
@@ -126,11 +123,11 @@ export default function StoreHomePage() {
     )
   }
   
-  if (error) {
+  if (error || !store) {
      return (
         <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
              <h1 className="text-3xl font-bold text-destructive mb-4">Erro ao Carregar Loja</h1>
-             <p className="text-xl text-destructive text-center mb-8">{error}</p>
+             <p className="text-xl text-destructive text-center mb-8">{error || 'Loja não encontrada.'}</p>
              <Button asChild variant="secondary">
                 <Link href="/">
                 <Home className="h-5 w-5 mr-2" />
@@ -164,21 +161,9 @@ export default function StoreHomePage() {
         </header>
       </div>
 
-
       <p className="text-muted-foreground text-center mb-6 text-lg max-w-2xl">
         Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.
       </p>
-
-        {formattedLastUpdated && (
-            <Card className="w-full max-w-4xl mb-6 bg-destructive text-destructive-foreground shadow-lg">
-                <CardContent className="p-3 flex items-center justify-center gap-3">
-                    <Clock className="h-5 w-5" />
-                    <p className="text-sm font-semibold text-center">
-                        Última atualização de dados: <span className="font-bold">{formattedLastUpdated}</span>
-                    </p>
-                </CardContent>
-            </Card>
-        )}
 
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         <motion.div whileHover={{ y: -5 }} onClick={handleAdminAccess} className="cursor-pointer">
@@ -214,7 +199,7 @@ export default function StoreHomePage() {
                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                        <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
+                        <SellerAvatar avatarId={seller.avatar_id} className="h-11 w-11" />
                       <div>
                         <p className="text-base font-semibold text-foreground">
                           {seller.name}

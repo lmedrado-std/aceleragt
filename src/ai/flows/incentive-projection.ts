@@ -17,7 +17,7 @@ import {z} from 'genkit';
 const SellerSchema = z.object({
   id: z.string(),
   name: z.string(),
-  avatarId: z.string(),
+  avatar_id: z.string(),
   vendas: z.coerce.number().default(0),
   pa: z.coerce.number().default(0),
   ticketMedio: z.coerce.number().default(0),
