@@ -6,7 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 export async function GET() {
   try {
+    console.log('[API /api/stores] Requisição recebida');
     const result = await conn.query('SELECT * FROM stores ORDER BY name ASC');
+    console.log(`[API /api/stores] Lojas retornadas: ${result.rowCount}`);
     return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     console.error('[API /api/stores] ERRO no GET:', error);
