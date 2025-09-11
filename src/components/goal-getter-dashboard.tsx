@@ -9,10 +9,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ShieldCheck, Home, CheckCircle, Save } from "lucide-react";
 
-import {
-  incentiveProjection,
-  type IncentiveProjectionOutput,
-} from "@/ai/flows/incentive-projection";
+import { type IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -25,8 +22,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  loadStateFromStorage,
-  saveState,
   Seller,
   Goals,
   Store,
@@ -35,19 +30,6 @@ import {
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
-
-const availableAvatarIds = [
-  "avatar1",
-  "avatar2",
-  "avatar3",
-  "avatar4",
-  "avatar5",
-  "avatar6",
-  "avatar7",
-  "avatar8",
-  "avatar9",
-  "avatar10",
-];
 
 const sellerSchema = z.object({
   id: z.string(),
@@ -126,6 +108,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
+  const [sellers, setSellers] = useState<Seller[]>([]);
   const [mounted, setMounted] = useState(false);
   const [incentives, setIncentives] = useState<Incentives>({});
   const [rankings, setRankings] = useState<Rankings>({});
@@ -145,6 +128,21 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const { reset, getValues, setValue } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
+
+  const fetchSellers = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/sellers?storeId=${storeId}`);
+      if (!res.ok) throw new Error("Falha ao carregar vendedores");
+      const data = await res.json();
+      setSellers(data);
+      setValue("sellers", data);
+      calculateRankings(data);
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível carregar os vendedores.' });
+    }
+  }, [storeId, setValue, toast]);
+
 
   // 📊 Rankings
   const calculateRankings = useCallback((sellers: Partial<Seller>[]) => {
@@ -191,21 +189,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     (newIncentives: Incentives, newLastUpdated: string) => {
       setIncentives(newIncentives);
       setLastUpdated(newLastUpdated);
-      const currentState = loadStateFromStorage();
-      currentState.incentives[storeId] = newIncentives;
-      if (!currentState.lastUpdated) currentState.lastUpdated = {};
-      currentState.lastUpdated[storeId] = newLastUpdated;
-      saveState(currentState);
+      // TODO: Salvar incentivos e lastUpdated no banco
       calculateRankings(getValues().sellers ?? []);
     },
-    [storeId, calculateRankings, getValues]
+    [calculateRankings, getValues]
   );
 
   // 💾 Salvar Metas Manualmente
   const handleSaveGoals = () => {
-      const currentState = loadStateFromStorage();
-      currentState.goals[storeId] = getValues().goals;
-      saveState(currentState);
+      // TODO: Salvar metas no banco via API
+      console.log("Saving goals:", getValues().goals);
       toast({
           title: "Metas Salvas!",
           description: "As novas metas e prêmios foram salvos com sucesso.",
@@ -213,113 +206,27 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       })
   }
 
-  // ➕ Adicionar vendedor (corrigido para salvar imediatamente)
-  const addSeller = useCallback(
-    (name: string, pass: string) => {
-      const currentSellers = getValues("sellers") || [];
-      const existingAvatarIds = new Set(currentSellers.map((s) => s.avatarId));
-      let randomAvatarId =
-        availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
-
-      if (existingAvatarIds.size < availableAvatarIds.length) {
-        while (existingAvatarIds.has(randomAvatarId)) {
-          randomAvatarId =
-            availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
-        }
-      }
-
-      const newSeller: Seller = {
-        id: crypto.randomUUID(),
-        name,
-        password: pass,
-        avatarId: randomAvatarId,
-        vendas: 0,
-        pa: 0,
-        ticketMedio: 0,
-        corridinhaDiaria: 0,
-      };
-
-      const updatedSellers = [...currentSellers, newSeller];
-      setValue("sellers", updatedSellers, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
-
-      const currentState = loadStateFromStorage();
-      currentState.sellers[storeId] = updatedSellers as Seller[];
-      currentState.goals[storeId] = getValues("goals");
-      currentState.incentives[storeId] = { ...incentives, [newSeller.id]: null };
-      saveState(currentState);
-
-      setIncentives(currentState.incentives[storeId]);
-
-      toast({
-        title: "Vendedor adicionado!",
-        description: `${name} foi adicionado(a) com sucesso.`,
-      });
-
-      router.push(`/dashboard/${storeId}?tab=${newSeller.id}`, { scroll: false });
-    },
-    [getValues, setValue, storeId, router, toast, incentives]
-  );
-
   // 🔄 Carregar dados iniciais
   useEffect(() => {
     setMounted(true);
-    const state = loadStateFromStorage();
-    const store = state.stores.find((s) => s.id === storeId);
-
-    if (!store) {
-      setTimeout(
-        () =>
-          toast({
-            variant: "destructive",
-            title: "Erro",
-            description: "Loja não encontrada.",
-          }),
-        0
-      );
-      router.push("/");
-      return;
-    }
-
-    setCurrentStore(store);
-    setLastUpdated(state.lastUpdated?.[storeId] || null);
-
-    const initialSellers = state.sellers[storeId] || [];
-    const initialFormValues: FormValues = {
-      newSellerName: "",
-      newSellerPassword: "",
-      goals: state.goals[storeId] || state.goals.default,
-      sellers: initialSellers,
-    };
-    reset(initialFormValues);
-    const currentIncentives = state.incentives[storeId] || {};
-    setIncentives(currentIncentives);
-    calculateRankings(initialSellers);
-
     const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
     setIsAdmin(adminAuthenticated);
 
-    const sellersForStore = initialSellers;
+    // TODO: Carregar dados da loja, metas, etc. via API
+    fetchSellers();
+
     const tabFromUrl = searchParams.get("tab");
-    let tabToActivate =
-      tabFromUrl || (adminAuthenticated ? "admin" : sellersForStore.length > 0 && sellersForStore[0].id ? sellersForStore[0].id : "admin");
-
-    if (tabToActivate !== "admin" && !sellersForStore.some((s) => s.id === tabToActivate)) {
-      tabToActivate = adminAuthenticated ? "admin" : sellersForStore.length > 0 && sellersForStore[0].id ? sellersForStore[0].id : "admin";
-    }
-
+    let tabToActivate = tabFromUrl || (adminAuthenticated ? "admin" : sellers.length > 0 && sellers[0].id ? sellers[0].id : "admin");
+    
+    // Lógica de autenticação e redirecionamento
     if (tabToActivate === "admin") {
       if (!adminAuthenticated) {
         const destination = `/dashboard/${storeId}?tab=admin`;
         router.push(`/login?redirect=${encodeURIComponent(destination)}`);
         return;
       }
-    } else {
-      if (!sellersForStore.find((s) => s.id === tabToActivate)) {
-        const fallbackTab = adminAuthenticated ? "admin" : sellersForStore.length > 0 && sellersForStore[0].id ? sellersForStore[0].id : "admin";
-        router.push(`/dashboard/${storeId}?tab=${fallbackTab}`);
-        return;
-      }
-      if (
+    } else if (tabToActivate) {
+       if (
         !adminAuthenticated &&
         !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)
       ) {
@@ -329,8 +236,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         return;
       }
     }
-    setActiveTab(tabToActivate);
-  }, [storeId, reset, router, toast, searchParams, calculateRankings]);
+    setActiveTab(tabToActivate || 'admin');
+
+  }, [storeId, router, searchParams, fetchSellers]);
 
   
   const handleTabChange = (newTab: string) => {
@@ -354,9 +262,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setActiveTab(newTab);
     router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
   };
-
-  const currentValues = getValues();
-  const validSellers = (currentValues.sellers || []).filter(s => s && s.id);
   
   if (!mounted || activeTab === "loading") {
     return <DashboardSkeleton />;
@@ -399,7 +304,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <div className="flex items-center border-b justify-between">
                 <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
-                  {validSellers.map((seller) => (
+                  {sellers.map((seller) => (
                     <TabsTrigger
                       key={seller.id}
                       value={seller.id!}
@@ -438,27 +343,27 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   <AdminTab
                     form={form}
                     storeId={storeId}
+                    sellers={sellers}
+                    onSellersChange={fetchSellers}
                     onIncentivesCalculated={handleIncentivesCalculated}
-                    incentives={incentives}
-                    addSeller={addSeller}
                     handleSaveGoals={handleSaveGoals}
                     lastUpdated={lastUpdated}
                   />
                 </TabsContent>
               )}
 
-              {validSellers.map((seller) => (
+              {sellers.map((seller) => (
                 <TabsContent key={seller.id} value={seller.id!} className="mt-6">
                   <SellerTab
                     seller={seller as Seller}
-                    goals={currentValues.goals}
+                    goals={getValues().goals}
                     incentives={incentives[seller.id!]}
                     rankings={rankings[seller.id!]}
                   />
                 </TabsContent>
               ))}
 
-              {validSellers.length === 0 && !isAdmin && (
+              {sellers.length === 0 && !isAdmin && (
                 <TabsContent
                   value={activeTab}
                   className="mt-10 text-center text-muted-foreground py-10"

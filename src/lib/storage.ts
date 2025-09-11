@@ -8,13 +8,13 @@ const DEFAULT_ADMIN_PASSWORD = "supermoda";
 export interface Seller {
   id: string;
   name: string;
-  avatarId: string;
+  avatarId: string; // no banco é avatar_id
   vendas: number;
   pa: number;
-  ticketMedio: number;
-  corridinhaDiaria: number;
+  ticketMedio: number; // no banco é ticket_medio
+  corridinhaDiaria: number; // no banco é corridinha_diaria
   password?: string;
-  store_id?: string;
+  store_id: string;
 }
 
 export interface Goals {
@@ -52,7 +52,7 @@ export type Incentives = Record<string, IncentiveProjectionOutput | null>;
 export interface Store {
     id: string;
     name: string;
-    themeColor: string;
+    themeColor: string; // no banco é theme_color
 }
 
 export function getAdminPassword(): string {
