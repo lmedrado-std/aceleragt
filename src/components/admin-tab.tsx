@@ -57,7 +57,7 @@ const goalTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
 ];
 
 const ticketMedioTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
-  { id: "Nível 1", goal: "ticketMedioGoal1", prize: "ticketMedioPrize1" },
+  { id: "Nível 1", goal: "ticketMedioGoal1-", prize: "ticketMedioPrize1" },
   { id: "Nível 2", goal: "ticketMedioGoal2", prize: "ticketMedioPrize2" },
   { id: "Nível 3", goal: "ticketMedioGoal3", prize: "ticketMedioPrize3" },
   { id: "Nível 4", goal: "ticketMedioGoal4", prize: "ticketMedioPrize4" },
@@ -199,6 +199,17 @@ export function AdminTab({
           return;
       }
       
+      const parseGoals = (rawGoals: any): Goals => {
+        const parsed: any = {};
+        for (const key in rawGoals) {
+          const value = rawGoals[key];
+          parsed[key] = typeof value === 'string' && !isNaN(Number(value)) ? Number(value) : value;
+        }
+        return parsed as Goals;
+      }
+
+      const fixedGoals = parseGoals(currentGoals);
+
       for (const seller of currentSellers) {
         const result = await incentiveProjection({
            seller: {
@@ -208,7 +219,7 @@ export function AdminTab({
               ticketMedio: Number(seller.ticketMedio || 0),
               corridinhaDiaria: Number(seller.corridinhaDiaria || 0),
             } as Seller,
-          goals: currentGoals,
+          goals: fixedGoals,
         });
         allIncentives[seller.id!] = result;
       }
@@ -217,7 +228,7 @@ export function AdminTab({
 
       const currentState = loadStateFromStorage();
       currentState.sellers[storeId] = currentSellers as Seller[];
-      currentState.goals[storeId] = currentGoals;
+      currentState.goals[storeId] = fixedGoals;
       currentState.incentives[storeId] = allIncentives;
       saveState(currentState);
 
@@ -412,3 +423,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
