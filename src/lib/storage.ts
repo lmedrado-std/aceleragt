@@ -14,9 +14,12 @@ export interface Seller {
   ticketMedio: number;
   corridinhaDiaria: number;
   password?: string;
+  store_id?: string;
 }
 
 export interface Goals {
+  id?: string;
+  store_id: string;
   metaMinha: number;
   meta: number;
   metona: number;
@@ -50,14 +53,6 @@ export interface Store {
     id: string;
     name: string;
     themeColor: string;
-}
-
-export interface AppState {
-    stores: Store[];
-    sellers: Record<string, Seller[]>;
-    goals: Record<string, Goals>;
-    incentives: Record<string, Incentives>;
-    lastUpdated?: Record<string, string>;
 }
 
 export function getAdminPassword(): string {

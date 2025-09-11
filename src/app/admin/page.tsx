@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { KeyRound, Trash2, Home, ArrowRight, LogOut, Loader2, Edit, Save, X, LineChart, Building, Rocket, LayoutDashboard, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Store, setAdminPassword, Seller, Goals } from "@/lib/storage";
+import { Store, setAdminPassword } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,7 +83,7 @@ export default function AdminPage() {
       document.documentElement.classList.remove('dark');
     }
 
-  }, [router]);
+  }, [router, toast]);
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
@@ -121,11 +121,6 @@ export default function AdminPage() {
   };
 
   const handleRemoveStore = async (id: string) => {
-    if (stores.length <= 1) {
-        toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
-        return;
-    }
-
     const storeToRemove = stores.find(s => s.id === id);
     try {
       const res = await fetch(`/api/stores/${id}`, { method: 'DELETE' });
@@ -324,7 +319,7 @@ export default function AdminPage() {
                                         <Button size="icon" variant="ghost" onClick={() => handleStartEditingStore(store)}><Edit className="h-4 w-4"/></Button>
                                         <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
                                             <AlertDialogContent>
-                                            <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados.</AlertDialogDescription></AlertDialogHeader>
+                                            <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados associados.</AlertDialogDescription></AlertDialogHeader>
                                             <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>
