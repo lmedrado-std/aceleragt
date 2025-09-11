@@ -58,6 +58,7 @@ export interface AppState {
     sellers: Record<string, Seller[]>;
     goals: Record<string, Goals>;
     incentives: Record<string, Incentives>;
+    lastUpdated?: Record<string, string>;
 }
 
 const defaultGoals: Goals = {
@@ -105,6 +106,7 @@ export function getInitialState(): AppState {
         incentives: {
             [store1Id]: {},
         },
+        lastUpdated: {},
     }
 }
 
@@ -140,6 +142,10 @@ function mergeWithInitialState(savedState: AppState): AppState {
         }
       });
     });
+
+    if (!savedState.lastUpdated) {
+        savedState.lastUpdated = {};
+    }
 
     return savedState;
 }

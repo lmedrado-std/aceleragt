@@ -129,6 +129,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [mounted, setMounted] = useState(false);
   const [incentives, setIncentives] = useState<Incentives>({});
   const [rankings, setRankings] = useState<Rankings>({});
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -157,7 +158,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     metrics.forEach((metric) => {
       const rankedSellers = sellers
-        .filter(s => (s[metric] || 0) > 0) // apenas vendedores com vendas
+        .filter(s => (s[metric] || 0) > 0)
         .sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
 
       let currentRank = 0;
@@ -168,7 +169,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         const currentValue = seller[metric] || 0;
 
-        // 🔹 Se a venda for diferente, atualiza posição
         if (currentValue !== lastValue) {
           currentRank = index + 1;
           lastValue = currentValue;
@@ -188,10 +188,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   // 🎯 Incentivos
   const handleIncentivesCalculated = useCallback(
-    (newIncentives: Incentives) => {
+    (newIncentives: Incentives, newLastUpdated: string) => {
       setIncentives(newIncentives);
+      setLastUpdated(newLastUpdated);
       const currentState = loadStateFromStorage();
       currentState.incentives[storeId] = newIncentives;
+      if (!currentState.lastUpdated) currentState.lastUpdated = {};
+      currentState.lastUpdated[storeId] = newLastUpdated;
       saveState(currentState);
       calculateRankings(getValues().sellers ?? []);
     },
@@ -239,7 +242,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       const updatedSellers = [...currentSellers, newSeller];
       setValue("sellers", updatedSellers, { shouldDirty: true, shouldValidate: true, shouldTouch: true });
 
-      // ✅ salva imediatamente no storage
       const currentState = loadStateFromStorage();
       currentState.sellers[storeId] = updatedSellers as Seller[];
       currentState.goals[storeId] = getValues("goals");
@@ -279,6 +281,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     }
 
     setCurrentStore(store);
+    setLastUpdated(state.lastUpdated?.[storeId] || null);
 
     const initialSellers = state.sellers[storeId] || [];
     const initialFormValues: FormValues = {
@@ -439,6 +442,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     incentives={incentives}
                     addSeller={addSeller}
                     handleSaveGoals={handleSaveGoals}
+                    lastUpdated={lastUpdated}
                   />
                 </TabsContent>
               )}

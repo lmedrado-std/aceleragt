@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   Calculator,
+  Clock,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -57,7 +58,7 @@ const goalTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
 ];
 
 const ticketMedioTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
-  { id: "Nível 1", goal: "ticketMedioGoal1-", prize: "ticketMedioPrize1" },
+  { id: "Nível 1", goal: "ticketMedioGoal1", prize: "ticketMedioPrize1" },
   { id: "Nível 2", goal: "ticketMedioGoal2", prize: "ticketMedioPrize2" },
   { id: "Nível 3", goal: "ticketMedioGoal3", prize: "ticketMedioPrize3" },
   { id: "Nível 4", goal: "ticketMedioGoal4", prize: "ticketMedioPrize4" },
@@ -67,10 +68,11 @@ const ticketMedioTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] 
 interface AdminTabProps {
   form: UseFormReturn<FormValues>;
   storeId: string;
-  onIncentivesCalculated: (incentives: Incentives) => void;
+  onIncentivesCalculated: (incentives: Incentives, lastUpdated: string) => void;
   incentives: Incentives;
   addSeller: (name: string, pass: string) => void;
   handleSaveGoals: () => void;
+  lastUpdated: string | null;
 }
 
 export function AdminTab({
@@ -80,6 +82,7 @@ export function AdminTab({
   incentives,
   addSeller,
   handleSaveGoals,
+  lastUpdated,
 }: AdminTabProps) {
   const { toast } = useToast();
   const router = useRouter();
@@ -136,7 +139,7 @@ export function AdminTab({
 
     const newIncentives = { ...incentives };
     delete newIncentives[sellerId];
-    onIncentivesCalculated(newIncentives);
+    onIncentivesCalculated(newIncentives, lastUpdated || new Date().toISOString());
 
     const currentState = loadStateFromStorage();
     currentState.sellers[storeId] = updatedSellers as Seller[];
@@ -224,12 +227,15 @@ export function AdminTab({
         allIncentives[seller.id!] = result;
       }
       
-      onIncentivesCalculated(allIncentives);
+      const newLastUpdated = new Date().toISOString();
+      onIncentivesCalculated(allIncentives, newLastUpdated);
 
       const currentState = loadStateFromStorage();
       currentState.sellers[storeId] = currentSellers as Seller[];
       currentState.goals[storeId] = fixedGoals;
       currentState.incentives[storeId] = allIncentives;
+      if (!currentState.lastUpdated) currentState.lastUpdated = {};
+      currentState.lastUpdated[storeId] = newLastUpdated;
       saveState(currentState);
 
       toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados." });
@@ -243,6 +249,15 @@ export function AdminTab({
   };
   
   const validSellers = (sellers || []).filter((s): s is Seller => !!s && !!s.id);
+  const formattedLastUpdated = lastUpdated
+    ? new Date(lastUpdated).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   return (
     <div className="space-y-8">
@@ -339,6 +354,16 @@ export function AdminTab({
             <CardContent>
               {validSellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
                 <div className="space-y-6">
+                   {formattedLastUpdated && (
+                    <Card className="bg-secondary/50">
+                        <CardContent className="p-4 flex items-center gap-3">
+                           <Clock className="h-5 w-5 text-muted-foreground" />
+                           <p className="text-sm text-muted-foreground">
+                               Última atualização de dados: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
+                           </p>
+                        </CardContent>
+                    </Card>
+                  )}
                   {validSellers.map((seller, index) => (
                     <div key={seller.id} className="p-4 border rounded-lg space-y-4 bg-card">
                       <h3 className="font-semibold text-lg text-card-foreground">{seller.name ?? 'Vendedor sem nome'}</h3>
@@ -352,7 +377,7 @@ export function AdminTab({
                   ))}
                   <Button onClick={handleCalculateIncentives} disabled={isCalculating}>
                     <Calculator className="mr-2" />
-                    {isCalculating ? "Calculando..." : "Calcular Todos os Incentivos"}
+                    {isCalculating ? "Calculando..." : "Calcular e Salvar Lançamentos"}
                   </Button>
                 </div>
               )}
@@ -423,5 +448,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
