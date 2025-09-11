@@ -27,8 +27,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json(result.rows[0], { status: 200 });
   } catch (error) {
     console.error(`[API /api/stores/[id]] ERRO no PUT (id: ${params.id}):`, error);
-    const message = error instanceof Error ? error.message : 'Erro desconhecido ao atualizar a loja.';
-    return NextResponse.json({ status: 'erro', message }, { status: 500 });
+    return NextResponse.json({ status: 'erro', message: 'Erro ao atualizar a loja.' }, { status: 500 });
   }
 }
 
@@ -55,7 +54,6 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   } catch (error) {
     await conn.query('ROLLBACK');
     console.error(`[API /api/stores/[id]] ERRO no DELETE (id: ${params.id}):`, error);
-    const message = error instanceof Error ? error.message : 'Erro desconhecido ao remover a loja.';
-    return NextResponse.json({ status: 'erro', message }, { status: 500 });
+    return NextResponse.json({ status: 'erro', message: 'Erro ao remover a loja.' }, { status: 500 });
   }
 }

@@ -176,16 +176,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       // Fetch goals
       const goalsRes = await fetch(`/api/goals/${storeId}`);
       if (!goalsRes.ok) {
-        if (goalsRes.status === 404) {
-             console.log("Nenhuma meta encontrada para esta loja. Usando valores padrão.");
-             setValue("goals", {});
-        } else {
-            throw new Error("Falha ao carregar metas");
-        }
-      } else {
-        const goalsData = await goalsRes.json();
-        setValue("goals", goalsData);
+          throw new Error("Falha ao carregar metas");
       }
+      const goalsData = await goalsRes.json();
+      setValue("goals", goalsData);
+      
       
       // Set form values after data is fetched
       setValue("sellers", sellersData);
@@ -193,7 +188,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       calculateRankings(sellersData);
     } catch (error) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível carregar os dados da loja.' });
+      toast({ variant: 'destructive', title: 'Erro de Carregamento', description: 'Não foi possível carregar os dados da loja. Tente recarregar a página.' });
     } finally {
       setIsLoading(false);
     }

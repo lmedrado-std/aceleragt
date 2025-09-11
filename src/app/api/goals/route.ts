@@ -69,7 +69,6 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("[API /api/goals] ERRO no POST:", error);
-    const message = error instanceof Error ? error.message : 'Erro desconhecido ao salvar metas';
-    return NextResponse.json({ status: 'erro', message }, { status: 500 });
+    return NextResponse.json({ status: 'erro', message: 'Erro ao salvar metas' }, { status: 500 });
   }
 }
