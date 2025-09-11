@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Home, Shield, Loader2, ArrowRight, Sun, Moon } from "lucide-react";
+import { Home, Shield, Loader2, ArrowRight, Sun, Moon, Clock } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
@@ -19,6 +19,7 @@ export default function StoreHomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   
   const params = useParams();
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function StoreHomePage() {
         if (foundStore) {
             setStore(foundStore);
             setSellers(savedState.sellers[decodedStoreId] || []);
+            setLastUpdated(savedState.lastUpdated?.[decodedStoreId] || null);
             setError(null);
         } else {
             setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
@@ -105,6 +107,16 @@ export default function StoreHomePage() {
     }
   };
 
+    const formattedLastUpdated = lastUpdated
+    ? new Date(lastUpdated).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
   if (loading) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-background">
@@ -156,6 +168,17 @@ export default function StoreHomePage() {
       <p className="text-muted-foreground text-center mb-6 text-lg max-w-2xl">
         Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.
       </p>
+
+        {formattedLastUpdated && (
+            <Card className="w-full max-w-4xl mb-6 bg-destructive text-destructive-foreground shadow-lg">
+                <CardContent className="p-3 flex items-center justify-center gap-3">
+                    <Clock className="h-5 w-5" />
+                    <p className="text-sm font-semibold text-center">
+                        Última atualização de dados: <span className="font-bold">{formattedLastUpdated}</span>
+                    </p>
+                </CardContent>
+            </Card>
+        )}
 
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         <motion.div whileHover={{ y: -5 }} onClick={handleAdminAccess} className="cursor-pointer">
