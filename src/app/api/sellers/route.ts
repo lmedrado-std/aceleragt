@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     }
     
     const result = await conn.query(
-      'INSERT INTO sellers (name, password, avatar_id, store_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO sellers (name, password, "avatar_id", "store_id") VALUES ($1, $2, $3, $4) RETURNING *',
       [name, password, avatarId, storeId]
     );
     
