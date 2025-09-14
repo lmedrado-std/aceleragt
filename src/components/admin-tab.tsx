@@ -1,7 +1,7 @@
 
 "use client";
 
-import { UseFormReturn, useWatch } from "react-hook-form";
+import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import {
   UserPlus,
   Trash2,
@@ -11,9 +11,9 @@ import {
   Eye,
   EyeOff,
   Calculator,
+  Clock,
 } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback } from "react";
 import { FormValues } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,45 +45,48 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Seller, Goals, Incentives, loadStateFromStorage, saveState } from "@/lib/storage";
+import { Seller, Goals, Incentives } from "@/lib/storage";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GoalsFormValues } from "./goal-getter-dashboard";
 
-const goalTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
-  { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
-  { id: "Nível 2", goal: "paGoal2", prize: "paPrize2" },
-  { id: "Nível 3", goal: "paGoal3", prize: "paPrize3" },
-  { id: "Nível 4", goal: "paGoal4", prize: "paPrize4" },
+const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
+  { id: "Nível 1", goal: "pagoal1", prize: "paprize1" },
+  { id: "Nível 2", goal: "pagoal2", prize: "paprize2" },
+  { id: "Nível 3", goal: "pagoal3", prize: "paprize3" },
+  { id: "Nível 4", goal: "pagoal4", prize: "paprize4" },
 ];
 
-const ticketMedioTiers: { id: string; goal: keyof Goals; prize: keyof Goals }[] = [
-  { id: "Nível 1", goal: "ticketMedioGoal1", prize: "ticketMedioPrize1" },
-  { id: "Nível 2", goal: "ticketMedioGoal2", prize: "ticketMedioPrize2" },
-  { id: "Nível 3", goal: "ticketMedioGoal3", prize: "ticketMedioPrize3" },
-  { id: "Nível 4", goal: "ticketMedioGoal4", prize: "ticketMedioPrize4" },
+const ticketMedioTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
+  { id: "Nível 1", goal: "ticketmediogoal1", prize: "ticketmedioprize1" },
+  { id: "Nível 2", goal: "ticketmediogoal2", prize: "ticketmedioprize2" },
+  { id: "Nível 3", goal: "ticketmediogoal3", prize: "ticketmedioprize3" },
+  { id: "Nível 4", goal: "ticketmediogoal4", prize: "ticketmedioprize4" },
 ];
-
 
 interface AdminTabProps {
   form: UseFormReturn<FormValues>;
   storeId: string;
-  onIncentivesCalculated: (incentives: Incentives) => void;
-  incentives: Incentives;
-  addSeller: (name: string, pass: string) => void;
+  sellers: Seller[];
+  onSellersChange: () => void; // Callback para recarregar vendedores
+  onIncentivesCalculated: (incentives: Incentives, lastUpdated: string) => void;
   handleSaveGoals: () => void;
+  lastUpdated: string | null;
 }
 
 export function AdminTab({
   form,
   storeId,
+  sellers,
+  onSellersChange,
   onIncentivesCalculated,
-  incentives,
-  addSeller,
   handleSaveGoals,
+  lastUpdated,
 }: AdminTabProps) {
   const { toast } = useToast();
-  const router = useRouter();
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
+  const [editingSellerName, setEditingSellerName] = useState('');
+  const [editingSellerPassword, setEditingSellerPassword] = useState('');
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -93,14 +96,32 @@ export function AdminTab({
     setValue,
     setError,
     clearErrors,
-    formState: { errors },
-    register,
   } = form;
 
-  const sellers = useWatch({ control, name: "sellers" }) ?? [];
-  const goals = useWatch({ control, name: "goals" });
+  const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const sanitizedValue = value.replace(/[^0-9,.]/g, '').replace(',', '.');
+    onChange(sanitizedValue);
+  }, []);
 
-  const handleAddSeller = () => {
+  const handleNumericBlur = useCallback((field: ControllerRenderProps<any, any>) => {
+      const value = field.value;
+      if (typeof value === 'string' && value.trim() !== '') {
+          const num = parseFloat(value);
+          if (!isNaN(num)) {
+              // Formata para no máximo 2 casas decimais, depois remove os zeros à direita se for o caso.
+              let formattedValue = num.toFixed(2);
+              if (formattedValue.endsWith('.00')) {
+                  formattedValue = String(parseInt(formattedValue));
+              } else if (formattedValue.endsWith('0')) {
+                  formattedValue = formattedValue.slice(0, -1);
+              }
+              field.onChange(formattedValue.replace('.', ',')); // Exibe com vírgula
+          }
+      }
+  }, []);
+
+  const handleAddSeller = async () => {
     const newSellerName = getValues("newSellerName");
     const newSellerPassword = getValues("newSellerPassword");
 
@@ -108,7 +129,7 @@ export function AdminTab({
       setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
       return;
     }
-    if (sellers.some(s => s.name?.toLowerCase() === newSellerName.toLowerCase())) {
+     if (sellers.some(s => s.name?.toLowerCase() === newSellerName.toLowerCase())) {
         setError("newSellerName", { type: "manual", message: "Este nome de vendedor já existe."});
         return;
     }
@@ -124,63 +145,82 @@ export function AdminTab({
       return;
     }
     clearErrors("newSellerPassword");
+    
+    const availableAvatarIds = Array.from({length: 10}, (_, i) => `avatar${i + 1}`);
+    const usedAvatarIds = new Set(sellers.map(s => s.avatar_id));
+    let randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+    if(usedAvatarIds.size < availableAvatarIds.length) {
+        while(usedAvatarIds.has(randomAvatarId)) {
+            randomAvatarId = availableAvatarIds[Math.floor(Math.random() * availableAvatarIds.length)];
+        }
+    }
 
-    addSeller(newSellerName!, finalPassword);
-    setValue("newSellerName", "");
-    setValue("newSellerPassword", "");
+    try {
+        const res = await fetch('/api/sellers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newSellerName, password: finalPassword, avatarId: randomAvatarId, storeId }),
+        });
+
+        if(!res.ok) throw new Error('Falha ao adicionar vendedor');
+        
+        onSellersChange();
+        setValue("newSellerName", "");
+        setValue("newSellerPassword", "");
+        toast({ title: "Sucesso!", description: `Vendedor "${newSellerName}" adicionado.` });
+
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível adicionar o vendedor.' });
+    }
   };
 
-  const removeSeller = (sellerId: string) => {
-    const updatedSellers = (getValues().sellers || []).filter((s) => s.id !== sellerId);
-    setValue("sellers", updatedSellers, { shouldDirty: true });
-
-    const newIncentives = { ...incentives };
-    delete newIncentives[sellerId];
-    onIncentivesCalculated(newIncentives);
-
-    const currentState = loadStateFromStorage();
-    currentState.sellers[storeId] = updatedSellers as Seller[];
-    currentState.goals[storeId] = goals;
-    currentState.incentives[storeId] = newIncentives;
-    saveState(currentState);
-
-    const newTab = updatedSellers.length > 0 && updatedSellers[0].id ? updatedSellers[0].id : "admin";
-    router.push(`/dashboard/${storeId}?tab=${newTab}`);
+  const removeSeller = async (sellerId: string) => {
+    try {
+      const res = await fetch(`/api/sellers/${sellerId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Falha ao remover vendedor');
+      onSellersChange();
+      toast({ title: "Vendedor Removido", description: "O vendedor foi removido com sucesso." });
+    } catch(error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível remover o vendedor.' });
+    }
   };
 
-  const startEditing = (sellerId: string) => setEditingSellerId(sellerId);
+  const startEditing = (seller: Seller) => {
+      setEditingSellerId(seller.id);
+      setEditingSellerName(seller.name);
+      setEditingSellerPassword(seller.password || '');
+  }
   const cancelEditing = () => setEditingSellerId(null);
 
-  const saveSeller = (sellerId: string) => {
-    const currentSellers = getValues().sellers || [];
-    const sellerIndex = currentSellers.findIndex((s) => s.id === sellerId);
-    if (sellerIndex === -1) return;
-
-    const newName = getValues(`sellers.${sellerIndex}.name`);
-    const newPassword = getValues(`sellers.${sellerIndex}.password`);
-
-    if (!newName || newName.trim() === "") {
-      toast({ variant: "destructive", title: "Erro", description: "O nome do vendedor não pode estar vazio." });
+  const saveSeller = async (sellerId: string) => {
+    if (!editingSellerName.trim()) {
+      toast({ variant: "destructive", title: "Erro", description: "O nome não pode estar vazio." });
       return;
     }
-    if (!newPassword || newPassword.length < 4) {
+    if (editingSellerPassword.length < 4) {
       toast({ variant: "destructive", title: "Erro", description: "A senha deve ter pelo menos 4 caracteres." });
       return;
     }
 
-    const updatedSellers = [...currentSellers];
-    updatedSellers[sellerIndex] = { ...updatedSellers[sellerIndex], name: newName, password: newPassword };
-    
-    setValue("sellers", updatedSellers, { shouldDirty: true });
+    try {
+        const res = await fetch(`/api/sellers/${sellerId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: editingSellerName, password: editingSellerPassword }),
+        });
 
-    const currentState = loadStateFromStorage();
-    currentState.sellers[storeId] = updatedSellers as Seller[];
-    currentState.goals[storeId] = goals;
-    currentState.incentives[storeId] = incentives;
-    saveState(currentState);
+        if(!res.ok) throw new Error('Falha ao atualizar vendedor');
+        
+        onSellersChange();
+        setEditingSellerId(null);
+        toast({ title: "Sucesso!", description: "Dados do vendedor atualizados." });
 
-    setEditingSellerId(null);
-    toast({ title: "Sucesso!", description: "Dados do vendedor atualizados." });
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível atualizar o vendedor.' });
+    }
   };
 
   const togglePasswordVisibility = (sellerId: string) => {
@@ -190,38 +230,74 @@ export function AdminTab({
   const handleCalculateIncentives = async () => {
     setIsCalculating(true);
     try {
-      const currentSellers = getValues().sellers;
       const currentGoals = getValues().goals;
       const allIncentives: Incentives = {};
 
-      if (!currentSellers || currentSellers.some(s => !s.id)) {
-          toast({ variant: "destructive", title: "Erro", description: "Dados de vendedores incompletos. Salve todas as alterações antes de calcular." });
+      if (!sellers || sellers.some(s => !s.id)) {
+          toast({ variant: "destructive", title: "Erro", description: "Dados de vendedores incompletos." });
           return;
       }
       
-      for (const seller of currentSellers) {
+       const parseGoals = (rawGoals: any): Goals => {
+        const parsed: any = {};
+        for (const key in rawGoals) {
+            const value = rawGoals[key];
+            if (typeof value === 'string') {
+                const parsedValue = parseFloat(value.replace(',', '.'));
+                parsed[key] = isNaN(parsedValue) ? value : parsedValue;
+            } else {
+                parsed[key] = value;
+            }
+        }
+        return parsed as Goals;
+      }
+
+      const fixedGoals = parseGoals(currentGoals);
+
+      for (const seller of sellers) {
+        const sellerIndex = sellers.findIndex(s => s.id === seller.id);
+        const sellerDataForUpdate = {
+            vendas: getValues(`sellers.${sellerIndex}.vendas`),
+            pa: getValues(`sellers.${sellerIndex}.pa`),
+            ticket_medio: getValues(`sellers.${sellerIndex}.ticket_medio`),
+            corridinha_diaria: getValues(`sellers.${sellerIndex}.corridinha_diaria`),
+        };
+        
+        const parsedSellerData: any = {};
+        for (const key in sellerDataForUpdate) {
+            const value = (sellerDataForUpdate as any)[key];
+             if (typeof value === 'string') {
+                const parsedValue = parseFloat(value.replace(',', '.'));
+                parsedSellerData[key] = isNaN(parsedValue) ? 0 : parsedValue;
+            } else {
+                parsedSellerData[key] = value || 0;
+            }
+        }
+
+        await fetch(`/api/sellers/${seller.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parsedSellerData)
+        });
+
         const result = await incentiveProjection({
            seller: {
               ...seller,
-              vendas: Number(seller.vendas || 0),
-              pa: Number(seller.pa || 0),
-              ticketMedio: Number(seller.ticketMedio || 0),
-              corridinhaDiaria: Number(seller.corridinhaDiaria || 0),
-            } as Seller,
-          goals: currentGoals,
+              vendas: parsedSellerData.vendas,
+              pa: parsedSellerData.pa,
+              ticket_medio: parsedSellerData.ticket_medio,
+              corridinha_diaria: parsedSellerData.corridinha_diaria,
+            },
+          goals: fixedGoals,
         });
         allIncentives[seller.id!] = result;
       }
       
-      onIncentivesCalculated(allIncentives);
+      const newLastUpdated = new Date().toISOString();
+      onIncentivesCalculated(allIncentives, newLastUpdated);
+      onSellersChange();
 
-      const currentState = loadStateFromStorage();
-      currentState.sellers[storeId] = currentSellers as Seller[];
-      currentState.goals[storeId] = currentGoals;
-      currentState.incentives[storeId] = allIncentives;
-      saveState(currentState);
-
-      toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados." });
+      toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados e os dados salvos." });
     } catch (err) {
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : "Falha ao calcular incentivos.";
@@ -231,7 +307,15 @@ export function AdminTab({
     }
   };
   
-  const validSellers = (sellers || []).filter((s): s is Seller => !!s && !!s.id);
+  const formattedLastUpdated = lastUpdated
+    ? new Date(lastUpdated).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   return (
     <div className="space-y-8">
@@ -256,7 +340,7 @@ export function AdminTab({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Nome do Vendedor</FormLabel>
-                          <FormControl><Input placeholder="Ex: João Silva" {...field} /></FormControl>
+                          <FormControl><Input placeholder="Ex: João Silva" {...field} value={field.value ?? ''} onKeyDown={(e) => e.key === 'Enter' && handleAddSeller()} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -265,7 +349,7 @@ export function AdminTab({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Senha (mínimo 4 caracteres)</FormLabel>
-                          <FormControl><Input type="password" placeholder="Opcional, se deixado em branco será o nome" {...field} /></FormControl>
+                          <FormControl><Input type="password" placeholder="Opcional, se deixado em branco será o nome" {...field} value={field.value ?? ''} onKeyDown={(e) => e.key === 'Enter' && handleAddSeller()}/></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -277,18 +361,14 @@ export function AdminTab({
                <div>
                 <h3 className="text-lg font-medium mb-4">Vendedores Atuais</h3>
                 <div className="space-y-2">
-                  {validSellers.length === 0 ? <p className="text-muted-foreground text-sm">Nenhum vendedor cadastrado ainda.</p> :
-                  validSellers.map((seller, index) => (
+                  {sellers.length === 0 ? <p className="text-muted-foreground text-sm">Nenhum vendedor cadastrado ainda.</p> :
+                  sellers.map((seller) => (
                     <div key={seller.id} className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted">
                       {editingSellerId === seller.id ? (
                         <>
                           <div className="flex-grow space-y-2">
-                            <FormField control={control} name={`sellers.${index}.name`} render={({ field }) => (
-                                <FormItem><FormLabel className="sr-only">Nome</FormLabel><FormControl><Input {...field} className="h-9" autoFocus/></FormControl></FormItem>
-                            )}/>
-                            <FormField control={control} name={`sellers.${index}.password`} render={({ field }) => (
-                               <FormItem><FormLabel className="sr-only">Senha</FormLabel><FormControl><Input type={showPassword[seller.id] ? "text" : "password"} {...field} className="h-9" /></FormControl></FormItem>
-                            )}/>
+                             <Input value={editingSellerName} onChange={e => setEditingSellerName(e.target.value)} className="h-9" autoFocus/>
+                             <Input type={showPassword[seller.id] ? "text" : "password"} value={editingSellerPassword} onChange={e => setEditingSellerPassword(e.target.value)} className="h-9" />
                           </div>
                           <div className="flex items-center">
                             <Button size="icon" variant="ghost" type="button" onClick={() => togglePasswordVisibility(seller.id)}>{showPassword[seller.id] ? <EyeOff /> : <Eye />}</Button>
@@ -300,7 +380,7 @@ export function AdminTab({
                         <>
                           <span className="font-medium">{seller.name ?? 'Vendedor sem nome'}</span>
                           <div className="flex items-center">
-                            <Button size="icon" variant="ghost" type="button" onClick={() => startEditing(seller.id)}><Edit/></Button>
+                            <Button size="icon" variant="ghost" type="button" onClick={() => startEditing(seller)}><Edit/></Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" type="button"><Trash2 /></Button></AlertDialogTrigger>
                               <AlertDialogContent>
@@ -325,27 +405,42 @@ export function AdminTab({
               <CardTitle>Lançamentos de Desempenho</CardTitle>
               <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
             </CardHeader>
-            <CardContent>
-              {validSellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
-                <div className="space-y-6">
-                  {validSellers.map((seller, index) => (
-                    <div key={seller.id} className="p-4 border rounded-lg space-y-4 bg-card">
-                      <h3 className="font-semibold text-lg text-card-foreground">{seller.name ?? 'Vendedor sem nome'}</h3>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
-                        <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
-                        <FormField control={control} name={`sellers.${index}.ticketMedio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
-                        <FormField control={control} name={`sellers.${index}.corridinhaDiaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl></FormItem>)}/>
-                      </div>
+            <CardContent className="space-y-8">
+              {sellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
+                <>
+                   {formattedLastUpdated && (
+                    <Card className="bg-secondary/50 border-dashed">
+                        <CardContent className="p-4 flex items-center gap-3">
+                           <Clock className="h-5 w-5 text-muted-foreground" />
+                           <p className="text-sm text-muted-foreground">
+                               Última atualização de dados: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
+                           </p>
+                        </CardContent>
+                    </Card>
+                  )}
+                  {sellers.map((seller, index) => (
+                    <div key={seller.id}>
+                        {index > 0 && <Separator className="my-6" />}
+                        <h3 className="font-semibold text-lg mb-4 text-card-foreground">{seller.name ?? 'Vendedor sem nome'}</h3>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} /></FormControl></FormItem>)}/>
+                            <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} /></FormControl></FormItem>)}/>
+                            <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} /></FormControl></FormItem>)}/>
+                            <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} /></FormControl></FormItem>)}/>
+                        </div>
                     </div>
                   ))}
-                  <Button onClick={handleCalculateIncentives} disabled={isCalculating}>
-                    <Calculator className="mr-2" />
-                    {isCalculating ? "Calculando..." : "Calcular Todos os Incentivos"}
-                  </Button>
-                </div>
+                 </>
               )}
             </CardContent>
+             <CardFooter className="flex-col items-start gap-4">
+                {sellers.length > 0 && (
+                    <Button onClick={handleCalculateIncentives} disabled={isCalculating}>
+                        <Calculator className="mr-2" />
+                        {isCalculating ? "Calculando..." : "Calcular e Salvar Lançamentos"}
+                    </Button>
+                )}
+            </CardFooter>
           </Card>
         </TabsContent>
         
@@ -359,19 +454,19 @@ export function AdminTab({
                 <div>
                     <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Vendas e Prêmios</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metinha (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                         <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Meta (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metona (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaminha" render={({ field }) => (<FormItem><FormLabel>Metinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaminhaprize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaprize" render={({ field }) => (<FormItem><FormLabel>Prêmio Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Metona (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metonaprize" render={({ field }) => (<FormItem><FormLabel>Prêmio Metona (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                     </div>
                      <div className="mt-4 pt-4 border-t">
                         <h4 className="font-medium mb-2 text-card-foreground">Bônus Lendária</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                           <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                           <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                           <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                           <FormField control={control} name="goals.metalendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                           <FormField control={control} name="goals.legendariabonusvalorvenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                           <FormField control={control} name="goals.legendariabonusvalorpremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
                     </div>
                 </div>
@@ -381,8 +476,8 @@ export function AdminTab({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                         {goalTiers.map(tier => (
                             <div key={tier.id} className="space-y-2">
-                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl></FormItem>)} />
-                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="text" inputMode="decimal" step="0.01" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
                         ))}
                     </div>
@@ -393,8 +488,8 @@ export function AdminTab({
                      <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                         {ticketMedioTiers.map(tier => (
                             <div key={tier.id} className="space-y-2">
-                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
-                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
                         ))}
                     </div>
