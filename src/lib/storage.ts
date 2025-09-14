@@ -48,7 +48,7 @@ export interface Goals {
 export type Incentives = Record<string, IncentiveProjectionOutput | null>;
 
 export interface Store {
-    id: string;
+    id: number;
     name: string;
     themeColor: string;
 }
@@ -90,7 +90,7 @@ const defaultGoals: Goals = {
 
 
 export function getInitialState(): AppState {
-    const store1Id = 'minha-primeira-loja';
+    const store1Id = 1;
     return {
         stores: [
             { id: store1Id, name: 'Minha Loja', themeColor: '217.2 32.6% 17.5%' },
