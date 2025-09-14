@@ -27,6 +27,11 @@ Para rodar este projeto corretamente, você precisa configurar as variáveis de 
 -   Encontre a seção "Environment Variables" (Variáveis de Ambiente).
 -   Adicione a variável `DATABASE_URL` com a string de conexão do seu banco de dados Neon de produção.
 
+### Nota sobre Erros de Hidratação
+
+Se você visualizar erros de "Hydration Mismatch" no console do navegador (especialmente com IDs ou elementos desconhecidos como `ptt_birro`), saiba que isso geralmente é causado por extensões de navegador (como gerenciadores de senha ou tradutores) que modificam o HTML. Nossa aplicação já utiliza abordagens seguras de "ClientOnly" e `useEffect` para minimizar este efeito. Recomenda-se testar com extensões desabilitadas para confirmar a origem do aviso.
+
+
 ## Como Publicar e Usar
 
 Para publicar seu aplicativo e começar a usá-lo online, o processo geralmente envolve dois passos principais: compilar o projeto para produção e, em seguida, implantá-lo em um serviço de hospedagem como o Firebase App Hosting.
