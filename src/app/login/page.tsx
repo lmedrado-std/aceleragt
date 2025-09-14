@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, KeyRound, Loader2, Database } from 'lucide-react';
 import Link from 'next/link';
-import { getAdminPassword } from '@/lib/storage';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
