@@ -3,10 +3,7 @@ import { conn } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const storeId = parseInt(params.id, 10);
-  if (isNaN(storeId)) {
-    return NextResponse.json({ error: 'ID da loja inválido' }, { status: 400 });
-  }
+  const storeId = params.id;
 
   try {
     const result = await conn.query('SELECT * FROM stores WHERE id = $1', [storeId]);
@@ -22,10 +19,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const storeId = parseInt(params.id, 10);
-  if (isNaN(storeId)) {
-    return NextResponse.json({ error: 'ID da loja inválido' }, { status: 400 });
-  }
+  const storeId = params.id;
 
   try {
     const { name, theme_color, last_incentive_calculation } = await request.json();
@@ -70,18 +64,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const storeId = parseInt(params.id, 10);
-
-  if (isNaN(storeId)) {
-    return NextResponse.json({ error: 'ID da loja inválido' }, { status: 400 });
-  }
+  const storeId = params.id;
 
   try {
     await conn.query('BEGIN');
     
-    // A restrição ON DELETE CASCADE na tabela `sellers` e `goals` já cuida da remoção dos filhos.
-    // Manter a lógica explícita pode ser mais claro, mas não é estritamente necessário com o schema atual.
-    // Vamos manter a exclusão explícita para clareza e segurança.
     await conn.query('DELETE FROM goals WHERE store_id = $1', [storeId]);
     await conn.query('DELETE FROM sellers WHERE store_id = $1', [storeId]);
     const result = await conn.query('DELETE FROM stores WHERE id = $1', [storeId]);

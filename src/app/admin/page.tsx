@@ -42,7 +42,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [newStoreName, setNewStoreName] = useState("");
   const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: ''});
-  const [editingStoreId, setEditingStoreId] = useState<number | null>(null);
+  const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
   const [editingStoreName, setEditingStoreName] = useState('');
 
   const { toast } = useToast();
@@ -90,7 +90,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleRemoveStore = async (id: number) => {
+  const handleRemoveStore = async (id: string) => {
     if (stores.length <= 1) {
         toast({ variant: "destructive", title: "Ação não permitida", description: "Não é possível remover a última loja." });
         return;
@@ -119,7 +119,7 @@ export default function AdminPage() {
     setEditingStoreName('');
   };
 
-  const handleSaveStore = async (id: number) => {
+  const handleSaveStore = async (id: string) => {
     if (!editingStoreName.trim()) {
       toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       return;

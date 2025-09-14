@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { Logo } from '@/components/logo';
 
 interface Store {
-  id: number;
+  id: string;
   name: string;
 }
 

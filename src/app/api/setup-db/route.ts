@@ -9,7 +9,7 @@ export async function GET() {
     // Tabela de Lojas
     await conn.query(`
       CREATE TABLE IF NOT EXISTS stores (
-        id SERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
         theme_color VARCHAR(50),
         last_incentive_calculation TIMESTAMPTZ
@@ -27,14 +27,15 @@ export async function GET() {
         pa NUMERIC(5, 2) DEFAULT 0,
         ticket_medio NUMERIC(10, 2) DEFAULT 0,
         corridinha_diaria NUMERIC(10, 2) DEFAULT 0,
-        store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE
+        store_id UUID REFERENCES stores(id) ON DELETE CASCADE
       );
     `);
 
     // Tabela de Metas
     await conn.query(`
       CREATE TABLE IF NOT EXISTS goals (
-        store_id INTEGER PRIMARY KEY REFERENCES stores(id) ON DELETE CASCADE,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
         "metaMinha" NUMERIC(10, 2) DEFAULT 0,
         "metaMinhaPrize" NUMERIC(10, 2) DEFAULT 0,
         "meta" NUMERIC(10, 2) DEFAULT 0,

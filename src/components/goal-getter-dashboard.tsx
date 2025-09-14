@@ -27,7 +27,7 @@ const sellerSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   password: z.string().min(4, "A senha deve ter pelo menos 4 caracteres"),
   avatar_id: z.string(),
-  store_id: z.number(),
+  store_id: z.string(),
   vendas: z.coerce.number().min(0).default(0),
   pa: z.coerce.number().min(0).default(0),
   ticket_medio: z.coerce.number().min(0).default(0),

@@ -14,7 +14,12 @@ export async function GET(request: Request) {
   try {
     const result = await conn.query('SELECT * FROM goals WHERE store_id = $1', [storeId]);
     if (result.rowCount === 0) {
-        return NextResponse.json({}); // Retorna objeto vazio se não houver metas
+        // Find store to make sure it exists
+        const storeResult = await conn.query('SELECT id FROM stores WHERE id = $1', [storeId]);
+        if (storeResult.rowCount > 0) {
+          return NextResponse.json({}); // Return empty if goals don't exist but store does
+        }
+        return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 });
     }
     return NextResponse.json(result.rows[0]);
   } catch (error) {

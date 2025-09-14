@@ -34,9 +34,7 @@ const defaultGoals: Omit<Goals, 'store_id'> = {
 
 export async function GET() {
   try {
-    console.log('[API /api/stores] GET: Requisição recebida');
     const result = await conn.query('SELECT id, name, theme_color FROM stores ORDER BY name ASC');
-    console.log(`[API /api/stores] GET: ${result.rowCount} lojas retornadas.`);
     return NextResponse.json(result.rows);
   } catch (error) {
     console.error('[API /api/stores] GET: ERRO ao buscar lojas:', error);
@@ -49,7 +47,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    console.log('[API /api/stores] POST: Requisição recebida');
     const { name, themeColor } = await request.json();
 
     if (!name) {
@@ -73,7 +70,6 @@ export async function POST(request: Request) {
     await conn.query('COMMIT');
 
     const newStore = { id: newStoreId, name, themeColor };
-    console.log('[API /api/stores] POST: Loja criada com sucesso:', newStore);
     return NextResponse.json(newStore, { status: 201 });
   } catch (error) {
     await conn.query('ROLLBACK');
