@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
@@ -7,10 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
+import { ArrowLeft, KeyRound, Loader2, Database } from 'lucide-react';
 import Link from 'next/link';
 import { getAdminPassword } from '@/lib/storage';
-import DbStatus from '@/components/DbStatus';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
@@ -36,7 +36,9 @@ function LoginComponent() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const adminPassword = getAdminPassword();
+    // No modo de desenvolvimento, a senha do admin pode ser diferente.
+    // Em um app real, isso viria de uma fonte segura no backend.
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'supermoda';
 
     if (password === adminPassword) {
       sessionStorage.setItem('adminAuthenticated', 'true');
@@ -102,7 +104,12 @@ function LoginComponent() {
             </form>
           </CardContent>
         </Card>
-        <DbStatus />
+        <Button variant="link" asChild>
+          <Link href="/api/setup-db" target="_blank">
+            <Database className="mr-2 h-4 w-4" />
+            Configurar/Resetar Banco de Dados
+          </Link>
+        </Button>
       </div>
     </main>
   );
@@ -120,5 +127,3 @@ export default function LoginPage() {
         </Suspense>
     )
 }
-
-    
