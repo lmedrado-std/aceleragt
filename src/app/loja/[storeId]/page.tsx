@@ -7,25 +7,26 @@ import { Home, Shield, Loader2, ArrowRight, Sun, Moon } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
-import { loadStateFromStorage, Seller, Store } from "@/lib/storage";
+import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ClientOnly from "@/components/client-only";
 
-export default function StoreHomePage() {
+
+function StorePageContent() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(false);
   
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const storeId = params.storeId as string;
 
-  const loadStoreData = useCallback(() => {
+  const loadStoreData = useCallback(async () => {
     if (!storeId) {
       setError("ID da loja não encontrado na URL.");
       setLoading(false);
@@ -33,25 +34,29 @@ export default function StoreHomePage() {
     };
 
     try {
-        const decodedStoreId = decodeURIComponent(storeId);
-        const savedState = loadStateFromStorage();
-        const foundStore = savedState.stores.find(s => s.id === decodedStoreId);
+        const [storeRes, sellersRes] = await Promise.all([
+          fetch(`/api/stores/${storeId}`),
+          fetch(`/api/sellers?storeId=${storeId}`),
+        ]);
+
+        if (!storeRes.ok) throw new Error('Loja não encontrada');
+        const storeData = await storeRes.json();
+        setStore(storeData);
+
+        if (!sellersRes.ok) throw new Error('Falha ao carregar vendedores');
+        const sellersData = await sellersRes.json();
+        setSellers(sellersData);
         
-        if (foundStore) {
-            setStore(foundStore);
-            setSellers(savedState.sellers[decodedStoreId] || []);
-            setError(null);
-        } else {
-            setError(`Loja com ID "${decodedStoreId}" não foi encontrada.`);
-            toast({
-              variant: "destructive",
-              title: "Erro ao carregar",
-              description: `A loja que você está tentando acessar não foi encontrada.`,
-            });
-        }
+        setError(null);
     } catch (e) {
-        console.error("Failed to load state from localStorage", e);
-        setError("Ocorreu um erro ao carregar os dados da loja.");
+        const errorMessage = e instanceof Error ? e.message : "Ocorreu um erro ao carregar os dados da loja.";
+        console.error("Failed to load store data", e);
+        setError(errorMessage);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar",
+          description: errorMessage,
+        });
     } finally {
         setLoading(false);
     }
@@ -61,29 +66,6 @@ export default function StoreHomePage() {
     loadStoreData();
   }, [loadStoreData]);
   
-  useEffect(() => {
-    const body = document.body;
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(isDark);
-    if(isDark) {
-      body.classList.add('dark');
-    } else {
-      body.classList.remove('dark');
-    }
-  }, [])
-  
-  useEffect(() => {
-    const body = document.body;
-    if(darkMode) {
-      body.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      body.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
-  }, [darkMode])
-
-
   const handleAdminAccess = () => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
     const destination = `/dashboard/${storeId}?tab=admin`;
@@ -116,7 +98,7 @@ export default function StoreHomePage() {
   
   if (error) {
      return (
-        <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
+        <main className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8">
              <h1 className="text-3xl font-bold text-destructive mb-4">Erro ao Carregar Loja</h1>
              <p className="text-xl text-destructive text-center mb-8">{error}</p>
              <Button asChild variant="secondary">
@@ -138,10 +120,6 @@ export default function StoreHomePage() {
           </h1>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full bg-transparent text-primary-foreground border-primary-foreground/50 hover:bg-primary-foreground/10 hover:text-primary-foreground">
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-
             <Button asChild variant="secondary" className="hidden sm:flex items-center gap-2 shadow">
               <Link href="/">
                   <Home className="h-5 w-5" />
@@ -191,7 +169,7 @@ export default function StoreHomePage() {
                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                        <SellerAvatar avatarId={seller.avatarId} className="h-11 w-11" />
+                        <SellerAvatar avatarId={seller.avatar_id} className="h-11 w-11" />
                       <div>
                         <p className="text-base font-semibold text-foreground">
                           {seller.name}
@@ -219,4 +197,12 @@ export default function StoreHomePage() {
       </Button>
     </div>
   );
+}
+
+export default function StoreHomePage() {
+  return (
+    <ClientOnly>
+      <StorePageContent />
+    </ClientOnly>
+  )
 }
