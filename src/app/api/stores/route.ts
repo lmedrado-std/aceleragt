@@ -61,16 +61,37 @@ export async function POST(request: Request) {
     );
     const newStore = storeResult.rows[0];
 
-    const goalColumns = Object.keys(defaultGoals).map(key => `"${key}"`).join(', ');
-    const goalValues = Object.values(defaultGoals);
-    const goalPlaceholders = Object.keys(defaultGoals).map((_, i) => `$${i + 2}`).join(', ');
+    // Explicitly define columns and values to ensure order and correctness
+    const goalColumns = [
+      '"store_id"', '"metaMinha"', '"metaMinhaPrize"', '"meta"', '"metaPrize"',
+      '"metona"', '"metonaPrize"', '"metaLendaria"', '"legendariaBonusValorVenda"',
+      '"legendariaBonusValorPremio"', '"paGoal1"', '"paPrize1"', '"paGoal2"',
+      '"paPrize2"', '"paGoal3"', '"paPrize3"', '"paGoal4"', '"paPrize4"',
+      '"ticketMedioGoal1"', '"ticketMedioPrize1"', '"ticketMedioGoal2"',
+      '"ticketMedioPrize2"', '"ticketMedioGoal3"', '"ticketMedioPrize3"',
+      '"ticketMedioGoal4"', '"ticketMedioPrize4"'
+    ];
+
+    const goalValues = [
+      newStore.id, defaultGoals.metaMinha, defaultGoals.metaMinhaPrize, defaultGoals.meta,
+      defaultGoals.metaPrize, defaultGoals.metona, defaultGoals.metonaPrize, defaultGoals.metaLendaria,
+      defaultGoals.legendariaBonusValorVenda, defaultGoals.legendariaBonusValorPremio,
+      defaultGoals.paGoal1, defaultGoals.paPrize1, defaultGoals.paGoal2, defaultGoals.paPrize2,
+      defaultGoals.paGoal3, defaultGoals.paPrize3, defaultGoals.paGoal4, defaultGoals.paPrize4,
+      defaultGoals.ticketMedioGoal1, defaultGoals.ticketMedioPrize1,
+      defaultGoals.ticketMedioGoal2, defaultGoals.ticketMedioPrize2,
+      defaultGoals.ticketMedioGoal3, defaultGoals.ticketMedioPrize3,
+      defaultGoals.ticketMedioGoal4, defaultGoals.ticketMedioPrize4
+    ];
+
+    const goalPlaceholders = goalValues.map((_, i) => `$${i + 1}`).join(', ');
 
     const goalsQuery = `
-      INSERT INTO goals ("store_id", ${goalColumns})
-      VALUES ($1, ${goalPlaceholders})
+      INSERT INTO goals (${goalColumns.join(', ')})
+      VALUES (${goalPlaceholders})
     `;
 
-    await conn.query(goalsQuery, [newStore.id, ...goalValues]);
+    await conn.query(goalsQuery, goalValues);
 
     await conn.query('COMMIT');
     
