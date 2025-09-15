@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Home, Shield, Store as StoreIcon, Rocket, Moon, Sun } from "lucide-react";
+import { Shield, Store as StoreIcon, Rocket, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Store } from "@/lib/storage";
+import { Logo } from "./logo";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -45,42 +46,41 @@ export function Sidebar() {
       asChild
       variant="ghost"
       className={cn(
-        "w-full justify-start text-base",
-        pathname === href ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"
+        "w-full justify-start text-base font-normal",
+        pathname.startsWith(href) ? "bg-white/20 text-white font-semibold" : "text-white/80 hover:bg-white/10 hover:text-white"
       )}
     >
       <Link href={href}>
-        <div className="mr-2">{icon}</div>
+        <div className="mr-3">{icon}</div>
         {children}
       </Link>
     </Button>
   );
-  
+
   const renderThemeToggle = () => {
     if (!mounted) {
       return <Skeleton className="h-9 w-full bg-white/10" />;
     }
     return (
-      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" className="w-full justify-start text-base text-white/80 hover:bg-white/10 hover:text-white">
-          {theme === 'light' ? <Moon className="mr-2" /> : <Sun className="mr-2" />}
+      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" className="w-full justify-start text-base font-normal text-white/80 hover:bg-white/10 hover:text-white">
+          {theme === 'light' ? <Moon className="mr-3" /> : <Sun className="mr-3" />}
           Modo {theme === 'light' ? 'Escuro' : 'Claro'}
       </Button>
     )
   }
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-blue-600 to-red-600 text-white flex flex-col">
-      <div className="p-4 flex items-center gap-2 border-b border-white/20">
-         <div className="rounded-lg bg-white/20 p-2">
-            <Rocket className="h-6 w-6 text-white" />
-        </div>
-        <h1 className="text-xl font-bold">Acelera GT</h1>
+    <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-[#4A55A2] via-[#D45079] to-[#D45079] text-white flex flex-col">
+      <div className="p-4 flex items-center gap-2 border-b border-white/20 h-20">
+         <Logo className="text-white" />
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
-        <NavLink href="/admin" icon={<Shield />}>Admin</NavLink>
-        <Separator className="bg-white/20 my-4" />
-        <h2 className="text-sm font-semibold tracking-wider text-white/70 uppercase px-3">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+        <div className="px-2 py-2">
+            <NavLink href="/admin" icon={<Shield size={20} />}>Admin</NavLink>
+        </div>
+        <Separator className="bg-white/20 my-2" />
+        <h2 className="text-sm font-semibold tracking-wider text-white/70 uppercase px-3 mt-4 mb-2">
           Lojas
         </h2>
         {loading ? (
@@ -90,7 +90,7 @@ export function Sidebar() {
             </div>
         ) : stores.length > 0 ? (
           stores.map((store) => (
-            <NavLink key={store.id} href={`/loja/${store.id}`} icon={<StoreIcon />}>
+            <NavLink key={store.id} href={`/dashboard/${store.id}`} icon={<StoreIcon size={20} />}>
               {store.name}
             </NavLink>
           ))
@@ -99,12 +99,12 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="p-4 border-t border-white/20 space-y-4">
+      <div className="p-2 border-t border-white/20 space-y-2">
          {renderThemeToggle()}
-        <div className="text-xs text-white/50 text-center">
-            <p>Build Teste 0.0.1 Version</p>
+        <div className="px-3 py-2 text-xs text-white/60 space-y-1">
+            <p>v1.0 - Build Estável</p>
             <p>RyannBreston desenvolvedor</p>
-            <p>© {new Date().getFullYear()} Acelera GT. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} Acelera GT.</p>
         </div>
       </div>
     </aside>
