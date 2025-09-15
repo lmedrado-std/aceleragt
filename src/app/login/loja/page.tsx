@@ -131,9 +131,9 @@ function StoreLoginComponent() {
         <Card className="w-full">
           <CardHeader className="items-center text-center">
             <Store className="h-16 w-16 mb-4 text-primary"/>
-            <CardTitle>Acessar {store.name}</CardTitle>
+            <CardTitle>Login da Loja</CardTitle>
             <CardDescription>
-                Por favor, insira a senha desta loja para continuar.
+                Insira a senha para acessar a loja <strong>{store.name}</strong>.
             </CardDescription>
           </CardHeader>
           <CardContent>

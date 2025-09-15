@@ -81,7 +81,7 @@ function LoginComponent() {
         </Link>
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle>Acesso Restrito</CardTitle>
+            <CardTitle>Login do Administrador Global</CardTitle>
             <CardDescription>
                 Por favor, insira a senha de administrador para continuar.
             </CardDescription>

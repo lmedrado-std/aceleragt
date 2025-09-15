@@ -116,9 +116,9 @@ function SellerLoginComponent() {
         <Card className="w-full">
           <CardHeader className="items-center text-center">
             <SellerAvatar avatarId={seller.avatar_id} className="h-20 w-20 mb-4" />
-            <CardTitle>Olá, {seller.name}!</CardTitle>
+            <CardTitle>Login do Vendedor</CardTitle>
             <CardDescription>
-                Por favor, insira sua senha para acessar seu painel.
+                <strong>{seller.name}</strong>, insira sua senha para continuar.
             </CardDescription>
           </CardHeader>
           <CardContent>
