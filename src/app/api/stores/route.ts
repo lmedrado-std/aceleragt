@@ -57,14 +57,19 @@ export async function POST(request: Request) {
     
     const storeResult = await conn.query(
       'INSERT INTO stores (name, theme_color) VALUES ($1, $2) RETURNING id',
-      [name, themeColor || '217.2 32.6% 17.5%']
+      [name, themeColor || null]
     );
     const newStoreId = storeResult.rows[0].id;
 
+    const goalKeys = Object.keys(defaultGoals);
+    const goalValues = Object.values(defaultGoals);
+    const goalColumns = goalKeys.map(key => `"${key}"`).join(', ');
+    const goalPlaceholders = goalKeys.map((_, i) => `$${i + 2}`).join(', ');
+
     await conn.query(
-        `INSERT INTO goals (store_id, "metaMinha", "metaMinhaPrize", "meta", "metaPrize", "metona", "metonaPrize", "metaLendaria", "legendariaBonusValorVenda", "legendariaBonusValorPremio", "paGoal1", "paPrize1", "paGoal2", "paPrize2", "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1", "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3", "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4")
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
-        [newStoreId, ...Object.values(defaultGoals)]
+        `INSERT INTO goals (store_id, ${goalColumns})
+         VALUES ($1, ${goalPlaceholders})`,
+        [newStoreId, ...goalValues]
     );
 
     await conn.query('COMMIT');
