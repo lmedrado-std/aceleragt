@@ -143,7 +143,7 @@ function AdminPageComponent() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
+    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto p-4 sm:p-6 md:p-8">
         <div className="w-full flex justify-between items-center">
             <div>
                 <h1 className="text-3xl font-bold text-foreground">
@@ -253,7 +253,7 @@ function AdminPageComponent() {
                         />
                     </div>
                 </div>
-                <Button onClick={handleChangePassword} className="w-full mt-6" disabled><KeyRound/> Alterar Senha</Button>
+                <Button onClick={handleChangePassword} className="w-full mt-6" disabled><KeyRound className="mr-2 h-4 w-4"/> Alterar Senha</Button>
                 </CardContent>
             </Card>
         </div>

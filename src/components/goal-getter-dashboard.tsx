@@ -204,15 +204,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         setIsAdmin(adminAuthenticated);
 
         const tabFromUrl = searchParams.get("tab");
-        let tabToActivate = tabFromUrl || (adminAuthenticated ? "admin" : sellersData[0]?.id || "admin");
+        let tabToActivate = tabFromUrl || (sellersData[0]?.id || "admin");
 
         if (tabToActivate !== "admin" && !sellersData.some((s: Seller) => s.id === tabToActivate)) {
-            tabToActivate = adminAuthenticated ? "admin" : (sellersData[0]?.id || "admin");
+            tabToActivate = sellersData[0]?.id || "admin";
         }
 
         if (tabToActivate === "admin" && !adminAuthenticated) {
-            router.push(`/login?redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=admin`)}`);
-        } else if (tabToActivate !== 'admin' && !adminAuthenticated && !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)) {
+            // If not admin and trying to access admin tab, redirect to first seller or login
+            if (sellersData.length > 0) {
+              handleTabChange(sellersData[0].id)
+            } else {
+               router.push(`/login?redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=admin`)}`);
+            }
+        } else if (tabToActivate !== 'admin' && !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)) {
             router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=${tabToActivate}`)}`);
         } else {
             setActiveTab(tabToActivate);
@@ -261,14 +266,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   };
 
   const handleTabChange = (newTab: string) => {
-    if (newTab === "admin" && !isAdmin) {
-      router.push(`/login?redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=admin`)}`);
-      return;
-    }
-    if (newTab !== "admin" && !isAdmin && !sessionStorage.getItem(`sellerAuthenticated-${newTab}`)) {
-      router.push(`/login/vendedor?storeId=${storeId}&sellerId=${newTab}&redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=${newTab}`)}`);
-      return;
-    }
     setActiveTab(newTab);
     router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
   };
@@ -279,27 +276,25 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   return (
     <div className="container mx-auto p-4 py-8 md:p-8 relative">
-       <div className="w-full bg-gradient-to-r from-primary to-destructive text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+       <div className="w-full bg-gradient-to-r from-[#4A55A2] to-[#D45079] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
             <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" className="shadow">
+            <Button asChild variant="secondary" className="shadow bg-white/20 hover:bg-white/30 text-white">
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
                 Todas as Lojas
               </Link>
             </Button>
-            {isAdmin && (
-              <Button asChild variant="secondary" className="shadow">
+            <Button asChild variant="secondary" className="shadow bg-white/20 hover:bg-white/30 text-white">
                 <Link href="/admin">
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   Admin Global
                 </Link>
               </Button>
-            )}
           </div>
         </header>
       </div>
@@ -310,13 +305,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <div className="flex items-center border-b justify-between flex-wrap">
                 <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
-                  {sellers.map((seller) => (
+                   {sellers.length > 0 ? sellers.map((seller) => (
                     <TabsTrigger key={seller.id} value={seller.id}
-                      className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                      className="rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-semibold"
                     >
                       {seller.name}
                     </TabsTrigger>
-                  ))}
+                  )) : !isAdmin && (
+                    <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
+                  )}
                 </TabsList>
 
                 {isAdmin && (
@@ -324,7 +321,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     <TooltipTrigger asChild>
                       <TabsList className="h-auto p-0 bg-transparent border-b-0">
                         <TabsTrigger value="admin"
-                          className="rounded-t-lg rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                          className="rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-semibold"
                         >
                           <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                         </TabsTrigger>

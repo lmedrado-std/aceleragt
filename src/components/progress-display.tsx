@@ -100,61 +100,6 @@ const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
     </div>
 );
 
-const GoldMedal = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 13.5L6 18H18L15 13.5" fill="#FFC700"/>
-        <path d="M9 13.5L6 18H18L15 13.5" stroke="#E6B300" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="12" cy="9" r="5" fill="#FFD700" stroke="#E6B300" strokeWidth="1.5"/>
-        <path d="M12 9L11 8L12 11L13 8L12 9Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M8 12L6 6" fill="#D20000"/>
-        <path d="M16 12L18 6" fill="#D20000"/>
-        <path d="M8 12L6 6" stroke="#C00" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M16 12L18 6" stroke="#C00" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-)
-
-const SilverMedal = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 13.5L6 18H18L15 13.5" fill="#C0C0C0" stroke="#A9A9A9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="12" cy="9" r="5" fill="#D3D3D3" stroke="#A9A9A9" strokeWidth="1.5"/>
-        <path d="M12 9L11 8L12 11L13 8L12 9Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M8 12L6 6" fill="#005B96"/>
-        <path d="M16 12L18 6" fill="#005B96"/>
-        <path d="M8 12L6 6" stroke="#004080" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M16 12L18 6" stroke="#004080" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-)
-
-const BronzeMedal = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 13.5L6 18H18L15 13.5" fill="#CD7F32" stroke="#B8732E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="12" cy="9" r="5" fill="#D28C3A" stroke="#B8732E" strokeWidth="1.5"/>
-        <path d="M12 9L11 8L12 11L13 8L12 9Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M8 12L6 6" fill="#A52A2A"/>
-        <path d="M16 12L18 6" fill="#A52A2A"/>
-        <path d="M8 12L6 6" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M16 12L18 6" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-)
-const RankingBadge = ({ rank }: { rank: number | undefined }) => {
-    if (!rank || rank <= 0) return null;
-
-    let Medal = null;
-    if (rank === 1) Medal = GoldMedal;
-    if (rank === 2) Medal = SilverMedal;
-    if (rank === 3) Medal = BronzeMedal;
-
-    return (
-        <div className={cn("flex items-center justify-center gap-4 rounded-lg px-4 py-2 bg-primary/90 text-primary-foreground shadow-md")}>
-            <Trophy className="h-8 w-8" />
-            <div className="text-center">
-                <p className="font-bold text-lg">{rank}º Lugar em Vendas</p>
-                {Medal && <div className="flex justify-center"><Medal/></div>}
-            </div>
-        </div>
-    );
-};
-
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
@@ -190,14 +135,14 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
           rankMedal = "🥉";
           rankMessage = `Muito bom, ${name}! Você conquistou o 3º lugar, bora buscar o topo!`;
       } else {
-          rankMessage = `Bora subir, ${name}! Continue se esforçando, o pódio te espera!`;
+          rankMessage = `Bora subir, ${name}! Você está em ${salesRank}º lugar. Continue se esforçando, o pódio te espera!`;
       }
   }
 
 
   return (
     <div className="space-y-6">
-       <Card className="col-span-1 md:col-span-2 lg:col-span-4 bg-primary text-primary-foreground">
+        <Card className="col-span-full bg-primary text-primary-foreground">
             <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div>
@@ -206,7 +151,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     </div>
                 </div>
                  {vendas > 0 && salesRank && salesRank > 0 && (
-                     <div className="text-right">
+                     <div className="text-right flex-grow">
                         <div className="flex items-center justify-end gap-2 font-bold">
                             <Trophy className="h-5 w-5" />
                             <span>{salesRank}º Lugar em Vendas</span>

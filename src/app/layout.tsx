@@ -10,7 +10,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Goal Getter',
+  title: 'Acelera GT',
   description: 'Acelere suas vendas e ganhos',
 };
 
@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${montserrat.className} font-sans antialiased bg-muted/40`}>
-          <main className='p-4 sm:p-6 md:p-8'>{children}</main>
+          <main>{children}</main>
           <Toaster />
       </body>
     </html>
