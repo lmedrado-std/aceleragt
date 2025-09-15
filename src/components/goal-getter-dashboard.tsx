@@ -248,10 +248,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   
   const handleSaveGoals = async () => {
     try {
+        const goals = getValues().goals;
+        const cleanGoals: { [key: string]: any } = {};
+
+        for (const key in goals) {
+          const value = (goals as any)[key];
+          if (typeof value === 'string') {
+            const parsedValue = parseFloat(value.replace(',', '.'));
+            cleanGoals[key] = isNaN(parsedValue) ? 0 : parsedValue;
+          } else {
+            cleanGoals[key] = value;
+          }
+        }
+
         const res = await fetch(`/api/goals`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ store_id: storeId, goals: getValues().goals })
+            body: JSON.stringify({ store_id: storeId, goals: cleanGoals })
         });
         if (!res.ok) {
             const errorData = await res.json();
