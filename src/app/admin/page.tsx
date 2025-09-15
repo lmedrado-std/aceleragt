@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home, Database } from "lucide-react";
+import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home, Database, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,7 @@ function AdminPageComponent() {
   const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: ''});
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
   const [editingStoreName, setEditingStoreName] = useState('');
+  const [isResettingDb, setIsResettingDb] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
@@ -134,6 +135,22 @@ function AdminPageComponent() {
   const handleChangePassword = () => {
     // This is a placeholder as admin password management is not implemented via DB yet
     toast({ title: "Funcionalidade em desenvolvimento", description: "A alteração de senha de admin será implementada em breve."});
+  };
+  
+  const handleResetDatabase = async () => {
+    setIsResettingDb(true);
+    try {
+        const res = await fetch('/api/setup-db');
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || 'Falha ao resetar o banco de dados.');
+        }
+        toast({ title: "Sucesso!", description: "A estrutura do banco de dados foi configurada com sucesso."});
+    } catch(error) {
+        toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
+    } finally {
+        setIsResettingDb(false);
+    }
   };
 
   if (loading) {
@@ -246,16 +263,42 @@ function AdminPageComponent() {
                      <Button onClick={handleChangePassword} className="w-full" disabled><KeyRound className="mr-2 h-4 w-4"/> Alterar Senha</Button>
                      <Separator />
                      <div className="space-y-2">
-                        <Label>Diagnóstico do Banco de Dados</Label>
+                        <Label>Manutenção do Banco de Dados</Label>
                         <p className="text-sm text-muted-foreground">
-                            Verifique a estrutura das tabelas para garantir que correspondem ao código da aplicação.
+                            Use estas ferramentas para diagnósticos ou para a configuração inicial do sistema.
                         </p>
-                        <Button asChild variant="outline" className="w-full">
-                            <Link href="/admin/db-schema">
-                                <Database className="mr-2 h-4 w-4" />
-                                Visualizar Schema do Banco
-                            </Link>
-                        </Button>
+                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <Button asChild variant="outline" className="w-full">
+                                <Link href="/admin/db-schema">
+                                    <Database className="mr-2 h-4 w-4" />
+                                    Ver Schema
+                                </Link>
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" className="w-full">
+                                        <AlertTriangle className="mr-2 h-4 w-4" />
+                                        Resetar Estrutura do Banco
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmar Ação</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`) se elas não existirem. 
+                                            É uma operação segura e **não apaga dados existentes**. Use para a configuração inicial ou para corrigir problemas de schema.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleResetDatabase} disabled={isResettingDb}>
+                                            {isResettingDb && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                            Confirmar e Configurar
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                     </div>
                 </div>
                 </CardContent>

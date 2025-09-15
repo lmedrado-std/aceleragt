@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Loader2, Database } from 'lucide-react';
+import { KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 
@@ -98,12 +98,6 @@ function LoginComponent() {
             </form>
           </CardContent>
         </Card>
-        <Button variant="link" asChild>
-          <Link href="/api/setup-db" target="_blank">
-            <Database className="mr-2 h-4 w-4" />
-            Configurar/Resetar Banco de Dados
-          </Link>
-        </Button>
       </div>
     </main>
   );
