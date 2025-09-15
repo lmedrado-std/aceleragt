@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, KeyRound, Loader2, Database } from 'lucide-react';
+import { KeyRound, Loader2, Database } from 'lucide-react';
 import Link from 'next/link';
+import { Logo } from '@/components/logo';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
@@ -35,8 +36,7 @@ function LoginComponent() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // No modo de desenvolvimento, a senha do admin pode ser diferente.
-    // Em um app real, isso viria de uma fonte segura no backend.
+    // This password should be managed via a secure backend in a real app
     const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'supermoda';
 
     if (password === adminPassword) {
@@ -58,7 +58,7 @@ function LoginComponent() {
 
   if (loading) {
      return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background">
             <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
             <p className="mt-4 text-muted-foreground">Verificando acesso...</p>
         </div>
@@ -66,16 +66,11 @@ function LoginComponent() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
-       <div className="absolute top-4 left-4">
-            <Button asChild variant="outline">
-                <Link href="/">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Página Inicial
-                </Link>
-            </Button>
-        </div>
+    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
+        <Link href="/" className="mb-4">
+          <Logo className="h-16 w-auto text-foreground" />
+        </Link>
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle>Acesso Restrito</CardTitle>
@@ -98,7 +93,7 @@ function LoginComponent() {
                 </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? 'Verificando...' : 'Entrar'}
-                <KeyRound className="ml-2 h-4 w-4" />
+                <KeyRound />
               </Button>
             </form>
           </CardContent>
@@ -117,7 +112,7 @@ function LoginComponent() {
 export default function LoginPage() {
     return (
         <Suspense fallback={
-            <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background">
                 <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
                 <p className="mt-4 text-muted-foreground">Carregando...</p>
             </div>

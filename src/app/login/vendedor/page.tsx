@@ -12,6 +12,7 @@ import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Seller } from '@/lib/storage';
 import { SellerAvatar } from '@/components/seller-avatar';
+import { Logo } from '@/components/logo';
 
 function SellerLoginComponent() {
   const [password, setPassword] = useState('');
@@ -91,7 +92,7 @@ function SellerLoginComponent() {
 
   if (loading || !seller || !storeId) {
      return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background">
             <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
             <p className="mt-4 text-muted-foreground">Carregando...</p>
         </div>
@@ -109,6 +110,9 @@ function SellerLoginComponent() {
             </Button>
         </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
+        <Link href="/" className="mb-4">
+          <Logo className="h-16 w-auto text-foreground" />
+        </Link>
         <Card className="w-full">
           <CardHeader className="items-center text-center">
             <SellerAvatar avatarId={seller.avatar_id} className="h-20 w-20 mb-4" />
@@ -132,7 +136,7 @@ function SellerLoginComponent() {
                 </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? 'Verificando...' : 'Entrar'}
-                <KeyRound className="ml-2 h-4 w-4" />
+                <KeyRound />
               </Button>
             </form>
           </CardContent>
@@ -145,7 +149,7 @@ function SellerLoginComponent() {
 export default function SellerLoginPage() {
     return (
         <Suspense fallback={
-            <div className="flex flex-col items-center justify-center min-h-screen">
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background">
                 <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
                 <p className="mt-4 text-muted-foreground">Carregando...</p>
             </div>
