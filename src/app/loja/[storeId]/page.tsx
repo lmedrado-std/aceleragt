@@ -80,7 +80,8 @@ function StorePageContent() {
   };
 
   const handleAdminAccess = () => {
-    router.push(`/login?redirect=/admin/dashboard`);
+    const destination = `/dashboard/${storeId}?tab=admin`;
+    router.push(`/login?redirect=${encodeURIComponent(destination)}`);
   };
 
   const formattedLastUpdated = store?.last_incentive_calculation
