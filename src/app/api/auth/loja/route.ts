@@ -10,7 +10,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ID da loja e senha são obrigatórios' }, { status: 400 });
     }
     
-    // Fetch store with password. We use includePassword=true for this internal check.
     const result = await conn.query("SELECT password FROM stores WHERE id = $1", [storeId]);
 
     if (result.rowCount === 0) {
@@ -20,7 +19,6 @@ export async function POST(request: Request) {
     const storePassword = result.rows[0].password;
 
     // A null password means the store is not password protected.
-    // An empty string password means it's protected but the password is blank.
     if (storePassword === null) {
          return NextResponse.json({ success: true });
     }

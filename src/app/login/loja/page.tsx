@@ -35,14 +35,18 @@ function StoreLoginComponent() {
     
     async function fetchStore() {
         try {
-            const res = await fetch(`/api/stores/${storeId}?includePassword=true`);
+            const res = await fetch(`/api/stores/${storeId}`);
             if (!res.ok) throw new Error('Falha ao buscar dados da loja');
             const currentStore = await res.json();
 
             if (currentStore) {
-                setStore(currentStore);
+                // Fetch the store with password info separately for the check
+                const passRes = await fetch(`/api/stores/${storeId}?includePassword=true`);
+                const storeWithPass = await passRes.json();
+                
+                setStore(storeWithPass);
                 // If the store is not password protected OR already authenticated, redirect
-                if (currentStore.password === null || sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true') {
+                if (storeWithPass.password === null || sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true') {
                   sessionStorage.setItem(`storeAuthenticated-${storeId}`, 'true'); // Ensure it is set for non-password stores
                   router.push(redirectUrl);
                 } else {
@@ -76,12 +80,17 @@ function StoreLoginComponent() {
       });
 
       if (res.ok) {
-        sessionStorage.setItem(`storeAuthenticated-${storeId}`, 'true');
-        toast({
-          title: 'Acesso concedido!',
-          description: `Bem-vindo(a) à ${store?.name}.`,
-        });
-        router.push(redirectUrl);
+        const data = await res.json();
+        if (data.success) {
+            sessionStorage.setItem(`storeAuthenticated-${storeId}`, 'true');
+            toast({
+              title: 'Acesso concedido!',
+              description: `Bem-vindo(a) à ${store?.name}.`,
+            });
+            router.push(redirectUrl);
+        } else {
+            throw new Error(data.error || 'Senha incorreta');
+        }
       } else {
         const data = await res.json();
         throw new Error(data.error || 'Senha incorreta');
