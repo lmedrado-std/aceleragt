@@ -25,7 +25,7 @@ export async function POST(request: Request) {
          return NextResponse.json({ success: true });
     }
 
-    // Se a senha digitada for a da loja, acesso liberado
+    // Se a senha digitada for a da loja, acesso liberado (agora com trim em ambos os lados)
     if (storePassword && trimmedPassword === storePassword.trim()) {
         return NextResponse.json({ success: true });
     }
