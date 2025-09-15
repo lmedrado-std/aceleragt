@@ -28,7 +28,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Campos obrigatórios ausentes: nome, senha, avatarId e storeId são necessários.' }, { status: 400 });
     }
     
-    // As colunas com "_" ou camelCase precisam de aspas duplas no PostgreSQL
     const result = await conn.query(
       'INSERT INTO sellers (name, password, "avatar_id", "store_id") VALUES ($1, $2, $3, $4) RETURNING *',
       [name, password, avatarId, storeId]
@@ -38,7 +37,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[API POST /api/sellers] ERRO:', error);
     const typedError = error as any;
-    // Retorna um erro mais detalhado para facilitar a depuração
     return NextResponse.json({ 
         error: 'Erro interno do servidor ao criar vendedor.',
         details: typedError.message,

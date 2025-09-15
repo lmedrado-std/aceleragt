@@ -56,28 +56,25 @@ export async function POST(request: Request) {
     await conn.query('BEGIN');
     
     const storeResult = await conn.query(
-      'INSERT INTO stores (name, theme_color) VALUES ($1, $2) RETURNING id',
+      'INSERT INTO stores (name, theme_color) VALUES ($1, $2) RETURNING id, name, theme_color',
       [name, themeColor || null]
     );
-    const newStoreId = storeResult.rows[0].id;
+    const newStore = storeResult.rows[0];
 
-    const goalEntries = Object.entries(defaultGoals);
-    const goalColumns = goalEntries.map(([key]) => `"${key}"`).join(', ');
-    const goalValues = goalEntries.map(([, value]) => value);
-    const goalPlaceholders = goalEntries.map((_, i) => `$${i + 2}`).join(', ');
+    const goalColumns = Object.keys(defaultGoals).map(key => `"${key}"`).join(', ');
+    const goalValues = Object.values(defaultGoals);
+    const goalPlaceholders = Object.keys(defaultGoals).map((_, i) => `$${i + 2}`).join(', ');
 
     const goalsQuery = `
       INSERT INTO goals ("store_id", ${goalColumns})
       VALUES ($1, ${goalPlaceholders})
     `;
 
-    await conn.query(goalsQuery, [newStoreId, ...goalValues]);
+    await conn.query(goalsQuery, [newStore.id, ...goalValues]);
 
     await conn.query('COMMIT');
-
-    const storeQuery = await conn.query('SELECT * FROM stores WHERE id = $1', [newStoreId]);
-
-    return NextResponse.json(storeQuery.rows[0], { status: 201 });
+    
+    return NextResponse.json(newStore, { status: 201 });
 
   } catch (error) {
     await conn.query('ROLLBACK');
