@@ -36,7 +36,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json(result.rows[0]);
   } catch (error) {
     console.error(`[API PUT /api/sellers/${sellerId}] ERRO:`, error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }, { status: 500 });
+    const typedError = error as any;
+    return NextResponse.json({
+         error: 'Erro interno do servidor ao atualizar vendedor.',
+        details: typedError.message,
+        code: typedError.code,
+     }, { status: 500 });
   }
 }
 

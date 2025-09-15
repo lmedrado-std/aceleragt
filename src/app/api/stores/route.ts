@@ -74,8 +74,10 @@ export async function POST(request: Request) {
 
     await conn.query('COMMIT');
 
-    const newStore = { id: newStoreId, name, themeColor };
-    return NextResponse.json(newStore, { status: 201 });
+    const storeQuery = await conn.query('SELECT * FROM stores WHERE id = $1', [newStoreId]);
+
+    return NextResponse.json(storeQuery.rows[0], { status: 201 });
+
   } catch (error) {
     await conn.query('ROLLBACK');
     console.error('[API /api/stores] POST: ERRO ao criar loja:', error);
