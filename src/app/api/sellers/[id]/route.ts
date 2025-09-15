@@ -7,16 +7,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   try {
     const body = await request.json();
+    // Renomeado para corresponder ao schema
     const { name, password, vendas, pa, ticket_medio, corridinha_diaria } = body;
 
     const fields: string[] = [];
     const values: any[] = [];
     let queryIndex = 1;
 
+    // Colunas padrão não precisam de aspas, mas snake_case/camelCase sim.
     if (name !== undefined) { fields.push(`name = $${queryIndex++}`); values.push(name); }
     if (password !== undefined) { fields.push(`password = $${queryIndex++}`); values.push(password); }
     if (vendas !== undefined) { fields.push(`vendas = $${queryIndex++}`); values.push(vendas); }
     if (pa !== undefined) { fields.push(`pa = $${queryIndex++}`); values.push(pa); }
+    // As colunas com _ ou camelCase precisam de aspas duplas.
     if (ticket_medio !== undefined) { fields.push(`"ticket_medio" = $${queryIndex++}`); values.push(ticket_medio); }
     if (corridinha_diaria !== undefined) { fields.push(`"corridinha_diaria" = $${queryIndex++}`); values.push(corridinha_diaria); }
     

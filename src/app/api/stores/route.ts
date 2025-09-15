@@ -61,16 +61,17 @@ export async function POST(request: Request) {
     );
     const newStoreId = storeResult.rows[0].id;
 
-    const goalKeys = Object.keys(defaultGoals);
-    const goalValues = Object.values(defaultGoals);
-    const goalColumns = goalKeys.map(key => `"${key}"`).join(', ');
-    const goalPlaceholders = goalKeys.map((_, i) => `$${i + 2}`).join(', ');
+    const goalEntries = Object.entries(defaultGoals);
+    const goalColumns = goalEntries.map(([key]) => `"${key}"`).join(', ');
+    const goalValues = goalEntries.map(([, value]) => value);
+    const goalPlaceholders = goalEntries.map((_, i) => `$${i + 2}`).join(', ');
 
-    await conn.query(
-        `INSERT INTO goals (store_id, ${goalColumns})
-         VALUES ($1, ${goalPlaceholders})`,
-        [newStoreId, ...goalValues]
-    );
+    const goalsQuery = `
+      INSERT INTO goals ("store_id", ${goalColumns})
+      VALUES ($1, ${goalPlaceholders})
+    `;
+
+    await conn.query(goalsQuery, [newStoreId, ...goalValues]);
 
     await conn.query('COMMIT');
 
