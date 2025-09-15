@@ -28,9 +28,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Campos obrigatórios ausentes' }, { status: 400 });
     }
     
-    // Corrigido: Envolvendo todas as colunas com aspas duplas para consistência e segurança
     const result = await conn.query(
-      'INSERT INTO sellers ("name", "password", "avatar_id", "store_id") VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO sellers (name, password, avatar_id, store_id) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, password, avatarId, storeId]
     );
     
