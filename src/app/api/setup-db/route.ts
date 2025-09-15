@@ -27,7 +27,7 @@ export async function GET() {
         pa NUMERIC(5, 2) DEFAULT 0,
         ticket_medio NUMERIC(10, 2) DEFAULT 0,
         corridinha_diaria NUMERIC(10, 2) DEFAULT 0,
-        store_id UUID REFERENCES stores(id) ON DELETE CASCADE
+        store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE
       );
     `);
 
