@@ -68,7 +68,10 @@ function AdminPageComponent() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: newStoreName })
         });
-        if (!res.ok) throw new Error('Falha ao adicionar loja');
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Falha ao adicionar loja');
+        }
         const newStore = await res.json();
         setStores(prev => [...prev, newStore]);
         setNewStoreName("");
@@ -203,7 +206,7 @@ function AdminPageComponent() {
                                 <span className="font-medium">{store.name}</span>
                                 <div className="flex items-center">
                                     <Button asChild variant="ghost" size="sm">
-                                    <Link href={`/dashboard/${store.id}`}>
+                                    <Link href={`/loja/${store.id}`}>
                                         Acessar <ArrowRight className="ml-2 h-4 w-4"/>
                                     </Link>
                                     </Button>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,8 @@ function StorePageContent() {
   };
 
   const handleAdminAccess = () => {
-    router.push(`/dashboard/${storeId}?tab=admin`);
+    const destination = `/dashboard/${storeId}?tab=admin`;
+    router.push(`/login?redirect=${encodeURIComponent(destination)}`);
   };
 
   const formattedLastUpdated = store?.last_incentive_calculation
@@ -100,20 +102,20 @@ function StorePageContent() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-6 p-6 rounded-lg bg-gradient-to-r from-primary to-destructive shadow-lg text-primary-foreground">
+        <div className="mb-6 p-6 rounded-lg bg-card shadow-md">
             <div className="flex flex-wrap items-center justify-between gap-4">
                  <div>
                     <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
-                    <p className="text-primary-foreground/80 mt-1">Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.</p>
+                    <p className="text-muted-foreground mt-1">Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="secondary" onClick={() => loadStoreData(true)} disabled={loading}>
+                    <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading}>
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Atualizar
                     </Button>
-                    <Button variant="secondary" asChild>
+                    <Button variant="default" asChild>
                         <Link href="/">
                             <Home className="mr-2 h-4 w-4" />
                             Página Inicial
@@ -125,7 +127,7 @@ function StorePageContent() {
         
         {/* Last Updated Banner */}
         {formattedLastUpdated && (
-            <div className="mb-6 p-3 rounded-md bg-destructive/80 text-destructive-foreground text-center flex items-center justify-center gap-2 text-sm font-medium">
+            <div className="mb-6 p-3 rounded-md bg-destructive text-destructive-foreground text-center flex items-center justify-center gap-2 text-sm font-medium">
                 <Clock className="h-4 w-4" />
                 <span>Última atualização de dados: {formattedLastUpdated}</span>
             </div>
