@@ -46,6 +46,7 @@ export type Incentives = Record<string, IncentiveProjectionOutput | null>;
 export interface Store {
     id: string;
     name: string;
+    password?: string | null;
     theme_color: string | null;
     last_incentive_calculation: string | null;
 }
@@ -56,3 +57,5 @@ export interface AppState {
     goals: Record<string, Goals>;
     incentives: Record<string, Incentives>;
 }
+
+    

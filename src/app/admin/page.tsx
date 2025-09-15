@@ -37,7 +37,7 @@ function AdminPageComponent() {
   const [newStoreName, setNewStoreName] = useState("");
   const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: '' });
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
-  const [editingStore, setEditingStore] = useState<{ name: string, password?: string }>({ name: '' });
+  const [editingStore, setEditingStore] = useState<{ name: string, password?: string }>({ name: '', password: '' });
   const [isResettingDb, setIsResettingDb] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
@@ -122,12 +122,12 @@ function AdminPageComponent() {
   
   const handleStartEditingStore = (store: StoreType) => {
     setEditingStoreId(store.id);
-    setEditingStore({ name: store.name, password: store.password });
+    setEditingStore({ name: store.name, password: store.password || '' });
   };
 
   const handleCancelEditingStore = () => {
     setEditingStoreId(null);
-    setEditingStore({ name: '' });
+    setEditingStore({ name: '', password: '' });
   };
 
   const handleSaveStore = async (id: string) => {
@@ -142,7 +142,7 @@ function AdminPageComponent() {
             body: JSON.stringify({ name: editingStore.name, password: editingStore.password })
         });
         if (!res.ok) throw new Error('Falha ao atualizar loja');
-        fetchStores();
+        fetchStores(); // Refetch to get updated data, including potentially new password
         toast({ title: "Sucesso!", description: `Loja "${editingStore.name}" atualizada.` });
     } catch(error) {
         toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
@@ -266,7 +266,7 @@ function AdminPageComponent() {
                         {stores.map((store) => (
                             <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
                                 {editingStoreId === store.id ? (
-                                <div className="flex-grow flex items-center gap-2">
+                                <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
                                     <Input 
                                         value={editingStore.name}
                                         onChange={(e) => setEditingStore(prev => ({ ...prev, name: e.target.value }))}
@@ -274,13 +274,15 @@ function AdminPageComponent() {
                                         autoFocus
                                     />
                                     <Input 
-                                        placeholder="Senha da loja"
+                                        placeholder="Senha da loja (opcional)"
                                         value={editingStore.password}
                                         onChange={(e) => setEditingStore(prev => ({ ...prev, password: e.target.value }))}
                                         className="h-8"
                                     />
-                                    <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
-                                    <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
+                                    <div className="col-span-full sm:col-span-2 flex justify-end items-center">
+                                      <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
+                                      <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
+                                    </div>
                                 </div>
                                 ) : (
                                 <>
@@ -429,3 +431,5 @@ export default function AdminDashboardPage() {
         </ClientOnly>
     )
 }
+
+    

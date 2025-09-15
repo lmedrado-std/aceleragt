@@ -4,9 +4,13 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const storeId = params.id;
+  const { searchParams } = new URL(request.url);
+  const includePassword = searchParams.get('includePassword') === 'true';
 
   try {
-    const result = await conn.query('SELECT * FROM stores WHERE id = $1', [storeId]);
+    const columns = includePassword ? 'id, name, theme_color, password' : 'id, name, theme_color, last_incentive_calculation';
+    const result = await conn.query(`SELECT ${columns} FROM stores WHERE id = $1`, [storeId]);
+    
     if (result.rowCount === 0) {
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 });
     }
@@ -18,29 +22,20 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id:string } }) {
   const storeId = params.id;
 
   try {
-    const { name, theme_color, last_incentive_calculation } = await request.json();
+    const { name, theme_color, last_incentive_calculation, password } = await request.json();
     
-    // Build query dynamically
     const fields: string[] = [];
     const values: any[] = [];
     let queryIndex = 1;
 
-    if (name) {
-      fields.push(`name = $${queryIndex++}`);
-      values.push(name);
-    }
-    if (theme_color) {
-        fields.push(`theme_color = $${queryIndex++}`);
-        values.push(theme_color);
-    }
-    if (last_incentive_calculation) {
-        fields.push(`"last_incentive_calculation" = $${queryIndex++}`);
-        values.push(last_incentive_calculation);
-    }
+    if (name !== undefined) { fields.push(`name = $${queryIndex++}`); values.push(name); }
+    if (theme_color !== undefined) { fields.push(`theme_color = $${queryIndex++}`); values.push(theme_color); }
+    if (last_incentive_calculation !== undefined) { fields.push(`"last_incentive_calculation" = $${queryIndex++}`); values.push(last_incentive_calculation); }
+    if (password !== undefined) { fields.push(`password = $${queryIndex++}`); values.push(password || null); }
 
     if (fields.length === 0) {
       return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 });
@@ -86,3 +81,5 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }, { status: 500 });
   }
 }
+
+    
