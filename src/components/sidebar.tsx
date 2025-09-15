@@ -18,6 +18,11 @@ export function Sidebar() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchStores() {
@@ -50,6 +55,18 @@ export function Sidebar() {
       </Link>
     </Button>
   );
+  
+  const renderThemeToggle = () => {
+    if (!mounted) {
+      return <Skeleton className="h-9 w-full bg-white/10" />;
+    }
+    return (
+      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" className="w-full justify-start text-base text-white/80 hover:bg-white/10 hover:text-white">
+          {theme === 'light' ? <Moon className="mr-2" /> : <Sun className="mr-2" />}
+          Modo {theme === 'light' ? 'Escuro' : 'Claro'}
+      </Button>
+    )
+  }
 
   return (
     <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-blue-600 to-red-600 text-white flex flex-col">
@@ -83,10 +100,7 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-white/20 space-y-4">
-         <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" className="w-full justify-start text-base text-white/80 hover:bg-white/10 hover:text-white">
-            {theme === 'light' ? <Moon className="mr-2" /> : <Sun className="mr-2" />}
-            Modo {theme === 'light' ? 'Escuro' : 'Claro'}
-        </Button>
+         {renderThemeToggle()}
         <div className="text-xs text-white/50 text-center">
             <p>Build Teste 0.0.1 Version</p>
             <p>RyannBreston desenvolvedor</p>
