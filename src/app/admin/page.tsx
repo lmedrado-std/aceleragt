@@ -131,11 +131,6 @@ function AdminPageComponent() {
         handleCancelEditingStore();
     }
   };
-
-  const handleChangePassword = () => {
-    // This is a placeholder as admin password management is not implemented via DB yet
-    toast({ title: "Funcionalidade em desenvolvimento", description: "A alteração de senha de admin será implementada em breve."});
-  };
   
   const handleResetDatabase = async () => {
     setIsResettingDb(true);
@@ -249,19 +244,6 @@ function AdminPageComponent() {
                 </CardHeader>
                 <CardContent>
                 <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="new-password">Alterar Senha de Admin</Label>
-                        <Input 
-                            id="new-password"
-                            type="password" 
-                            placeholder="Funcionalidade em breve"
-                            value={adminPasswords.new}
-                            onChange={(e) => setAdminPasswords(p => ({...p, new: e.target.value}))}
-                            disabled
-                        />
-                    </div>
-                     <Button onClick={handleChangePassword} className="w-full" disabled><KeyRound className="mr-2 h-4 w-4"/> Alterar Senha</Button>
-                     <Separator />
                      <div className="space-y-2">
                         <Label>Manutenção do Banco de Dados</Label>
                         <p className="text-sm text-muted-foreground">
@@ -315,3 +297,5 @@ export default function AdminDashboardPage() {
         </ClientOnly>
     )
 }
+
+    
