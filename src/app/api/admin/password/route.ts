@@ -11,20 +11,13 @@ export async function POST(request: Request) {
     }
     
     const query = `
-      UPDATE app_config
-      SET value = $1
-      WHERE key = 'admin_password'
-      RETURNING key;
+      INSERT INTO app_config (key, value)
+      VALUES ('admin_password', $1)
+      ON CONFLICT (key) DO UPDATE
+      SET value = $1;
     `;
     
-    const result = await conn.query(query, [password]);
-    
-    if (result.rowCount === 0) {
-        // This case should ideally not happen if setup-db is run correctly
-        await conn.query(`
-            INSERT INTO app_config (key, value) VALUES ('admin_password', $1)
-        `, [password]);
-    }
+    await conn.query(query, [password]);
     
     return NextResponse.json({ message: 'Senha do administrador atualizada com sucesso.' });
   } catch (error) {

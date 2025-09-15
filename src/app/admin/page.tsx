@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home, Database, AlertTriangle } from "lucide-react";
+import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home, Database, AlertTriangle, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -180,6 +180,12 @@ function AdminPageComponent() {
     }
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuthenticated');
+    toast({ title: "Sessão encerrada", description: "Você saiu do modo de administrador." });
+    router.push('/');
+  };
+
 
   if (loading) {
       return (
@@ -192,7 +198,7 @@ function AdminPageComponent() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto p-4 sm:p-6 md:p-8">
-        <div className="w-full flex justify-between items-center">
+        <div className="w-full flex justify-between items-start">
             <div>
                 <h1 className="text-3xl font-bold text-foreground">
                     Painel Administrativo Global
@@ -201,12 +207,18 @@ function AdminPageComponent() {
                     Gerencie todas as lojas e configurações do sistema aqui.
                 </p>
             </div>
-            <Button asChild variant="outline">
-              <Link href="/home">
-                <Home className="mr-2 h-4 w-4" />
-                Voltar ao Início
-              </Link>
-            </Button>
+             <div className="flex items-center gap-2">
+                <Button asChild variant="outline">
+                  <Link href="/home">
+                    <Home className="mr-2 h-4 w-4" />
+                    Voltar ao Início
+                  </Link>
+                </Button>
+                <Button onClick={handleLogout} variant="destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </Button>
+            </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-6">
