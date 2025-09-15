@@ -251,7 +251,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         const res = await fetch(`/api/goals`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ storeId, goals: getValues().goals })
+            body: JSON.stringify({ store_id: storeId, goals: getValues().goals })
         });
         if (!res.ok) {
             const errorData = await res.json();

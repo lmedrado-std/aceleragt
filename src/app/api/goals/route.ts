@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await conn.query('SELECT * FROM goals WHERE store_id = $1', [storeId]);
+    const result = await conn.query('SELECT * FROM goals WHERE "store_id" = $1', [storeId]);
     if (result.rowCount === 0) {
         // Find store to make sure it exists
         const storeResult = await conn.query('SELECT id FROM stores WHERE id = $1', [storeId]);
@@ -30,10 +30,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-      const { storeId, goals } = await request.json();
+      const { store_id, goals } = await request.json();
   
-      if (!storeId || !goals) {
-        return NextResponse.json({ error: 'storeId e metas são obrigatórios' }, { status: 400 });
+      if (!store_id || !goals) {
+        return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
       }
 
       const goalKeys = Object.keys(goals);
@@ -42,14 +42,14 @@ export async function POST(request: Request) {
       const setClause = goalKeys.map((key, i) => `"${key}" = $${i + 2}`).join(', ');
       
       const query = `
-        INSERT INTO goals (store_id, ${goalKeys.map(k => `"${k}"`).join(', ')})
+        INSERT INTO goals ("store_id", ${goalKeys.map(k => `"${k}"`).join(', ')})
         VALUES ($1, ${goalKeys.map((_, i) => `$${i + 2}`).join(', ')})
-        ON CONFLICT (store_id) DO UPDATE SET
+        ON CONFLICT ("store_id") DO UPDATE SET
           ${setClause}
         RETURNING *;
       `;
   
-      const result = await conn.query(query, [storeId, ...goalValues]);
+      const result = await conn.query(query, [store_id, ...goalValues]);
       
       return NextResponse.json(result.rows[0]);
     } catch (error) {
