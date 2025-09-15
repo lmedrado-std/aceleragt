@@ -249,27 +249,44 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const handleSaveGoals = async () => {
     try {
         const goals = getValues().goals;
-        const cleanGoals: { [key: string]: any } = {};
-
-        for (const key in goals) {
-          const value = (goals as any)[key];
-          if (typeof value === 'string') {
-            const parsedValue = parseFloat(value.replace(',', '.'));
-            cleanGoals[key] = isNaN(parsedValue) ? 0 : parsedValue;
-          } else {
-            cleanGoals[key] = value;
-          }
-        }
         
-        // Ensure store_id is not nested inside the goals object
-        delete cleanGoals.store_id;
-        delete cleanGoals.id;
+        const integerFields = [
+            "metaMinha", "metaMinhaPrize", "meta", "metaPrize", "metona", "metonaPrize", "metaLendaria",
+            "legendariaBonusValorVenda", "legendariaBonusValorPremio",
+            "paPrize1", "paPrize2", "paPrize3", "paPrize4",
+            "ticketMedioGoal1", "ticketMedioGoal2", "ticketMedioGoal3", "ticketMedioGoal4",
+            "ticketMedioPrize1", "ticketMedioPrize2", "ticketMedioPrize3", "ticketMedioPrize4"
+        ];
 
+        const cleanedGoals: { [key: string]: any } = {};
+
+        Object.entries(goals).forEach(([key, value]) => {
+            let processedValue = value;
+            if (typeof processedValue === 'string') {
+                processedValue = processedValue.replace(',', '.');
+            }
+            
+            const numValue = Number(processedValue);
+            if (isNaN(numValue)) {
+                cleanedGoals[key] = 0; // Default to 0 if conversion fails
+                return;
+            }
+
+            if (integerFields.includes(key)) {
+                cleanedGoals[key] = parseInt(String(numValue), 10);
+            } else {
+                cleanedGoals[key] = parseFloat(String(numValue));
+            }
+        });
+
+        // Ensure store_id is not nested inside the goals object
+        delete cleanedGoals.store_id;
+        delete cleanedGoals.id;
 
         const res = await fetch(`/api/goals`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ store_id: storeId, goals: cleanGoals })
+            body: JSON.stringify({ store_id: storeId, goals: cleanedGoals })
         });
         if (!res.ok) {
             const errorData = await res.json();
@@ -391,3 +408,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
