@@ -29,17 +29,18 @@ function AdminPageComponent() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [newStoreName, setNewStoreName] = useState("");
-  const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: ''});
+  const [adminPasswords, setAdminPasswords] = useState({ new: '', confirm: '' });
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
-  const [editingStoreName, setEditingStoreName] = useState('');
+  const [editingStore, setEditingStore] = useState<{ name: string, password?: string }>({ name: '' });
   const [isResettingDb, setIsResettingDb] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
 
   const fetchStores = async () => {
     try {
-        const res = await fetch('/api/stores');
+        const res = await fetch('/api/stores?admin=true');
         if (!res.ok) throw new Error('Falha ao buscar lojas');
         const data = await res.json();
         setStores(data);
@@ -55,7 +56,7 @@ function AdminPageComponent() {
     } else {
       fetchStores().finally(() => setLoading(false));
     }
-  }, [router, toast]);
+  }, [router]);
 
   const handleAddStore = async () => {
     if (!newStoreName.trim()) {
@@ -73,10 +74,9 @@ function AdminPageComponent() {
             const errorData = await res.json();
             throw new Error(errorData.error || 'Falha ao adicionar loja');
         }
-        const newStore = await res.json();
-        setStores(prev => [...prev, newStore]);
+        await fetchStores(); // Re-fetch all stores
         setNewStoreName("");
-        toast({ title: "Sucesso!", description: `Loja "${newStore.name}" adicionada.` });
+        toast({ title: "Sucesso!", description: `Loja "${newStoreName}" adicionada.` });
     } catch (error) {
         toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
     }
@@ -103,16 +103,16 @@ function AdminPageComponent() {
   
   const handleStartEditingStore = (store: Store) => {
     setEditingStoreId(store.id);
-    setEditingStoreName(store.name);
+    setEditingStore({ name: store.name, password: store.password });
   };
 
   const handleCancelEditingStore = () => {
     setEditingStoreId(null);
-    setEditingStoreName('');
+    setEditingStore({ name: '' });
   };
 
   const handleSaveStore = async (id: string) => {
-    if (!editingStoreName.trim()) {
+    if (!editingStore.name.trim()) {
       toast({ variant: "destructive", title: "Erro", description: "O nome da loja não pode estar vazio." });
       return;
     }
@@ -120,11 +120,11 @@ function AdminPageComponent() {
         const res = await fetch(`/api/stores/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: editingStoreName })
+            body: JSON.stringify({ name: editingStore.name, password: editingStore.password })
         });
         if (!res.ok) throw new Error('Falha ao atualizar loja');
         fetchStores(); // Re-fetch to get the updated list
-        toast({ title: "Sucesso!", description: `Loja "${editingStoreName}" atualizada.` });
+        toast({ title: "Sucesso!", description: `Loja "${editingStore.name}" atualizada.` });
     } catch(error) {
         toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
     } finally {
@@ -141,12 +141,45 @@ function AdminPageComponent() {
             throw new Error(data.error || 'Falha ao resetar o banco de dados.');
         }
         toast({ title: "Sucesso!", description: "A estrutura do banco de dados foi configurada com sucesso."});
+        // Re-fetch stores in case the first one was just created
+        fetchStores();
     } catch(error) {
         toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
     } finally {
         setIsResettingDb(false);
     }
   };
+  
+  const handlePasswordChange = async () => {
+    if (adminPasswords.new !== adminPasswords.confirm) {
+        toast({ variant: "destructive", title: "Erro", description: "As senhas não coincidem." });
+        return;
+    }
+    if (adminPasswords.new.length < 4) {
+        toast({ variant: "destructive", title: "Erro", description: "A senha deve ter no mínimo 4 caracteres." });
+        return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+        const res = await fetch('/api/admin/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: adminPasswords.new })
+        });
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Falha ao alterar a senha.');
+        }
+        toast({ title: "Sucesso!", description: "Senha do administrador global alterada." });
+        setAdminPasswords({ new: '', confirm: '' });
+    } catch(e) {
+        toast({ variant: 'destructive', title: 'Erro', description: (e as Error).message });
+    } finally {
+        setIsUpdatingPassword(false);
+    }
+  };
+
 
   if (loading) {
       return (
@@ -169,7 +202,7 @@ function AdminPageComponent() {
                 </p>
             </div>
             <Button asChild variant="outline">
-              <Link href="/">
+              <Link href="/home">
                 <Home className="mr-2 h-4 w-4" />
                 Voltar ao Início
               </Link>
@@ -180,7 +213,7 @@ function AdminPageComponent() {
             <Card>
                 <CardHeader>
                     <CardTitle>Gerenciar Lojas</CardTitle>
-                    <CardDescription>Adicione, renomeie ou remova lojas.</CardDescription>
+                    <CardDescription>Adicione, renomeie ou remova lojas e senhas.</CardDescription>
                 </CardHeader>
                 <CardContent>
                 <div className="space-y-2 mb-4">
@@ -202,17 +235,22 @@ function AdminPageComponent() {
                     {stores.map((store) => (
                         <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
                             {editingStoreId === store.id ? (
-                            <>
+                            <div className="flex-grow flex items-center gap-2">
                                 <Input 
-                                value={editingStoreName}
-                                onChange={(e) => setEditingStoreName(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSaveStore(store.id)}
-                                autoFocus
-                                className="h-8"
+                                    value={editingStore.name}
+                                    onChange={(e) => setEditingStore(prev => ({ ...prev, name: e.target.value }))}
+                                    className="h-8"
+                                    autoFocus
+                                />
+                                <Input 
+                                    placeholder="Senha da loja"
+                                    value={editingStore.password}
+                                    onChange={(e) => setEditingStore(prev => ({ ...prev, password: e.target.value }))}
+                                    className="h-8"
                                 />
                                 <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
                                 <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
-                            </>
+                            </div>
                             ) : (
                             <>
                                 <span className="font-medium">{store.name}</span>
@@ -244,6 +282,30 @@ function AdminPageComponent() {
                 </CardHeader>
                 <CardContent>
                 <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Alterar Senha de Admin Global</Label>
+                        <div className="space-y-2">
+                            <Input 
+                                type="password"
+                                placeholder="Nova Senha"
+                                value={adminPasswords.new}
+                                onChange={(e) => setAdminPasswords(p => ({...p, new: e.target.value}))}
+                            />
+                            <Input 
+                                type="password"
+                                placeholder="Confirmar Nova Senha"
+                                value={adminPasswords.confirm}
+                                onChange={(e) => setAdminPasswords(p => ({...p, confirm: e.target.value}))}
+                            />
+                        </div>
+                        <Button onClick={handlePasswordChange} disabled={isUpdatingPassword}>
+                            {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                            Alterar Senha
+                        </Button>
+                    </div>
+
+                    <Separator />
+                    
                      <div className="space-y-2">
                         <Label>Manutenção do Banco de Dados</Label>
                         <p className="text-sm text-muted-foreground">
@@ -260,14 +322,14 @@ function AdminPageComponent() {
                                 <AlertDialogTrigger asChild>
                                     <Button variant="destructive" className="w-full">
                                         <AlertTriangle className="mr-2 h-4 w-4" />
-                                        Resetar Estrutura do Banco
+                                        Configurar Banco
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Confirmar Ação</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`) se elas não existirem. 
+                                            Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`, `app_config`) se elas não existirem. 
                                             É uma operação segura e **não apaga dados existentes**. Use para a configuração inicial ou para corrigir problemas de schema.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
@@ -297,5 +359,3 @@ export default function AdminDashboardPage() {
         </ClientOnly>
     )
 }
-
-    

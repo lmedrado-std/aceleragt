@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Loader2 } from 'lucide-react';
+import { KeyRound, Loader2, AlertTriangle, Database } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 
@@ -32,27 +32,35 @@ function LoginComponent() {
   }, [router, redirectUrl]);
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // This password should be managed via a secure backend in a real app
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'supermoda';
+    try {
+        const res = await fetch('/api/auth/admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
 
-    if (password === adminPassword) {
-      sessionStorage.setItem('adminAuthenticated', 'true');
-      toast({
-        title: 'Acesso concedido!',
-        description: 'Bem-vindo, administrador.',
-      });
-      router.push(redirectUrl);
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Senha incorreta',
-        description: 'Por favor, tente novamente.',
-      });
-      setIsSubmitting(false);
+        if (res.ok) {
+            sessionStorage.setItem('adminAuthenticated', 'true');
+            toast({
+                title: 'Acesso concedido!',
+                description: 'Bem-vindo, administrador.',
+            });
+            router.push(redirectUrl);
+        } else {
+            const data = await res.json();
+            throw new Error(data.error || "Senha incorreta");
+        }
+    } catch(error) {
+         toast({
+            variant: 'destructive',
+            title: 'Senha incorreta',
+            description: 'Por favor, tente novamente.',
+        });
+        setIsSubmitting(false);
     }
   };
 
@@ -115,5 +123,3 @@ export default function LoginPage() {
         </Suspense>
     )
 }
-
-    

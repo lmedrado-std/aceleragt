@@ -11,8 +11,8 @@ export async function GET() {
       CREATE TABLE IF NOT EXISTS stores (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
-        theme_color TEXT,
-        last_incentive_calculation TIMESTAMPTZ
+        password TEXT,
+        theme_color TEXT
       );
     `);
 
@@ -62,6 +62,21 @@ export async function GET() {
         "ticketMedioGoal4" INTEGER DEFAULT 0,
         "ticketMedioPrize4" INTEGER DEFAULT 0
       );
+    `);
+
+    // Tabela de Configurações do Aplicativo
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS app_config (
+        key VARCHAR(255) PRIMARY KEY,
+        value TEXT
+      );
+    `);
+
+    // Inserir senha de admin padrão, se não existir
+    await conn.query(`
+      INSERT INTO app_config (key, value)
+      VALUES ('admin_password', 'supermoda')
+      ON CONFLICT (key) DO NOTHING;
     `);
 
     await conn.query('COMMIT');
