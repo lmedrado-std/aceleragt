@@ -12,7 +12,8 @@ export async function GET() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
         password TEXT,
-        theme_color TEXT
+        theme_color TEXT,
+        last_incentive_calculation TIMESTAMPTZ
       );
     `);
 
@@ -88,5 +89,3 @@ export async function GET() {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }, { status: 500 });
   }
 }
-
-    

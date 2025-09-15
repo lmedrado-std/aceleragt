@@ -45,7 +45,15 @@ function StorePageContent() {
           fetch(`/api/sellers?storeId=${storeId}`),
         ]);
 
-        if (!storeRes.ok) throw new Error('Loja não encontrada');
+        if (!storeRes.ok) {
+            if (storeRes.status === 404) {
+                 setError('Loja não encontrada. Verifique o ID e tente novamente.');
+            } else {
+                throw new Error('Falha ao carregar dados da loja');
+            }
+            setLoading(false);
+            return;
+        }
         const storeData = await storeRes.json();
         setStore(storeData);
 
@@ -76,7 +84,19 @@ function StorePageContent() {
 
   const handleSellerAccess = (sellerId: string) => {
     const destination = `/dashboard/${storeId}?tab=${sellerId}`;
-    router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`);
+    // Check if store has a password and if it's already been authenticated in this session
+    if (store?.password) {
+        const storeAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
+        if (storeAuthenticated) {
+            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`);
+        } else {
+             const loginRedirect = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`;
+             router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(loginRedirect)}`);
+        }
+    } else {
+        // No password for the store, proceed directly to seller login
+        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`);
+    }
   };
 
   const handleAdminAccess = () => {
@@ -96,7 +116,7 @@ function StorePageContent() {
 
   if (error) {
      return (
-        <div className="bg-card rounded-lg flex flex-col items-center justify-center p-8 text-center h-full">
+        <div className="bg-card rounded-lg flex flex-col items-center justify-center p-8 text-center h-full max-w-lg mx-auto">
              <h1 className="text-2xl font-bold text-destructive mb-4">Erro ao Carregar Loja</h1>
              <p className="text-destructive/80 mb-6">{error}</p>
              <Button asChild>
