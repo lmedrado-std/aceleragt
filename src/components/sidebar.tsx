@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Shield, Store as StoreIcon, Rocket, Moon, Sun } from "lucide-react";
+import { Shield, Store as StoreIcon, Rocket, Moon, Sun, Database } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
@@ -59,15 +59,17 @@ export function Sidebar() {
 
   const renderThemeToggle = () => {
     if (!mounted) {
-      return <Skeleton className="h-9 w-full bg-white/10" />;
+      return <Skeleton className="h-10 w-10 rounded-full bg-white/10" />;
     }
     return (
-      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" className="w-full justify-start text-base font-normal text-white/80 hover:bg-white/10 hover:text-white">
-          {theme === 'light' ? <Moon className="mr-3" /> : <Sun className="mr-3" />}
-          Modo {theme === 'light' ? 'Escuro' : 'Claro'}
+      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
+          {theme === 'light' ? <Moon /> : <Sun />}
+          <span className="sr-only">Toggle theme</span>
       </Button>
     )
   }
+
+  const isAdminPage = pathname.startsWith('/admin');
 
   return (
     <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-[#4A55A2] via-[#D45079] to-[#D45079] text-white flex flex-col">
@@ -78,6 +80,11 @@ export function Sidebar() {
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         <div className="px-2 py-2">
             <NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname === '/admin'}>Admin</NavLink>
+             {isAdminPage && (
+              <div className="pl-4 mt-1">
+                 <NavLink href="/admin/db" icon={<Database size={20} />} isActive={pathname === '/admin/db'}>DB Dashboard</NavLink>
+              </div>
+            )}
         </div>
         <Separator className="bg-white/20 my-2" />
         <h2 className="text-sm font-semibold tracking-wider text-white/70 uppercase px-3 mt-4 mb-2">
@@ -105,8 +112,10 @@ export function Sidebar() {
       </nav>
 
       <div className="p-2 border-t border-white/20 space-y-2">
-         {renderThemeToggle()}
-        <div className="px-3 py-2 text-xs text-white/60 space-y-1">
+        <div className="flex justify-center">
+            {renderThemeToggle()}
+        </div>
+        <div className="px-3 py-2 text-xs text-center text-white/60 space-y-1">
             <p>v1.0 - Build Estável</p>
             <p>RyannBreston desenvolvedor</p>
             <p>© {new Date().getFullYear()} Acelera GT.</p>
@@ -115,5 +124,3 @@ export function Sidebar() {
     </aside>
   );
 }
-
-    
