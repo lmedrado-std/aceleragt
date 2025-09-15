@@ -1,68 +1,24 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Store } from '@/lib/storage';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Loader2, ArrowRight, Shield } from 'lucide-react';
-import { Logo } from '@/components/logo';
+import { Card, CardContent } from '@/components/ui/card';
+import { Rocket } from 'lucide-react';
 
 export default function HomePage() {
-  const [stores, setStores] = useState<Store[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const res = await fetch('/api/stores');
-        const data = await res.json();
-        setStores(data);
-      } catch (error) {
-        console.error("Failed to fetch stores", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStores();
-  }, []);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="items-center text-center">
-          <Logo className="mb-4" />
-          <CardTitle className="text-2xl font-bold">Bem-vindo ao Acelera GT</CardTitle>
-          <CardDescription>Selecione uma loja para começar</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center h-24">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="flex flex-col space-y-3">
-              {stores.map((store) => (
-                <Button key={store.id} asChild variant="outline" className="justify-between">
-                  <Link href={`/loja/${store.id}`}>
-                    {store.name}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              ))}
-            </div>
-          )}
-          <div className="mt-6 flex justify-center">
-            <Button asChild>
-              <Link href="/admin">
-                <Shield className="mr-2 h-4 w-4" />
-                Painel do Administrador
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="flex flex-1 items-center justify-center">
+        <Card className="w-full max-w-lg">
+            <CardContent className="p-10 flex flex-col items-center justify-center text-center">
+                <Rocket className="h-16 w-16 text-primary mb-6" />
+                <h1 className="text-3xl font-bold text-foreground">
+                    Bem-vindo(a) ao <span className="text-primary">Acelera GT</span>
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                    Selecione uma loja na barra lateral para começar a acompanhar o desempenho.
+                </p>
+            </CardContent>
+        </Card>
     </div>
   );
 }
