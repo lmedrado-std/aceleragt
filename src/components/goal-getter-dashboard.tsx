@@ -391,6 +391,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     goals={getValues().goals as Goals}
                     incentives={incentives[seller.id!]}
                     rankings={rankings[seller.id!] || null}
+                    lastUpdated={lastUpdated}
                   />
                 </TabsContent>
               ))}
@@ -408,5 +409,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

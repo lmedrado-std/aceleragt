@@ -14,9 +14,7 @@ import {
   DollarSign,
   Package,
   Ticket,
-  Award,
   Target,
-  Rocket,
   Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -73,19 +71,6 @@ const ProgressItem = ({
   );
 };
 
-const MetricCard = ({ title, value, icon, description }: { title: string, value: string, icon: React.ReactNode, description: string }) => (
-    <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            {icon}
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-muted-foreground">{description}</p>
-        </CardContent>
-    </Card>
-);
-
 const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
      <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
         <p className="font-medium">{label}</p>
@@ -107,7 +92,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     vendas = 0,
     pa = 0,
     ticketMedio = 0,
-    corridinhaDiaria = 0,
     goals,
   } = salesData;
   
@@ -161,33 +145,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 )}
             </CardContent>
         </Card>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <MetricCard 
-                title="Vendas Realizadas" 
-                value={formatCurrency(vendas)} 
-                icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
-                description="Total vendido no período"
-            />
-             <MetricCard 
-                title="Produtos por Atendimento (PA)"
-                value={String(Number(pa || 0).toFixed(2))}
-                icon={<Package className="h-4 w-4 text-muted-foreground" />}
-                 description="Média de itens por venda"
-            />
-            <MetricCard 
-                title="Ticket Médio" 
-                value={formatCurrency(ticketMedio)} 
-                icon={<Ticket className="h-4 w-4 text-muted-foreground" />}
-                description="Valor médio por venda"
-            />
-            <MetricCard 
-                title="Bônus Corridinha" 
-                value={formatCurrency(corridinhaDiaria)} 
-                icon={<Rocket className="h-4 w-4 text-muted-foreground" />}
-                description="Bônus diário direto"
-            />
-        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-1">
