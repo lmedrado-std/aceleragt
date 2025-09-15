@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Shield, Store as StoreIcon, Rocket, Moon, Sun, Database } from "lucide-react";
+import { Shield, Store as StoreIcon, Rocket, Moon, Sun, Database, LineChart } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
@@ -81,7 +81,8 @@ export function Sidebar() {
         <div className="px-2 py-2">
             <NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname === '/admin'}>Admin</NavLink>
              {isAdminPage && (
-              <div className="pl-4 mt-1">
+              <div className="pl-4 mt-1 space-y-1">
+                 <NavLink href="/admin/dashboard" icon={<LineChart size={20} />} isActive={pathname === '/admin/dashboard'}>Dashboard</NavLink>
                  <NavLink href="/admin/db-schema" icon={<Database size={20} />} isActive={pathname === '/admin/db-schema'}>DB Schema</NavLink>
               </div>
             )}
