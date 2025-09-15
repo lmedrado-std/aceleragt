@@ -47,26 +47,26 @@ function SchemaViewer() {
     }, []);
 
     const renderTable = (tableName: string, columns: Column[] | undefined) => (
-        <Card>
+        <Card className="flex-1 min-w-[300px]">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Database /> {tableName}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl font-semibold"><Database size={20}/> {tableName}</CardTitle>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Nome da Coluna</TableHead>
-                            <TableHead>Tipo de Dado</TableHead>
-                            <TableHead>Aceita Nulo?</TableHead>
+                            <TableHead className="w-1/3">Nome da Coluna</TableHead>
+                            <TableHead className="w-1/3">Tipo de Dado</TableHead>
+                            <TableHead className="w-1/3 text-right">Aceita Nulo?</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {columns && columns.length > 0 ? (
                             columns.map((col) => (
                                 <TableRow key={col.column_name}>
-                                    <TableCell className="font-mono font-medium">{col.column_name}</TableCell>
-                                    <TableCell className="font-mono">{col.data_type}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="font-mono font-medium text-sm">{col.column_name}</TableCell>
+                                    <TableCell className="font-mono text-sm">{col.data_type}</TableCell>
+                                    <TableCell className="text-right">
                                         <Badge variant={col.is_nullable === 'YES' ? 'secondary' : 'destructive'}>
                                             {col.is_nullable}
                                         </Badge>
@@ -127,7 +127,7 @@ function SchemaViewer() {
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col lg:flex-row gap-6">
                 {renderTable('stores', schema?.stores)}
                 {renderTable('sellers', schema?.sellers)}
                 {renderTable('goals', schema?.goals)}

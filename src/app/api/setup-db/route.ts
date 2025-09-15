@@ -10,8 +10,8 @@ export async function GET() {
     await conn.query(`
       CREATE TABLE IF NOT EXISTS stores (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(255) NOT NULL,
-        theme_color VARCHAR(50),
+        name TEXT NOT NULL,
+        theme_color TEXT,
         last_incentive_calculation TIMESTAMPTZ
       );
     `);
@@ -22,12 +22,12 @@ export async function GET() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
-        "avatar_id" VARCHAR(50) NOT NULL,
+        avatar_id VARCHAR(50) NOT NULL,
         vendas NUMERIC(10, 2) DEFAULT 0,
         pa NUMERIC(5, 2) DEFAULT 0,
-        "ticket_medio" NUMERIC(10, 2) DEFAULT 0,
-        "corridinha_diaria" NUMERIC(10, 2) DEFAULT 0,
-        "store_id" UUID REFERENCES stores(id) ON DELETE CASCADE
+        ticket_medio NUMERIC(10, 2) DEFAULT 0,
+        corridinha_diaria NUMERIC(10, 2) DEFAULT 0,
+        store_id UUID REFERENCES stores(id) ON DELETE CASCADE
       );
     `);
 
@@ -35,32 +35,32 @@ export async function GET() {
     await conn.query(`
       CREATE TABLE IF NOT EXISTS goals (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "store_id" UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
-        "metaMinha" NUMERIC(10, 2) DEFAULT 0,
-        "metaMinhaPrize" NUMERIC(10, 2) DEFAULT 0,
-        "meta" NUMERIC(10, 2) DEFAULT 0,
-        "metaPrize" NUMERIC(10, 2) DEFAULT 0,
-        "metona" NUMERIC(10, 2) DEFAULT 0,
-        "metonaPrize" NUMERIC(10, 2) DEFAULT 0,
-        "metaLendaria" NUMERIC(10, 2) DEFAULT 0,
-        "legendariaBonusValorVenda" NUMERIC(10, 2) DEFAULT 0,
-        "legendariaBonusValorPremio" NUMERIC(10, 2) DEFAULT 0,
-        "paGoal1" NUMERIC(5, 2) DEFAULT 0,
-        "paPrize1" NUMERIC(10, 2) DEFAULT 0,
-        "paGoal2" NUMERIC(5, 2) DEFAULT 0,
-        "paPrize2" NUMERIC(10, 2) DEFAULT 0,
-        "paGoal3" NUMERIC(5, 2) DEFAULT 0,
-        "paPrize3" NUMERIC(10, 2) DEFAULT 0,
-        "paGoal4" NUMERIC(5, 2) DEFAULT 0,
-        "paPrize4" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioGoal1" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioPrize1" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioGoal2" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioPrize2" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioGoal3" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioPrize3" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioGoal4" NUMERIC(10, 2) DEFAULT 0,
-        "ticketMedioPrize4" NUMERIC(10, 2) DEFAULT 0
+        store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
+        "metaMinha" INTEGER DEFAULT 0,
+        "metaMinhaPrize" INTEGER DEFAULT 0,
+        meta INTEGER DEFAULT 0,
+        "metaPrize" INTEGER DEFAULT 0,
+        metona INTEGER DEFAULT 0,
+        "metonaPrize" INTEGER DEFAULT 0,
+        "metaLendaria" INTEGER DEFAULT 0,
+        "legendariaBonusValorVenda" INTEGER DEFAULT 0,
+        "legendariaBonusValorPremio" INTEGER DEFAULT 0,
+        "paGoal1" REAL DEFAULT 0,
+        "paPrize1" INTEGER DEFAULT 0,
+        "paGoal2" REAL DEFAULT 0,
+        "paPrize2" INTEGER DEFAULT 0,
+        "paGoal3" REAL DEFAULT 0,
+        "paPrize3" INTEGER DEFAULT 0,
+        "paGoal4" REAL DEFAULT 0,
+        "paPrize4" INTEGER DEFAULT 0,
+        "ticketMedioGoal1" INTEGER DEFAULT 0,
+        "ticketMedioPrize1" INTEGER DEFAULT 0,
+        "ticketMedioGoal2" INTEGER DEFAULT 0,
+        "ticketMedioPrize2" INTEGER DEFAULT 0,
+        "ticketMedioGoal3" INTEGER DEFAULT 0,
+        "ticketMedioPrize3" INTEGER DEFAULT 0,
+        "ticketMedioGoal4" INTEGER DEFAULT 0,
+        "ticketMedioPrize4" INTEGER DEFAULT 0
       );
     `);
 
