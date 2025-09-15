@@ -90,7 +90,7 @@ export function Sidebar() {
             </div>
         ) : stores.length > 0 ? (
           stores.map((store) => (
-            <NavLink key={store.id} href={`/dashboard/${store.id}`} icon={<StoreIcon size={20} />}>
+            <NavLink key={store.id} href={`/loja/${store.id}`} icon={<StoreIcon size={20} />}>
               {store.name}
             </NavLink>
           ))
