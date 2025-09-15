@@ -23,7 +23,7 @@ export async function POST(request: Request) {
          return NextResponse.json({ success: true });
     }
 
-    if (password === storePassword) {
+    if (password.trim() === storePassword.trim()) {
         return NextResponse.json({ success: true });
     } else {
         return NextResponse.json({ error: 'Senha inválida' }, { status: 401 });

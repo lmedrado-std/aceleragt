@@ -76,7 +76,7 @@ function StoreLoginComponent() {
       const res = await fetch('/api/auth/loja', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeId, password })
+        body: JSON.stringify({ storeId, password: password.trim() })
       });
 
       if (res.ok) {
