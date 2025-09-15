@@ -161,7 +161,10 @@ export function AdminTab({
             body: JSON.stringify({ name: newSellerName, password: finalPassword, avatarId: randomAvatarId, storeId }),
         });
 
-        if(!res.ok) throw new Error('Falha ao adicionar vendedor');
+        if(!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.details || errorData.error || 'Falha ao adicionar vendedor');
+        }
         
         onSellersChange();
         setValue("newSellerName", "");
@@ -170,7 +173,7 @@ export function AdminTab({
 
     } catch (error) {
         console.error(error);
-        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível adicionar o vendedor.' });
+        toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
     }
   };
 

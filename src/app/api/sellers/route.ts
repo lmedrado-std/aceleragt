@@ -28,10 +28,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Campos obrigatórios ausentes: nome, senha, avatarId e storeId são necessários.' }, { status: 400 });
     }
     
-    const result = await conn.query(
-      'INSERT INTO sellers (name, password, "avatar_id", "store_id") VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, password, avatarId, storeId]
-    );
+    const query = `
+      INSERT INTO sellers (name, password, "avatar_id", "store_id") 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING *
+    `;
+    
+    const result = await conn.query(query, [name, password, avatarId, storeId]);
     
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {
