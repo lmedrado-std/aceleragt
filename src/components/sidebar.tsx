@@ -52,7 +52,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-blue-600 via-purple-600 to-red-600 text-white flex flex-col">
+    <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-blue-600 to-red-600 text-white flex flex-col">
       <div className="p-4 flex items-center gap-2 border-b border-white/20">
          <div className="rounded-lg bg-white/20 p-2">
             <Rocket className="h-6 w-6 text-white" />
