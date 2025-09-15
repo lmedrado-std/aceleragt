@@ -82,7 +82,7 @@ export function Sidebar() {
             <NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname === '/admin'}>Admin</NavLink>
              {isAdminPage && (
               <div className="pl-4 mt-1">
-                 <NavLink href="/admin/db" icon={<Database size={20} />} isActive={pathname === '/admin/db'}>DB Dashboard</NavLink>
+                 <NavLink href="/admin/db-schema" icon={<Database size={20} />} isActive={pathname === '/admin/db-schema'}>DB Schema</NavLink>
               </div>
             )}
         </div>
