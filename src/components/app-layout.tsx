@@ -1,16 +1,4 @@
-
-import { Sidebar } from "@/components/sidebar";
-import ClientOnly from "./client-only";
-
+// This file is no longer used and can be deleted. I am emptying it to avoid build errors.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <ClientOnly>
-            <div className="flex min-h-screen w-full">
-                <Sidebar />
-                <main className="flex-1 p-4 sm:p-6 md:p-8">
-                    {children}
-                </main>
-            </div>
-        </ClientOnly>
-    )
+    return <>{children}</>;
 }

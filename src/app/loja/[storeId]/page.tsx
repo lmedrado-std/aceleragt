@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Home } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ClientOnly from "@/components/client-only";
+import Link from "next/link";
 
 function StorePageContent() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -94,51 +95,54 @@ function StorePageContent() {
   }
 
   return (
-    <div className="bg-card min-h-full rounded-lg shadow-lg flex flex-col p-6 sm:p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            {store?.name || "Carregando..."}
-          </h1>
-          <p className="text-muted-foreground">
-            Selecione seu usuário para ver seu desempenho e metas.
-          </p>
+    <Card className="min-h-full shadow-lg flex flex-col p-6 sm:p-8 w-full max-w-2xl mx-auto">
+        <header className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              {store?.name || "Carregando..."}
+            </h1>
+            <p className="text-muted-foreground">
+              Selecione seu usuário para ver seu desempenho e metas.
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/">
+              <Home className="mr-2 h-4 w-4" />
+              Início
+            </Link>
+          </Button>
         </header>
 
-        <Card className="flex-1 flex flex-col border-none shadow-none bg-transparent">
-          <CardHeader>
-            <CardTitle className="text-primary">Equipe de Vendedores</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col p-0">
-            <ScrollArea className="flex-1 pr-4 -mr-4">
-              <div className="space-y-3">
-                {(sellers || []).map((seller) => (
-                  <motion.div
-                    key={seller.id}
-                    onClick={() => handleSellerAccess(seller.id)}
-                    whileHover={{ scale: 1.02, x: 4, backgroundColor: 'hsl(var(--muted))' }}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                        <SellerAvatar avatarId={seller.avatar_id} className="h-12 w-12" />
-                      <div>
-                        <p className="text-base font-semibold text-foreground">
-                          {seller.name}
-                        </p>
-                      </div>
+        <CardContent className="flex-1 flex flex-col p-0">
+          <ScrollArea className="flex-1 pr-4 -mr-4">
+            <div className="space-y-3">
+              {(sellers || []).map((seller) => (
+                <motion.div
+                  key={seller.id}
+                  onClick={() => handleSellerAccess(seller.id)}
+                  whileHover={{ scale: 1.02, x: 4, backgroundColor: 'hsl(var(--muted))' }}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                      <SellerAvatar avatarId={seller.avatar_id} className="h-12 w-12" />
+                    <div>
+                      <p className="text-base font-semibold text-foreground">
+                        {seller.name}
+                      </p>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                  </motion.div>
-                ))}
-                 {sellers.length === 0 && (
-                    <p className="text-center text-sm text-muted-foreground pt-10">
-                      Nenhum vendedor cadastrado nesta loja ainda.
-                    </p>
-                )}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </motion.div>
+              ))}
+               {sellers.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground pt-10">
+                    Nenhum vendedor cadastrado nesta loja ainda.
+                  </p>
+              )}
+            </div>
+          </ScrollArea>
+        </CardContent>
+    </Card>
   );
 }
 

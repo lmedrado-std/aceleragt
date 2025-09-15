@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X } from "lucide-react";
+import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -143,14 +143,22 @@ function AdminPageComponent() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-        <div className="w-full">
-            <h1 className="text-3xl font-bold text-foreground">
-                Painel Administrativo
-            </h1>
-            <p className="text-muted-foreground">
-                Gerencie todas as lojas e configurações do sistema aqui.
-            </p>
+    <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
+        <div className="w-full flex justify-between items-center">
+            <div>
+                <h1 className="text-3xl font-bold text-foreground">
+                    Painel Administrativo
+                </h1>
+                <p className="text-muted-foreground">
+                    Gerencie todas as lojas e configurações do sistema aqui.
+                </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                Voltar ao Início
+              </Link>
+            </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-6">
@@ -195,7 +203,7 @@ function AdminPageComponent() {
                                 <span className="font-medium">{store.name}</span>
                                 <div className="flex items-center">
                                     <Button asChild variant="ghost" size="sm">
-                                    <Link href={`/loja/${store.id}`}>
+                                    <Link href={`/dashboard/${store.id}`}>
                                         Acessar <ArrowRight className="ml-2 h-4 w-4"/>
                                     </Link>
                                     </Button>

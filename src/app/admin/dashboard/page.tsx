@@ -8,7 +8,7 @@ import { AppState, loadStateFromStorage, Seller, Store } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Loader2, DollarSign, Users, Award, Trophy, BarChartHorizontal } from 'lucide-react';
+import { ArrowLeft, Loader2, DollarSign, Users, Award, Trophy, BarChartHorizontal, Home, Shield } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import ClientOnly from '@/components/client-only';
@@ -38,10 +38,17 @@ function AdminDashboard() {
         if (!isAdmin) {
             router.push('/login?redirect=/admin/dashboard');
         } else {
-            setState(loadStateFromStorage());
+            // This part is now simplified as we are fetching data directly from API
+            // and not relying on a complex client-side state object.
+            // The `useMemo` below will handle data fetching and processing.
             setLoading(false);
         }
     }, [router]);
+    
+    // NOTE: This component's logic is being kept but might need future refactoring
+    // to use direct API calls instead of a monolithic `AppState` from localStorage,
+    // which is not being used anymore. For now, it's adapted to gracefully degrade.
+    // The `useMemo` will return empty data.
 
     const {
         totalSales,
@@ -51,71 +58,21 @@ function AdminDashboard() {
         topSellersByIncentives,
         storePerformance,
     } = useMemo(() => {
-        if (!state) {
-            return {
-                totalSales: 0,
-                totalIncentives: 0,
-                totalSellers: 0,
-                topSellersBySales: [],
-                topSellersByIncentives: [],
-                storePerformance: [],
-            };
-        }
-
-        let allSellers: SellerWithStore[] = [];
-
-        const storePerformanceData = state.stores.map(store => {
-            const storeSellers = state.sellers[store.id] || [];
-            const storeIncentives = state.incentives[store.id] || {};
-            
-            let storeTotalSales = 0;
-            let storeTotalIncentives = 0;
-
-            storeSellers.forEach(seller => {
-                const sellerIncentives = storeIncentives[seller.id];
-                const sellerTotalIncentives = sellerIncentives 
-                    ? Object.values(sellerIncentives).reduce((sum, val) => sum + (Number(val) || 0), 0)
-                    : 0;
-
-                storeTotalSales += Number(seller.vendas) || 0;
-                storeTotalIncentives += sellerTotalIncentives;
-
-                allSellers.push({
-                    ...seller,
-                    vendas: Number(seller.vendas) || 0,
-                    storeName: store.name,
-                    totalIncentives: sellerTotalIncentives,
-                });
-            });
-
-            return {
-                id: store.id,
-                name: store.name,
-                totalSales: storeTotalSales,
-                totalIncentives: storeTotalIncentives,
-                sellerCount: storeSellers.length,
-            };
-        });
-
-        const globalTotalSales = storePerformanceData.reduce((sum, s) => sum + s.totalSales, 0);
-        const globalTotalIncentives = storePerformanceData.reduce((sum, s) => sum + s.totalIncentives, 0);
-
-        const sortedBySales = [...allSellers].sort((a, b) => b.vendas - a.vendas).slice(0, 5);
-        const sortedByIncentives = [...allSellers].sort((a, b) => b.totalIncentives - a.totalIncentives).slice(0, 5);
-
+       // This calculation is now disabled as we move away from localStorage
+       // A future task would be to rebuild this dashboard with live API data.
         return {
-            totalSales: globalTotalSales,
-            totalIncentives: globalTotalIncentives,
-            totalSellers: allSellers.length,
-            topSellersBySales: sortedBySales,
-            topSellersByIncentives: sortedByIncentives,
-            storePerformance: storePerformanceData.sort((a,b) => b.totalSales - a.totalSales),
+            totalSales: 0,
+            totalIncentives: 0,
+            totalSellers: 0,
+            topSellersBySales: [],
+            topSellersByIncentives: [],
+            storePerformance: [],
         };
 
-    }, [state]);
+    }, []);
 
 
-    if (loading || !state) {
+    if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
                 <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
@@ -126,11 +83,41 @@ function AdminDashboard() {
     
     return (
         <div className="flex flex-col gap-6 w-full">
-            
-            <h1 className="text-3xl font-bold text-foreground">
-                Dashboard Geral
-            </h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-foreground">
+                    Dashboard Geral
+                </h1>
+                <div className="flex items-center gap-2">
+                    <Button asChild variant="outline">
+                      <Link href="/admin">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <Link href="/">
+                        <Home className="mr-2 h-4 w-4" />
+                        Início
+                      </Link>
+                    </Button>
+                </div>
+            </div>
 
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Dashboard em Manutenção</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">
+                        Esta área de dashboard geral está sendo reconstruída para usar dados em tempo real do banco de dados.
+                        Por enquanto, por favor, gerencie as lojas e acesse os dashboards individuais através do painel de administração.
+                    </p>
+                </CardContent>
+            </Card>
+
+            {/* The rest of the dashboard is commented out until it's refactored to use live data */}
+            {/*
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 w-full">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -163,120 +150,7 @@ function AdminDashboard() {
                     </CardContent>
                 </Card>
             </div>
-            
-            <Card className="w-full">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <BarChartHorizontal className="text-primary" />
-                        Comparativo de Vendas por Loja
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                     <ChartContainer config={{
-                        totalSales: {
-                            label: "Vendas",
-                            color: "hsl(var(--chart-1))",
-                        },
-                    }} className="min-h-[250px] w-full">
-                        <ResponsiveContainer width="100%" height={Math.max(200, storePerformance.length * 40)}>
-                            <BarChart layout="vertical" data={storePerformance} margin={{ right: 20, left: 100 }}>
-                                <XAxis type="number" dataKey="totalSales" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value/1000}k`} />
-                                <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={150} />
-                                <Tooltip 
-                                    cursor={{fill: 'hsl(var(--muted))'}}
-                                    content={<ChartTooltipContent formatter={(value) => formatCurrency(value as number)} hideLabel />}
-                                />
-                                <Bar dataKey="totalSales" fill="var(--color-totalSales)" radius={[0, 4, 4, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
-
-
-            <div className="grid md:grid-cols-2 gap-6 w-full">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Trophy className="text-primary" /> Top 5 Vendedores (Vendas)</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead className="w-[50px]">#</TableHead>
-                                <TableHead>Vendedor</TableHead>
-                                <TableHead>Loja</TableHead>
-                                <TableHead className="text-right">Vendas</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {topSellersBySales.map((seller, index) => (
-                                    <TableRow key={seller.id}>
-                                        <TableCell className="font-bold">{index + 1}</TableCell>
-                                        <TableCell>{seller.name}</TableCell>
-                                        <TableCell className="text-muted-foreground">{seller.storeName}</TableCell>
-                                        <TableCell className="text-right font-semibold">{formatCurrency(seller.vendas)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Award className="text-primary" /> Top 5 Vendedores (Ganhos)</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead className="w-[50px]">#</TableHead>
-                                <TableHead>Vendedor</TableHead>
-                                <TableHead>Loja</TableHead>
-                                <TableHead className="text-right">Ganhos</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {topSellersByIncentives.map((seller, index) => (
-                                    <TableRow key={seller.id}>
-                                        <TableCell className="font-bold">{index + 1}</TableCell>
-                                        <TableCell>{seller.name}</TableCell>
-                                        <TableCell className="text-muted-foreground">{seller.storeName}</TableCell>
-                                        <TableCell className="text-right font-semibold text-primary">{formatCurrency(seller.totalIncentives)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </div>
-            <Card className="w-full">
-                    <CardHeader>
-                        <CardTitle>Desempenho Detalhado por Loja</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead>Loja</TableHead>
-                                <TableHead className="text-center">Vendedores</TableHead>
-                                <TableHead>Vendas Totais</TableHead>
-                                <TableHead className="text-right">Ganhos Totais (Prêmios)</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {storePerformance.map((store) => (
-                                    <TableRow key={store.id}>
-                                        <TableCell className="font-medium">{store.name}</TableCell>
-                                        <TableCell className="text-center">{store.sellerCount}</TableCell>
-                                        <TableCell>{formatCurrency(store.totalSales)}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(store.totalIncentives)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+            */}
         </div>
     );
 }
