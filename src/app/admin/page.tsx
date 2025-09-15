@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home } from "lucide-react";
+import { KeyRound, Trash2, ArrowRight, Loader2, Edit, Save, X, Home, Database } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -227,13 +227,13 @@ function AdminPageComponent() {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Segurança</CardTitle>
-                    <CardDescription>Altere a senha de acesso ao painel de administrador.</CardDescription>
+                    <CardTitle>Segurança e Diagnóstico</CardTitle>
+                    <CardDescription>Gerencie a segurança e verifique a saúde do sistema.</CardDescription>
                 </CardHeader>
                 <CardContent>
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="new-password">Nova Senha</Label>
+                        <Label htmlFor="new-password">Alterar Senha de Admin</Label>
                         <Input 
                             id="new-password"
                             type="password" 
@@ -243,20 +243,21 @@ function AdminPageComponent() {
                             disabled
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                        <Input 
-                            id="confirm-password"
-                            type="password" 
-                            placeholder="Funcionalidade em breve"
-                            value={adminPasswords.confirm}
-                            onChange={(e) => setAdminPasswords(p => ({...p, confirm: e.target.value}))}
-                            onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-                            disabled
-                        />
+                     <Button onClick={handleChangePassword} className="w-full" disabled><KeyRound className="mr-2 h-4 w-4"/> Alterar Senha</Button>
+                     <Separator />
+                     <div className="space-y-2">
+                        <Label>Diagnóstico do Banco de Dados</Label>
+                        <p className="text-sm text-muted-foreground">
+                            Verifique a estrutura das tabelas para garantir que correspondem ao código da aplicação.
+                        </p>
+                        <Button asChild variant="outline" className="w-full">
+                            <Link href="/admin/db-schema">
+                                <Database className="mr-2 h-4 w-4" />
+                                Visualizar Schema do Banco
+                            </Link>
+                        </Button>
                     </div>
                 </div>
-                <Button onClick={handleChangePassword} className="w-full mt-6" disabled><KeyRound className="mr-2 h-4 w-4"/> Alterar Senha</Button>
                 </CardContent>
             </Card>
         </div>
@@ -271,5 +272,3 @@ export default function AdminDashboardPage() {
         </ClientOnly>
     )
 }
-
-    
