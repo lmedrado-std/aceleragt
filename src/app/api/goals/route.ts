@@ -36,6 +36,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
       }
 
+      // Ensure store_id from the nested goals object is ignored
+      if (goals.store_id) delete goals.store_id;
+      if (goals.id) delete goals.id;
+
       const goalKeys = Object.keys(goals);
       const goalValues = Object.values(goals);
 

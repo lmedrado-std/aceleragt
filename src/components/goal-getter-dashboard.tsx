@@ -260,6 +260,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             cleanGoals[key] = value;
           }
         }
+        
+        // Ensure store_id is not nested inside the goals object
+        delete cleanGoals.store_id;
+        delete cleanGoals.id;
+
 
         const res = await fetch(`/api/goals`, {
             method: 'POST',
