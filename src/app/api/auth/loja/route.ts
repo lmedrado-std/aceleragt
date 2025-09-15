@@ -20,24 +20,29 @@ export async function POST(request: Request) {
     
     const storePassword = storeResult.rows[0].password;
 
+    // 2. Se a senha da loja falhou, tenta validar com a senha do admin global (chave mestra)
+    const adminResult = await conn.query("SELECT value FROM app_config WHERE key = 'admin_password'");
+    const adminPassword = adminResult.rows[0]?.value;
+
+    console.log(
+      "[AUTH LOJA] Digitada:", JSON.stringify(trimmedPassword),
+      "| Salva no banco:", JSON.stringify(storePassword),
+      "| Admin global (app_config):", JSON.stringify(adminPassword)
+    );
+
     // Se a loja não tiver senha, acesso liberado
     if (storePassword === null) {
          return NextResponse.json({ success: true });
     }
 
-    // Se a senha digitada for a da loja, acesso liberado (agora com trim em ambos os lados)
-    if (storePassword && trimmedPassword === storePassword.trim()) {
+    // Se a senha digitada for a da loja, acesso liberado (agora com trim e case-insensitive)
+    if (storePassword && trimmedPassword.toLowerCase() === storePassword.trim().toLowerCase()) {
         return NextResponse.json({ success: true });
     }
-
-    // 2. Se a senha da loja falhou, tenta validar com a senha do admin global (chave mestra)
-    const adminResult = await conn.query("SELECT value FROM app_config WHERE key = 'admin_password'");
-
-    if (adminResult.rowCount > 0) {
-        const adminPassword = adminResult.rows[0].value;
-        if (trimmedPassword === adminPassword.trim()) {
-            return NextResponse.json({ success: true });
-        }
+    
+    // Se a senha for a do admin global, acesso liberado
+    if (adminPassword && trimmedPassword.toLowerCase() === adminPassword.trim().toLowerCase()) {
+        return NextResponse.json({ success: true });
     }
     
     // 3. Se nenhuma senha for válida, nega o acesso
