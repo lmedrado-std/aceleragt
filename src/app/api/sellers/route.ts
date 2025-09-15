@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await conn.query('SELECT * FROM sellers WHERE store_id = $1 ORDER BY name ASC', [storeId]);
+    const result = await conn.query('SELECT * FROM sellers WHERE "store_id" = $1 ORDER BY name ASC', [storeId]);
     return NextResponse.json(result.rows);
   } catch (error) {
     console.error('[API GET /api/sellers] ERRO:', error);
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     }
     
     const result = await conn.query(
-      'INSERT INTO sellers (name, password, avatar_id, store_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO sellers (name, password, "avatar_id", "store_id") VALUES ($1, $2, $3, $4) RETURNING *',
       [name, password, avatarId, storeId]
     );
     
