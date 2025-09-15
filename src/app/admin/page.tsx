@@ -50,7 +50,7 @@ function AdminPageComponent() {
   useEffect(() => {
     const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
     if (!isAdmin) {
-      router.push('/login?redirect=/admin/dashboard');
+      router.push('/login?redirect=/admin');
     } else {
       fetchStores().finally(() => setLoading(false));
     }
@@ -150,7 +150,7 @@ function AdminPageComponent() {
         <div className="w-full flex justify-between items-center">
             <div>
                 <h1 className="text-3xl font-bold text-foreground">
-                    Painel Administrativo
+                    Painel Administrativo Global
                 </h1>
                 <p className="text-muted-foreground">
                     Gerencie todas as lojas e configurações do sistema aqui.
@@ -271,3 +271,5 @@ export default function AdminDashboardPage() {
         </ClientOnly>
     )
 }
+
+    

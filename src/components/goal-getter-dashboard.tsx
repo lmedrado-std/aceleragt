@@ -286,7 +286,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             <Button asChild variant="secondary" className="shadow bg-white/20 hover:bg-white/30 text-white">
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
-                Todas as Lojas
+                Página Inicial
               </Link>
             </Button>
             <Button asChild variant="secondary" className="shadow bg-white/20 hover:bg-white/30 text-white">
@@ -370,3 +370,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
