@@ -217,7 +217,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             } else {
                router.push(`/login?redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=admin`)}`);
             }
-        } else if (tabToActivate !== 'admin' && !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)) {
+        } else if (tabToActivate !== 'admin' && !adminAuthenticated && !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)) {
             router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=${tabToActivate}`)}`);
         } else {
             setActiveTab(tabToActivate);
