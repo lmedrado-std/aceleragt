@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw } from "lucide-react";
+import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw, Moon, Sun } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
@@ -11,17 +11,25 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
 import Link from "next/link";
+import { useTheme } from "next-themes";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function StorePageContent() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const storeId = params.storeId as string;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const loadStoreData = useCallback(async (showToast = false) => {
     if (!storeId) {
@@ -72,8 +80,7 @@ function StorePageContent() {
   };
 
   const handleAdminAccess = () => {
-    const destination = `/dashboard/${storeId}?tab=admin`;
-    router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+    router.push(`/login?redirect=/admin/dashboard`);
   };
 
   const formattedLastUpdated = store?.last_incentive_calculation
@@ -101,31 +108,39 @@ function StorePageContent() {
      )
   }
 
+  const renderThemeToggle = () => {
+    if (!mounted) {
+      return <Skeleton className="h-10 w-10 rounded-full bg-white/20" />;
+    }
+    return (
+      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
+          {theme === 'light' ? <Moon /> : <Sun />}
+      </Button>
+    )
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 p-6 rounded-lg bg-card shadow-md">
+        <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-[#4A55A2] to-[#D45079] shadow-lg text-white">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                 <div>
-                    <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
-                    <p className="text-muted-foreground mt-1">Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.</p>
-                </div>
+                 <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading}>
-                        <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        Atualizar
-                    </Button>
-                    <Button variant="default" asChild>
+                    {renderThemeToggle()}
+                    <Button variant="secondary" asChild className="bg-white/90 text-primary hover:bg-white">
                         <Link href="/">
                             <Home className="mr-2 h-4 w-4" />
                             Página Inicial
                         </Link>
                     </Button>
+                     <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading} className="bg-transparent text-white hover:bg-white/20 hover:text-white border-white/50">
+                        <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        Atualizar
+                    </Button>
                 </div>
             </div>
+             <p className="text-white/80 mt-2">Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.</p>
         </div>
         
-        {/* Last Updated Banner */}
         {formattedLastUpdated && (
             <div className="mb-6 p-3 rounded-md bg-destructive text-destructive-foreground text-center flex items-center justify-center gap-2 text-sm font-medium">
                 <Clock className="h-4 w-4" />
@@ -139,7 +154,6 @@ function StorePageContent() {
             </div>
         ) : (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Admin Panel */}
                 <div className="flex">
                     <Card className="w-full bg-primary text-primary-foreground flex flex-col justify-center items-center p-8 text-center">
                         <Shield className="h-16 w-16 mb-4" />
@@ -147,7 +161,7 @@ function StorePageContent() {
                             <CardTitle className="text-2xl">Administrador</CardTitle>
                         </CardHeader>
                         <CardContent className="p-0 mt-2">
-                            <p className="text-primary-foreground/80">Painel de controle da loja</p>
+                            <p className="text-primary-foreground/80">Painel de controle geral</p>
                         </CardContent>
                         <Button variant="secondary" onClick={handleAdminAccess} className="mt-6 w-full max-w-xs">
                             Acessar Painel <ArrowRight className="ml-2 h-4 w-4" />
@@ -155,7 +169,6 @@ function StorePageContent() {
                     </Card>
                 </div>
 
-                {/* Sellers List */}
                 <div>
                     <Card className="w-full">
                         <CardHeader>

@@ -22,12 +22,12 @@ export async function GET() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
-        avatar_id VARCHAR(50) NOT NULL,
+        "avatar_id" VARCHAR(50) NOT NULL,
         vendas NUMERIC(10, 2) DEFAULT 0,
         pa NUMERIC(5, 2) DEFAULT 0,
-        ticket_medio NUMERIC(10, 2) DEFAULT 0,
-        corridinha_diaria NUMERIC(10, 2) DEFAULT 0,
-        store_id UUID REFERENCES stores(id) ON DELETE CASCADE
+        "ticket_medio" NUMERIC(10, 2) DEFAULT 0,
+        "corridinha_diaria" NUMERIC(10, 2) DEFAULT 0,
+        "store_id" UUID REFERENCES stores(id) ON DELETE CASCADE
       );
     `);
 
@@ -35,7 +35,7 @@ export async function GET() {
     await conn.query(`
       CREATE TABLE IF NOT EXISTS goals (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
+        "store_id" UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
         "metaMinha" NUMERIC(10, 2) DEFAULT 0,
         "metaMinhaPrize" NUMERIC(10, 2) DEFAULT 0,
         "meta" NUMERIC(10, 2) DEFAULT 0,

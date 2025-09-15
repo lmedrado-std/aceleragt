@@ -46,7 +46,8 @@ export type Incentives = Record<string, IncentiveProjectionOutput | null>;
 export interface Store {
     id: string;
     name: string;
-    themeColor: string;
+    theme_color: string | null;
+    last_incentive_calculation: string | null;
 }
 
 export interface AppState {

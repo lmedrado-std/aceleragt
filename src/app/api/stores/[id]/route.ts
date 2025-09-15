@@ -38,7 +38,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         values.push(theme_color);
     }
     if (last_incentive_calculation) {
-        fields.push(`last_incentive_calculation = $${queryIndex++}`);
+        fields.push(`"last_incentive_calculation" = $${queryIndex++}`);
         values.push(last_incentive_calculation);
     }
 

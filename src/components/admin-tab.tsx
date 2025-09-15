@@ -293,6 +293,11 @@ export function AdminTab({
       }
       
       const newLastUpdated = new Date().toISOString();
+      await fetch(`/api/stores/${storeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ last_incentive_calculation: newLastUpdated })
+      });
       onIncentivesCalculated(allIncentives, newLastUpdated);
       onSellersChange();
 
@@ -436,7 +441,7 @@ export function AdminTab({
                 {sellers.length > 0 && (
                     <Button onClick={handleCalculateIncentives} disabled={isCalculating}>
                         <Calculator className="mr-2" />
-                        {isCalculating ? "Calculando..." : "Calcular e Salvar Lançamentos"}
+                        {isCalculating ? "Calculando e salvando..." : "Calcular e Salvar Lançamentos"}
                     </Button>
                 )}
             </CardFooter>
