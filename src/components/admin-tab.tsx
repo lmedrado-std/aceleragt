@@ -158,7 +158,12 @@ export function AdminTab({
         const res = await fetch('/api/sellers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newSellerName, password: finalPassword, avatarId: randomAvatarId, storeId }),
+            body: JSON.stringify({ 
+              name: newSellerName, 
+              password: finalPassword, 
+              avatar_id: randomAvatarId, 
+              store_id: storeId 
+            }),
         });
 
         if(!res.ok) {

@@ -54,6 +54,11 @@ export async function POST(request: Request) {
       return NextResponse.json(result.rows[0]);
     } catch (error) {
       console.error('[API POST /api/goals] ERRO:', error);
-      return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }, { status: 500 });
+      const typedError = error as any;
+      return NextResponse.json({ 
+        error: 'Erro interno do servidor ao salvar metas.',
+        details: typedError.message,
+        code: typedError.code,
+     }, { status: 500 });
     }
 }

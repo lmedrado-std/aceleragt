@@ -253,7 +253,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ storeId, goals: getValues().goals })
         });
-        if (!res.ok) throw new Error('Falha ao salvar metas');
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.details || errorData.error || 'Falha ao salvar metas');
+        }
         toast({
             title: "Metas Salvas!",
             description: "As novas metas e prêmios foram salvos com sucesso.",
@@ -370,5 +373,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

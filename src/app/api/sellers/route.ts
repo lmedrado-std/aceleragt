@@ -22,10 +22,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { name, password, avatarId, storeId } = await request.json();
+    const { name, password, avatar_id, store_id } = await request.json();
 
-    if (!name || !password || !avatarId || !storeId) {
-      return NextResponse.json({ error: 'Campos obrigatórios ausentes: nome, senha, avatarId e storeId são necessários.' }, { status: 400 });
+    if (!name || !password || !avatar_id || !store_id) {
+      return NextResponse.json({ error: 'Campos obrigatórios ausentes: name, password, avatar_id e store_id são necessários.' }, { status: 400 });
     }
     
     const query = `
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       RETURNING *
     `;
     
-    const result = await conn.query(query, [name, password, avatarId, storeId]);
+    const result = await conn.query(query, [name, password, avatar_id, store_id]);
     
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {
