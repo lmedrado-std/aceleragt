@@ -79,8 +79,13 @@ export async function POST(request: Request) {
   } catch (error) {
     await conn.query('ROLLBACK');
     console.error('[API /api/stores] POST: ERRO ao criar loja:', error);
+    const typedError = error as any;
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro interno do servidor ao criar loja' },
+      { 
+        error: 'Erro interno do servidor ao criar loja',
+        details: typedError.message,
+        code: typedError.code
+      },
       { status: 500 }
     );
   }
