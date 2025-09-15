@@ -1,3 +1,4 @@
+
 "use client";
 
 import { GoalGetterDashboard } from "@/components/goal-getter-dashboard";
