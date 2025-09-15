@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -287,14 +288,20 @@ export function AdminTab({
             body: JSON.stringify(parsedSellerData)
         });
 
+        // Map snake_case from DB/form to camelCase for AI flow
+        const sellerForAI = {
+          id: seller.id,
+          name: seller.name,
+          avatarId: seller.avatar_id,
+          password: seller.password,
+          vendas: parsedSellerData.vendas,
+          pa: parsedSellerData.pa,
+          ticketMedio: parsedSellerData.ticket_medio,
+          corridinhaDiaria: parsedSellerData.corridinha_diaria,
+        }
+
         const result = await incentiveProjection({
-           seller: {
-              ...seller,
-              vendas: parsedSellerData.vendas,
-              pa: parsedSellerData.pa,
-              ticket_medio: parsedSellerData.ticket_medio,
-              corridinha_diaria: parsedSellerData.corridinha_diaria,
-            },
+          seller: sellerForAI,
           goals: fixedGoals,
         });
         allIncentives[seller.id!] = result;
