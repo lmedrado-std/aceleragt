@@ -84,19 +84,8 @@ function StorePageContent() {
 
   const handleSellerAccess = (sellerId: string) => {
     const destination = `/dashboard/${storeId}?tab=${sellerId}`;
-    // Check if store has a password and if it's already been authenticated in this session
-    if (store?.password) {
-        const storeAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
-        if (storeAuthenticated) {
-            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`);
-        } else {
-             const loginRedirect = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`;
-             router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(loginRedirect)}`);
-        }
-    } else {
-        // No password for the store, proceed directly to seller login
-        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`);
-    }
+    const loginRedirect = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`;
+    router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(loginRedirect)}`);
   };
 
   const handleAdminAccess = () => {

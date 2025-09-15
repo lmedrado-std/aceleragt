@@ -35,14 +35,15 @@ function StoreLoginComponent() {
     
     async function fetchStore() {
         try {
-            const res = await fetch(`/api/stores/${storeId}`);
+            const res = await fetch(`/api/stores/${storeId}?includePassword=true`);
             if (!res.ok) throw new Error('Falha ao buscar dados da loja');
             const currentStore = await res.json();
 
             if (currentStore) {
                 setStore(currentStore);
-                const storeAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
-                if (storeAuthenticated) {
+                // If the store is not password protected OR already authenticated, redirect
+                if (currentStore.password === null || sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true') {
+                  sessionStorage.setItem(`storeAuthenticated-${storeId}`, 'true'); // Ensure it is set for non-password stores
                   router.push(redirectUrl);
                 } else {
                   setLoading(false);
@@ -60,7 +61,7 @@ function StoreLoginComponent() {
     
     fetchStore();
 
-  }, [router, redirectUrl, storeId, toast, searchParams]);
+  }, [router, redirectUrl, storeId, toast]);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
