@@ -111,7 +111,8 @@ const incentiveProjectionFlow = ai.defineFlow(
     }
 
     if (seller.vendas >= goals.metaLendaria && goals.legendariaBonusValorVenda > 0) {
-      legendariaBonus = Math.floor((seller.vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda) * goals.legendariaBonusValorPremio;
+      const bonusCalculation = Math.floor((seller.vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda) * goals.legendariaBonusValorPremio;
+      legendariaBonus = Math.max(0, bonusCalculation);
     }
 
     if (seller.pa >= goals.paGoal4) {
