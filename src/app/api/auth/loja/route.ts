@@ -1,41 +1,53 @@
 
-import { conn } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import { NextRequest, NextResponse } from "next/server";
+import { conn } from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
-    const { id, password } = await request.json();
-
-    if (!id || !password) {
-      return NextResponse.json({ error: 'ID da loja e senha são obrigatórios' }, { status: 400 });
+    const { storeId, password } = await request.json();
+    if (!storeId || !password) {
+      return NextResponse.json({ error: "ID e senha são obrigatórios." }, { status: 400 });
     }
 
-    const result = await conn.query('SELECT password FROM stores WHERE id = $1', [id]);
+    // Busque a senha da loja
+    const storeRes = await conn.query(
+      'SELECT password FROM stores WHERE id = $1',
+      [storeId]
+    );
+    if (storeRes.rowCount === 0) {
+      return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+    }
+    const storePassword = storeRes.rows[0].password;
 
-    if (result.rowCount === 0) {
-      return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 });
+    // Busque senha global do app_config (estrutura key/value)
+    const appConfigRes = await conn.query(
+      "SELECT value FROM app_config WHERE key = 'admin_password' LIMIT 1"
+    );
+    const adminPassword = appConfigRes.rowCount > 0 ? appConfigRes.rows[0].value : "";
+
+    // 1. Verificação com senha global
+    if (adminPassword && password === adminPassword) {
+      return NextResponse.json({ success: true, admin: true, method: "global" });
     }
 
-    const storedPasswordHash = result.rows[0].password;
-
-    // Se a senha armazenada for nula ou não for um hash válido, negue o acesso.
-    if (!storedPasswordHash || !storedPasswordHash.startsWith('$2a')) { // bcrypt hashes começam com $2a$, $2b$, ou $2y$
-        return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 });
-    }
-
-    const isPasswordCorrect = await bcrypt.compare(password, storedPasswordHash);
-
-    if (isPasswordCorrect) {
-      // Login bem-sucedido
-      return NextResponse.json({ message: 'Login bem-sucedido' });
+    // 2. Verificação retrocompatível: senha da loja pode ser hash ou texto plano
+    let lojaOK = false;
+    if (storePassword && (storePassword.startsWith("$2a$") || storePassword.startsWith("$2b$"))) {
+      // bcrypt hash
+      lojaOK = bcrypt.compareSync(password, storePassword);
     } else {
-      // Senha incorreta
-      return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 });
+      // texto puro (legado)
+      lojaOK = password === storePassword;
     }
 
+    if (lojaOK) {
+      return NextResponse.json({ success: true, admin: false, method: "loja" });
+    }
+
+    return NextResponse.json({ error: "Senha incorreta." }, { status: 401 });
   } catch (error) {
-    console.error('[API POST /api/auth/loja] ERRO:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    console.error("Erro no login da loja:", error);
+    return NextResponse.json({ error: "Erro interno." }, { status: 500 });
   }
 }
