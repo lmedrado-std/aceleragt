@@ -110,6 +110,7 @@ const incentiveProjectionFlow = ai.defineFlow(
       metinhaPremio = salesPrize;
     }
 
+    // Bônus Lendária: a cada X vendido acima da meta lendária, ganha Y extra.
     if (seller.vendas >= goals.metaLendaria && goals.legendariaBonusValorVenda > 0) {
       const bonusCalculation = Math.floor((seller.vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda) * goals.legendariaBonusValorPremio;
       legendariaBonus = Math.max(0, bonusCalculation);
