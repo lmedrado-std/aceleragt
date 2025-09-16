@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import ClientOnly from "@/components/client-only";
+import { logoutAll } from "@/lib/auth";
 
 interface DashboardStats {
     storeCount: number;
@@ -199,7 +200,7 @@ function AdminPageComponent() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('adminAuthenticated');
+    logoutAll();
     toast({ title: "Sessão encerrada", description: "Você saiu do modo de administrador." });
     router.push('/');
   };
