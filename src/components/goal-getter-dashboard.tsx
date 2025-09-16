@@ -400,8 +400,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   <SellerTab
                     seller={seller}
                     goals={getValues().goals as Goals}
-                    incentives={incentives[seller.id!]}
-                    rankings={rankings[seller.id!] || null}
+                    incentives={incentives[seller.id!] || null}
+                    rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null}
                     lastUpdated={lastUpdated}
                   />
                 </TabsContent>

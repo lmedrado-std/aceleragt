@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Seller, Goals, Incentives } from "@/lib/storage";
+import { Seller, Goals } from "@/lib/storage";
 import { ProgressDisplay } from "./progress-display";
 import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";

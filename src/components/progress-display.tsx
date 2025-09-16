@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
+import { RankingMetric } from "./goal-getter-dashboard";
 
 
 type ProgressDisplaySalesData = Partial<Seller> & {
@@ -29,7 +30,7 @@ type ProgressDisplaySalesData = Partial<Seller> & {
 interface ProgressDisplayProps {
   salesData: ProgressDisplaySalesData;
   incentives: IncentiveProjectionOutput | null;
-  rankings: Record<string, number> | null;
+  rankings: Record<RankingMetric, number> | null;
 }
 
 const formatCurrency = (value: number) =>
