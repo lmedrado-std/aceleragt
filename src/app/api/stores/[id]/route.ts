@@ -1,8 +1,8 @@
 
 import { conn } from '@/lib/db';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const storeId = params.id;
   const { searchParams } = new URL(request.url);
   const includePassword = searchParams.get('includePassword') === 'true';
@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 
-export async function PUT(request: Request, { params }: { params: { id:string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { id:string } }) {
   const storeId = params.id;
 
   try {
@@ -58,7 +58,7 @@ export async function PUT(request: Request, { params }: { params: { id:string } 
 }
 
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const storeId = params.id;
 
   try {
