@@ -104,8 +104,16 @@ function StorePageContent() {
   }, [loadStoreData]);
 
   const handleAdminAccess = () => {
-    const destination = `/dashboard/${storeId}?tab=admin`;
-    router.push(`/login?redirect=${encodeURIComponent(destination)}`);
+    const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
+    const isStoreAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
+    const lojaDashboardUrl = `/dashboard/${storeId}?tab=admin`;
+    const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(lojaDashboardUrl)}`;
+  
+    if (isAdmin || isStoreAuthenticated) {
+      router.push(lojaDashboardUrl); // Já autenticado (global ou loja), abre direto o dashboard admin da loja
+    } else {
+      router.push(lojaLoginUrl); // Pede login da loja antes
+    }
   };
 
   const formattedLastUpdated = store?.last_incentive_calculation
@@ -234,5 +242,3 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
-
-    
