@@ -187,7 +187,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         const sellerForAI = {
             id: seller.id,
             name: seller.name,
-            avatar_id: seller.avatar_id,
+            avatarId: seller.avatar_id,
             vendas: parseForAI(seller.vendas),
             pa: parseForAI(seller.pa),
             ticketMedio: parseForAI(seller.ticket_medio),
