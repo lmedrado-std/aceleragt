@@ -1,11 +1,10 @@
 
 import { conn } from '@/lib/db';
-import { NextResponse } from 'next/server';
-import { URL } from 'url';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const storeId = url.searchParams.get('storeId');
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const storeId = searchParams.get('storeId');
 
   if (!storeId) {
     return NextResponse.json({ error: 'O ID da loja é obrigatório' }, { status: 400 });
@@ -20,30 +19,22 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { name, password, avatar_id, store_id } = await request.json();
 
-    if (!name || !password || !avatar_id || !store_id) {
-      return NextResponse.json({ error: 'Campos obrigatórios ausentes: name, password, avatar_id e store_id são necessários.' }, { status: 400 });
+    if (!name || !store_id) {
+        return NextResponse.json({ error: 'Nome e ID da loja são obrigatórios' }, { status: 400 });
     }
-    
-    const query = `
-      INSERT INTO sellers (name, password, "avatar_id", "store_id") 
-      VALUES ($1, $2, $3, $4) 
-      RETURNING *
-    `;
-    
-    const result = await conn.query(query, [name, password, avatar_id, store_id]);
-    
+
+    const result = await conn.query(
+        'INSERT INTO sellers (name, password, avatar_id, store_id) VALUES ($1, $2, $3, $4) RETURNING *',
+        [name, password, avatar_id, store_id]
+    );
+
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {
     console.error('[API POST /api/sellers] ERRO:', error);
-    const typedError = error as any;
-    return NextResponse.json({ 
-        error: 'Erro interno do servidor ao criar vendedor.',
-        details: typedError.message,
-        code: typedError.code,
-     }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }, { status: 500 });
   }
 }
