@@ -27,28 +27,16 @@ function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNex
 function handleSellerAccess(storeId: string, sellerId: string, router: ReturnType<typeof useNextRouter>) {
   const sellerDashboardUrl = `/dashboard/${storeId}?tab=${sellerId}`;
 
-  // Admin global ou da loja pode trocar de vendedor sem novo login
-  if (isAdminGlobal() || isStoreAuthenticated(storeId)) {
-    router.push(sellerDashboardUrl);
-    return;
-  }
-  
-  // Vendedor já autenticado acessa direto
-  if (isSellerAuthenticated(sellerId)) {
+  // Case 1: User has direct access to the seller's dashboard.
+  if (isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(sellerId)) {
     router.push(sellerDashboardUrl);
     return;
   }
 
-  // Redireciona para login, passando pelo da loja primeiro se necessário
+  // Case 2: User is not authenticated. Redirect to the seller's login page.
   const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
-  const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(sellerLoginUrl)}`;
   
-  // Se a loja já está autenticada na sessão (mesmo que não seja admin), vai direto pro login do vendedor
-  if(isStoreAuthenticated(storeId)) {
-      router.push(sellerLoginUrl);
-  } else {
-      router.push(lojaLoginUrl);
-  }
+  router.push(sellerLoginUrl);
 }
 
 
@@ -246,5 +234,3 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
-
-    
