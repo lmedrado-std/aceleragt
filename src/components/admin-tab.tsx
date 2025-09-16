@@ -495,7 +495,7 @@ export function AdminTab({
                            <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
                          <p className="text-xs text-muted-foreground mt-2">
-                          Ex: O vendedor ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2)}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2)}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2)}</strong>.
+                          Você ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2).replace('.',',')}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2).replace('.',',')}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2).replace('.',',')}</strong>.
                         </p>
                     </div>
                 </div>
