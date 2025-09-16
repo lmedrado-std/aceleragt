@@ -21,6 +21,7 @@ import { Goals, Store, Incentives, Seller } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
+import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
 
 const sellerSchema = z.object({
   id: z.string(),
@@ -99,7 +100,6 @@ const DashboardSkeleton = () => (
 
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [incentives, setIncentives] = useState<Incentives>({});
@@ -122,6 +122,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const { reset, getValues } = form;
   const [activeTab, setActiveTab] = useState<string>("loading");
+  
+  const isAdmin = isAdminGlobal();
+  const isStoreAdmin = isStoreAuthenticated(storeId);
 
   const calculateRankings = useCallback((sellersToRank: Seller[]) => {
     const newRankings: Rankings = {};
@@ -200,9 +203,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             setLastUpdated(storeData.last_incentive_calculation);
         }
 
-        const adminAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
-        setIsAdmin(adminAuthenticated);
-
         const tabFromUrl = searchParams.get("tab");
         let tabToActivate = tabFromUrl || (sellersData[0]?.id || "admin");
 
@@ -210,18 +210,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             tabToActivate = sellersData[0]?.id || "admin";
         }
 
-        if (tabToActivate === "admin" && !adminAuthenticated) {
-            // If not admin and trying to access admin tab, redirect to first seller or login
-            if (sellersData.length > 0) {
-              handleTabChange(sellersData[0].id)
-            } else {
-               router.push(`/login?redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=admin`)}`);
-            }
-        } else if (tabToActivate !== 'admin' && !adminAuthenticated && !sessionStorage.getItem(`sellerAuthenticated-${tabToActivate}`)) {
-            router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabToActivate}&redirect=${encodeURIComponent(`/dashboard/${storeId}?tab=${tabToActivate}`)}`);
-        } else {
-            setActiveTab(tabToActivate);
-        }
+        setActiveTab(tabToActivate);
 
     } catch (error) {
         console.error(error);
@@ -230,12 +219,34 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     } finally {
         setLoading(false);
     }
-  }, [storeId, reset, router, toast, searchParams, loadSellers, form]);
-
+  }, [storeId, form, loadSellers, router, searchParams, toast]);
 
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
+
+  // Route protection
+  useEffect(() => {
+    if (loading) return;
+
+    const tabFromUrl = searchParams.get("tab") || activeTab;
+
+    if (isAdminGlobal()) return; // Global admin can access anything
+
+    if (tabFromUrl === 'admin') {
+      if (!isStoreAuthenticated(storeId)) {
+        const redirectUrl = `/dashboard/${storeId}?tab=admin`;
+        router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(redirectUrl)}`);
+      }
+    } else if (tabFromUrl && tabFromUrl !== 'loading') { // It's a seller tab
+      if (!isStoreAuthenticated(storeId) && !isSellerAuthenticated(tabFromUrl)) {
+        const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
+        const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
+        const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(sellerLoginUrl)}`;
+        router.push(lojaLoginUrl);
+      }
+    }
+  }, [storeId, activeTab, searchParams, router, loading]);
 
   const handleIncentivesCalculated = useCallback(
     (newIncentives: Incentives, newLastUpdated: string) => {
@@ -349,12 +360,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     >
                       {seller.name}
                     </TabsTrigger>
-                  )) : !isAdmin && (
+                  )) : !(isAdmin || isStoreAdmin) && (
                     <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
                   )}
                 </TabsList>
 
-                {isAdmin && (
+                {(isAdmin || isStoreAdmin) && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <TabsList className="h-auto p-0 bg-transparent border-b-0">
@@ -370,7 +381,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 )}
               </div>
 
-              {isAdmin && (
+              {(isAdmin || isStoreAdmin) && (
                 <TabsContent value="admin" className="mt-6">
                   <AdminTab
                     form={form}
@@ -396,7 +407,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 </TabsContent>
               ))}
 
-              {sellers.length === 0 && !isAdmin && (
+              {sellers.length === 0 && !(isAdmin || isStoreAdmin) && (
                 <TabsContent value={activeTab} className="mt-10 text-center text-muted-foreground py-10">
                   <p className="text-lg">Bem-vindo!</p>
                   <p>Nenhum vendedor cadastrado nesta loja ainda. Peça ao administrador para adicioná-lo.</p>
@@ -409,3 +420,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    

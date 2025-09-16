@@ -13,27 +13,44 @@ import ClientOnly from "@/components/client-only";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
 
-function handleSellerAccess(sellerId: string, storeId: string, router: ReturnType<typeof useNextRouter>) {
-  const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
-  // Note: O login da loja agora também confere a senha do admin global, então podemos simplificar
-  const isStoreAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
-
-  const dashboardUrl = `/dashboard/${storeId}?tab=${sellerId}`;
-  const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(dashboardUrl)}`;
-  const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(sellerLoginUrl)}`;
-
-  if (isAdmin) {
-    // Admin acessa direto o dashboard do vendedor de qualquer loja
-    router.push(dashboardUrl);
-  } else if (isStoreAuthenticated) {
-    // Loja já autenticada, pede só login do vendedor
-    router.push(sellerLoginUrl);
+function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNextRouter>) {
+  const lojaDashboardUrl = `/dashboard/${storeId}?tab=admin`;
+  if (isAdminGlobal() || isStoreAuthenticated(storeId)) {
+    router.push(lojaDashboardUrl);
   } else {
-    // Não autenticado, pede login da loja primeiro, que depois redirecionará para o login do vendedor
-    router.push(lojaLoginUrl);
+    router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(lojaDashboardUrl)}`);
   }
 }
+
+function handleSellerAccess(storeId: string, sellerId: string, router: ReturnType<typeof useNextRouter>) {
+  const sellerDashboardUrl = `/dashboard/${storeId}?tab=${sellerId}`;
+
+  // Admin global ou da loja pode trocar de vendedor sem novo login
+  if (isAdminGlobal() || isStoreAuthenticated(storeId)) {
+    router.push(sellerDashboardUrl);
+    return;
+  }
+  
+  // Vendedor já autenticado acessa direto
+  if (isSellerAuthenticated(sellerId)) {
+    router.push(sellerDashboardUrl);
+    return;
+  }
+
+  // Redireciona para login, passando pelo da loja primeiro se necessário
+  const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
+  const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(sellerLoginUrl)}`;
+  
+  // Se a loja já está autenticada na sessão (mesmo que não seja admin), vai direto pro login do vendedor
+  if(isStoreAuthenticated(storeId)) {
+      router.push(sellerLoginUrl);
+  } else {
+      router.push(lojaLoginUrl);
+  }
+}
+
 
 function StorePageContent() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -102,19 +119,6 @@ function StorePageContent() {
   useEffect(() => {
     loadStoreData();
   }, [loadStoreData]);
-
-  const handleAdminAccess = () => {
-    const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
-    const isStoreAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
-    const lojaDashboardUrl = `/dashboard/${storeId}?tab=admin`;
-    const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(lojaDashboardUrl)}`;
-  
-    if (isAdmin || isStoreAuthenticated) {
-      router.push(lojaDashboardUrl); // Já autenticado (global ou loja), abre direto o dashboard admin da loja
-    } else {
-      router.push(lojaLoginUrl); // Pede login da loja antes
-    }
-  };
 
   const formattedLastUpdated = store?.last_incentive_calculation
     ? new Date(store.last_incentive_calculation).toLocaleString("pt-BR", {
@@ -196,7 +200,7 @@ function StorePageContent() {
                         <CardContent className="p-0 mt-2">
                             <p className="text-primary-foreground/80">Painel de controle geral</p>
                         </CardContent>
-                        <Button variant="secondary" onClick={handleAdminAccess} className="mt-6 w-full max-w-xs">
+                        <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="mt-6 w-full max-w-xs">
                             Acessar Painel <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </Card>
@@ -212,7 +216,7 @@ function StorePageContent() {
                             {sellers.length > 0 ? sellers.map((seller) => (
                                 <button
                                     key={seller.id}
-                                    onClick={() => handleSellerAccess(seller.id, storeId, router)}
+                                    onClick={() => handleSellerAccess(storeId, seller.id, router)}
                                     className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-muted transition-colors text-left"
                                 >
                                     <div className="flex items-center gap-4">
@@ -242,3 +246,5 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
+
+    
