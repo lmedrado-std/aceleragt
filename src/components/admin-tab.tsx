@@ -97,7 +97,14 @@ export function AdminTab({
     setValue,
     setError,
     clearErrors,
+    watch,
   } = form;
+
+  const legendariaValues = watch([
+    "goals.metaLendaria",
+    "goals.legendariaBonusValorVenda",
+    "goals.legendariaBonusValorPremio",
+  ]);
 
   const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -487,6 +494,9 @@ export function AdminTab({
                            <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                            <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
+                         <p className="text-xs text-muted-foreground mt-2">
+                          Ex: O vendedor ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2)}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2)}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2)}</strong>.
+                        </p>
                     </div>
                 </div>
                  <Separator/>
