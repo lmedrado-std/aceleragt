@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw, Moon, Sun } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter,useRouter as useNextRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,27 @@ import ClientOnly from "@/components/client-only";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
+
+function handleSellerAccess(sellerId: string, storeId: string, router: ReturnType<typeof useNextRouter>) {
+  const isAdmin = sessionStorage.getItem('adminAuthenticated') === 'true';
+  // Note: O login da loja agora também confere a senha do admin global, então podemos simplificar
+  const isStoreAuthenticated = sessionStorage.getItem(`storeAuthenticated-${storeId}`) === 'true';
+
+  const dashboardUrl = `/dashboard/${storeId}?tab=${sellerId}`;
+  const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(dashboardUrl)}`;
+  const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(sellerLoginUrl)}`;
+
+  if (isAdmin) {
+    // Admin acessa direto o dashboard do vendedor de qualquer loja
+    router.push(dashboardUrl);
+  } else if (isStoreAuthenticated) {
+    // Loja já autenticada, pede só login do vendedor
+    router.push(sellerLoginUrl);
+  } else {
+    // Não autenticado, pede login da loja primeiro, que depois redirecionará para o login do vendedor
+    router.push(lojaLoginUrl);
+  }
+}
 
 function StorePageContent() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -81,12 +102,6 @@ function StorePageContent() {
   useEffect(() => {
     loadStoreData();
   }, [loadStoreData]);
-
-  const handleSellerAccess = (sellerId: string) => {
-    const destination = `/dashboard/${storeId}?tab=${sellerId}`;
-    const loginRedirect = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(destination)}`;
-    router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(loginRedirect)}`);
-  };
 
   const handleAdminAccess = () => {
     const destination = `/dashboard/${storeId}?tab=admin`;
@@ -189,7 +204,7 @@ function StorePageContent() {
                             {sellers.length > 0 ? sellers.map((seller) => (
                                 <button
                                     key={seller.id}
-                                    onClick={() => handleSellerAccess(seller.id)}
+                                    onClick={() => handleSellerAccess(seller.id, storeId, router)}
                                     className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-muted transition-colors text-left"
                                 >
                                     <div className="flex items-center gap-4">
@@ -219,3 +234,5 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
+
+    
