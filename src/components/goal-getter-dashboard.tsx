@@ -11,6 +11,7 @@ import { ShieldCheck, Home, CheckCircle, Loader2 } from "lucide-react";
 
 import {
   type IncentiveProjectionOutput,
+  incentiveProjection,
 } from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -98,6 +99,22 @@ const DashboardSkeleton = () => (
   </div>
 );
 
+const parseForAI = (value: any): number => {
+    if (typeof value === 'string') {
+        const parsedValue = parseFloat(value.replace(',', '.'));
+        return isNaN(parsedValue) ? 0 : parsedValue;
+    }
+    return value || 0;
+};
+
+const parseGoalsForAI = (rawGoals: any): Goals => {
+    const parsed: any = {};
+    for (const key in rawGoals) {
+        parsed[key] = parseForAI(rawGoals[key]);
+    }
+    return parsed as Goals;
+};
+
 export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const { toast } = useToast();
   const [currentStore, setCurrentStore] = useState<Store | null>(null);
@@ -161,6 +178,26 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   
     setRankings(newRankings);
   }, []);
+  
+  const calculateAllIncentives = useCallback(async (sellersData: Seller[], goalsData: any) => {
+    const allIncentives: Incentives = {};
+    const fixedGoals = parseGoalsForAI(goalsData);
+
+    for (const seller of sellersData) {
+        const sellerForAI = {
+            id: seller.id,
+            name: seller.name,
+            avatar_id: seller.avatar_id,
+            vendas: parseForAI(seller.vendas),
+            pa: parseForAI(seller.pa),
+            ticketMedio: parseForAI(seller.ticket_medio),
+            corridinhaDiaria: parseForAI(seller.corridinha_diaria),
+        };
+        const result = await incentiveProjection({ seller: sellerForAI, goals: fixedGoals });
+        allIncentives[seller.id!] = result;
+    }
+    setIncentives(allIncentives);
+  }, []);
 
   const loadSellers = useCallback(async () => {
     try {
@@ -192,6 +229,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         setCurrentStore(storeData);
 
         const goalsData = goalsRes.ok ? await goalsRes.json() : {};
+        
+        await calculateAllIncentives(sellersData, goalsData);
+
         form.reset({
             newSellerName: "",
             newSellerPassword: "",
@@ -219,7 +259,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     } finally {
         setLoading(false);
     }
-  }, [storeId, form, loadSellers, router, searchParams, toast]);
+  }, [storeId, form, loadSellers, router, searchParams, toast, calculateAllIncentives]);
 
   useEffect(() => {
     loadInitialData();
@@ -420,5 +460,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    
