@@ -74,8 +74,11 @@ export function Sidebar() {
   return (
     <aside className="flex h-full max-h-screen flex-col gap-2 bg-gradient-to-br from-blue-600 to-red-500 text-white">
       <div className="flex h-14 items-center border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
-        <Link href="/">
-          <Logo className="text-white"/>
+        <Link href="/" className="flex items-center gap-3 text-white">
+          <div className="rounded-lg bg-white/20 p-2">
+            <Rocket className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-xl font-bold">Acelera GT</span>
         </Link>
       </div>
 
