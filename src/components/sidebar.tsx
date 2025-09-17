@@ -38,8 +38,11 @@ export function Sidebar() {
         setLoading(false);
       }
     }
-    fetchStores();
-  }, []);
+
+    if (mounted) {
+      fetchStores();
+    }
+  }, [mounted]);
 
   const NavLink = ({ href, children, icon, isActive }: { href: string, children: React.ReactNode, icon: React.ReactNode, isActive?: boolean }) => (
     <Button
@@ -63,7 +66,7 @@ export function Sidebar() {
     }
     return (
       <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
-          {theme === 'light' ? <Moon /> : <Sun />}
+          {theme === 'dark' ? <Sun /> : <Moon />}
           <span className="sr-only">Toggle theme</span>
       </Button>
     )
