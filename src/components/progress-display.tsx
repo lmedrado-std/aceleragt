@@ -92,7 +92,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     name = "Vendedor",
     vendas = 0,
     pa = 0,
-    ticketMedio = 0,
+    ticket_medio: ticketMedio = 0,
     goals,
   } = salesData;
   

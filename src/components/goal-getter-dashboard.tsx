@@ -311,24 +311,27 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         const cleanedGoals: { [key: string]: any } = {};
 
-        Object.entries(goals).forEach(([key, value]) => {
-            let processedValue = value;
-            if (typeof processedValue === 'string') {
-                processedValue = processedValue.replace(',', '.');
+        for (const [key, value] of Object.entries(goals)) {
+            if (value === null || value === undefined) {
+                cleanedGoals[key] = 0;
+                continue;
             }
-            
-            const numValue = Number(processedValue);
-            if (isNaN(numValue)) {
-                cleanedGoals[key] = 0; // Default to 0 if conversion fails
-                return;
+
+            const stringValue = String(value);
+            const sanitizedValue = stringValue.replace(',', '.');
+            const numericValue = parseFloat(sanitizedValue);
+
+            if (isNaN(numericValue)) {
+                cleanedGoals[key] = 0; 
+                continue;
             }
 
             if (integerFields.includes(key)) {
-                cleanedGoals[key] = parseInt(String(numValue), 10);
+                cleanedGoals[key] = Math.round(numericValue);
             } else {
-                cleanedGoals[key] = parseFloat(String(numValue));
+                cleanedGoals[key] = numericValue;
             }
-        });
+        }
 
         // Ensure store_id is not nested inside the goals object
         delete cleanedGoals.store_id;
