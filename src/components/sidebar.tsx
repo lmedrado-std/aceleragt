@@ -72,7 +72,7 @@ export function Sidebar() {
   const isAdminPage = pathname.startsWith('/admin');
 
   return (
-    <aside className="flex h-full max-h-screen flex-col gap-2 bg-gradient-to-br from-blue-600 to-red-600 text-white">
+    <aside className="flex h-full max-h-screen flex-col gap-2 bg-gradient-to-br from-blue-600 to-red-500 text-white">
       <div className="flex h-14 items-center border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
         <Link href="/">
           <Logo className="text-white"/>
