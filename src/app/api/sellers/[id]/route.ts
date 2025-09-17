@@ -3,9 +3,9 @@ import { NextResponse, NextRequest } from 'next/server';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-  const sellerId = params.id;
+  const sellerId = context.params.id;
 
   try {
     const body = await request.json();
@@ -19,8 +19,8 @@ export async function PUT(
     if (password !== undefined) { fields.push(`password = $${queryIndex++}`); values.push(password); }
     if (vendas !== undefined) { fields.push(`vendas = $${queryIndex++}`); values.push(vendas); }
     if (pa !== undefined) { fields.push(`pa = $${queryIndex++}`); values.push(pa); }
-    if (ticket_medio !== undefined) { fields.push(`"ticket_medio" = $${queryIndex++}`); values.push(ticket_medio); }
-    if (corridinha_diaria !== undefined) { fields.push(`"corridinha_diaria" = $${queryIndex++}`); values.push(corridinha_diaria); }
+    if (ticket_medio !== undefined) { fields.push(`\"ticket_medio\" = $${queryIndex++}`); values.push(ticket_medio); }
+    if (corridinha_diaria !== undefined) { fields.push(`\"corridinha_diaria\" = $${queryIndex++}`); values.push(corridinha_diaria); }
     
     if (fields.length === 0) {
       return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 });
@@ -49,9 +49,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-    const sellerId = params.id;
+    const sellerId = context.params.id;
     try {
         const result = await conn.query('DELETE FROM sellers WHERE id = $1', [sellerId]);
 

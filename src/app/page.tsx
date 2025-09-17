@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +16,7 @@ export default function HomePage() {
                     <span className="text-primary">Acelera GT</span>
                 </h1>
                 <p className="text-muted-foreground mt-3 text-base md:text-lg">
-                    Selecione uma loja na barra lateral para começar ou acesse o painel de Admin para configurar.
+                    Selecione uma loja na barra lateral para começar. Ou acesse o painel de Admin para configurar.
                 </p>
             </CardContent>
         </Card>
