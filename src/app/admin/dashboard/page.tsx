@@ -85,7 +85,7 @@ function GlobalDashboard() {
 
     return (
         <div className="space-y-6">
-             <div className="flex justify-between items-center">
+             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                      <h1 className="text-3xl font-bold">Dashboard Geral</h1>
                      <p className="text-muted-foreground">Visão consolidada de todas as lojas.</p>
@@ -138,7 +138,7 @@ function GlobalDashboard() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-[60%]">Loja</TableHead>
-                                <TableHead className="text-center">Vendedores</TableHead>
+                                <TableHead className="text-center hidden sm:table-cell">Vendedores</TableHead>
                                 <TableHead className="text-right">Vendas</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -146,7 +146,7 @@ function GlobalDashboard() {
                             {stats.storesDetails.map((store) => (
                                 <TableRow key={store.id}>
                                     <TableCell className="font-medium">{store.name}</TableCell>
-                                    <TableCell className="text-center">{store.seller_count}</TableCell>
+                                    <TableCell className="text-center hidden sm:table-cell">{store.seller_count}</TableCell>
                                     <TableCell className="text-right font-semibold">{formatCurrency(store.total_vendas)}</TableCell>
                                 </TableRow>
                             ))}

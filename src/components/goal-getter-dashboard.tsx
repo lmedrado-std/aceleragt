@@ -185,13 +185,14 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     for (const seller of sellersData) {
         const sellerForAI = {
-            id: seller.id,
-            name: seller.name,
-            avatarId: seller.avatar_id,
-            vendas: parseForAI(seller.vendas),
-            pa: parseForAI(seller.pa),
-            ticketMedio: parseForAI(seller.ticket_medio),
-            corridinhaDiaria: parseForAI(seller.corridinha_diaria),
+          id: seller.id,
+          name: seller.name,
+          avatarId: seller.avatar_id,
+          password: seller.password,
+          vendas: parseForAI(seller.vendas),
+          pa: parseForAI(seller.pa),
+          ticketMedio: parseForAI(seller.ticket_medio),
+          corridinhaDiaria: parseForAI(seller.corridinha_diaria),
         };
         const result = await incentiveProjection({ seller: sellerForAI, goals: fixedGoals });
         allIncentives[seller.id!] = result;
@@ -367,9 +368,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
 
   return (
-    <div className="container mx-auto p-4 py-8 md:p-8 relative">
+    <div className="container mx-auto p-0 md:p-8">
        <div className="w-full bg-gradient-to-r from-[#4A55A2] to-[#D45079] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
-        <header className="flex flex-wrap items-center justify-between gap-4">
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
             <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
@@ -395,8 +396,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
           <TooltipProvider>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <div className="flex items-center border-b justify-between flex-wrap">
-                <TabsList className="flex-wrap h-auto p-0 bg-transparent border-b-0">
+              <div className="overflow-x-auto pb-2">
+                <TabsList className="h-auto p-0 bg-transparent border-b-0">
                    {sellers.length > 0 ? sellers.map((seller) => (
                     <TabsTrigger key={seller.id} value={seller.id}
                       className="rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-semibold"
@@ -406,9 +407,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   )) : !(isAdmin || isStoreAdmin) && (
                     <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
                   )}
-                </TabsList>
-
-                {(isAdmin || isStoreAdmin) && (
+                  {(isAdmin || isStoreAdmin) && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <TabsList className="h-auto p-0 bg-transparent border-b-0">
@@ -422,6 +421,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     <TooltipContent><p>Painel do Administrador da Loja</p></TooltipContent>
                   </Tooltip>
                 )}
+                </TabsList>
+
+                
               </div>
 
               {(isAdmin || isStoreAdmin) && (

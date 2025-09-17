@@ -216,8 +216,8 @@ function AdminPageComponent() {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
-        <div className="w-full flex justify-between items-start">
+    <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
+        <div className="w-full flex flex-col sm:flex-row justify-between items-start gap-4">
             <div>
                 <h1 className="text-3xl font-bold text-foreground">
                     Painel Administrativo Global
@@ -230,7 +230,7 @@ function AdminPageComponent() {
                 <Button asChild variant="outline">
                   <Link href="/">
                     <Home className="mr-2 h-4 w-4" />
-                    Voltar ao Início
+                    Voltar
                   </Link>
                 </Button>
                 <Button onClick={handleLogout} variant="destructive">
@@ -250,7 +250,7 @@ function AdminPageComponent() {
                     <CardContent>
                     <div className="space-y-2 mb-4">
                         <Label htmlFor="new-store">Adicionar Nova Loja</Label>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row items-stretch gap-2">
                             <Input 
                             id="new-store"
                             placeholder="Ex: SUPERMODA ITABUNA" 

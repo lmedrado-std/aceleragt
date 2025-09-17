@@ -47,7 +47,7 @@ function SchemaViewer() {
     }, []);
 
     const renderTable = (tableName: string, columns: Column[] | undefined) => (
-        <Card className="flex-1 min-w-[300px]">
+        <Card className="flex-1 min-w-[280px]">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl font-semibold"><Database size={20}/> {tableName}</CardTitle>
             </CardHeader>
@@ -55,9 +55,9 @@ function SchemaViewer() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-1/3">Nome da Coluna</TableHead>
-                            <TableHead className="w-1/3">Tipo de Dado</TableHead>
-                            <TableHead className="w-1/3 text-right">Aceita Nulo?</TableHead>
+                            <TableHead className="w-1/3">Coluna</TableHead>
+                            <TableHead className="w-1/3 hidden sm:table-cell">Tipo</TableHead>
+                            <TableHead className="w-1/3 text-right">Nulo?</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -65,7 +65,7 @@ function SchemaViewer() {
                             columns.map((col) => (
                                 <TableRow key={col.column_name}>
                                     <TableCell className="font-mono font-medium text-sm">{col.column_name}</TableCell>
-                                    <TableCell className="font-mono text-sm">{col.data_type}</TableCell>
+                                    <TableCell className="font-mono text-sm hidden sm:table-cell">{col.data_type}</TableCell>
                                     <TableCell className="text-right">
                                         <Badge variant={col.is_nullable === 'YES' ? 'secondary' : 'destructive'}>
                                             {col.is_nullable}
@@ -114,7 +114,7 @@ function SchemaViewer() {
 
     return (
         <div className="space-y-6">
-             <div className="flex justify-between items-center">
+             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                      <h1 className="text-3xl font-bold">Schema do Banco de Dados</h1>
                      <p className="text-muted-foreground">Estrutura atual das tabelas no Neon.</p>

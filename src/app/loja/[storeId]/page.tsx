@@ -147,19 +147,19 @@ function StorePageContent() {
   return (
     <div className="w-full max-w-5xl mx-auto">
         <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-[#4A55A2] to-[#D45079] shadow-lg text-white">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                  <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
                 <div className="flex items-center gap-2">
                     {renderThemeToggle()}
                     <Button variant="secondary" asChild className="bg-white/90 text-primary hover:bg-white">
                         <Link href="/">
                             <Home className="mr-2 h-4 w-4" />
-                            Página Inicial
+                            <span className="hidden sm:inline">Página Inicial</span>
                         </Link>
                     </Button>
                      <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading} className="bg-transparent text-white hover:bg-white/20 hover:text-white border-white/50">
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        Atualizar
+                        <span className="hidden sm:inline">Atualizar</span>
                     </Button>
                 </div>
             </div>
