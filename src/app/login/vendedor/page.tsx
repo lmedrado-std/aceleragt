@@ -110,9 +110,7 @@ function SellerLoginComponent() {
             </Button>
         </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Link href="/" className="mb-4">
-          <Logo className="h-16 w-auto text-foreground" />
-        </Link>
+        <Logo className="h-16 w-auto mb-4" />
         <Card className="w-full">
           <CardHeader className="items-center text-center">
             <SellerAvatar avatarId={seller.avatar_id} className="h-20 w-20 mb-4" />

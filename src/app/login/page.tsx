@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { KeyRound, Loader2, AlertTriangle, Database } from 'lucide-react';
-import Link from 'next/link';
 import { Logo } from '@/components/logo';
 
 function LoginComponent() {
@@ -76,9 +75,7 @@ function LoginComponent() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Link href="/" className="mb-4">
-          <Logo className="h-16 w-auto text-foreground" />
-        </Link>
+        <Logo className="h-16 w-auto mb-4" />
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle>Login do Administrador Global</CardTitle>
