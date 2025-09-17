@@ -1,10 +1,9 @@
-
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "./ui/sheet";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -26,6 +25,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </Button>
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col p-0">
+                            <span className="sr-only">
+                                <SheetTitle>Menu de Navegação</SheetTitle>
+                            </span>
                             <Sidebar />
                         </SheetContent>
                     </Sheet>
