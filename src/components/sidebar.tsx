@@ -47,7 +47,7 @@ export function Sidebar() {
       variant="ghost"
       className={cn(
         "w-full justify-start text-base font-normal",
-        isActive ? "bg-white/20 text-white font-semibold" : "text-white/80 hover:bg-white/10 hover:text-white"
+        isActive ? "bg-muted text-foreground font-semibold" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
       )}
     >
       <Link href={href}>
@@ -59,10 +59,10 @@ export function Sidebar() {
 
   const renderThemeToggle = () => {
     if (!mounted) {
-      return <Skeleton className="h-10 w-10 rounded-full bg-white/10" />;
+      return <Skeleton className="h-10 w-10 rounded-full bg-muted" />;
     }
     return (
-      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
+      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground">
           {theme === 'light' ? <Moon /> : <Sun />}
           <span className="sr-only">Toggle theme</span>
       </Button>
@@ -72,9 +72,9 @@ export function Sidebar() {
   const isAdminPage = pathname.startsWith('/admin');
 
   return (
-    <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-[#4A55A2] via-[#D45079] to-[#D45079] text-white flex-col hidden md:flex">
-      <div className="p-4 flex items-center gap-2 border-b border-white/20 h-20">
-         <Logo className="text-white" />
+    <aside className="flex h-full max-h-screen flex-col gap-2">
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+         <Logo className="text-foreground" />
       </div>
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
@@ -87,14 +87,14 @@ export function Sidebar() {
               </div>
             )}
         </div>
-        <Separator className="bg-white/20 my-2" />
-        <h2 className="text-sm font-semibold tracking-wider text-white/70 uppercase px-3 mt-4 mb-2">
+        <Separator className="my-2" />
+        <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase px-3 mt-4 mb-2">
           Lojas
         </h2>
         {loading ? (
             <div className="space-y-2 px-2">
-                <Skeleton className="h-9 w-full bg-white/10" />
-                <Skeleton className="h-9 w-full bg-white/10" />
+                <Skeleton className="h-9 w-full bg-muted" />
+                <Skeleton className="h-9 w-full bg-muted" />
             </div>
         ) : stores.length > 0 ? (
           stores.map((store) => (
@@ -108,15 +108,15 @@ export function Sidebar() {
             </NavLink>
           ))
         ) : (
-          <p className="px-3 text-sm text-white/60">Nenhuma loja cadastrada.</p>
+          <p className="px-3 text-sm text-muted-foreground">Nenhuma loja cadastrada.</p>
         )}
       </nav>
 
-      <div className="p-2 border-t border-white/20 space-y-2">
-        <div className="flex justify-center">
+      <div className="mt-auto p-4 border-t">
+        <div className="flex justify-center mb-2">
             {renderThemeToggle()}
         </div>
-        <div className="px-3 py-2 text-xs text-center text-white/60 space-y-1">
+        <div className="px-3 py-2 text-xs text-center text-muted-foreground space-y-1">
             <p>v1.0 - Build Estável</p>
             <p>RyannBreston desenvolvedor</p>
             <p>© {new Date().getFullYear()} Acelera GT.</p>
