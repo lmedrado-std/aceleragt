@@ -1,8 +1,10 @@
-
 import { conn } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const sellerId = params.id;
 
   try {
@@ -45,7 +47,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
     const sellerId = params.id;
     try {
         const result = await conn.query('DELETE FROM sellers WHERE id = $1', [sellerId]);
