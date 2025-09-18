@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
-  const sellerId = params.id;
+  const sellerId = context.params.id;
   try {
     const result = await conn.query('SELECT * FROM sellers WHERE id = $1', [sellerId]);
     if (result.rowCount === 0) {
@@ -25,9 +25,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
-  const sellerId = params.id;
+  const sellerId = context.params.id;
   try {
     const body = await request.json();
     const { name, password, vendas, pa, ticket_medio, corridinha_diaria } = body;
@@ -64,9 +64,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
-  const sellerId = params.id;
+  const sellerId = context.params.id;
   try {
     const result = await conn.query('DELETE FROM sellers WHERE id = $1', [sellerId]);
     if (result.rowCount === 0) {

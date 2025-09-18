@@ -2,8 +2,8 @@
 import { conn } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const storeId = params.id;
+export async function GET(request: NextRequest, context: any) {
+  const storeId = context.params.id;
   const { searchParams } = new URL(request.url);
   const includePassword = searchParams.get('includePassword') === 'true';
 
@@ -22,8 +22,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const storeId = params.id;
+export async function PUT(request: NextRequest, context: any) {
+  const storeId = context.params.id;
 
   try {
     const { name, theme_color, last_incentive_calculation, password } = await request.json();
@@ -58,8 +58,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  const storeId = params.id;
+export async function DELETE(request: NextRequest, context: any) {
+  const storeId = context.params.id;
 
   try {
     await conn.query('BEGIN');
