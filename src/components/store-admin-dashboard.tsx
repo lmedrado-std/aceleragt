@@ -3,7 +3,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Goals, Incentives, Seller } from "@/lib/storage";
-import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket } from "lucide-react";
+import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StoreAdminDashboardProps {
   sellers: Seller[];
@@ -31,13 +32,11 @@ const InfoCard = ({ title, value, icon, description }: { title: string; value: s
 );
 
 const GoalAchievementItem = ({ label, goalValue, sellers, sellersReached }: { label: string; goalValue: number; sellers: Seller[]; sellersReached: number }) => {
-    const percentage = sellers.length > 0 ? (sellersReached / sellers.length) * 100 : 0;
-    
     return (
         <div className="flex items-center justify-between p-3 rounded-lg bg-background">
             <div>
                 <p className="font-semibold text-foreground">{label}</p>
-                <p className="text-sm text-muted-foreground">Meta: {formatCurrency(goalValue)}</p>
+                <p className="text-sm text-muted-foreground">Meta: {goalValue > 0 ? formatCurrency(goalValue) : '-'}</p>
             </div>
             <div className="text-right">
                  <p className="font-bold text-lg text-primary">{sellersReached} / {sellers.length}</p>
@@ -46,6 +45,13 @@ const GoalAchievementItem = ({ label, goalValue, sellers, sellersReached }: { la
         </div>
     );
 };
+
+const PrizeBreakdownItem = ({ label, value, colorClass }: { label: string; value: number, colorClass?: string }) => (
+    <div className="flex justify-between items-center text-sm py-1.5 border-b border-border/50 last:border-0">
+        <p className="text-muted-foreground">{label}</p>
+        <p className={cn("font-semibold text-foreground", colorClass)}>{formatCurrency(value)}</p>
+    </div>
+);
 
 
 export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDashboardProps) {
@@ -60,10 +66,6 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   }
 
   const totalSales = sellers.reduce((acc, seller) => acc + (Number(seller.vendas) || 0), 0);
-  const totalPrizes = Object.values(incentives).reduce((acc, incentive) => {
-    if (!incentive) return acc;
-    return acc + Object.values(incentive).reduce((sum, val) => sum + (val || 0), 0);
-  }, 0);
   
   const totalPA = sellers.reduce((acc, seller) => acc + (Number(seller.pa) || 0), 0);
   const sellersWithPA = sellers.filter(s => (s.pa || 0) > 0);
@@ -83,6 +85,22 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const sellersReachedMetona = sellers.filter(s => (s.vendas || 0) >= goals.metona).length;
   const sellersReachedLendaria = sellers.filter(s => (s.vendas || 0) >= goals.metaLendaria).length;
 
+  // Cálculo do detalhamento de prêmios
+  const prizeBreakdown = Object.values(incentives).reduce((acc, incentive) => {
+    if (!incentive) return acc;
+    acc.metinha += incentive.metinhaPremio || 0;
+    acc.meta += incentive.metaPremio || 0;
+    acc.metona += incentive.metonaPremio || 0;
+    acc.lendaria += incentive.legendariaBonus || 0;
+    acc.pa += incentive.paBonus || 0;
+    acc.ticketMedio += incentive.ticketMedioBonus || 0;
+    acc.corridinha += incentive.corridinhaDiariaBonus || 0;
+    return acc;
+  }, { metinha: 0, meta: 0, metona: 0, lendaria: 0, pa: 0, ticketMedio: 0, corridinha: 0 });
+
+  const totalPrizes = Object.values(prizeBreakdown).reduce((sum, value) => sum + value, 0);
+
+
   return (
     <Card>
       <CardHeader>
@@ -98,15 +116,15 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
             <InfoCard title="Ticket Médio da Equipe" value={formatCurrency(averageTicketMedio)} icon={<Ticket className="h-4 w-4 text-muted-foreground" />} description="Valor médio por venda"/>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* === Goal Achievement by Sellers === */}
-            <Card>
+            <Card className="lg:col-span-1">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5" />
-                        Atingimento de Metas (Vendedores)
+                        Atingimento de Metas de Vendas
                     </CardTitle>
-                     <CardDescription>Quantos vendedores alcançaram cada nível de meta de vendas.</CardDescription>
+                     <CardDescription>Quantos vendedores alcançaram cada nível.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                    <GoalAchievementItem label="Metinha" goalValue={goals.metaMinha} sellers={sellers} sellersReached={sellersReachedMetinha} />
@@ -116,14 +134,35 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                 </CardContent>
             </Card>
 
+             {/* === Prize Breakdown === */}
+            <Card className="lg:col-span-1">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Gift className="h-5 w-5" />
+                        Detalhamento dos Prêmios
+                    </CardTitle>
+                    <CardDescription>Valores pagos por categoria de incentivo.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <PrizeBreakdownItem label="Prêmio Metinha" value={prizeBreakdown.metinha} />
+                    <PrizeBreakdownItem label="Prêmio Meta" value={prizeBreakdown.meta} />
+                    <PrizeBreakdownItem label="Prêmio Metona" value={prizeBreakdown.metona} />
+                    <PrizeBreakdownItem label="Bônus Lendária" value={prizeBreakdown.lendaria} />
+                    <PrizeBreakdownItem label="Bônus PA" value={prizeBreakdown.pa} />
+                    <PrizeBreakdownItem label="Bônus Ticket Médio" value={prizeBreakdown.ticketMedio} />
+                    <PrizeBreakdownItem label="Bônus Corridinha" value={prizeBreakdown.corridinha} />
+                </CardContent>
+            </Card>
+
+
             {/* === Summary & Top Performer === */}
-             <Card className="bg-secondary/50">
+             <Card className="bg-secondary/50 lg:col-span-1">
                 <CardHeader>
                     <CardTitle>Destaques da Equipe</CardTitle>
                     <CardDescription>{sellers.length} vendedores ativos</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {bestSeller && bestSeller.name ? (
+                    {bestSeller && bestSeller.name && bestSeller.vendas > 0 ? (
                          <div className="text-center p-6 rounded-lg bg-background">
                             <Trophy className="h-8 w-8 mx-auto text-yellow-500 mb-2"/>
                             <p className="text-muted-foreground text-sm">Destaque em Vendas</p>
@@ -131,16 +170,10 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                             <p className="text-lg font-semibold text-primary">{formatCurrency(bestSeller.vendas)}</p>
                         </div>
                     ) : (
-                        <div className="text-center p-6 rounded-lg bg-background">
+                        <div className="text-center p-6 rounded-lg bg-background flex items-center justify-center h-full">
                              <p className="text-muted-foreground">Sem dados de vendas para definir um destaque.</p>
                         </div>
                     )}
-                    
-                    <div className="text-center p-6 rounded-lg bg-background">
-                       <Goal className="h-8 w-8 mx-auto text-primary mb-2"/>
-                       <p className="text-muted-foreground text-sm">Total de Vendas da Loja</p>
-                       <p className="text-3xl font-bold">{formatCurrency(totalSales)}</p>
-                    </div>
                 </CardContent>
             </Card>
         </div>
