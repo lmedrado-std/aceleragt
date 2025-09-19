@@ -47,6 +47,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Seller, Goals, Incentives } from "@/lib/storage";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
@@ -717,3 +718,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
