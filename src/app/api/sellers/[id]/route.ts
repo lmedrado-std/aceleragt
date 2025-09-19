@@ -3,8 +3,8 @@ import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET /api/sellers/[id]
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const sellerId = params.id;
+export async function GET(request: NextRequest, context: any) {
+  const sellerId = context.params.id;
 
   try {
     const seller = await prisma.sellers.findUnique({
@@ -30,9 +30,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: any) {
+  const { id } = context.params;
   try {
-    const { id } = params;
     const body = await request.json();
     // Assuming body can contain any of these fields for update
     const { name, password, vendas, pa, ticketMedio, corridinhaDiaria, ticket_medio, corridinha_diaria } = body;
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(seller, { status: 200 });
 
   } catch (error) {
-    console.error(`[API /api/sellers/[id]] ERRO no PUT (id: ${params.id}):`, error);
+    console.error(`[API /api/sellers/[id]] ERRO no PUT (id: ${id}):`, error);
     const typedError = error as any;
     if (typedError.code === 'P2025') { // Prisma's error code for record not found
         return NextResponse.json({ error: 'Vendedor não encontrado.' }, { status: 404 });
@@ -69,10 +69,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: any) {
+  const { id } = context.params;
   try {
-    const { id } = params;
-
     await prisma.sellers.delete({
       where: { id: id },
     });
@@ -81,7 +80,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return new NextResponse(null, { status: 204 });
 
   } catch (error) {
-    console.error(`[API /api/sellers/[id]] ERRO no DELETE (id: ${params.id}):`, error);
+    console.error(`[API /api/sellers/[id]] ERRO no DELETE (id: ${id}):`, error);
     const typedError = error as any;
     if (typedError.code === 'P2025') { // Prisma's error code for record not found
         return NextResponse.json({ error: 'Vendedor não encontrado.' }, { status: 404 });

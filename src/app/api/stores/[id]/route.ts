@@ -2,7 +2,7 @@
 import { prisma } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: any) {
   const storeId = context.params.id;
 
   const { searchParams } = new URL(request.url);
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, context: { params: { id: string 
   }
 }
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: any) {
   const storeId = context.params.id;
 
   try {
@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
   }
 }
 
-export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: any) {
   const storeId = context.params.id;
 
   try {
