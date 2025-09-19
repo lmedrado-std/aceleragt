@@ -15,6 +15,7 @@ import {
   Clock,
   LayoutDashboard,
   FileUp,
+  AlertTriangle,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -46,7 +47,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Seller, Goals, Incentives } from "@/lib/storage";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
@@ -81,6 +81,13 @@ interface AdminTabProps {
   incentives: Incentives;
 }
 
+type ParsedRow = {
+  sellerIndex: number;
+  salesValue: any;
+  paValue: any;
+  ticketMedioValue: any;
+}
+
 export function AdminTab({
   form,
   storeId,
@@ -98,6 +105,11 @@ export function AdminTab({
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [isCalculating, setIsCalculating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importDialog, setImportDialog] = useState<{
+      open: boolean;
+      notFound: string[];
+      found: ParsedRow[];
+  }>({ open: false, notFound: [], found: [] });
 
 
   const {
@@ -351,6 +363,26 @@ export function AdminTab({
         minute: "2-digit",
       })
     : null;
+    
+  const proceedWithImport = (rows: ParsedRow[]) => {
+      let updatedCount = 0;
+      rows.forEach(row => {
+          setValue(`sellers.${row.sellerIndex}.vendas`, row.salesValue, { shouldDirty: true });
+          setValue(`sellers.${row.sellerIndex}.pa`, row.paValue, { shouldDirty: true });
+          setValue(`sellers.${row.sellerIndex}.ticket_medio`, row.ticketMedioValue, { shouldDirty: true });
+          updatedCount++;
+      });
+
+      if (updatedCount > 0) {
+          toast({
+              title: "Importação Concluída!",
+              description: `${updatedCount} vendedor(es) atualizado(s). O bônus 'Corridinha Diária' deve ser inserido manualmente, se aplicável.`,
+              duration: 8000
+          });
+      }
+      setImportDialog({ open: false, notFound: [], found: [] });
+  };
+
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -371,51 +403,45 @@ export function AdminTab({
 
             const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
 
-            let updatedCount = 0;
-            const notFound: string[] = [];
+            const updatesToApply: ParsedRow[] = [];
+            const notFoundSellers: string[] = [];
 
             jsonData.forEach(row => {
                 const sellerName = row['reportgroup']?.toString().trim().toLowerCase();
-                const salesValue = row['totalliquido'];
-                const paValue = row['mediapecasvendas'];
-                const ticketMedioValue = row['mediavendas'];
-                
                 if (!sellerName) return;
 
                 const sellerIndex = sellers.findIndex(s => s.name?.trim().toLowerCase() === sellerName);
 
                 if (sellerIndex !== -1) {
-                    setValue(`sellers.${sellerIndex}.vendas`, salesValue, { shouldDirty: true });
-                    setValue(`sellers.${sellerIndex}.pa`, paValue, { shouldDirty: true });
-                    setValue(`sellers.${sellerIndex}.ticket_medio`, ticketMedioValue, { shouldDirty: true });
-                    updatedCount++;
+                    updatesToApply.push({
+                        sellerIndex: sellerIndex,
+                        salesValue: row['totalliquido'],
+                        paValue: row['mediapecasvendas'],
+                        ticketMedioValue: row['mediavendas'],
+                    });
                 } else {
-                    notFound.push(row['reportgroup']);
+                    notFoundSellers.push(row['reportgroup']);
                 }
             });
 
-            if (updatedCount > 0) {
+            if (updatesToApply.length === 0 && notFoundSellers.length === 0) {
               toast({
-                  title: "Importação Concluída!",
-                  description: `${updatedCount} vendedor(es) atualizado(s). O bônus 'Corridinha Diária' deve ser inserido manualmente, se aplicável.`,
-                  duration: 8000
+                  variant: "destructive",
+                  title: "Nenhum dado para importar",
+                  description: "Verifique se o arquivo Excel tem as colunas corretas e se os nomes dos vendedores correspondem.",
+                  duration: 10000
               });
+              return;
             }
-            if (notFound.length > 0) {
-                toast({
-                    variant: "destructive",
-                    title: "Vendedores Não Encontrados",
-                    description: `Os seguintes vendedores do arquivo não foram encontrados: ${notFound.join(', ')}. Verifique se os nomes correspondem.`,
-                    duration: 10000
+
+            if (notFoundSellers.length > 0) {
+                setImportDialog({
+                    open: true,
+                    notFound: notFoundSellers,
+                    found: updatesToApply
                 });
-            }
-            if(updatedCount === 0 && notFound.length === 0){
-                toast({
-                    variant: "destructive",
-                    title: "Nenhum dado importado",
-                    description: "Verifique se o arquivo Excel tem as colunas corretas (reportgroup, totalliquido, etc.) e se os nomes dos vendedores correspondem.",
-                    duration: 10000
-                });
+            } else {
+                proceedWithImport(updatesToApply);
             }
 
         } catch (error) {
@@ -435,8 +461,36 @@ export function AdminTab({
     reader.readAsArrayBuffer(file);
   };
 
+
   return (
     <div className="space-y-8">
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={importDialog.open} onOpenChange={(open) => !open && setImportDialog({ open: false, notFound: [], found: [] })}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                      <AlertTriangle className="text-yellow-500" />
+                      Vendedores não encontrados
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                      A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
+                      <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
+                          {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
+                      </ul>
+                      Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setImportDialog({ open: false, notFound: [], found: [] })}>
+                      Cancelar
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={() => proceedWithImport(importDialog.found)}>
+                      Continuar Importação
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard">
@@ -661,5 +715,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
