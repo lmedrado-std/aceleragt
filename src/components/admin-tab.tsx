@@ -533,28 +533,11 @@ export function AdminTab({
           <Card>
             <CardHeader>
               <CardTitle>Lançamentos de Desempenho</CardTitle>
-              <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor, manualmente ou via importação.</CardDescription>
+              <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               {sellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
                 <>
-                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">Importar de Arquivo Excel</h3>
-                        <p className="text-sm text-muted-foreground">Faça o upload de um arquivo .xlsx com as colunas: Vendedor, V. Bruta, PA, Ticket Medio.</p>
-                      </div>
-                       <Button onClick={() => fileInputRef.current?.click()}>
-                            <FileUp className="mr-2 h-4 w-4" />
-                            Importar Arquivo
-                        </Button>
-                        <Input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            className="hidden"
-                            accept=".xlsx, .xls"
-                            onChange={handleFileUpload}
-                        />
-                   </div>
                   {sellers.map((seller, index) => (
                     <div key={seller.id}>
                         {index > 0 && <Separator className="my-6" />}
@@ -570,21 +553,44 @@ export function AdminTab({
                  </>
               )}
             </CardContent>
-             <CardFooter className="flex flex-col sm:flex-row items-start gap-4">
-                {sellers.length > 0 && (
-                    <Button onClick={handleCalculateIncentives} disabled={isCalculating}>
-                        <Calculator className="mr-2" />
-                        {isCalculating ? "Calculando e salvando..." : "Calcular e Salvar Lançamentos"}
-                    </Button>
-                )}
-                 {formattedLastUpdated && (
-                    <div className="p-3 rounded-md bg-secondary/50 border-dashed flex items-center gap-3 text-sm text-muted-foreground flex-grow justify-center sm:justify-start">
-                       <Clock className="h-5 w-5" />
-                       <span>
-                           Última atualização de dados: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
-                       </span>
+             <CardFooter className="flex flex-col-reverse sm:flex-row items-center gap-4 border-t pt-6">
+                <div className="flex-grow flex flex-col sm:flex-row items-center gap-4">
+                    {sellers.length > 0 && (
+                        <Button onClick={handleCalculateIncentives} disabled={isCalculating} className="w-full sm:w-auto">
+                            <Calculator className="mr-2" />
+                            {isCalculating ? "Calculando e salvando..." : "Calcular e Salvar Lançamentos"}
+                        </Button>
+                    )}
+                    {formattedLastUpdated && (
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                           <Clock className="h-4 w-4" />
+                           <span>
+                               Última atualização: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
+                           </span>
+                        </div>
+                    )}
+                </div>
+                <div className="w-full sm:w-auto">
+                    <div className="flex flex-col items-start gap-2 p-4 border rounded-lg bg-muted/50 w-full">
+                        <div className="flex items-center justify-between w-full">
+                            <div>
+                                <h3 className="font-semibold text-sm">Importar de Arquivo Excel</h3>
+                                <p className="text-xs text-muted-foreground">Colunas: Vendedor, V. Bruta, PA, Ticket Medio.</p>
+                            </div>
+                            <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline">
+                                <FileUp className="mr-2 h-4 w-4" />
+                                Importar
+                            </Button>
+                            <Input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                className="hidden"
+                                accept=".xlsx, .xls"
+                                onChange={handleFileUpload}
+                            />
+                        </div>
                     </div>
-                  )}
+                </div>
             </CardFooter>
           </Card>
         </TabsContent>
