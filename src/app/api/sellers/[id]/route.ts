@@ -1,80 +1,91 @@
-import { conn } from '@/lib/db';
+
+import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(
-  request: NextRequest,
-  context: any
-) {
-  const sellerId = context.params.id;
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
+  const sellerId = parseInt(context.params.id, 10);
+  if (isNaN(sellerId)) {
+    return NextResponse.json({ error: 'ID do vendedor inválido' }, { status: 400 });
+  }
+
   try {
-    const result = await conn.query('SELECT * FROM sellers WHERE id = $1', [sellerId]);
-    if (result.rowCount === 0) {
+    const seller = await prisma.sellers.findUnique({
+      where: { id: sellerId },
+    });
+
+    if (!seller) {
       return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
     }
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(seller);
   } catch (error) {
     console.error(`[API GET /api/sellers/${sellerId}] ERRO:`, error);
     const typedError = error as any;
-    return NextResponse.json({
-      error: 'Erro interno do servidor ao buscar vendedor.',
-      details: typedError.message,
-      code: typedError.code,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor ao buscar vendedor.',
+        details: typedError.message,
+        code: typedError.code,
+      },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  context: any
-) {
-  const sellerId = context.params.id;
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+  const sellerId = parseInt(context.params.id, 10);
+  if (isNaN(sellerId)) {
+    return NextResponse.json({ error: 'ID do vendedor inválido' }, { status: 400 });
+  }
+
   try {
     const body = await request.json();
-    const { name, password, vendas, pa, ticket_medio, corridinha_diaria } = body;
-    const fields: string[] = [];
-    const values: any[] = [];
-    let queryIndex = 1;
-    if (name !== undefined) { fields.push(`name = $${queryIndex++}`); values.push(name); }
-    if (password !== undefined) { fields.push(`password = $${queryIndex++}`); values.push(password); }
-    if (vendas !== undefined) { fields.push(`vendas = $${queryIndex++}`); values.push(vendas); }
-    if (pa !== undefined) { fields.push(`pa = $${queryIndex++}`); values.push(pa); }
-    if (ticket_medio !== undefined) { fields.push(`"ticket_medio" = $${queryIndex++}`); values.push(ticket_medio); }
-    if (corridinha_diaria !== undefined) { fields.push(`"corridinha_diaria" = $${queryIndex++}`); values.push(corridinha_diaria); }
-    
-    if (fields.length === 0) {
-      return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 });
-    }
-    values.push(sellerId);
-    const query = `UPDATE sellers SET ${fields.join(', ')} WHERE id = $${queryIndex} RETURNING *`;
-    const result = await conn.query(query, values);
-    if (result.rowCount === 0) {
-      return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
-    }
-    return NextResponse.json(result.rows[0]);
+
+    const seller = await prisma.sellers.update({
+      where: { id: sellerId },
+      data: body,
+    });
+
+    return NextResponse.json(seller);
   } catch (error) {
     console.error(`[API PUT /api/sellers/${sellerId}] ERRO:`, error);
     const typedError = error as any;
-    return NextResponse.json({
-      error: 'Erro interno do servidor ao atualizar vendedor.',
-      details: typedError.message,
-      code: typedError.code,
-    }, { status: 500 });
+    // Prisma's P2025 is the error code for a record not found on update/delete
+    if (typedError.code === 'P2025') {
+      return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
+    }
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor ao atualizar vendedor.',
+        details: typedError.message,
+        code: typedError.code,
+      },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  context: any
-) {
-  const sellerId = context.params.id;
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+  const sellerId = parseInt(context.params.id, 10);
+  if (isNaN(sellerId)) {
+    return NextResponse.json({ error: 'ID do vendedor inválido' }, { status: 400 });
+  }
+
   try {
-    const result = await conn.query('DELETE FROM sellers WHERE id = $1', [sellerId]);
-    if (result.rowCount === 0) {
-      return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
-    }
+    await prisma.sellers.delete({
+      where: { id: sellerId },
+    });
+
     return new NextResponse(null, { status: 204 }); // No Content
   } catch (error) {
     console.error(`[API DELETE /api/sellers/${sellerId}] ERRO:`, error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }, { status: 500 });
+    const typedError = error as any;
+    // Prisma's P2025 is the error code for a record not found on update/delete
+    if (typedError.code === 'P2025') {
+      return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
+    }
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }

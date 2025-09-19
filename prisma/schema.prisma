@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model admins {
+  id       String @id
+  password String
+}
+
+model app_config {
+  key   String @id
+  value String
+}
+
+model goals {
+  id                         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  store_id                   String @unique(map: "goals_store_id_unique") @db.Uuid
+  metaMinha                  Int?
+  metaMinhaPrize             Int?
+  meta                       Int?
+  metaPrize                  Int?
+  metona                     Int?
+  metonaPrize                Int?
+  metaLendaria               Int?
+  legendariaBonusValorVenda  Int?
+  legendariaBonusValorPremio Int?
+  paGoal1                    Float? @db.Real
+  paPrize1                   Int?
+  paGoal2                    Float? @db.Real
+  paPrize2                   Int?
+  paGoal3                    Float? @db.Real
+  paPrize3                   Int?
+  paGoal4                    Float? @db.Real
+  paPrize4                   Int?
+  ticketMedioGoal1           Int?
+  ticketMedioPrize1          Int?
+  ticketMedioGoal2           Int?
+  ticketMedioPrize2          Int?
+  ticketMedioGoal3           Int?
+  ticketMedioPrize3          Int?
+  ticketMedioGoal4           Int?
+  ticketMedioPrize4          Int?
+  stores                     stores @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model incentives {
+  id          Int      @id @default(autoincrement())
+  store_id    Int?
+  description String
+  amount      Decimal? @db.Decimal
+}
+
+model playing_with_neon {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value Float? @db.Real
+}
+
+model sellers {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  store_id          String   @db.Uuid
+  name              String   @db.VarChar(255)
+  password          String   @db.VarChar(255)
+  avatar_id         String   @db.VarChar(50)
+  vendas            Decimal? @default(0) @db.Decimal(10, 2)
+  pa                Decimal? @default(0) @db.Decimal(10, 2)
+  ticket_medio      Decimal? @default(0) @db.Decimal(10, 2)
+  corridinha_diaria Decimal? @default(0) @db.Decimal(10, 2)
+  stores            stores   @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model stores {
+  id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                       String
+  theme_color                String?
+  password                   String?
+  last_incentive_calculation DateTime? @db.Timestamp(6)
+  goals                      goals?
+  sellers                    sellers[]
+}
