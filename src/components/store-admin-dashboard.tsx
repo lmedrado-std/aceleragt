@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Goals, Incentives, Seller } from "@/lib/storage";
-import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift } from "lucide-react";
+import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StoreAdminDashboardProps {
@@ -100,6 +100,15 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
 
   const totalPrizes = Object.values(prizeBreakdown).reduce((sum, value) => sum + value, 0);
 
+  const highestGoalAchieved = () => {
+    if (sellersReachedLendaria > 0) return { name: "Lendária", message: `Pelo menos um membro da equipe já alcançou a Meta Lendária!` };
+    if (sellersReachedMetona > 0) return { name: "Metona", message: `Pelo menos um membro da equipe já alcançou a Metona!` };
+    if (sellersReachedMeta > 0) return { name: "Meta", message: `Pelo menos um membro da equipe já alcançou a Meta!` };
+    if (sellersReachedMetinha > 0) return { name: "Metinha", message: `Pelo menos um membro da equipe já alcançou a Metinha!` };
+    return null;
+  }
+  const celebration = highestGoalAchieved();
+
 
   return (
     <Card>
@@ -115,6 +124,18 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
             <InfoCard title="PA Médio da Equipe" value={averagePA.toFixed(2)} icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />} description="Média de produtos por atendimento"/>
             <InfoCard title="Ticket Médio da Equipe" value={formatCurrency(averageTicketMedio)} icon={<Ticket className="h-4 w-4 text-muted-foreground" />} description="Valor médio por venda"/>
         </div>
+
+        {celebration && (
+            <Card className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+                <CardContent className="p-4 flex items-center gap-4">
+                    <PartyPopper className="h-8 w-8 text-green-600 dark:text-green-400" />
+                    <div>
+                        <h3 className="font-bold text-lg text-green-800 dark:text-green-300">Parabéns, Equipe!</h3>
+                        <p className="text-green-700 dark:text-green-300/90">{celebration.message}</p>
+                    </div>
+                </CardContent>
+            </Card>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* === Goal Achievement by Sellers === */}
@@ -181,3 +202,5 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     </Card>
   );
 }
+
+    
