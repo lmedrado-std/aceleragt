@@ -1,4 +1,3 @@
-
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -723,5 +722,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
