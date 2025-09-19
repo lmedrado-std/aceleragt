@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -475,12 +474,18 @@ export function AdminTab({
                       <AlertTriangle className="text-yellow-500" />
                       Vendedores não encontrados
                   </AlertDialogTitle>
-                  <AlertDialogDescription>
-                      A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
+                  <AlertDialogDescription asChild>
+                    <div>
+                      <p>
+                        A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
+                      </p>
                       <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
                           {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
                       </ul>
-                      Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
+                      <p className="mt-2">
+                        Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
+                      </p>
+                    </div>
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -502,7 +507,7 @@ export function AdminTab({
           </TabsTrigger>
           <TabsTrigger value="vendedores">👥 Vendedores</TabsTrigger>
           <TabsTrigger value="lancamentos">📊 Lançamentos</TabsTrigger>
-          <TabsTrigger value="metas">🎯 Metas & Prêmios</TabsTrigger>
+          <TabsTrigger value="metas">🎯 Metas &amp; Prêmios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
