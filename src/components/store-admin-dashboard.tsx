@@ -32,14 +32,15 @@ const InfoCard = ({ title, value, icon, description }: { title: string; value: s
 );
 
 const GoalAchievementItem = ({ label, goalValue, sellers, sellersReached }: { label: string; goalValue: number; sellers: Seller[]; sellersReached: number }) => {
+    const isAchieved = sellersReached > 0;
     return (
-        <div className="flex items-center justify-between p-3 rounded-lg bg-background">
+        <div className={cn("flex items-center justify-between p-3 rounded-lg", isAchieved ? "bg-green-100 dark:bg-green-900/30" : "bg-muted/50")}>
             <div>
                 <p className="font-semibold text-foreground">{label}</p>
                 <p className="text-sm text-muted-foreground">Meta: {goalValue > 0 ? formatCurrency(goalValue) : '-'}</p>
             </div>
             <div className="text-right">
-                 <p className="font-bold text-lg text-primary">{sellersReached} / {sellers.length}</p>
+                 <p className={cn("font-bold text-lg", isAchieved ? "text-green-600 dark:text-green-400" : "text-primary")}>{sellersReached} / {sellers.length}</p>
                  <p className="text-xs text-muted-foreground">Vendedores</p>
             </div>
         </div>
@@ -179,7 +180,10 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
             {/* === Summary & Top Performer === */}
              <Card className="bg-secondary/50 lg:col-span-1">
                 <CardHeader>
-                    <CardTitle>Destaques da Equipe</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5" />
+                        Destaques da Equipe
+                    </CardTitle>
                     <CardDescription>{sellers.length} vendedores ativos</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -202,5 +206,3 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     </Card>
   );
 }
-
-    
