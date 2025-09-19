@@ -15,7 +15,7 @@ export default function HomePage() {
                     <span className="text-destructive">Bem-vindo(a) ao </span> 
                     <span className="text-primary">Acelera GT</span>
                 </h1>
-                <p className="text-muted-foreground mt-3 text-base md:text-lg">
+                <p className="text-muted-foreground mt-3 text-sm md:text-base">
                     Selecione uma loja na barra lateral para começar. Ou acesse o painel de Admin para configurar.
                 </p>
             </CardContent>
