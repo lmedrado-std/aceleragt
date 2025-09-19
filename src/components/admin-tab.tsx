@@ -363,7 +363,6 @@ export function AdminTab({
 
         try {
             const workbook = XLSX.read(data, { type: 'array' });
-            // Assuming the first sheet is the correct one.
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             if (!worksheet) {
@@ -398,23 +397,24 @@ export function AdminTab({
             if (updatedCount > 0) {
               toast({
                   title: "Importação Concluída!",
-                  description: `${updatedCount} vendedor(es) atualizado(s).`,
+                  description: `${updatedCount} vendedor(es) atualizado(s). O bônus 'Corridinha Diária' deve ser inserido manualmente, se aplicável.`,
+                  duration: 8000
               });
             }
             if (notFound.length > 0) {
                 toast({
                     variant: "destructive",
                     title: "Vendedores Não Encontrados",
-                    description: `Os seguintes vendedores do arquivo não foram encontrados no sistema: ${notFound.join(', ')}`,
-                    duration: 8000
+                    description: `Os seguintes vendedores do arquivo não foram encontrados: ${notFound.join(', ')}. Verifique se os nomes correspondem.`,
+                    duration: 10000
                 });
             }
             if(updatedCount === 0 && notFound.length === 0){
                 toast({
                     variant: "destructive",
                     title: "Nenhum dado importado",
-                    description: "Verifique se o arquivo Excel tem as colunas corretas (reportgroup, totalliquido, mediapecasvendas, mediavendas) e se os nomes dos vendedores correspondem.",
-                    duration: 8000
+                    description: "Verifique se o arquivo Excel tem as colunas corretas (reportgroup, totalliquido, etc.) e se os nomes dos vendedores correspondem.",
+                    duration: 10000
                 });
             }
 
@@ -422,7 +422,6 @@ export function AdminTab({
             console.error(error);
             toast({ variant: 'destructive', title: 'Erro de Importação', description: (error as Error).message });
         } finally {
-            // Reset file input
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";
             }
@@ -554,7 +553,7 @@ export function AdminTab({
                  </>
               )}
             </CardContent>
-             <CardFooter className="flex flex-col-reverse sm:flex-row items-center gap-4 border-t pt-6">
+             <CardFooter className="flex flex-col sm:flex-row items-center gap-4 border-t pt-6">
                 <div className="flex-grow flex flex-col sm:flex-row items-center gap-4">
                     {sellers.length > 0 && (
                         <Button onClick={handleCalculateIncentives} disabled={isCalculating} className="w-full sm:w-auto">
@@ -662,3 +661,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
