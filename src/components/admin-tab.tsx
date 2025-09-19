@@ -13,9 +13,10 @@ import {
   EyeOff,
   Calculator,
   Clock,
-  LayoutDashboard
+  LayoutDashboard,
+  FileUp,
 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +53,8 @@ import { incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoalsFormValues } from "./goal-getter-dashboard";
 import { StoreAdminDashboard } from "./store-admin-dashboard";
+import * as XLSX from 'xlsx';
+
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -94,6 +97,8 @@ export function AdminTab({
   const [editingSellerPassword, setEditingSellerPassword] = useState('');
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [isCalculating, setIsCalculating] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const {
     control,
@@ -347,6 +352,89 @@ export function AdminTab({
       })
     : null;
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const data = e.target?.result;
+        if (!data) return;
+
+        try {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = "Plan1"; // As per user screenshot
+            const worksheet = workbook.Sheets[sheetName];
+            if (!worksheet) {
+                throw new Error(`A planilha "${sheetName}" não foi encontrada no arquivo.`);
+            }
+
+            const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+
+            let updatedCount = 0;
+            const notFound: string[] = [];
+
+            jsonData.forEach(row => {
+                const sellerName = row['Vendedor']?.trim().toLowerCase();
+                const salesValue = row['V. Bruta'];
+                const paValue = row['PA'];
+                const ticketMedioValue = row['Ticket Medio'];
+                
+                if (!sellerName) return;
+
+                const sellerIndex = sellers.findIndex(s => s.name?.trim().toLowerCase() === sellerName);
+
+                if (sellerIndex !== -1) {
+                    setValue(`sellers.${sellerIndex}.vendas`, salesValue, { shouldDirty: true });
+                    setValue(`sellers.${sellerIndex}.pa`, paValue, { shouldDirty: true });
+                    setValue(`sellers.${sellerIndex}.ticket_medio`, ticketMedioValue, { shouldDirty: true });
+                    updatedCount++;
+                } else {
+                    notFound.push(row['Vendedor']);
+                }
+            });
+
+            if (updatedCount > 0) {
+              toast({
+                  title: "Importação Concluída!",
+                  description: `${updatedCount} vendedor(es) atualizado(s).`,
+              });
+            }
+            if (notFound.length > 0) {
+                toast({
+                    variant: "destructive",
+                    title: "Vendedores Não Encontrados",
+                    description: `Os seguintes vendedores do arquivo não foram encontrados no sistema: ${notFound.join(', ')}`,
+                    duration: 8000
+                });
+            }
+            if(updatedCount === 0 && notFound.length === 0){
+                toast({
+                    variant: "destructive",
+                    title: "Nenhum dado importado",
+                    description: "Verifique se o arquivo Excel tem as colunas corretas (Vendedor, V. Bruta, PA, Ticket Medio) e se os nomes dos vendedores correspondem.",
+                    duration: 8000
+                });
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Erro de Importação', description: (error as Error).message });
+        } finally {
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+    reader.onerror = (error) => {
+        toast({ variant: 'destructive', title: 'Erro de Leitura', description: 'Não foi possível ler o arquivo.' });
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
   return (
     <div className="space-y-8">
       <Tabs defaultValue="dashboard" className="w-full">
@@ -445,21 +533,28 @@ export function AdminTab({
           <Card>
             <CardHeader>
               <CardTitle>Lançamentos de Desempenho</CardTitle>
-              <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
+              <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor, manualmente ou via importação.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               {sellers.length === 0 ? <p className="text-muted-foreground">Adicione vendedores na aba "Vendedores" para começar.</p> : (
                 <>
-                   {formattedLastUpdated && (
-                    <Card className="bg-secondary/50 border-dashed">
-                        <CardContent className="p-4 flex items-center gap-3">
-                           <Clock className="h-5 w-5 text-muted-foreground" />
-                           <p className="text-sm text-muted-foreground">
-                               Última atualização de dados: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
-                           </p>
-                        </CardContent>
-                    </Card>
-                  )}
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Importar de Arquivo Excel</h3>
+                        <p className="text-sm text-muted-foreground">Faça o upload de um arquivo .xlsx com as colunas: Vendedor, V. Bruta, PA, Ticket Medio.</p>
+                      </div>
+                       <Button onClick={() => fileInputRef.current?.click()}>
+                            <FileUp className="mr-2 h-4 w-4" />
+                            Importar Arquivo
+                        </Button>
+                        <Input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            className="hidden"
+                            accept=".xlsx, .xls"
+                            onChange={handleFileUpload}
+                        />
+                   </div>
                   {sellers.map((seller, index) => (
                     <div key={seller.id}>
                         {index > 0 && <Separator className="my-6" />}
@@ -475,13 +570,21 @@ export function AdminTab({
                  </>
               )}
             </CardContent>
-             <CardFooter className="flex-col items-start gap-4">
+             <CardFooter className="flex flex-col sm:flex-row items-start gap-4">
                 {sellers.length > 0 && (
                     <Button onClick={handleCalculateIncentives} disabled={isCalculating}>
                         <Calculator className="mr-2" />
                         {isCalculating ? "Calculando e salvando..." : "Calcular e Salvar Lançamentos"}
                     </Button>
                 )}
+                 {formattedLastUpdated && (
+                    <div className="p-3 rounded-md bg-secondary/50 border-dashed flex items-center gap-3 text-sm text-muted-foreground flex-grow justify-center sm:justify-start">
+                       <Clock className="h-5 w-5" />
+                       <span>
+                           Última atualização de dados: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
+                       </span>
+                    </div>
+                  )}
             </CardFooter>
           </Card>
         </TabsContent>
@@ -552,5 +655,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
