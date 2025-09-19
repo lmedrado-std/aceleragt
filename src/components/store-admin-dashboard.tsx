@@ -2,9 +2,8 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Goals, Incentives, Seller } from "@/lib/storage";
-import { DollarSign, Goal, Users, Trophy, TrendingUp } from "lucide-react";
+import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle } from "lucide-react";
 
 interface StoreAdminDashboardProps {
   sellers: Seller[];
@@ -18,7 +17,7 @@ const formatCurrency = (value: number) =>
     currency: "BRL",
   }).format(value || 0);
 
-const InfoCard = ({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) => (
+const InfoCard = ({ title, value, icon, description }: { title: string; value: string; icon: React.ReactNode; description?: string }) => (
     <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -26,29 +25,28 @@ const InfoCard = ({ title, value, icon }: { title: string; value: string; icon: 
         </CardHeader>
         <CardContent>
             <div className="text-2xl font-bold">{value}</div>
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </CardContent>
     </Card>
 );
 
-const ProgressBar = ({ title, currentValue, goalValue, format }: { title: string, currentValue: number, goalValue: number, format: (value: number) => string }) => {
-    const percentage = goalValue > 0 ? (currentValue / goalValue) * 100 : 0;
-    const isCompleted = currentValue >= goalValue;
-
+const GoalAchievementItem = ({ label, goalValue, sellers, sellersReached }: { label: string; goalValue: number; sellers: Seller[]; sellersReached: number }) => {
+    const percentage = sellers.length > 0 ? (sellersReached / sellers.length) * 100 : 0;
+    
     return (
-        <div>
-            <div className="mb-1 flex justify-between items-end">
-                <span className="text-sm font-medium text-muted-foreground">{title}</span>
-                <span className="text-xs font-semibold">
-                    {format(currentValue)} / {format(goalValue)}
-                </span>
+        <div className="flex items-center justify-between p-3 rounded-lg bg-background">
+            <div>
+                <p className="font-semibold text-foreground">{label}</p>
+                <p className="text-sm text-muted-foreground">Meta: {formatCurrency(goalValue)}</p>
             </div>
-            <Progress value={percentage} className={isCompleted ? "[&>div]:bg-green-500" : ""} />
-             {isCompleted && (
-                <p className="text-xs font-semibold text-green-600 mt-1">Meta Batida!</p>
-            )}
+            <div className="text-right">
+                 <p className="font-bold text-lg text-primary">{sellersReached} / {sellers.length}</p>
+                 <p className="text-xs text-muted-foreground">Vendedores</p>
+            </div>
         </div>
     );
 };
+
 
 export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDashboardProps) {
   if (!sellers || !goals) {
@@ -67,21 +65,19 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     return acc + Object.values(incentive).reduce((sum, val) => sum + (val || 0), 0);
   }, 0);
   
-  const averageTicket = sellers.length > 0 ? totalSales / sellers.length : 0; // This seems wrong. ticket_medio should be averaged.
   const totalPA = sellers.reduce((acc, seller) => acc + (Number(seller.pa) || 0), 0);
-  const averagePA = sellers.length > 0 ? totalPA / sellers.filter(s => s.pa > 0).length || 0 : 0;
+  const sellersWithPA = sellers.filter(s => (s.pa || 0) > 0);
+  const averagePA = sellersWithPA.length > 0 ? totalPA / sellersWithPA.length : 0;
 
-  const highestGoal = Math.max(goals.metaMinha, goals.meta, goals.metona, goals.metaLendaria);
-  const nextGoalValue = [goals.metaMinha, goals.meta, goals.metona, goals.metaLendaria].find(g => totalSales < g) || highestGoal;
-  const nextGoalName = 
-      totalSales < goals.metaMinha ? "Metinha" :
-      totalSales < goals.meta ? "Meta" :
-      totalSales < goals.metona ? "Metona" :
-      totalSales < goals.metaLendaria ? "Lendária" : "Todas as metas batidas!";
-  const amountToNextGoal = nextGoalValue > totalSales ? nextGoalValue - totalSales : 0;
-  
-  const bestSeller = sellers.reduce((prev, current) => ((prev.vendas || 0) > (current.vendas || 0)) ? prev : current, {} as Seller);
+  const bestSeller = sellers.length > 0 
+    ? sellers.reduce((prev, current) => ((prev.vendas || 0) > (current.vendas || 0)) ? prev : current, sellers[0]) 
+    : null;
 
+  // Contagem de vendedores que atingiram cada meta
+  const sellersReachedMetinha = sellers.filter(s => (s.vendas || 0) >= goals.metaMinha).length;
+  const sellersReachedMeta = sellers.filter(s => (s.vendas || 0) >= goals.meta).length;
+  const sellersReachedMetona = sellers.filter(s => (s.vendas || 0) >= goals.metona).length;
+  const sellersReachedLendaria = sellers.filter(s => (s.vendas || 0) >= goals.metaLendaria).length;
 
   return (
     <Card>
@@ -92,55 +88,54 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
       <CardContent className="space-y-8">
         {/* === KPIs === */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <InfoCard title="Vendas Totais" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} />
-            <InfoCard title="Prêmios Pagos" value={formatCurrency(totalPrizes)} icon={<Trophy className="h-4 w-4 text-muted-foreground" />} />
-            <InfoCard title="PA Médio da Equipe" value={averagePA.toFixed(2)} icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />} />
+            <InfoCard title="Vendas Totais" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Soma de todas as vendas" />
+            <InfoCard title="Prêmios Totais" value={formatCurrency(totalPrizes)} icon={<Trophy className="h-4 w-4 text-muted-foreground" />} description="Soma de todos os prêmios" />
+            <InfoCard title="PA Médio da Equipe" value={averagePA.toFixed(2)} icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />} description="Média de produtos por atendimento"/>
             <InfoCard title="Vendedores Ativos" value={String(sellers.length)} icon={<Users className="h-4 w-4 text-muted-foreground" />} />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-            {/* === Goal Progress === */}
+            {/* === Goal Achievement by Sellers === */}
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Goal className="h-5 w-5" />
-                        Progresso das Metas de Vendas
+                        <CheckCircle className="h-5 w-5" />
+                        Atingimento de Metas (Vendedores)
                     </CardTitle>
+                     <CardDescription>Quantos vendedores alcançaram cada nível de meta de vendas.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <ProgressBar title="Metinha" currentValue={totalSales} goalValue={goals.metaMinha} format={formatCurrency} />
-                    <ProgressBar title="Meta" currentValue={totalSales} goalValue={goals.meta} format={formatCurrency} />
-                    <ProgressBar title="Metona" currentValue={totalSales} goalValue={goals.metona} format={formatCurrency} />
-                    <ProgressBar title="Lendária" currentValue={totalSales} goalValue={goals.metaLendaria} format={formatCurrency} />
+                <CardContent className="space-y-3">
+                   <GoalAchievementItem label="Metinha" goalValue={goals.metaMinha} sellers={sellers} sellersReached={sellersReachedMetinha} />
+                   <GoalAchievementItem label="Meta" goalValue={goals.meta} sellers={sellers} sellersReached={sellersReachedMeta} />
+                   <GoalAchievementItem label="Metona" goalValue={goals.metona} sellers={sellers} sellersReached={sellersReachedMetona} />
+                   <GoalAchievementItem label="Lendária" goalValue={goals.metaLendaria} sellers={sellers} sellersReached={sellersReachedLendaria} />
                 </CardContent>
             </Card>
 
-            {/* === Summary & Next Steps === */}
+            {/* === Summary & Top Performer === */}
              <Card className="bg-secondary/50">
                 <CardHeader>
-                    <CardTitle>Resumo e Próximos Passos</CardTitle>
+                    <CardTitle>Destaques da Equipe</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {amountToNextGoal > 0 ? (
-                        <div className="text-center p-4 rounded-lg bg-background">
-                            <p className="text-muted-foreground">Faltam</p>
-                            <p className="text-3xl font-bold text-primary">{formatCurrency(amountToNextGoal)}</p>
-                            <p className="text-muted-foreground">para bater a <span className="font-bold">{nextGoalName}</span>!</p>
+                    {bestSeller && bestSeller.name ? (
+                         <div className="text-center p-6 rounded-lg bg-background">
+                            <Trophy className="h-8 w-8 mx-auto text-yellow-500 mb-2"/>
+                            <p className="text-muted-foreground text-sm">Destaque em Vendas</p>
+                            <p className="text-xl font-bold">{bestSeller.name}</p>
+                            <p className="text-lg font-semibold text-primary">{formatCurrency(bestSeller.vendas)}</p>
                         </div>
                     ) : (
-                         <div className="text-center p-4 rounded-lg bg-green-100 dark:bg-green-900/30">
-                            <p className="text-2xl font-bold text-green-600 dark:text-green-300">Parabéns!</p>
-                            <p className="text-muted-foreground text-green-700 dark:text-green-400">Todas as metas principais de vendas foram alcançadas!</p>
+                        <div className="text-center p-6 rounded-lg bg-background">
+                             <p className="text-muted-foreground">Sem dados de vendas para definir um destaque.</p>
                         </div>
                     )}
-
-                    {bestSeller && bestSeller.name && (
-                         <div className="text-center p-4 rounded-lg bg-background">
-                            <p className="text-muted-foreground">Destaque da Equipe</p>
-                            <p className="text-xl font-bold">{bestSeller.name}</p>
-                            <p className="text-muted-foreground">com <span className="font-bold">{formatCurrency(bestSeller.vendas)}</span> em vendas.</p>
-                        </div>
-                    )}
+                    
+                    <div className="text-center p-6 rounded-lg bg-background">
+                       <Goal className="h-8 w-8 mx-auto text-primary mb-2"/>
+                       <p className="text-muted-foreground text-sm">Total de Vendas da Loja</p>
+                       <p className="text-3xl font-bold">{formatCurrency(totalSales)}</p>
+                    </div>
                 </CardContent>
             </Card>
         </div>
@@ -148,5 +143,3 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     </Card>
   );
 }
-
-    
