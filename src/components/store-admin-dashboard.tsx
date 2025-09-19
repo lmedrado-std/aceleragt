@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Goals, Incentives, Seller } from "@/lib/storage";
-import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle } from "lucide-react";
+import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket } from "lucide-react";
 
 interface StoreAdminDashboardProps {
   sellers: Seller[];
@@ -69,6 +69,10 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const sellersWithPA = sellers.filter(s => (s.pa || 0) > 0);
   const averagePA = sellersWithPA.length > 0 ? totalPA / sellersWithPA.length : 0;
 
+  const totalTicketMedio = sellers.reduce((acc, seller) => acc + (Number(seller.ticket_medio) || 0), 0);
+  const sellersWithTicketMedio = sellers.filter(s => (s.ticket_medio || 0) > 0);
+  const averageTicketMedio = sellersWithTicketMedio.length > 0 ? totalTicketMedio / sellersWithTicketMedio.length : 0;
+
   const bestSeller = sellers.length > 0 
     ? sellers.reduce((prev, current) => ((prev.vendas || 0) > (current.vendas || 0)) ? prev : current, sellers[0]) 
     : null;
@@ -91,7 +95,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
             <InfoCard title="Vendas Totais" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Soma de todas as vendas" />
             <InfoCard title="Prêmios Totais" value={formatCurrency(totalPrizes)} icon={<Trophy className="h-4 w-4 text-muted-foreground" />} description="Soma de todos os prêmios" />
             <InfoCard title="PA Médio da Equipe" value={averagePA.toFixed(2)} icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />} description="Média de produtos por atendimento"/>
-            <InfoCard title="Vendedores Ativos" value={String(sellers.length)} icon={<Users className="h-4 w-4 text-muted-foreground" />} />
+            <InfoCard title="Ticket Médio da Equipe" value={formatCurrency(averageTicketMedio)} icon={<Ticket className="h-4 w-4 text-muted-foreground" />} description="Valor médio por venda"/>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -116,6 +120,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
              <Card className="bg-secondary/50">
                 <CardHeader>
                     <CardTitle>Destaques da Equipe</CardTitle>
+                    <CardDescription>{sellers.length} vendedores ativos</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {bestSeller && bestSeller.name ? (
