@@ -363,7 +363,8 @@ export function AdminTab({
 
         try {
             const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = "Plan1"; // As per user screenshot
+            // Assuming the first sheet is the correct one.
+            const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             if (!worksheet) {
                 throw new Error(`A planilha "${sheetName}" não foi encontrada no arquivo.`);
@@ -375,10 +376,10 @@ export function AdminTab({
             const notFound: string[] = [];
 
             jsonData.forEach(row => {
-                const sellerName = row['Vendedor']?.trim().toLowerCase();
-                const salesValue = row['V. Bruta'];
-                const paValue = row['PA'];
-                const ticketMedioValue = row['Ticket Medio'];
+                const sellerName = row['reportgroup']?.toString().trim().toLowerCase();
+                const salesValue = row['totalliquido'];
+                const paValue = row['mediapecasvendas'];
+                const ticketMedioValue = row['mediavendas'];
                 
                 if (!sellerName) return;
 
@@ -390,7 +391,7 @@ export function AdminTab({
                     setValue(`sellers.${sellerIndex}.ticket_medio`, ticketMedioValue, { shouldDirty: true });
                     updatedCount++;
                 } else {
-                    notFound.push(row['Vendedor']);
+                    notFound.push(row['reportgroup']);
                 }
             });
 
@@ -412,7 +413,7 @@ export function AdminTab({
                 toast({
                     variant: "destructive",
                     title: "Nenhum dado importado",
-                    description: "Verifique se o arquivo Excel tem as colunas corretas (Vendedor, V. Bruta, PA, Ticket Medio) e se os nomes dos vendedores correspondem.",
+                    description: "Verifique se o arquivo Excel tem as colunas corretas (reportgroup, totalliquido, mediapecasvendas, mediavendas) e se os nomes dos vendedores correspondem.",
                     duration: 8000
                 });
             }
@@ -575,7 +576,7 @@ export function AdminTab({
                         <div className="flex items-center justify-between w-full">
                             <div>
                                 <h3 className="font-semibold text-sm">Importar de Arquivo Excel</h3>
-                                <p className="text-xs text-muted-foreground">Colunas: Vendedor, V. Bruta, PA, Ticket Medio.</p>
+                                <p className="text-xs text-muted-foreground">Colunas: reportgroup, totalliquido, etc.</p>
                             </div>
                             <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline">
                                 <FileUp className="mr-2 h-4 w-4" />
