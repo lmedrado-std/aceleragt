@@ -2,11 +2,9 @@
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
-  const sellerId = parseInt(context.params.id, 10);
-  if (isNaN(sellerId)) {
-    return NextResponse.json({ error: 'ID do vendedor inválido' }, { status: 400 });
-  }
+// GET /api/sellers/[id]
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const sellerId = params.id;
 
   try {
     const seller = await prisma.sellers.findUnique({
@@ -31,61 +29,61 @@ export async function GET(request: NextRequest, context: { params: { id: string 
   }
 }
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
-  const sellerId = parseInt(context.params.id, 10);
-  if (isNaN(sellerId)) {
-    return NextResponse.json({ error: 'ID do vendedor inválido' }, { status: 400 });
-  }
 
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const { id } = params;
     const body = await request.json();
+    // Assuming body can contain any of these fields for update
+    const { name, password, vendas, pa, ticketMedio, corridinhaDiaria } = body;
+
+    const dataToUpdate: { [key: string]: any } = {};
+
+    if (name !== undefined) dataToUpdate.name = name;
+    if (password !== undefined) dataToUpdate.password = password;
+    if (vendas !== undefined) dataToUpdate.vendas = vendas;
+    if (pa !== undefined) dataToUpdate.pa = pa;
+    if (ticketMedio !== undefined) dataToUpdate.ticket_medio = ticketMedio;
+    if (corridinhaDiaria !== undefined) dataToUpdate.corridinha_diaria = corridinhaDiaria;
+
+    if (Object.keys(dataToUpdate).length === 0) {
+      return NextResponse.json({ info: 'Nenhum campo para atualizar.' }, { status: 200 });
+    }
 
     const seller = await prisma.sellers.update({
-      where: { id: sellerId },
-      data: body,
+      where: { id: id },
+      data: dataToUpdate,
     });
 
-    return NextResponse.json(seller);
+    return NextResponse.json(seller, { status: 200 });
+
   } catch (error) {
-    console.error(`[API PUT /api/sellers/${sellerId}] ERRO:`, error);
+    console.error(`[API /api/sellers/[id]] ERRO no PUT (id: ${params.id}):`, error);
     const typedError = error as any;
-    // Prisma's P2025 is the error code for a record not found on update/delete
-    if (typedError.code === 'P2025') {
-      return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
+    if (typedError.code === 'P2025') { // Prisma's error code for record not found
+        return NextResponse.json({ error: 'Vendedor não encontrado.' }, { status: 404 });
     }
-    return NextResponse.json(
-      {
-        error: 'Erro interno do servidor ao atualizar vendedor.',
-        details: typedError.message,
-        code: typedError.code,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao atualizar vendedor.', details: (error as Error).message }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
-  const sellerId = parseInt(context.params.id, 10);
-  if (isNaN(sellerId)) {
-    return NextResponse.json({ error: 'ID do vendedor inválido' }, { status: 400 });
-  }
-
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const { id } = params;
+
     await prisma.sellers.delete({
-      where: { id: sellerId },
+      where: { id: id },
     });
 
-    return new NextResponse(null, { status: 204 }); // No Content
+    // DELETE should return 204 No Content on success
+    return new NextResponse(null, { status: 204 });
+
   } catch (error) {
-    console.error(`[API DELETE /api/sellers/${sellerId}] ERRO:`, error);
+    console.error(`[API /api/sellers/[id]] ERRO no DELETE (id: ${params.id}):`, error);
     const typedError = error as any;
-    // Prisma's P2025 is the error code for a record not found on update/delete
-    if (typedError.code === 'P2025') {
-      return NextResponse.json({ error: 'Vendedor não encontrado' }, { status: 404 });
+    if (typedError.code === 'P2025') { // Prisma's error code for record not found
+        return NextResponse.json({ error: 'Vendedor não encontrado.' }, { status: 404 });
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro ao remover vendedor.', details: (error as Error).message }, { status: 500 });
   }
 }

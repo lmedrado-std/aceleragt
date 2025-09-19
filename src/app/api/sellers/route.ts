@@ -10,11 +10,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'O ID da loja é obrigatório' }, { status: 400 });
   }
 
-  const storeIdNum = parseInt(storeId, 10);
-
   try {
     const sellers = await prisma.sellers.findMany({
-      where: { store_id: storeIdNum },
+      where: { store_id: storeId },
       orderBy: {
         name: 'asc',
       },

@@ -11,16 +11,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'O ID da loja é obrigatório' }, { status: 400 });
   }
 
-  const storeIdNum = parseInt(storeId, 10);
-
   try {
     const goals = await prisma.goals.findUnique({
-      where: { store_id: storeIdNum },
+      where: { store_id: storeId },
     });
 
     if (!goals) {
       const store = await prisma.stores.findUnique({
-        where: { id: storeIdNum },
+        where: { id: storeId },
       });
 
       if (store) {

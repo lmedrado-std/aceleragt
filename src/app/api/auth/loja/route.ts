@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     // Busque a senha da loja
     const store = await prisma.stores.findUnique({
-        where: { id: parseInt(storeId, 10) },
+        where: { id: storeId },
     });
 
     if (!store) {
