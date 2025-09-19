@@ -250,6 +250,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         if (tabToActivate !== "admin" && !sellersData.some((s: Seller) => s.id === tabToActivate)) {
             tabToActivate = sellersData[0]?.id || "admin";
         }
+        
+        // Default to admin-dashboard if user is admin
+        if(isStoreAuthenticated(storeId) || isAdminGlobal()) {
+            tabToActivate = tabFromUrl || "admin";
+        }
+
 
         setActiveTab(tabToActivate);
 
@@ -260,7 +266,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     } finally {
         setLoading(false);
     }
-  }, [storeId, form, loadSellers, router, searchParams, toast, calculateAllIncentives]);
+  }, [storeId, form, loadSellers, router, searchParams, toast, calculateAllIncentives, isStoreAdmin, isAdmin]);
 
   useEffect(() => {
     loadInitialData();
@@ -287,7 +293,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         router.push(lojaLoginUrl);
       }
     }
-  }, [storeId, activeTab, searchParams, router, loading]);
+  }, [storeId, activeTab, searchParams, router, loading, isStoreAdmin]);
 
   const handleIncentivesCalculated = useCallback(
     (newIncentives: Incentives, newLastUpdated: string) => {
@@ -436,6 +442,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     onIncentivesCalculated={handleIncentivesCalculated}
                     handleSaveGoals={handleSaveGoals}
                     lastUpdated={lastUpdated}
+                    incentives={incentives}
                   />
                 </TabsContent>
               )}
@@ -465,3 +472,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    

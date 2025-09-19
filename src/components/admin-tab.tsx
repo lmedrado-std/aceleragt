@@ -13,6 +13,7 @@ import {
   EyeOff,
   Calculator,
   Clock,
+  LayoutDashboard
 } from "lucide-react";
 import { useState, useCallback } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -50,6 +51,7 @@ import { Seller, Goals, Incentives } from "@/lib/storage";
 import { incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoalsFormValues } from "./goal-getter-dashboard";
+import { StoreAdminDashboard } from "./store-admin-dashboard";
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -73,6 +75,7 @@ interface AdminTabProps {
   onIncentivesCalculated: (incentives: Incentives, lastUpdated: string) => void;
   handleSaveGoals: () => void;
   lastUpdated: string | null;
+  incentives: Incentives;
 }
 
 export function AdminTab({
@@ -83,6 +86,7 @@ export function AdminTab({
   onIncentivesCalculated,
   handleSaveGoals,
   lastUpdated,
+  incentives
 }: AdminTabProps) {
   const { toast } = useToast();
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
@@ -345,12 +349,24 @@ export function AdminTab({
 
   return (
     <div className="space-y-8">
-      <Tabs defaultValue="vendedores" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="dashboard">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
           <TabsTrigger value="vendedores">👥 Vendedores</TabsTrigger>
           <TabsTrigger value="lancamentos">📊 Lançamentos</TabsTrigger>
           <TabsTrigger value="metas">🎯 Metas & Prêmios</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard">
+           <StoreAdminDashboard
+              sellers={sellers}
+              goals={getValues().goals as Goals}
+              incentives={incentives}
+            />
+        </TabsContent>
         
         <TabsContent value="vendedores">
           <Card>
@@ -536,3 +552,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
