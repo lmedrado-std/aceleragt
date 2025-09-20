@@ -76,8 +76,11 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const sellersWithTicketMedio = sellers.filter(s => (s.ticket_medio || 0) > 0);
   const averageTicketMedio = sellersWithTicketMedio.length > 0 ? totalTicketMedio / sellersWithTicketMedio.length : 0;
 
-  const sortedSellers = [...sellers].sort((a, b) => (b.vendas || 0) - (a.vendas || 0));
-  const bestSeller = sortedSellers.length > 0 ? sortedSellers[0] : null;
+  const sortedSellers = [...sellers]
+    .filter(s => (s.vendas || 0) > 0)
+    .sort((a, b) => (b.vendas || 0) - (a.vendas || 0));
+  const topSellers = sortedSellers.slice(0, 3);
+
 
   // Contagem de vendedores que atingiram cada meta
   const sellersReachedMetinha = sellers.filter(s => (s.vendas || 0) >= goals.metaMinha).length;
@@ -108,6 +111,8 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     return null;
   }
   const celebration = highestGoalAchieved();
+
+  const medals = ["🥇", "🥈", "🥉"];
 
 
   return (
@@ -180,22 +185,25 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
              <Card className="bg-secondary/50 lg:col-span-1">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        Destaques da Equipe
+                        <Trophy className="h-5 w-5 text-yellow-500" />
+                        Pódio de Vendas
                     </CardTitle>
-                    <CardDescription>{sellers.length} vendedores ativos</CardDescription>
+                    <CardDescription>{sellers.length} vendedores na competição</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {bestSeller && bestSeller.name && (bestSeller.vendas || 0) > 0 ? (
-                         <div className="text-center p-6 rounded-lg bg-background">
-                            <Trophy className="h-8 w-8 mx-auto text-yellow-500 mb-2"/>
-                            <p className="text-muted-foreground text-sm">Destaque em Vendas</p>
-                            <p className="text-xl font-bold">{bestSeller.name}</p>
-                            <p className="text-lg font-semibold text-primary">{formatCurrency(bestSeller.vendas)}</p>
-                        </div>
+                <CardContent className="space-y-3">
+                    {topSellers.length > 0 ? (
+                        topSellers.map((seller, index) => (
+                           <div key={seller.id} className="flex items-center gap-4 p-3 rounded-lg bg-background">
+                               <span className="text-2xl w-6 text-center">{medals[index]}</span>
+                               <div className="flex-grow">
+                                   <p className="font-bold text-base truncate">{seller.name}</p>
+                                   <p className="text-sm font-semibold text-primary">{formatCurrency(seller.vendas)}</p>
+                               </div>
+                           </div>
+                        ))
                     ) : (
                         <div className="text-center p-6 rounded-lg bg-background flex items-center justify-center h-full">
-                             <p className="text-muted-foreground">Sem dados de vendas para definir um destaque.</p>
+                             <p className="text-muted-foreground">Sem dados de vendas para formar o pódio.</p>
                         </div>
                     )}
                 </CardContent>
