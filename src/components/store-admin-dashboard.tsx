@@ -76,9 +76,8 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const sellersWithTicketMedio = sellers.filter(s => (s.ticket_medio || 0) > 0);
   const averageTicketMedio = sellersWithTicketMedio.length > 0 ? totalTicketMedio / sellersWithTicketMedio.length : 0;
 
-  const bestSeller = sellers.length > 0 
-    ? sellers.reduce((prev, current) => ((prev.vendas || 0) > (current.vendas || 0)) ? prev : current, sellers[0]) 
-    : null;
+  const sortedSellers = [...sellers].sort((a, b) => (b.vendas || 0) - (a.vendas || 0));
+  const bestSeller = sortedSellers.length > 0 ? sortedSellers[0] : null;
 
   // Contagem de vendedores que atingiram cada meta
   const sellersReachedMetinha = sellers.filter(s => (s.vendas || 0) >= goals.metaMinha).length;
@@ -187,7 +186,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                     <CardDescription>{sellers.length} vendedores ativos</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {bestSeller && bestSeller.name && bestSeller.vendas > 0 ? (
+                    {bestSeller && bestSeller.name && (bestSeller.vendas || 0) > 0 ? (
                          <div className="text-center p-6 rounded-lg bg-background">
                             <Trophy className="h-8 w-8 mx-auto text-yellow-500 mb-2"/>
                             <p className="text-muted-foreground text-sm">Destaque em Vendas</p>
