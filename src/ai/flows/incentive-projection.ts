@@ -101,7 +101,8 @@ const incentiveProjectionFlow = ai.defineFlow(
       salesPrize = goals.metonaPrize;
     }
     
-    // Assign the prize to the correct tier for display, zeroing out the others.
+    // Assign the prize to the correct tier for display, zeroing out the others,
+    // but ensuring Lendaria also gets Metona prize.
     if (seller.vendas >= goals.metona) {
       metonaPremio = salesPrize;
     } else if (seller.vendas >= goals.meta) {
