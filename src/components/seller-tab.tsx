@@ -8,6 +8,7 @@ import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { DollarSign, Package, Ticket, Rocket, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SellerTabProps {
     seller: Seller;
@@ -23,15 +24,15 @@ const formatCurrency = (value: number) =>
     currency: "BRL",
   }).format(value || 0);
 
-const MetricCard = ({ title, value, icon, description }: { title: string, value: string, icon: React.ReactNode, description: string }) => (
-    <Card>
+const MetricCard = ({ title, value, icon, description, className }: { title: string, value: string, icon: React.ReactNode, description: string, className?: string }) => (
+    <Card className={cn("text-card-foreground", className)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             {icon}
         </CardHeader>
         <CardContent>
             <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-xs opacity-80">{description}</p>
         </CardContent>
     </Card>
 );
@@ -76,26 +77,30 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
                         <MetricCard 
                             title="Vendas Realizadas" 
                             value={formatCurrency(seller.vendas)} 
-                            icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
+                            icon={<DollarSign className="h-4 w-4" />}
                             description="Total vendido no período"
+                            className="bg-gradient-to-br from-blue-500 to-blue-700 text-white"
                         />
                          <MetricCard 
                             title="Produtos por Atendimento (PA)"
                             value={String(Number(seller.pa || 0).toFixed(2))}
-                            icon={<Package className="h-4 w-4 text-muted-foreground" />}
+                            icon={<Package className="h-4 w-4" />}
                              description="Média de itens por venda"
+                             className="bg-gradient-to-br from-purple-500 to-purple-700 text-white"
                         />
                         <MetricCard 
                             title="Ticket Médio" 
                             value={formatCurrency(seller.ticket_medio)} 
-                            icon={<Ticket className="h-4 w-4 text-muted-foreground" />}
+                            icon={<Ticket className="h-4 w-4" />}
                             description="Valor médio por venda"
+                            className="bg-gradient-to-br from-orange-500 to-orange-700 text-white"
                         />
                         <MetricCard 
                             title="Bônus Corridinha" 
                             value={formatCurrency(seller.corridinha_diaria)} 
-                            icon={<Rocket className="h-4 w-4 text-muted-foreground" />}
+                            icon={<Rocket className="h-4 w-4" />}
                             description="Bônus diário direto"
+                            className="bg-gradient-to-br from-green-500 to-green-700 text-white"
                         />
                     </div>
                      {lastUpdated && (
