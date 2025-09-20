@@ -82,11 +82,13 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const topSellers = sortedSellers.slice(0, 3);
 
 
-  // Contagem de vendedores que atingiram cada meta
-  const sellersReachedMetinha = sellers.filter(s => (s.vendas || 0) >= goals.metaMinha).length;
-  const sellersReachedMeta = sellers.filter(s => (s.vendas || 0) >= goals.meta).length;
-  const sellersReachedMetona = sellers.filter(s => (s.vendas || 0) >= goals.metona).length;
-  const sellersReachedLendaria = sellers.filter(s => (s.vendas || 0) >= goals.metaLendaria).length;
+  // Contagem de vendedores em cada faixa de meta
+  const sellersInLendaria = sellers.filter(s => (s.vendas || 0) >= goals.metaLendaria).length;
+  const sellersInMetona = sellers.filter(s => (s.vendas || 0) >= goals.metona && (s.vendas || 0) < goals.metaLendaria).length;
+  const sellersInMeta = sellers.filter(s => (s.vendas || 0) >= goals.meta && (s.vendas || 0) < goals.metona).length;
+  const sellersInMetinha = sellers.filter(s => (s.vendas || 0) >= goals.metaMinha && (s.vendas || 0) < goals.meta).length;
+
+  const sellersReachedAnyGoal = sellersInLendaria > 0 || sellersInMetona > 0 || sellersInMeta > 0 || sellersInMetinha > 0;
 
   // Cálculo do detalhamento de prêmios
   const prizeBreakdown = Object.values(incentives).reduce((acc, incentive) => {
@@ -104,10 +106,10 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const totalPrizes = Object.values(prizeBreakdown).reduce((sum, value) => sum + value, 0);
 
   const highestGoalAchieved = () => {
-    if (sellersReachedLendaria > 0) return { name: "Lendária", message: `Pelo menos um membro da equipe já alcançou a Meta Lendária!` };
-    if (sellersReachedMetona > 0) return { name: "Metona", message: `Pelo menos um membro da equipe já alcançou a Metona!` };
-    if (sellersReachedMeta > 0) return { name: "Meta", message: `Pelo menos um membro da equipe já alcançou a Meta!` };
-    if (sellersReachedMetinha > 0) return { name: "Metinha", message: `Pelo menos um membro da equipe já alcançou a Metinha!` };
+    if (sellersInLendaria > 0) return { name: "Lendária", message: `Pelo menos um membro da equipe já alcançou a Meta Lendária!` };
+    if (sellersInMetona > 0) return { name: "Metona", message: `Pelo menos um membro da equipe já alcançou a Metona!` };
+    if (sellersInMeta > 0) return { name: "Meta", message: `Pelo menos um membro da equipe já alcançou a Meta!` };
+    if (sellersInMetinha > 0) return { name: "Metinha", message: `Pelo menos um membro da equipe já alcançou a Metinha!` };
     return null;
   }
   const celebration = highestGoalAchieved();
@@ -177,10 +179,10 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                      <CardDescription>Quantos vendedores alcançaram cada nível.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                   <GoalAchievementItem label="Metinha" goalValue={goals.metaMinha} sellers={sellers} sellersReached={sellersReachedMetinha} />
-                   <GoalAchievementItem label="Meta" goalValue={goals.meta} sellers={sellers} sellersReached={sellersReachedMeta} />
-                   <GoalAchievementItem label="Metona" goalValue={goals.metona} sellers={sellers} sellersReached={sellersReachedMetona} />
-                   <GoalAchievementItem label="Lendária" goalValue={goals.metaLendaria} sellers={sellers} sellersReached={sellersReachedLendaria} />
+                   <GoalAchievementItem label="Metinha" goalValue={goals.metaMinha} sellers={sellers} sellersReached={sellersInMetinha} />
+                   <GoalAchievementItem label="Meta" goalValue={goals.meta} sellers={sellers} sellersReached={sellersInMeta} />
+                   <GoalAchievementItem label="Metona" goalValue={goals.metona} sellers={sellers} sellersReached={sellersInMetona} />
+                   <GoalAchievementItem label="Lendária" goalValue={goals.metaLendaria} sellers={sellers} sellersReached={sellersInLendaria} />
                 </CardContent>
             </Card>
 
