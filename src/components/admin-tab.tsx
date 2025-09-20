@@ -475,16 +475,18 @@ export function AdminTab({
                       <AlertTriangle className="text-yellow-500" />
                       Vendedores não encontrados
                   </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <p>
-                      A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
-                    </p>
-                    <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
-                        {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
-                    </ul>
-                    <p className="mt-2">
-                      Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
-                    </p>
+                  <AlertDialogDescription asChild>
+                    <div>
+                      <p>
+                        A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
+                      </p>
+                      <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
+                          {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
+                      </ul>
+                      <p className="mt-2">
+                        Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
+                      </p>
+                    </div>
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
