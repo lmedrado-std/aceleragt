@@ -18,15 +18,15 @@ const formatCurrency = (value: number) =>
     currency: "BRL",
   }).format(value || 0);
 
-const InfoCard = ({ title, value, icon, description }: { title: string; value: string; icon: React.ReactNode; description?: string }) => (
-    <Card>
+const InfoCard = ({ title, value, icon, description, className }: { title: string; value: string; icon: React.ReactNode; description?: string, className?: string }) => (
+    <Card className={cn(className)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             {icon}
         </CardHeader>
         <CardContent>
             <div className="text-2xl font-bold">{value}</div>
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            {description && <p className="text-xs opacity-80">{description}</p>}
         </CardContent>
     </Card>
 );
@@ -124,10 +124,34 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
       <CardContent className="space-y-8">
         {/* === KPIs === */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <InfoCard title="Vendas Totais" value={formatCurrency(totalSales)} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} description="Soma de todas as vendas" />
-            <InfoCard title="Prêmios Totais" value={formatCurrency(totalPrizes)} icon={<Trophy className="h-4 w-4 text-muted-foreground" />} description="Soma de todos os prêmios" />
-            <InfoCard title="PA Médio da Equipe" value={averagePA.toFixed(2)} icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />} description="Média de produtos por atendimento"/>
-            <InfoCard title="Ticket Médio da Equipe" value={formatCurrency(averageTicketMedio)} icon={<Ticket className="h-4 w-4 text-muted-foreground" />} description="Valor médio por venda"/>
+            <InfoCard 
+                title="Vendas Totais" 
+                value={formatCurrency(totalSales)} 
+                icon={<DollarSign className="h-4 w-4" />} 
+                description="Soma de todas as vendas"
+                className="bg-gradient-to-br from-blue-500 to-blue-700 text-white"
+            />
+            <InfoCard 
+                title="Prêmios Totais" 
+                value={formatCurrency(totalPrizes)} 
+                icon={<Trophy className="h-4 w-4" />} 
+                description="Soma de todos os prêmios"
+                className="bg-gradient-to-br from-green-500 to-green-700 text-white"
+            />
+            <InfoCard 
+                title="PA Médio da Equipe" 
+                value={averagePA.toFixed(2)} 
+                icon={<TrendingUp className="h-4 w-4" />} 
+                description="Média de produtos por atendimento"
+                className="bg-gradient-to-br from-purple-500 to-purple-700 text-white"
+            />
+            <InfoCard 
+                title="Ticket Médio da Equipe" 
+                value={formatCurrency(averageTicketMedio)} 
+                icon={<Ticket className="h-4 w-4" />} 
+                description="Valor médio por venda"
+                className="bg-gradient-to-br from-orange-500 to-orange-700 text-white"
+            />
         </div>
 
         {celebration && (
