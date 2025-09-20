@@ -206,7 +206,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
             <Card className="lg:col-span-1">
                 <CardHeader>
                      <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
-                    <CardDescription>Seus prêmios e bônus detalhados.</CardDescription>
+                    <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <GoalDetail label="Prêmio Metinha" prize={incentives?.metinhaPremio || 0} achieved={(incentives?.metinhaPremio || 0) > 0} />
