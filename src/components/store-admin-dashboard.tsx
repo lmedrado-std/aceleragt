@@ -172,7 +172,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5" />
-                        Atingimento de Metas de Vendas
+                        Metas atingidas pela equipe.
                     </CardTitle>
                      <CardDescription>Quantos vendedores alcançaram cada nível.</CardDescription>
                 </CardHeader>
