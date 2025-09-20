@@ -503,9 +503,9 @@ export function AdminTab({
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="vendedores">👥 Vendedores</TabsTrigger>
-          <TabsTrigger value="lancamentos">📊 Lançamentos</TabsTrigger>
-          <TabsTrigger value="metas">🎯 Metas &amp; Prêmios</TabsTrigger>
+          <TabsTrigger value="vendedores" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">👥 Vendedores</TabsTrigger>
+          <TabsTrigger value="lancamentos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">📊 Lançamentos</TabsTrigger>
+          <TabsTrigger value="metas" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">🎯 Metas &amp; Prêmios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
