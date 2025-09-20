@@ -1,3 +1,4 @@
+
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -473,18 +474,16 @@ export function AdminTab({
                       <AlertTriangle className="text-yellow-500" />
                       Vendedores não encontrados
                   </AlertDialogTitle>
-                  <AlertDialogDescription asChild>
-                    <div>
-                      <p>
-                        A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
-                      </p>
-                      <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
-                          {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
-                      </ul>
-                      <p className="mt-2">
-                        Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
-                      </p>
-                    </div>
+                  <AlertDialogDescription>
+                    <p>
+                      A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
+                    </p>
+                    <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
+                        {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
+                    </ul>
+                    <p className="mt-2">
+                      Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
+                    </p>
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -500,7 +499,7 @@ export function AdminTab({
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">
+          <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Dashboard
           </TabsTrigger>
