@@ -20,6 +20,7 @@ export interface Goals {
   metaLendaria: number;
   legendariaBonusValorVenda: number;
   legendariaBonusValorPremio: number;
+  performanceBonusEnabled?: boolean;
   metaMinhaPrize: number;
   metaPrize: number;
   metonaPrize: number;
@@ -57,5 +58,3 @@ export interface AppState {
     goals: Record<string, Goals>;
     incentives: Record<string, Incentives>;
 }
-
-    

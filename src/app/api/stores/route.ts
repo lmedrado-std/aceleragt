@@ -14,6 +14,7 @@ const defaultGoals: Omit<Goals, 'store_id' | 'id'> = {
   metaLendaria: 12000,
   legendariaBonusValorVenda: 2000,
   legendariaBonusValorPremio: 50,
+  performanceBonusEnabled: true,
   paGoal1: 1.5,
   paPrize1: 5,
   paGoal2: 1.6,

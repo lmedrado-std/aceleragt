@@ -46,6 +46,7 @@ const goalsSchema = z.object({
   metaLendaria: z.coerce.number().default(0),
   legendariaBonusValorVenda: z.coerce.number().default(0),
   legendariaBonusValorPremio: z.coerce.number().default(0),
+  performanceBonusEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
   paPrize1: z.coerce.number().default(0),
   paGoal2: z.coerce.number().default(0),
@@ -320,8 +321,17 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         for (const [key, value] of Object.entries(goals)) {
             if (value === null || value === undefined) {
-                cleanedGoals[key] = 0;
+                if (typeof value === 'boolean') {
+                    cleanedGoals[key] = value;
+                } else {
+                    cleanedGoals[key] = 0;
+                }
                 continue;
+            }
+
+            if (typeof value === 'boolean') {
+                 cleanedGoals[key] = value;
+                 continue;
             }
 
             const stringValue = String(value);
@@ -472,5 +482,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-    

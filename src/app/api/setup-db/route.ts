@@ -44,6 +44,7 @@ export async function GET() {
         "metaLendaria" INTEGER DEFAULT 0,
         "legendariaBonusValorVenda" INTEGER DEFAULT 0,
         "legendariaBonusValorPremio" INTEGER DEFAULT 0,
+        "performanceBonusEnabled" BOOLEAN DEFAULT FALSE,
         "paGoal1" REAL DEFAULT 0,
         "paPrize1" INTEGER DEFAULT 0,
         "paGoal2" REAL DEFAULT 0,

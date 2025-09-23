@@ -56,6 +56,7 @@ import { StoreAdminDashboard } from "./store-admin-dashboard";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
 import { SellerAvatar } from "./seller-avatar";
+import { Switch } from "./ui/switch";
 
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
@@ -129,6 +130,7 @@ export function AdminTab({
     "goals.legendariaBonusValorVenda",
     "goals.legendariaBonusValorPremio",
   ]);
+  const performanceBonusEnabled = watch("goals.performanceBonusEnabled");
 
   const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -483,7 +485,7 @@ export function AdminTab({
                       <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
                           {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
                       </ul>
-                      <p className="mt-2">
+                       <p className="mt-2">
                         Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
                       </p>
                     </div>
@@ -672,7 +674,6 @@ export function AdminTab({
                 <div>
                     <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Vendas e Prêmios</h3>
                     <div className="space-y-6">
-                        {/* Meta 1 */}
                         <div className="space-y-2">
                             <h4 className="font-medium text-md text-card-foreground">Meta 1</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -681,7 +682,6 @@ export function AdminTab({
                             </div>
                         </div>
                         <Separator />
-                        {/* Meta 2 */}
                         <div className="space-y-2">
                             <h4 className="font-medium text-md text-card-foreground">Meta 2</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -690,7 +690,6 @@ export function AdminTab({
                             </div>
                         </div>
                         <Separator />
-                        {/* Meta 3 */}
                         <div className="space-y-2">
                             <h4 className="font-medium text-md text-card-foreground">Meta 3</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -700,15 +699,37 @@ export function AdminTab({
                         </div>
                     </div>
                      <div className="mt-6 pt-6 border-t">
-                        <h4 className="font-medium text-md text-card-foreground mb-2">Bônus Lendária</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                           <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                           <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                           <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <div className="flex items-center justify-between mb-4">
+                             <div>
+                                <h4 className="font-medium text-md text-card-foreground">Bônus Performance</h4>
+                                <p className="text-sm text-muted-foreground">Ative para habilitar um bônus por vendas acima da Meta 3.</p>
+                             </div>
+                             <FormField
+                                control={control}
+                                name="goals.performanceBonusEnabled"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
                         </div>
-                         <p className="text-xs text-muted-foreground mt-2">
-                          Você ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2).replace('.',',')}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2).replace('.',',')}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2).replace('.',',')}</strong>.
-                        </p>
+
+                        {performanceBonusEnabled && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                               <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                               <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                               <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                               <p className="text-xs text-muted-foreground mt-2 md:col-span-3">
+                                 Você ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2).replace('.',',')}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2).replace('.',',')}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2).replace('.',',')}</strong>.
+                               </p>
+                            </div>
+                        )}
                     </div>
                 </div>
                  <Separator/>

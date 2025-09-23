@@ -178,7 +178,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                             <TargetGoalItem label="Meta 1" value={formatCurrency(goals.metaMinha)} />
                             <TargetGoalItem label="Meta 2" value={formatCurrency(goals.meta)} />
                             <TargetGoalItem label="Meta 3" value={formatCurrency(goals.metona)} />
-                            <TargetGoalItem label="Lendária" value={formatCurrency(goals.metaLendaria)} />
+                            {goals.performanceBonusEnabled && <TargetGoalItem label="Bônus Performance" value={formatCurrency(goals.metaLendaria)} />}
                         </div>
                     </div>
                     <Separator />
@@ -212,7 +212,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     <GoalDetail label="Prêmio Meta 1" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
                     <GoalDetail label="Prêmio Meta 2" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
                     <GoalDetail label="Prêmio Meta 3" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
-                    <GoalDetail label="Bônus Lendária" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />
+                    {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
                     <Separator/>
                     <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
                     <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
