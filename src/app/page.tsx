@@ -16,7 +16,7 @@ export default function HomePage() {
                     <span className="text-primary">Acelera GT</span>
                 </h1>
                 <p className="text-muted-foreground mt-3 text-sm md:text-base">
-                    Selecione uma loja na barra lateral para começar !!!!
+                    Selecione uma loja na barra lateral para começar.
                 </p>
             </CardContent>
         </Card>
