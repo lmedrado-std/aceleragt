@@ -175,9 +175,9 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                      <div>
                         <h4 className="font-semibold mb-2 text-sm">Metas de Vendas</h4>
                         <div className="space-y-2 text-sm">
-                            <TargetGoalItem label="Metinha" value={formatCurrency(goals.metaMinha)} />
-                            <TargetGoalItem label="Meta" value={formatCurrency(goals.meta)} />
-                            <TargetGoalItem label="Metona" value={formatCurrency(goals.metona)} />
+                            <TargetGoalItem label="Meta 1" value={formatCurrency(goals.metaMinha)} />
+                            <TargetGoalItem label="Meta 2" value={formatCurrency(goals.meta)} />
+                            <TargetGoalItem label="Meta 3" value={formatCurrency(goals.metona)} />
                             <TargetGoalItem label="Lendária" value={formatCurrency(goals.metaLendaria)} />
                         </div>
                     </div>
@@ -209,9 +209,9 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                    <GoalDetail label="Prêmio Metinha" prize={incentives?.metinhaPremio || 0} achieved={(incentives?.metinhaPremio || 0) > 0} />
-                    <GoalDetail label="Prêmio Meta" prize={incentives?.metaPremio || 0} achieved={(incentives?.metaPremio || 0) > 0} />
-                    <GoalDetail label="Prêmio Metona" prize={incentives?.metonaPremio || 0} achieved={(incentives?.metonaPremio || 0) > 0} />
+                    <GoalDetail label="Prêmio Meta 1" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
+                    <GoalDetail label="Prêmio Meta 2" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
+                    <GoalDetail label="Prêmio Meta 3" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
                     <GoalDetail label="Bônus Lendária" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />
                     <Separator/>
                     <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />

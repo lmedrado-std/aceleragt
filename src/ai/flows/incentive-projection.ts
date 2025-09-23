@@ -61,9 +61,9 @@ const IncentiveProjectionInputSchema = z.object({
 export type IncentiveProjectionInput = z.infer<typeof IncentiveProjectionInputSchema>;
 
 const IncentiveProjectionOutputSchema = z.object({
-  metinhaPremio: z.number().describe('Potential reward for reaching Metinha.'),
-  metaPremio: z.number().describe('Potential reward for reaching Meta.'),
-  metonaPremio: z.number().describe('Potential reward for reaching Metona.'),
+  meta1Premio: z.number().describe('Potential reward for reaching Metinha.'),
+  meta2Premio: z.number().describe('Potential reward for reaching Meta.'),
+  meta3Premio: z.number().describe('Potential reward for reaching Metona.'),
   legendariaBonus: z.number().describe('Potential bonus for reaching Legendaria.'),
   paBonus: z.number().describe('Potential bonus for products per customer.'),
   ticketMedioBonus: z.number().describe('Potential bonus for average ticket.'),
@@ -82,9 +82,9 @@ const incentiveProjectionFlow = ai.defineFlow(
     outputSchema: IncentiveProjectionOutputSchema,
   },
   async ({ seller, goals }) => {
-    let metinhaPremio = 0;
-    let metaPremio = 0;
-    let metonaPremio = 0;
+    let meta1Premio = 0;
+    let meta2Premio = 0;
+    let meta3Premio = 0;
     let legendariaBonus = 0;
     let paBonus = 0;
     let ticketMedioBonus = 0;
@@ -101,14 +101,16 @@ const incentiveProjectionFlow = ai.defineFlow(
       salesPrize = goals.metonaPrize;
     }
     
-    // Assign the prize to the correct tier for display, zeroing out the others,
+    // Assign the prize to the correct tier for display,
     // but ensuring Lendaria also gets Metona prize.
-    if (seller.vendas >= goals.metona) {
-      metonaPremio = salesPrize;
+    if (seller.vendas >= goals.metaLendaria) {
+      meta3Premio = goals.metonaPrize; // Also gets Metona prize
+    } else if (seller.vendas >= goals.metona) {
+      meta3Premio = salesPrize;
     } else if (seller.vendas >= goals.meta) {
-      metaPremio = salesPrize;
+      meta2Premio = salesPrize;
     } else if (seller.vendas >= goals.metaMinha) {
-      metinhaPremio = salesPrize;
+      meta1Premio = salesPrize;
     }
 
     // Bônus Lendária: a cada X vendido acima da meta lendária, ganha Y extra.
@@ -140,9 +142,9 @@ const incentiveProjectionFlow = ai.defineFlow(
     const corridinhaDiariaBonus = seller.corridinhaDiaria;
 
     return {
-      metinhaPremio,
-      metaPremio,
-      metonaPremio,
+      meta1Premio,
+      meta2Premio,
+      meta3Premio,
       legendariaBonus,
       paBonus,
       ticketMedioBonus,
