@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -76,8 +77,8 @@ export function SellerTab({
         <TabsTrigger
           value="desempenho"
           className={
-            "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center hover:bg-blue-50 " +
-            "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+            "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center " +
+            "data-[state=active]:border-b-blue-700"
           }
         >
           <Trophy className="mr-2 h-4 w-4" />
@@ -86,8 +87,8 @@ export function SellerTab({
         <TabsTrigger
           value="lancamentos"
           className={
-            "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center hover:bg-blue-50 " +
-            "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+            "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center " +
+            "data-[state=active]:border-b-blue-700"
           }
         >
           <BarChart className="mr-2 h-4 w-4" />

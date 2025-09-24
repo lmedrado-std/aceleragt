@@ -407,6 +407,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   <p>Voltar para a seleção de vendedores</p>
                 </TooltipContent>
               </Tooltip>
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button asChild variant="secondary" size="icon" className="shadow bg-black/20 hover:bg-black/30 text-white">
+                      <Link href="/admin">
+                        <ShieldCheck />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Acesso ao Painel de Admin Global</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </header>
         </div>
@@ -422,7 +436,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                            <TabsTrigger
                             key={seller.id}
                             value={seller.id}
-                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-blue-600 data-[state=active]:font-bold data-[state=active]:text-white data-[state=active]:shadow-sm"
+                            className={cn(
+                              "rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base transition-all font-medium",
+                              "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md",
+                              "hover:bg-blue-500/10"
+                            )}
                            >
                             {seller.name}
                            </TabsTrigger>
@@ -442,7 +460,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             className={cn(
                               "rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base transition-all font-medium",
                               "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md",
-                              "hover:bg-primary/90 hover:text-primary-foreground"
+                              "hover:bg-blue-500/10"
                             )}
                            >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
@@ -496,7 +514,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
-
-    
-
-    
