@@ -1,6 +1,8 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -8,79 +10,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model admins {
-  id       String @id
-  password String
-}
-
-model app_config {
-  key   String @id
-  value String
-}
-
-model goals {
-  id                         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  store_id                   String @unique(map: "goals_store_id_unique") @db.Uuid
-  metaMinha                  Int?
-  metaMinhaPrize             Int?
-  meta                       Int?
-  metaPrize                  Int?
-  metona                     Int?
-  metonaPrize                Int?
-  metaLendaria               Int?
-  legendariaBonusValorVenda  Int?
-  legendariaBonusValorPremio Int?
-  paGoal1                    Float? @db.Real
-  paPrize1                   Int?
-  paGoal2                    Float? @db.Real
-  paPrize2                   Int?
-  paGoal3                    Float? @db.Real
-  paPrize3                   Int?
-  paGoal4                    Float? @db.Real
-  paPrize4                   Int?
-  ticketMedioGoal1           Int?
-  ticketMedioPrize1          Int?
-  ticketMedioGoal2           Int?
-  ticketMedioPrize2          Int?
-  ticketMedioGoal3           Int?
-  ticketMedioPrize3          Int?
-  ticketMedioGoal4           Int?
-  ticketMedioPrize4          Int?
-  stores                     stores @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model incentives {
-  id          Int      @id @default(autoincrement())
-  store_id    Int?
-  description String
-  amount      Decimal? @db.Decimal
-}
-
-model playing_with_neon {
-  id    Int    @id @default(autoincrement())
-  name  String
-  value Float? @db.Real
-}
-
-model sellers {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  store_id          String   @db.Uuid
-  name              String   @db.VarChar(255)
-  password          String   @db.VarChar(255)
-  avatar_id         String   @db.VarChar(50)
-  vendas            Decimal? @default(0) @db.Decimal(10, 2)
-  pa                Decimal? @default(0) @db.Decimal(10, 2)
-  ticket_medio      Decimal? @default(0) @db.Decimal(10, 2)
-  corridinha_diaria Decimal? @default(0) @db.Decimal(10, 2)
-  stores            stores   @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
 model stores {
   id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                       String
-  theme_color                String?
   password                   String?
-  last_incentive_calculation DateTime? @db.Timestamp(6)
-  goals                      goals?
+  theme_color                String?
+  last_incentive_calculation DateTime? @db.Timestamptz
   sellers                    sellers[]
+  goals                      goals?
+}
+
+model sellers {
+  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String  @db.VarChar(255)
+  password           String? @db.VarChar(255)
+  avatar_id          String? @db.VarChar(50)
+  vendas             Decimal? @default(0) @db.Decimal(10, 2)
+  pa                 Decimal? @default(0) @db.Decimal(5, 2)
+  ticket_medio       Decimal? @default(0) @db.Decimal(10, 2)
+  corridinha_diaria  Decimal? @default(0) @db.Decimal(10, 2)
+  store_id           String  @db.Uuid
+  store              stores  @relation(fields: [store_id], references: [id], onDelete: Cascade)
+}
+
+model goals {
+  id                         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  store_id                   String   @unique @db.Uuid
+  store                      stores   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  metaMinha                  Int?     @default(0) @map("metaMinha")
+  metaMinhaPrize             Int?     @default(0) @map("metaMinhaPrize")
+  meta                       Int?     @default(0)
+  metaPrize                  Int?     @default(0) @map("metaPrize")
+  metona                     Int?     @default(0)
+  metonaPrize                Int?     @default(0) @map("metonaPrize")
+  metaLendaria               Int?     @default(0) @map("metaLendaria")
+  legendariaBonusValorVenda  Int?     @default(0) @map("legendariaBonusValorVenda")
+  legendariaBonusValorPremio Int?     @default(0) @map("legendariaBonusValorPremio")
+  performanceBonusEnabled    Boolean? @default(false) @map("performanceBonusEnabled")
+  paGoal1                    Float?   @default(0) @map("paGoal1")
+  paPrize1                   Int?     @default(0) @map("paPrize1")
+  paGoal2                    Float?   @default(0) @map("paGoal2")
+  paPrize2                   Int?     @default(0) @map("paPrize2")
+  paGoal3                    Float?   @default(0) @map("paGoal3")
+  paPrize3                   Int?     @default(0) @map("paPrize3")
+  paGoal4                    Float?   @default(0) @map("paGoal4")
+  paPrize4                   Int?     @default(0) @map("paPrize4")
+  ticketMedioGoal1           Int?     @default(0) @map("ticketMedioGoal1")
+  ticketMedioPrize1          Int?     @default(0) @map("ticketMedioPrize1")
+  ticketMedioGoal2           Int?     @default(0) @map("ticketMedioGoal2")
+  ticketMedioPrize2          Int?     @default(0) @map("ticketMedioPrize2")
+  ticketMedioGoal3           Int?     @default(0) @map("ticketMedioGoal3")
+  ticketMedioPrize3          Int?     @default(0) @map("ticketMedioPrize3")
+  ticketMedioGoal4           Int?     @default(0) @map("ticketMedioGoal4")
+  ticketMedioPrize4          Int?     @default(0) @map("ticketMedioPrize4")
+}
+
+model app_config {
+  key   String @id @db.VarChar(255)
+  value String?
 }
