@@ -350,6 +350,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 cleanedGoals[key] = numericValue;
             }
         }
+        
+        if (typeof cleanedGoals.performanceBonusEnabled !== 'boolean') {
+            cleanedGoals.performanceBonusEnabled = !!cleanedGoals.performanceBonusEnabled;
+        }
 
         // Ensure store_id is not nested inside the goals object
         delete cleanedGoals.store_id;
@@ -407,20 +411,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   <p>Voltar para a seleção de vendedores</p>
                 </TooltipContent>
               </Tooltip>
-              {isAdmin && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button asChild variant="secondary" size="icon" className="shadow bg-black/20 hover:bg-black/30 text-white">
-                      <Link href="/admin">
-                        <ShieldCheck />
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Acesso ao Painel de Admin Global</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
             </div>
           </header>
         </div>
