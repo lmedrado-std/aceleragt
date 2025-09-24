@@ -416,7 +416,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 <TabsList className="h-auto p-0 bg-transparent border-b-0">
                    {sellers.length > 0 ? sellers.map((seller) => (
                     <TabsTrigger key={seller.id} value={seller.id}
-                      className="rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:bg-background data-[state=active]:font-bold data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                      className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                     >
                       {seller.name}
                     </TabsTrigger>
@@ -428,7 +428,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <TabsTrigger value="admin"
-                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:bg-background data-[state=active]:font-bold data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                           >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                           </TabsTrigger>
@@ -482,5 +482,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+    
 
     
