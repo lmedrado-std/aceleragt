@@ -715,8 +715,8 @@ export function AdminTab({
                         </div>
                     </div>
                      <div className="mt-6 pt-6 border-t">
-                        <div className="flex items-center justify-between mb-4">
-                             <div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                             <div className="pr-4">
                                 <h4 className="font-medium text-md text-card-foreground">Bônus Performance</h4>
                                 <p className="text-sm text-muted-foreground">Ative para habilitar um bônus por vendas acima da Meta 3.</p>
                              </div>
@@ -737,7 +737,7 @@ export function AdminTab({
                         </div>
 
                         {performanceBonusEnabled && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                                <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                                <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                                <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
