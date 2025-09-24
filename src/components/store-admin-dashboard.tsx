@@ -106,7 +106,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const totalPrizes = Object.values(prizeBreakdown).reduce((sum, value) => sum + value, 0);
 
   const highestGoalAchieved = () => {
-    if (sellersInLendaria > 0) return { name: "Lendária", message: `Pelo menos um membro da equipe já alcançou a Meta Lendária!` };
+    if (sellersInLendaria > 0) return { name: "Bônus Performance", message: `Pelo menos um membro da equipe já alcançou o Bônus Performance!` };
     if (sellersInMetona > 0) return { name: "Meta 3", message: `Pelo menos um membro da equipe já alcançou a Meta 3!` };
     if (sellersInMeta > 0) return { name: "Meta 2", message: `Pelo menos um membro da equipe já alcançou a Meta 2!` };
     if (sellersInMetinha > 0) return { name: "Meta 1", message: `Pelo menos um membro da equipe já alcançou a Meta 1!` };
@@ -182,7 +182,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                    <GoalAchievementItem label="Meta 1" goalValue={goals.metaMinha} sellers={sellers} sellersReached={sellersInMetinha} />
                    <GoalAchievementItem label="Meta 2" goalValue={goals.meta} sellers={sellers} sellersReached={sellersInMeta} />
                    <GoalAchievementItem label="Meta 3" goalValue={goals.metona} sellers={sellers} sellersReached={sellersInMetona} />
-                   <GoalAchievementItem label="Lendária" goalValue={goals.metaLendaria} sellers={sellers} sellersReached={sellersInLendaria} />
+                   {goals.performanceBonusEnabled && <GoalAchievementItem label="Bônus Performance" goalValue={goals.metaLendaria} sellers={sellers} sellersReached={sellersInLendaria} />}
                 </CardContent>
             </Card>
 
@@ -199,7 +199,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                     <PrizeBreakdownItem label="Prêmio Meta 1" value={prizeBreakdown.meta1} />
                     <PrizeBreakdownItem label="Prêmio Meta 2" value={prizeBreakdown.meta2} />
                     <PrizeBreakdownItem label="Prêmio Meta 3" value={prizeBreakdown.meta3} />
-                    <PrizeBreakdownItem label="Bônus Lendária" value={prizeBreakdown.lendaria} />
+                    {goals.performanceBonusEnabled && <PrizeBreakdownItem label="Bônus Performance" value={prizeBreakdown.lendaria} />}
                     <PrizeBreakdownItem label="Bônus PA" value={prizeBreakdown.pa} />
                     <PrizeBreakdownItem label="Bônus Ticket Médio" value={prizeBreakdown.ticketMedio} />
                     <PrizeBreakdownItem label="Bônus Corridinha" value={prizeBreakdown.corridinha} />
