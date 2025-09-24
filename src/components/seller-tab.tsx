@@ -58,13 +58,13 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
           <TabsList className="h-auto p-0 bg-transparent border-b-2">
             <TabsTrigger
               value="desempenho"
-              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
               Meu Desempenho
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
               Meus Lançamentos
             </TabsTrigger>
