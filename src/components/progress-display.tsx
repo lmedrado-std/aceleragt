@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
 import { RankingMetric } from "./goal-getter-dashboard";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Label, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Label, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 
@@ -123,11 +123,9 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     <div className="space-y-6">
         <Card className="col-span-full bg-primary text-primary-foreground">
             <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <p className="text-sm font-semibold text-primary-foreground/80">Ganho Total Projetado</p>
-                        <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
-                    </div>
+                <div>
+                    <p className="text-sm font-semibold text-primary-foreground/80">Ganho Total Projetado</p>
+                    <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
                 </div>
                  {vendas > 0 && salesRank && salesRank > 0 && (
                      <div className="text-right flex-grow">
