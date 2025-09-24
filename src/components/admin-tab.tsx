@@ -477,7 +477,7 @@ export function AdminTab({
                       <AlertTriangle className="text-yellow-500" />
                       Vendedores não encontrados
                   </AlertDialogTitle>
-                  <AlertDialogDescription asChild>
+                   <AlertDialogDescription asChild>
                     <div>
                       <p>
                         A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
@@ -504,16 +504,34 @@ export function AdminTab({
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="h-auto p-0 bg-transparent border-b-2">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">
+            <TabsTrigger
+              value="dashboard"
+              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+            >
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard
             </TabsTrigger>
-            <TabsTrigger value="vendedores" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">👥 Vendedores</TabsTrigger>
-            <TabsTrigger value="lancamentos" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">📊 Lançamentos</TabsTrigger>
-            <TabsTrigger value="metas" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">🎯 Metas &amp; Prêmios</TabsTrigger>
+            <TabsTrigger
+              value="vendedores"
+              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+            >
+              👥 Vendedores
+            </TabsTrigger>
+            <TabsTrigger
+              value="lancamentos"
+              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+            >
+              📊 Lançamentos
+            </TabsTrigger>
+            <TabsTrigger
+              value="metas"
+              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+            >
+              🎯 Metas &amp; Prêmios
+            </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard">
+        <TabsContent value="dashboard" className="mt-6">
            <StoreAdminDashboard
               sellers={sellers}
               goals={getValues().goals as Goals}
@@ -521,7 +539,7 @@ export function AdminTab({
             />
         </TabsContent>
         
-        <TabsContent value="vendedores">
+        <TabsContent value="vendedores" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Vendedores</CardTitle>
@@ -594,7 +612,7 @@ export function AdminTab({
           </Card>
         </TabsContent>
 
-        <TabsContent value="lancamentos">
+        <TabsContent value="lancamentos" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Lançamentos de Desempenho</CardTitle>
@@ -664,7 +682,7 @@ export function AdminTab({
           </Card>
         </TabsContent>
         
-        <TabsContent value="metas">
+        <TabsContent value="metas" className="mt-6">
            <Card>
             <CardHeader>
                 <CardTitle>Configuração de Metas e Prêmios</CardTitle>
