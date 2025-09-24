@@ -40,8 +40,8 @@ const formatCurrency = (value: number) =>
 const formatPercentage = (value: number) =>
   new Intl.NumberFormat("pt-BR", {
     style: "percent",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value || 0);
 
 const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
@@ -100,23 +100,20 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   const salesPercentage = goals.metona > 0 ? Math.min(vendas / goals.metona, 1) : 0;
   const paPercentage = goals.paGoal4 > 0 ? Math.min(pa / goals.paGoal4, 1) : 0;
   const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min(ticketMedio / goals.ticketMedioGoal4, 1) : 0;
-  
-  const salesChartData = [{ month: "Vendas", desktop: vendas }];
-  const salesChartConfig = {
-    desktop: {
-      label: "Vendas",
-      color: "hsl(var(--chart-1))",
-    },
-  } satisfies ChartConfig;
-
-  const paChartData = [{ name: 'PA', value: paPercentage, fill: 'hsl(var(--chart-1))' }];
-  const ticketMedioChartData = [{ name: 'Ticket Médio', value: ticketMedioPercentage, fill: 'hsl(var(--chart-1))' }];
 
   const chartConfig = {
     vendas: {
       label: "Vendas",
       color: "hsl(var(--primary))",
     },
+    pa: {
+      label: "PA",
+      color: "hsl(var(--chart-2))",
+    },
+    ticketMedio: {
+        label: "Ticket Médio",
+        color: "hsl(var(--chart-3))"
+    }
   } satisfies ChartConfig
 
   return (
@@ -145,8 +142,8 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                      <CardTitle className="text-xl">Progresso das Metas</CardTitle>
                     <CardDescription>Veja o quão perto você está de bater suas metas.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <div className="space-y-4">
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                   <div className="space-y-4 md:col-span-1">
                        <h3 className="font-semibold">Meta de Vendas</h3>
                        <div className="text-4xl font-bold text-foreground">{formatCurrency(vendas)}</div>
                        <ChartContainer config={chartConfig} className="h-[150px] w-full">
@@ -180,12 +177,12 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                             </AreaChart>
                         </ChartContainer>
                    </div>
-                   <div className="grid grid-cols-2 gap-6 items-center">
+                   <div className="md:col-span-2 grid grid-cols-2 gap-6 items-center">
                        <div className="flex flex-col items-center gap-2">
                            <h3 className="font-semibold">Meta PA</h3>
-                           <ChartContainer config={{}} className="h-32 w-32">
+                           <ChartContainer config={chartConfig} className="h-32 w-32">
                              <PieChart>
-                                <Pie data={[{ value: paPercentage }, { value: 1-paPercentage }]} dataKey="value" nameKey="name" innerRadius={35} outerRadius={45} startAngle={90} endAngle={450} cornerRadius={5}>
+                                <Pie data={[{ name: 'PA', value: paPercentage, fill: 'var(--color-pa)' }, { name: 'Restante', value: 1-paPercentage, fill: 'hsl(var(--muted))' }]} dataKey="value" nameKey="name" innerRadius={35} outerRadius={45} startAngle={90} endAngle={450} cornerRadius={5}>
                                   <Label
                                     content={({ viewBox }) => {
                                       if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -203,17 +200,16 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                                       }
                                     }}
                                   />
-                                  <cell fill="hsl(var(--primary))" />
-                                  <cell fill="hsl(var(--muted))" />
                                 </Pie>
                               </PieChart>
                            </ChartContainer>
+                           <p className="mt-2 font-medium">{pa.toFixed(2)} / {goals.paGoal4}</p>
                        </div>
                        <div className="flex flex-col items-center gap-2">
                            <h3 className="font-semibold">Meta Ticket Médio</h3>
-                           <ChartContainer config={{}} className="h-32 w-32">
+                           <ChartContainer config={chartConfig} className="h-32 w-32">
                              <PieChart>
-                                <Pie data={[{ value: ticketMedioPercentage }, { value: 1-ticketMedioPercentage }]} dataKey="value" nameKey="name" innerRadius={35} outerRadius={45} startAngle={90} endAngle={450} cornerRadius={5}>
+                                <Pie data={[{ name: 'Ticket', value: ticketMedioPercentage, fill: 'var(--color-ticketMedio)' }, { name: 'Restante', value: 1-ticketMedioPercentage, fill: 'hsl(var(--muted))' }]} dataKey="value" nameKey="name" innerRadius={35} outerRadius={45} startAngle={90} endAngle={450} cornerRadius={5}>
                                   <Label
                                     content={({ viewBox }) => {
                                       if (viewBox && "cx" in viewBox) {
@@ -231,11 +227,10 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                                       }
                                     }}
                                   />
-                                  <cell fill="hsl(var(--primary))" />
-                                  <cell fill="hsl(var(--muted))" />
                                 </Pie>
                               </PieChart>
                            </ChartContainer>
+                           <p className="mt-2 font-medium">{formatCurrency(ticketMedio)} / {formatCurrency(goals.ticketMedioGoal4)}</p>
                        </div>
                    </div>
                 </CardContent>
