@@ -147,7 +147,7 @@ function StorePageContent() {
 
   return (
     <div className="w-full max-w-5xl mx-auto">
-        <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-[#4A55A2] to-[#D45079] shadow-lg text-white">
+        <div className="mb-6 p-4 rounded-xl bg-[#2B344D] shadow-lg text-white">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                  <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
                 <div className="flex items-center gap-2">

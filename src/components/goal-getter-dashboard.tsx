@@ -428,7 +428,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     <TooltipTrigger asChild>
                       <TabsList className="h-auto p-0 bg-transparent border-b-0">
                         <TabsTrigger value="admin"
-                          className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-sm"
+                          className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-sm"
                         >
                           <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                         </TabsTrigger>
