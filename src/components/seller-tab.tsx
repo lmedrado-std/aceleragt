@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -58,14 +57,14 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
           <TabsList className="h-auto p-0 bg-transparent border-b">
             <TabsTrigger
               value="desempenho"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700 transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
             >
               <Trophy className="mr-2 h-4 w-4" />
               Meu Desempenho
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700 transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
             >
               <BarChart className="mr-2 h-4 w-4" />
               Meus Lançamentos
