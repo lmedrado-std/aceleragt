@@ -23,6 +23,7 @@ import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 const sellerSchema = z.object({
   id: z.string(),
@@ -393,12 +394,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
               <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
             </div>
             <div className="flex items-center gap-2">
-              <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
-                <Link href={`/loja/${storeId}`}>
-                  <Home className="mr-2 h-4 w-4" />
-                  Página da Loja
-                </Link>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
+                    <Link href={`/loja/${storeId}`}>
+                      <Home className="mr-2 h-4 w-4" />
+                      Página da Loja
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Voltar para a seleção de vendedores</p>
+                </TooltipContent>
+              </Tooltip>
               {isAdmin && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -423,27 +431,41 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 <div className="overflow-x-auto pb-2">
                   <TabsList className="h-auto p-0 bg-transparent border-b-0">
                     {sellers.length > 0 ? sellers.map((seller) => (
-                      <TabsTrigger key={seller.id} value={seller.id}
-                        className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-                      >
-                        {seller.name}
-                      </TabsTrigger>
+                      <Tooltip key={seller.id}>
+                        <TooltipTrigger asChild>
+                           <TabsTrigger
+                            key={seller.id}
+                            value={seller.id}
+                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                           >
+                            {seller.name}
+                           </TabsTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Acessar painel de {seller.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )) : !(isAdmin || isStoreAdmin) && (
                       <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
                     )}
                     {(isAdmin || isStoreAdmin) && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <TabsTrigger value="admin"
-                              className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-                            >
-                              <ShieldCheck className="h-5 w-5 mr-2" /> Admin
-                            </TabsTrigger>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Painel do Gerente da Loja</p>
-                          </TooltipContent>
-                        </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                           <TabsTrigger
+                            value="admin"
+                            className={cn(
+                              "rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base transition-all font-medium",
+                              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md",
+                              "hover:bg-primary/90 hover:text-primary-foreground"
+                            )}
+                           >
+                            <ShieldCheck className="h-5 w-5 mr-2" /> Admin
+                           </TabsTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Painel do Gerente da Loja</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </TabsList>
                 </div>
@@ -488,5 +510,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    
 
     
