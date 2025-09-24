@@ -658,8 +658,8 @@ export function AdminTab({
                  </div>
               )}
             </CardContent>
-             <CardFooter className="flex flex-col sm:flex-row items-center gap-4 border-t pt-6">
-                <div className="flex-grow flex flex-col sm:flex-row items-center gap-4">
+             <CardFooter className="flex flex-wrap items-start justify-between gap-6 border-t pt-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                     {sellers.length > 0 && (
                         <Button onClick={handleCalculateIncentives} disabled={isCalculating} className="w-full sm:w-auto">
                             <Calculator className="mr-2" />
@@ -675,26 +675,24 @@ export function AdminTab({
                         </div>
                     )}
                 </div>
-                 <div className="w-full sm:w-auto">
-                    <div className="flex flex-col items-start gap-2 p-4 border rounded-lg bg-muted/50 w-full">
-                        <div className="flex items-center justify-between w-full">
-                            <div>
-                                <h3 className="font-semibold text-sm">Importar de Arquivo Excel</h3>
-                                <p className="text-xs text-muted-foreground">Colunas: reportgroup, totalliquido, etc.</p>
-                            </div>
-                            <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline">
-                                <FileUp className="mr-2 h-4 w-4" />
-                                Importar
-                            </Button>
-                            <Input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                className="hidden"
-                                accept=".xlsx, .xls"
-                                onChange={handleFileUpload}
-                            />
-                        </div>
-                    </div>
+                <div className="w-full sm:w-auto flex-shrink-0">
+                  <div className="p-4 border rounded-lg bg-muted/50 w-full sm:max-w-xs">
+                      <div className="flex flex-col items-start gap-2">
+                           <h3 className="font-semibold text-sm">Importar de Arquivo Excel</h3>
+                           <p className="text-xs text-muted-foreground mb-2">Colunas: reportgroup, totalliquido, etc.</p>
+                           <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline" className="w-full">
+                               <FileUp className="mr-2 h-4 w-4" />
+                               Importar Planilha
+                           </Button>
+                           <Input 
+                               type="file" 
+                               ref={fileInputRef} 
+                               className="hidden"
+                               accept=".xlsx, .xls"
+                               onChange={handleFileUpload}
+                           />
+                      </div>
+                  </div>
                 </div>
             </CardFooter>
           </Card>
