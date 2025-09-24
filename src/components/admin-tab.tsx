@@ -154,17 +154,17 @@ export function AdminTab({
       }
   }, []);
 
-  const handleAddSeller = async () => {
-    const newSellerName = getValues("newSellerName");
-    const newSellerPassword = getValues("newSellerPassword");
+  const handleAddSeller = async (name?: string, password?: string) => {
+    const newSellerName = name || getValues("newSellerName");
+    const newSellerPassword = password || getValues("newSellerPassword");
 
     if (!newSellerName || newSellerName.trim() === "") {
       setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
-      return;
+      return false;
     }
      if (sellers.some(s => s.name?.toLowerCase() === newSellerName.toLowerCase())) {
         setError("newSellerName", { type: "manual", message: "Este nome de vendedor já existe."});
-        return;
+        return false;
     }
     clearErrors("newSellerName");
 
@@ -175,7 +175,7 @@ export function AdminTab({
 
     if (finalPassword.length < 4) {
       setError("newSellerPassword", { type: "manual", message: "A senha deve ter no mínimo 4 caracteres." });
-      return;
+      return false;
     }
     clearErrors("newSellerPassword");
     
@@ -205,14 +205,16 @@ export function AdminTab({
             throw new Error(errorData.details || errorData.error || 'Falha ao adicionar vendedor');
         }
         
-        onSellersChange();
+        onSellersChange(); // This will refetch sellers and update the state
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
         toast({ title: "Sucesso!", description: `Vendedor "${newSellerName}" adicionado.` });
+        return true;
 
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
+        return false;
     }
   };
 
@@ -465,6 +467,18 @@ export function AdminTab({
 
     reader.readAsArrayBuffer(file);
   };
+  
+    const handleQuickAddSeller = async (name: string) => {
+        const success = await handleAddSeller(name);
+        if (success) {
+            // Remove from notFound list if successfully added
+            setImportDialog(prev => ({
+                ...prev,
+                notFound: prev.notFound.filter(n => n.toLowerCase() !== name.toLowerCase()),
+            }));
+            toast({ title: `Vendedor "${name}" cadastrado!` });
+        }
+    };
 
 
   return (
@@ -480,30 +494,34 @@ export function AdminTab({
                    <AlertDialogDescription asChild>
                     <div>
                       <p>
-                        A importação pode continuar, mas os seguintes vendedores do arquivo não foram encontrados no sistema e serão ignorados:
+                        A importação pode continuar para os {importDialog.found.length} vendedores encontrados, mas os vendedores abaixo não existem no sistema. Você pode cadastrá-los agora ou ignorá-los.
                       </p>
-                      <ul className="mt-2 list-disc list-inside bg-muted p-2 rounded-md max-h-32 overflow-y-auto">
-                          {importDialog.notFound.map((name, i) => <li key={i}>{name}</li>)}
-                      </ul>
-                       <p className="mt-2">
-                        Deseja continuar a importação para os {importDialog.found.length} vendedores que foram encontrados?
-                      </p>
+                      <div className="mt-4 space-y-2 max-h-40 overflow-y-auto pr-2">
+                          {importDialog.notFound.map((name, i) => (
+                              <div key={i} className="flex justify-between items-center bg-muted p-2 rounded-md">
+                                  <span className="font-medium text-sm">{name}</span>
+                                  <Button size="sm" variant="outline" onClick={() => handleQuickAddSeller(name)}>
+                                    <UserPlus className="mr-2 h-4 w-4"/> Cadastrar
+                                  </Button>
+                              </div>
+                          ))}
+                      </div>
                     </div>
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                   <AlertDialogCancel onClick={() => setImportDialog({ open: false, notFound: [], found: [] })}>
-                      Cancelar
+                      Cancelar Tudo
                   </AlertDialogCancel>
                   <AlertDialogAction onClick={() => proceedWithImport(importDialog.found)}>
-                      Continuar Importação
+                      Continuar com Vendedores Encontrados
                   </AlertDialogAction>
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="h-auto p-0 bg-transparent border-b-2">
+        <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b-2">
             <TabsTrigger
               value="dashboard"
               className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
@@ -567,7 +585,7 @@ export function AdminTab({
                         </FormItem>
                       )}
                     />
-                    <Button type="button" onClick={handleAddSeller}><UserPlus className="mr-2" /> Adicionar Vendedor</Button>
+                    <Button type="button" onClick={() => handleAddSeller()}><UserPlus className="mr-2" /> Adicionar Vendedor</Button>
                 </div>
               </div>
               <Separator />
@@ -657,7 +675,7 @@ export function AdminTab({
                         </div>
                     )}
                 </div>
-                <div className="w-full sm:w-auto">
+                 <div className="w-full sm:w-auto">
                     <div className="flex flex-col items-start gap-2 p-4 border rounded-lg bg-muted/50 w-full">
                         <div className="flex items-center justify-between w-full">
                             <div>
