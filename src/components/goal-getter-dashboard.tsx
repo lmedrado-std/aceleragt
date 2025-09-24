@@ -112,7 +112,11 @@ const parseForAI = (value: any): number => {
 const parseGoalsForAI = (rawGoals: any): Goals => {
     const parsed: any = {};
     for (const key in rawGoals) {
-        parsed[key] = parseForAI(rawGoals[key]);
+        if (key === 'performanceBonusEnabled') {
+            parsed[key] = !!rawGoals[key];
+        } else {
+            parsed[key] = parseForAI(rawGoals[key]);
+        }
     }
     return parsed as Goals;
 };
@@ -500,5 +504,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    
 
     
