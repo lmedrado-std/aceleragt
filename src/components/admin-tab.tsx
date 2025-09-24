@@ -636,8 +636,10 @@ export function AdminTab({
               <CardTitle>Lançamentos de Desempenho</CardTitle>
               <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {sellers.length === 0 ? <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p> : (
+            <CardContent>
+              {sellers.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
+              ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {sellers.map((seller, index) => (
                     <Card key={seller.id} className="overflow-hidden">
