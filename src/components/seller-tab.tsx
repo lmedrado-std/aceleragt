@@ -115,3 +115,5 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
         </Tabs>
     )
 }
+
+    
