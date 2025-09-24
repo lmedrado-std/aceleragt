@@ -506,26 +506,26 @@ export function AdminTab({
         <TabsList className="h-auto p-0 bg-transparent border-b-2">
             <TabsTrigger
               value="dashboard"
-              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
             >
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard
             </TabsTrigger>
             <TabsTrigger
               value="vendedores"
-              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
             >
               👥 Vendedores
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
             >
               📊 Lançamentos
             </TabsTrigger>
             <TabsTrigger
               value="metas"
-              className="data-[state=active]:bg-background data-[state=active]:border-b-transparent border-b-2 border-transparent px-4 py-2 transition-all font-medium"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
             >
               🎯 Metas &amp; Prêmios
             </TabsTrigger>
