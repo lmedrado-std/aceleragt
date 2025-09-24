@@ -7,7 +7,7 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SellerTabProps {
@@ -55,17 +55,19 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
 
     return (
         <Tabs defaultValue="desempenho" className="w-full">
-          <TabsList className="h-auto p-0 bg-transparent border-b-2">
+          <TabsList className="h-auto p-0 bg-transparent border-b">
             <TabsTrigger
               value="desempenho"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
+              <Trophy className="mr-2 h-4 w-4" />
               Meu Desempenho
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
+              <BarChart className="mr-2 h-4 w-4" />
               Meus Lançamentos
             </TabsTrigger>
           </TabsList>
@@ -125,5 +127,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
         </Tabs>
     )
 }
+
+    
 
     

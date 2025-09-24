@@ -15,6 +15,9 @@ import {
   LayoutDashboard,
   FileUp,
   AlertTriangle,
+  Users,
+  BarChart,
+  Target,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -521,31 +524,34 @@ export function AdminTab({
       </AlertDialog>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b-2">
+        <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b">
             <TabsTrigger
               value="dashboard"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard
             </TabsTrigger>
             <TabsTrigger
               value="vendedores"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
-              👥 Vendedores
+              <Users className="mr-2 h-4 w-4" />
+              Vendedores
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
-              📊 Lançamentos
+              <BarChart className="mr-2 h-4 w-4" />
+              Lançamentos
             </TabsTrigger>
             <TabsTrigger
               value="metas"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
-              🎯 Metas &amp; Prêmios
+              <Target className="mr-2 h-4 w-4" />
+              Metas &amp; Prêmios
             </TabsTrigger>
         </TabsList>
 
@@ -803,6 +809,8 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
 
