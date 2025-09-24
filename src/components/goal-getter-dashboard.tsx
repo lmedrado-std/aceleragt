@@ -384,99 +384,109 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }
 
   return (
-    <div className="container mx-auto p-0 md:p-8">
-       <div className="w-full bg-[#2B344D] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
-        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
-            <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
-              <Link href="/">
-                <Home className="mr-2 h-4 w-4" />
-                Página Inicial
-              </Link>
-            </Button>
-            <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
-                <Link href="/admin">
-                  <ShieldCheck className="mr-2 h-4 w-4" />
-                  Admin Global
+    <TooltipProvider>
+      <div className="container mx-auto p-0 md:p-8">
+        <div className="w-full bg-[#2B344D] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+          <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
+              <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
+                <Link href={`/loja/${storeId}`}>
+                  <Home className="mr-2 h-4 w-4" />
+                  Página da Loja
                 </Link>
               </Button>
-          </div>
-        </header>
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button asChild size="icon" variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
+                        <Link href="/admin">
+                          <ShieldCheck className="h-5 w-5" />
+                        </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Acessar Admin Global</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </header>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                <div className="overflow-x-auto pb-2">
+                  <TabsList className="h-auto p-0 bg-transparent border-b-0">
+                    {sellers.length > 0 ? sellers.map((seller) => (
+                      <TabsTrigger key={seller.id} value={seller.id}
+                        className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                      >
+                        {seller.name}
+                      </TabsTrigger>
+                    )) : !(isAdmin || isStoreAdmin) && (
+                      <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
+                    )}
+                    {(isAdmin || isStoreAdmin) && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <TabsTrigger value="admin"
+                              className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                            >
+                              <ShieldCheck className="h-5 w-5 mr-2" /> Admin
+                            </TabsTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Painel do Gerente da Loja</p>
+                          </TooltipContent>
+                        </Tooltip>
+                    )}
+                  </TabsList>
+                </div>
+
+                {(isAdmin || isStoreAdmin) && (
+                  <TabsContent value="admin" className="mt-6">
+                    <AdminTab
+                      form={form}
+                      storeId={storeId}
+                      sellers={sellers}
+                      onSellersChange={loadSellers}
+                      onIncentivesCalculated={handleIncentivesCalculated}
+                      handleSaveGoals={handleSaveGoals}
+                      lastUpdated={lastUpdated}
+                      incentives={incentives}
+                    />
+                  </TabsContent>
+                )}
+
+                {sellers.map((seller) => (
+                  <TabsContent key={seller.id} value={seller.id!} className="mt-6">
+                    <SellerTab
+                      seller={seller}
+                      goals={getValues().goals as Goals}
+                      incentives={incentives[seller.id!] || null}
+                      rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null}
+                      lastUpdated={lastUpdated}
+                    />
+                  </TabsContent>
+                ))}
+
+                {sellers.length === 0 && !(isAdmin || isStoreAdmin) && (
+                  <TabsContent value={activeTab} className="mt-10 text-center text-muted-foreground py-10">
+                    <p className="text-lg">Bem-vindo!</p>
+                    <p>Nenhum vendedor cadastrado nesta loja ainda. Peça ao administrador para adicioná-lo.</p>
+                  </TabsContent>
+                )}
+              </Tabs>
+          </form>
+        </Form>
       </div>
-
-      <Form {...form}>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-          <TooltipProvider>
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <div className="overflow-x-auto pb-2">
-                <TabsList className="h-auto p-0 bg-transparent border-b-0">
-                   {sellers.length > 0 ? sellers.map((seller) => (
-                    <TabsTrigger key={seller.id} value={seller.id}
-                      className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-                    >
-                      {seller.name}
-                    </TabsTrigger>
-                  )) : !(isAdmin || isStoreAdmin) && (
-                    <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
-                  )}
-                  {(isAdmin || isStoreAdmin) && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                           <TabsTrigger value="admin"
-                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-                          >
-                            <ShieldCheck className="h-5 w-5 mr-2" /> Admin
-                          </TabsTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Painel do Gerente da Loja</p>
-                        </TooltipContent>
-                      </Tooltip>
-                  )}
-                </TabsList>
-              </div>
-
-              {(isAdmin || isStoreAdmin) && (
-                <TabsContent value="admin" className="mt-6">
-                  <AdminTab
-                    form={form}
-                    storeId={storeId}
-                    sellers={sellers}
-                    onSellersChange={loadSellers}
-                    onIncentivesCalculated={handleIncentivesCalculated}
-                    handleSaveGoals={handleSaveGoals}
-                    lastUpdated={lastUpdated}
-                    incentives={incentives}
-                  />
-                </TabsContent>
-              )}
-
-              {sellers.map((seller) => (
-                <TabsContent key={seller.id} value={seller.id!} className="mt-6">
-                  <SellerTab
-                    seller={seller}
-                    goals={getValues().goals as Goals}
-                    incentives={incentives[seller.id!] || null}
-                    rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null}
-                    lastUpdated={lastUpdated}
-                  />
-                </TabsContent>
-              ))}
-
-              {sellers.length === 0 && !(isAdmin || isStoreAdmin) && (
-                <TabsContent value={activeTab} className="mt-10 text-center text-muted-foreground py-10">
-                  <p className="text-lg">Bem-vindo!</p>
-                  <p>Nenhum vendedor cadastrado nesta loja ainda. Peça ao administrador para adicioná-lo.</p>
-                </TabsContent>
-              )}
-            </Tabs>
-          </TooltipProvider>
-        </form>
-      </Form>
-    </div>
+    </TooltipProvider>
   );
 }
+
+    
