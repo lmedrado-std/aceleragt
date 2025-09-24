@@ -424,7 +424,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     <div className="p-4 text-muted-foreground">Nenhum vendedor cadastrado.</div>
                   )}
                   {(isAdmin || isStoreAdmin) && (
-                    <TabsList className="h-auto p-0 bg-transparent border-b-0">
                       <Tooltip>
                         <TooltipTrigger asChild>
                            <TabsTrigger value="admin"
@@ -437,7 +436,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                           <p>Painel do Gerente da Loja</p>
                         </TooltipContent>
                       </Tooltip>
-                    </TabsList>
                   )}
                 </TabsList>
               </div>
