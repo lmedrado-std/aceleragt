@@ -407,20 +407,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   <p>Voltar para a seleção de vendedores</p>
                 </TooltipContent>
               </Tooltip>
-              {isAdmin && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button asChild size="icon" variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
-                        <Link href="/admin">
-                          <ShieldCheck className="h-5 w-5" />
-                        </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Acessar Admin Global</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
             </div>
           </header>
         </div>
@@ -514,3 +500,4 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     
 
     
+
