@@ -55,9 +55,9 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
 
     return (
         <Tabs defaultValue="desempenho" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="desempenho" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Meu Desempenho</TabsTrigger>
-            <TabsTrigger value="lancamentos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Meus Lançamentos</TabsTrigger>
+          <TabsList className="h-auto p-0 bg-transparent border-b-2">
+            <TabsTrigger value="desempenho" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">Meu Desempenho</TabsTrigger>
+            <TabsTrigger value="lancamentos" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">Meus Lançamentos</TabsTrigger>
           </TabsList>
           <TabsContent value="desempenho" className="mt-6">
             <ProgressDisplay 

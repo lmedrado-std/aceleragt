@@ -503,14 +503,14 @@ export function AdminTab({
       </AlertDialog>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="vendedores" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">👥 Vendedores</TabsTrigger>
-          <TabsTrigger value="lancamentos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">📊 Lançamentos</TabsTrigger>
-          <TabsTrigger value="metas" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">🎯 Metas &amp; Prêmios</TabsTrigger>
+        <TabsList className="h-auto p-0 bg-transparent border-b-2">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="vendedores" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">👥 Vendedores</TabsTrigger>
+            <TabsTrigger value="lancamentos" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">📊 Lançamentos</TabsTrigger>
+            <TabsTrigger value="metas" className="data-[state=active]:bg-background data-[state=active]:border-b-transparent">🎯 Metas &amp; Prêmios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
