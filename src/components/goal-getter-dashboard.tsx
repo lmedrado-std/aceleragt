@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Goals, Store, Incentives, Seller } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
@@ -447,11 +447,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <TooltipTrigger asChild>
                            <TabsTrigger
                             value="admin"
-                            className={cn(
-                              "rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base transition-all font-medium",
-                              "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md",
-                              "hover:bg-blue-500/10"
-                            )}
+                            className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center text-base font-medium hover:bg-blue-500/10 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md"
                            >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                            </TabsTrigger>
@@ -504,3 +500,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    

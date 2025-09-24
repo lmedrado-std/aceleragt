@@ -1,3 +1,4 @@
+
 =ta# Firebase Studio
 
 Este é um aplicativo Next.js criado no Firebase Studio.
