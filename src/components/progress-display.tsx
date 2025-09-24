@@ -98,7 +98,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   
   // Data for charts
   const salesPercentage = goals.metona > 0 ? Math.min(vendas / goals.metona, 1) : 0;
-  const paPercentage = goals.paGoal4 > 0 ? Math.min(pa / goals.paGoal4, 1) : 0;
+  const paPercentage = goals.paGoal4 > 0 ? Math.min(Number(pa) / goals.paGoal4, 1) : 0;
   const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min(ticketMedio / goals.ticketMedioGoal4, 1) : 0;
 
   const chartConfig = {
@@ -203,7 +203,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                                 </Pie>
                               </PieChart>
                            </ChartContainer>
-                           <p className="mt-2 font-medium">{pa.toFixed(2)} / {goals.paGoal4}</p>
+                           <p className="mt-2 font-medium">{Number(pa).toFixed(2)} / {goals.paGoal4}</p>
                        </div>
                        <div className="flex flex-col items-center gap-2">
                            <h3 className="font-semibold">Meta Ticket Médio</h3>
