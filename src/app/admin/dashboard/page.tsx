@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -9,6 +10,7 @@ import ClientOnly from '@/components/client-only';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import AppLayout from '@/components/app-layout';
 
 interface StoreDetail {
     id: string;
@@ -163,7 +165,9 @@ function GlobalDashboard() {
 export default function GlobalDashboardPage() {
     return (
         <ClientOnly>
-            <GlobalDashboard />
+            <AppLayout>
+              <GlobalDashboard />
+            </AppLayout>
         </ClientOnly>
     );
 }

@@ -1,11 +1,20 @@
+
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "./ui/sheet";
+import { usePathname } from "next/navigation";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const showSidebar = !pathname.startsWith('/login') && !pathname.startsWith('/dashboard');
+
+    if (!showSidebar) {
+        return <main className="flex flex-1 flex-col">{children}</main>;
+    }
+
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
             <div className="hidden md:block">

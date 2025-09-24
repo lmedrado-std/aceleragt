@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
+import AppLayout from "@/components/app-layout";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNextRouter>) {
   const lojaDashboardUrl = `/dashboard/${storeId}?tab=admin`;
@@ -230,7 +231,9 @@ function StorePageContent() {
 export default function StoreHomePage() {
   return (
     <ClientOnly>
-      <StorePageContent />
+        <AppLayout>
+          <StorePageContent />
+        </AppLayout>
     </ClientOnly>
   )
 }

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import ClientOnly from '@/components/client-only';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import AppLayout from '@/components/app-layout';
 
 interface Column {
     column_name: string;
@@ -140,7 +141,9 @@ function SchemaViewer() {
 export default function DbSchemaPage() {
     return (
         <ClientOnly>
-            <SchemaViewer />
+            <AppLayout>
+              <SchemaViewer />
+            </AppLayout>
         </ClientOnly>
     );
 }

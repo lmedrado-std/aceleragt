@@ -25,6 +25,7 @@ import {
 import Link from "next/link";
 import ClientOnly from "@/components/client-only";
 import { logoutAll } from "@/lib/auth";
+import AppLayout from "@/components/app-layout";
 
 interface DashboardStats {
     storeCount: number;
@@ -428,7 +429,9 @@ function AdminPageComponent() {
 export default function AdminDashboardPage() {
     return (
         <ClientOnly>
-            <AdminPageComponent />
+            <AppLayout>
+                <AdminPageComponent />
+            </AppLayout>
         </ClientOnly>
     )
 }
@@ -436,3 +439,4 @@ export default function AdminDashboardPage() {
     
 
     
+

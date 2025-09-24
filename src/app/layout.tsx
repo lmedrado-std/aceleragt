@@ -4,7 +4,6 @@ import { Montserrat } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
-import AppLayout from '@/components/app-layout';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -25,9 +24,7 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${montserrat.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <AppLayout>
-              {children}
-            </AppLayout>
+          {children}
           <Toaster />
         </ThemeProvider>
       </body>
