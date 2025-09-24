@@ -146,12 +146,16 @@ function StorePageContent() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto">
         <div className="mb-6 p-4 rounded-xl bg-[#2B344D] shadow-lg text-white">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                  <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
                 <div className="flex items-center gap-2">
                     {renderThemeToggle()}
+                     <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="bg-white/90 text-primary hover:bg-white">
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">Painel Admin</span>
+                    </Button>
                     <Button variant="secondary" asChild className="bg-white/90 text-primary hover:bg-white">
                         <Link href="/">
                             <Home className="mr-2 h-4 w-4" />
@@ -164,7 +168,7 @@ function StorePageContent() {
                     </Button>
                 </div>
             </div>
-             <p className="text-white/80 mt-2">Selecione seu usuário para começar. Se você for o administrador, acesse o painel de controle.</p>
+             <p className="text-white/80 mt-2">Selecione seu usuário para começar.</p>
         </div>
         
         {formattedLastUpdated && (
@@ -179,50 +183,32 @@ function StorePageContent() {
                 <Loader2 className="mr-2 h-12 w-12 animate-spin text-primary" />
             </div>
         ) : (
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="flex">
-                    <Card className="w-full bg-primary text-primary-foreground flex flex-col justify-center items-center p-8 text-center">
-                        <Shield className="h-16 w-16 mb-4" />
-                        <CardHeader className="p-0 items-center">
-                            <CardTitle className="text-2xl">Administrador</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0 mt-2">
-                            <p className="text-primary-foreground/80">Painel de controle geral</p>
-                        </CardContent>
-                        <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="mt-6 w-full max-w-xs">
-                            Acessar Painel <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </Card>
-                </div>
-
-                <div>
-                    <Card className="w-full">
-                        <CardHeader>
-                            <CardTitle>Vendedores</CardTitle>
-                             <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {sellers.length > 0 ? sellers.map((seller) => (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Vendedores</CardTitle>
+                    <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
+                </CardHeader>
+                <CardContent>
+                    {sellers.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            {sellers.map((seller) => (
                                 <button
                                     key={seller.id}
                                     onClick={() => handleSellerAccess(storeId, seller.id, router)}
-                                    className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-muted transition-colors text-left"
+                                    className="group flex flex-col items-center p-3 rounded-lg border hover:bg-muted hover:shadow-lg transition-all text-center"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <SellerAvatar avatarId={seller.avatar_id} className="h-10 w-10" />
-                                        <span className="font-medium text-foreground">{seller.name}</span>
-                                    </div>
-                                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                                    <SellerAvatar avatarId={seller.avatar_id} className="h-24 w-24 mb-3 transition-transform group-hover:scale-105" />
+                                    <span className="font-semibold text-foreground">{seller.name}</span>
                                 </button>
-                            )) : (
-                                <p className="text-center text-sm text-muted-foreground pt-4">
-                                    Nenhum vendedor cadastrado nesta loja ainda.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-center text-sm text-muted-foreground py-10">
+                            Nenhum vendedor cadastrado nesta loja ainda.
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
         )}
     </div>
   );
