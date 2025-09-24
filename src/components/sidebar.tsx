@@ -50,7 +50,7 @@ export function Sidebar() {
       variant="ghost"
       className={cn(
         "w-full justify-start text-base font-normal",
-        isActive ? "bg-white/20 text-white font-semibold" : "text-white/80 hover:bg-white/10 hover:text-white"
+        isActive ? "bg-black/20 text-white font-semibold" : "text-white/80 hover:bg-black/10 hover:text-white"
       )}
     >
       <Link href={href}>
@@ -62,10 +62,10 @@ export function Sidebar() {
 
   const renderThemeToggle = () => {
     if (!mounted) {
-      return <Skeleton className="h-10 w-10 rounded-full bg-white/20" />;
+      return <Skeleton className="h-10 w-10 rounded-full bg-black/20" />;
     }
     return (
-      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
+      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-black/20 hover:text-white">
           {theme === 'dark' ? <Sun /> : <Moon />}
           <span className="sr-only">Toggle theme</span>
       </Button>
@@ -75,7 +75,7 @@ export function Sidebar() {
   const isAdminPage = pathname.startsWith('/admin');
 
   return (
-    <aside className="flex h-full max-h-screen flex-col gap-2 bg-gradient-to-br from-blue-600 to-red-500 text-white">
+    <aside className="flex h-full max-h-screen flex-col gap-2 bg-[#2B344D] text-white">
       <div className="flex h-14 items-center border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-3 text-white">
             <Logo />
@@ -98,8 +98,8 @@ export function Sidebar() {
         </h2>
         {loading ? (
             <div className="space-y-2 px-2">
-                <Skeleton className="h-9 w-full bg-white/20" />
-                <Skeleton className="h-9 w-full bg-white/20" />
+                <Skeleton className="h-9 w-full bg-black/20" />
+                <Skeleton className="h-9 w-full bg-black/20" />
             </div>
         ) : stores.length > 0 ? (
           stores.map((store) => (
