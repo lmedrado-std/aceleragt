@@ -196,7 +196,13 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           ticketMedio: parseForAI(seller.ticket_medio),
           corridinhaDiaria: parseForAI(seller.corridinha_diaria),
         };
-        const result = await incentiveProjection({ seller: sellerForAI, goals: fixedGoals });
+        const result = await incentiveProjection({ 
+            seller: sellerForAI, 
+            goals: {
+                ...fixedGoals,
+                performanceBonusEnabled: !!fixedGoals.performanceBonusEnabled,
+            }
+        });
         allIncentives[seller.id!] = result;
     }
     setIncentives(allIncentives);
@@ -351,9 +357,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             }
         }
         
-        if (typeof cleanedGoals.performanceBonusEnabled !== 'boolean') {
-            cleanedGoals.performanceBonusEnabled = !!cleanedGoals.performanceBonusEnabled;
-        }
+        cleanedGoals.performanceBonusEnabled = !!cleanedGoals.performanceBonusEnabled;
 
         // Ensure store_id is not nested inside the goals object
         delete cleanedGoals.store_id;
@@ -496,7 +500,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
-
-    
 
     
