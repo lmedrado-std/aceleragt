@@ -79,7 +79,7 @@ export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 const DashboardSkeleton = () => (
   <div className="container mx-auto p-4 py-8 md:p-8">
-     <div className="w-full bg-gradient-to-r from-primary to-destructive text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+     <div className="w-full bg-[#2B344D] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
        <header className="flex flex-wrap items-center justify-between gap-4">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-64" />
@@ -385,20 +385,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   return (
     <div className="container mx-auto p-0 md:p-8">
-       <div className="w-full bg-gradient-to-r from-[#4A55A2] to-[#D45079] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
+       <div className="w-full bg-[#2B344D] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
         <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
             <p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" className="shadow bg-white/20 hover:bg-white/30 text-white">
+            <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
               <Link href="/">
                 <Home className="mr-2 h-4 w-4" />
                 Página Inicial
               </Link>
             </Button>
-            <Button asChild variant="secondary" className="shadow bg-white/20 hover:bg-white/30 text-white">
+            <Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white">
                 <Link href="/admin">
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   Admin Global
