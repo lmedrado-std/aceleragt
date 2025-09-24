@@ -15,6 +15,7 @@ import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
 import AppLayout from "@/components/app-layout";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNextRouter>) {
   const lojaDashboardUrl = `/dashboard/${storeId}?tab=admin`;
@@ -139,78 +140,114 @@ function StorePageContent() {
       return <Skeleton className="h-10 w-10 rounded-full bg-white/20" />;
     }
     return (
-      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
-          {theme === 'light' ? <Moon /> : <Sun />}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
+              {theme === 'light' ? <Moon /> : <Sun />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Alterar tema (claro/escuro)</p>
+        </TooltipContent>
+      </Tooltip>
     )
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
-        <div className="mb-6 p-4 rounded-xl bg-[#2B344D] shadow-lg text-white">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                 <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
-                <div className="flex items-center gap-2">
-                    {renderThemeToggle()}
-                     <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="bg-white/90 text-primary hover:bg-white">
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">Painel Admin</span>
-                    </Button>
-                    <Button variant="secondary" asChild className="bg-white/90 text-primary hover:bg-white">
-                        <Link href="/">
-                            <Home className="mr-2 h-4 w-4" />
-                            <span className="hidden sm:inline">Página Inicial</span>
-                        </Link>
-                    </Button>
-                     <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading} className="bg-transparent text-white hover:bg-white/20 hover:text-white border-white/50">
-                        <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Atualizar</span>
-                    </Button>
-                </div>
-            </div>
-             <p className="text-white/80 mt-2">Selecione seu usuário para começar.</p>
-        </div>
-        
-        {formattedLastUpdated && (
-            <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium">
-                <Clock className="h-4 w-4" />
-                <span>Última atualização de dados: {formattedLastUpdated}</span>
-            </div>
-        )}
-        
-        {loading ? (
-             <div className="flex items-center justify-center h-64">
-                <Loader2 className="mr-2 h-12 w-12 animate-spin text-primary" />
-            </div>
-        ) : (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Vendedores</CardTitle>
-                    <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
-                </CardHeader>
-                <CardContent>
-                    {sellers.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                            {sellers.map((seller) => (
-                                <button
-                                    key={seller.id}
-                                    onClick={() => handleSellerAccess(storeId, seller.id, router)}
-                                    className="group flex flex-col items-center p-3 rounded-lg border hover:bg-muted hover:shadow-lg transition-all text-center"
-                                >
-                                    <SellerAvatar avatarId={seller.avatar_id} className="h-24 w-24 mb-3 transition-transform group-hover:scale-105" />
-                                    <span className="font-semibold text-foreground">{seller.name}</span>
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-center text-sm text-muted-foreground py-10">
-                            Nenhum vendedor cadastrado nesta loja ainda.
-                        </p>
-                    )}
-                </CardContent>
-            </Card>
-        )}
-    </div>
+    <TooltipProvider>
+      <div className="w-full max-w-7xl mx-auto">
+          <div className="mb-6 p-4 rounded-xl bg-[#2B344D] shadow-lg text-white">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
+                  <div className="flex items-center gap-2">
+                      {renderThemeToggle()}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="bg-white/90 text-primary hover:bg-white">
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span className="hidden sm:inline">Painel do Gerente</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Acessar painel de gerenciamento da loja (metas, vendedores, etc.)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="secondary" asChild className="bg-white/90 text-primary hover:bg-white">
+                              <Link href="/">
+                                  <Home className="mr-2 h-4 w-4" />
+                                  <span className="hidden sm:inline">Página Inicial</span>
+                              </Link>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Voltar para a página inicial de seleção de lojas.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading} className="bg-transparent text-white hover:bg-white/20 hover:text-white border-white/50">
+                              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                              <span className="hidden sm:inline">Atualizar</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Recarregar os dados da loja e vendedores.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                  </div>
+              </div>
+              <p className="text-white/80 mt-2">Selecione seu usuário para começar.</p>
+          </div>
+          
+          {formattedLastUpdated && (
+              <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium">
+                  <Clock className="h-4 w-4" />
+                  <span>Última atualização de dados: {formattedLastUpdated}</span>
+              </div>
+          )}
+          
+          {loading ? (
+              <div className="flex items-center justify-center h-64">
+                  <Loader2 className="mr-2 h-12 w-12 animate-spin text-primary" />
+              </div>
+          ) : (
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Vendedores</CardTitle>
+                      <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
+                  </CardHeader>
+                  <CardContent>
+                      {sellers.length > 0 ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                              {sellers.map((seller) => (
+                                <Tooltip key={seller.id}>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => handleSellerAccess(storeId, seller.id, router)}
+                                        className="group flex flex-col items-center p-3 rounded-lg border hover:bg-muted hover:shadow-lg transition-all text-center"
+                                    >
+                                        <SellerAvatar avatarId={seller.avatar_id} className="h-24 w-24 mb-3 transition-transform group-hover:scale-105" />
+                                        <span className="font-semibold text-foreground">{seller.name}</span>
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Acessar painel de {seller.name}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ))}
+                          </div>
+                      ) : (
+                          <p className="text-center text-sm text-muted-foreground py-10">
+                              Nenhum vendedor cadastrado nesta loja ainda.
+                          </p>
+                      )}
+                  </CardContent>
+              </Card>
+          )}
+      </div>
+    </TooltipProvider>
   );
 }
 

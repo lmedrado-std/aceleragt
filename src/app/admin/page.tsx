@@ -26,6 +26,8 @@ import Link from "next/link";
 import ClientOnly from "@/components/client-only";
 import { logoutAll } from "@/lib/auth";
 import AppLayout from "@/components/app-layout";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+
 
 interface DashboardStats {
     storeCount: number;
@@ -217,212 +219,235 @@ function AdminPageComponent() {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
-        <div className="w-full flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                    Painel Administrativo Global
-                </h1>
-                <p className="text-muted-foreground">
-                    Gerencie todas as lojas e configurações do sistema aqui.
-                </p>
-            </div>
-             <div className="flex items-center gap-2">
-                <Button asChild variant="outline">
-                  <Link href="/">
-                    <Home className="mr-2 h-4 w-4" />
-                    Voltar
-                  </Link>
-                </Button>
-                <Button onClick={handleLogout} variant="destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sair
-                </Button>
-            </div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Gerenciar Lojas</CardTitle>
-                        <CardDescription>Adicione, renomeie ou remova lojas e senhas.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                    <div className="space-y-2 mb-4">
-                        <Label htmlFor="new-store">Adicionar Nova Loja</Label>
-                        <div className="flex flex-col sm:flex-row items-stretch gap-2">
-                            <Input 
-                            id="new-store"
-                            placeholder="Ex: SUPERMODA ITABUNA" 
-                            value={newStoreName}
-                            onChange={(e) => setNewStoreName(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleAddStore()}
-                            />
-                        <Button type="button" onClick={handleAddStore}>Adicionar</Button>
-                        </div>
-                    </div>
-                    <Separator className="my-4"/>
-                    <Label>Lojas Atuais</Label>
-                    <div className="space-y-2 mt-2 max-h-60 overflow-y-auto pr-2">
-                        {stores.map((store) => (
-                            <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
-                                {editingStoreId === store.id ? (
-                                <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
-                                    <Input 
-                                        value={editingStore.name}
-                                        onChange={(e) => setEditingStore(prev => ({ ...prev, name: e.target.value }))}
-                                        className="h-8"
-                                        autoFocus
-                                    />
-                                    <Input 
-                                        placeholder="Senha da loja (opcional)"
-                                        value={editingStore.password}
-                                        onChange={(e) => setEditingStore(prev => ({ ...prev, password: e.target.value }))}
-                                        className="h-8"
-                                    />
-                                    <div className="col-span-full sm:col-span-2 flex justify-end items-center">
-                                      <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
-                                      <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
-                                    </div>
-                                </div>
-                                ) : (
-                                <>
-                                    <span className="font-medium">{store.name}</span>
-                                    <div className="flex items-center">
-                                        <Button asChild variant="ghost" size="sm">
-                                        <Link href={`/loja/${store.id}`}>
-                                            Acessar <ArrowRight className="ml-2 h-4 w-4"/>
-                                        </Link>
-                                        </Button>
-                                        <Button size="icon" variant="ghost" onClick={() => handleStartEditingStore(store)}><Edit className="h-4 w-4"/></Button>
-                                        <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                            <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados associados (vendedores, metas).</AlertDialogDescription></AlertDialogHeader>
-                                            <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Dashboard Geral</CardTitle>
-                        <CardDescription>Visão geral do desempenho de todas as lojas.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {dashboardStats ? (
-                            <>
-                                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
-                                    <Store className="h-8 w-8 text-primary" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Total de Lojas</p>
-                                        <p className="text-2xl font-bold">{dashboardStats.storeCount}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
-                                    <Users className="h-8 w-8 text-primary" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Total de Vendedores</p>
-                                        <p className="text-2xl font-bold">{dashboardStats.sellerCount}</p>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                             <div className="flex items-center justify-center p-4">
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                            </div>
-                        )}
-                        <Button asChild className="w-full">
-                            <Link href="/admin/dashboard">
-                                <LineChart className="mr-2 h-4 w-4" />
-                                Ver Dashboard Completo
-                            </Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="lg:col-span-1">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Segurança e Diagnóstico</CardTitle>
-                        <CardDescription>Gerencie a segurança e verifique a saúde do sistema.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                    <div className="space-y-6">
-                        <div className="space-y-2">
-                            <Label>Alterar Senha de Admin Global</Label>
-                            <div className="space-y-2">
-                                <Input 
-                                    type="password"
-                                    placeholder="Nova Senha"
-                                    value={adminPasswords.new}
-                                    onChange={(e) => setAdminPasswords(p => ({...p, new: e.target.value}))}
-                                />
-                                <Input 
-                                    type="password"
-                                    placeholder="Confirmar Nova Senha"
-                                    value={adminPasswords.confirm}
-                                    onChange={(e) => setAdminPasswords(p => ({...p, confirm: e.target.value}))}
-                                />
-                            </div>
-                            <Button onClick={handlePasswordChange} disabled={isUpdatingPassword}>
-                                {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                Alterar Senha
-                            </Button>
-                        </div>
+    <TooltipProvider>
+      <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
+          <div className="w-full flex flex-col sm:flex-row justify-between items-start gap-4">
+              <div>
+                  <h1 className="text-3xl font-bold text-foreground">
+                      Painel Administrativo Global
+                  </h1>
+                  <p className="text-muted-foreground">
+                      Gerencie todas as lojas e configurações do sistema aqui.
+                  </p>
+              </div>
+              <div className="flex items-center gap-2">
+                  <Button asChild variant="outline">
+                    <Link href="/">
+                      <Home className="mr-2 h-4 w-4" />
+                      Voltar
+                    </Link>
+                  </Button>
+                  <Button onClick={handleLogout} variant="destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sair
+                  </Button>
+              </div>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Card>
+                          <CardHeader>
+                              <CardTitle>Gerenciar Lojas</CardTitle>
+                              <CardDescription>Adicione, renomeie ou remova lojas e senhas.</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                          <div className="space-y-2 mb-4">
+                              <Label htmlFor="new-store">Adicionar Nova Loja</Label>
+                              <div className="flex flex-col sm:flex-row items-stretch gap-2">
+                                  <Input 
+                                  id="new-store"
+                                  placeholder="Ex: SUPERMODA ITABUNA" 
+                                  value={newStoreName}
+                                  onChange={(e) => setNewStoreName(e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleAddStore()}
+                                  />
+                              <Button type="button" onClick={handleAddStore}>Adicionar</Button>
+                              </div>
+                          </div>
+                          <Separator className="my-4"/>
+                          <Label>Lojas Atuais</Label>
+                          <div className="space-y-2 mt-2 max-h-60 overflow-y-auto pr-2">
+                              {stores.map((store) => (
+                                  <div key={store.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50">
+                                      {editingStoreId === store.id ? (
+                                      <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                                          <Input 
+                                              value={editingStore.name}
+                                              onChange={(e) => setEditingStore(prev => ({ ...prev, name: e.target.value }))}
+                                              className="h-8"
+                                              autoFocus
+                                          />
+                                          <Input 
+                                              placeholder="Senha da loja (opcional)"
+                                              value={editingStore.password}
+                                              onChange={(e) => setEditingStore(prev => ({ ...prev, password: e.target.value }))}
+                                              className="h-8"
+                                          />
+                                          <div className="col-span-full sm:col-span-2 flex justify-end items-center">
+                                            <Button size="icon" variant="ghost" onClick={() => handleSaveStore(store.id)}><Save className="h-4 w-4 text-green-600"/></Button>
+                                            <Button size="icon" variant="ghost" onClick={handleCancelEditingStore}><X className="h-4 w-4"/></Button>
+                                          </div>
+                                      </div>
+                                      ) : (
+                                      <>
+                                          <span className="font-medium">{store.name}</span>
+                                          <div className="flex items-center">
+                                              <Button asChild variant="ghost" size="sm">
+                                              <Link href={`/loja/${store.id}`}>
+                                                  Acessar <ArrowRight className="ml-2 h-4 w-4"/>
+                                              </Link>
+                                              </Button>
+                                              <Button size="icon" variant="ghost" onClick={() => handleStartEditingStore(store)}><Edit className="h-4 w-4"/></Button>
+                                              <AlertDialog><AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4"/></Button></AlertDialogTrigger>
+                                                  <AlertDialogContent>
+                                                  <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Essa ação não pode ser desfeita. Isso irá remover permanentemente a loja e todos os seus dados associados (vendedores, metas).</AlertDialogDescription></AlertDialogHeader>
+                                                  <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleRemoveStore(store.id)} className="bg-destructive hover:bg-destructive/90">Remover</AlertDialogAction></AlertDialogFooter>
+                                                  </AlertDialogContent>
+                                              </AlertDialog>
+                                          </div>
+                                      </>
+                                      )}
+                                  </div>
+                              ))}
+                          </div>
+                          </CardContent>
+                      </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Adicione novas lojas, edite nomes e senhas, ou remova lojas existentes.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Card>
+                          <CardHeader>
+                              <CardTitle>Dashboard Geral</CardTitle>
+                              <CardDescription>Visão geral do desempenho de todas as lojas.</CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                              {dashboardStats ? (
+                                  <>
+                                      <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
+                                          <Store className="h-8 w-8 text-primary" />
+                                          <div>
+                                              <p className="text-sm text-muted-foreground">Total de Lojas</p>
+                                              <p className="text-2xl font-bold">{dashboardStats.storeCount}</p>
+                                          </div>
+                                      </div>
+                                      <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
+                                          <Users className="h-8 w-8 text-primary" />
+                                          <div>
+                                              <p className="text-sm text-muted-foreground">Total de Vendedores</p>
+                                              <p className="text-2xl font-bold">{dashboardStats.sellerCount}</p>
+                                          </div>
+                                      </div>
+                                  </>
+                              ) : (
+                                  <div className="flex items-center justify-center p-4">
+                                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                  </div>
+                              )}
+                              <Button asChild className="w-full">
+                                  <Link href="/admin/dashboard">
+                                      <LineChart className="mr-2 h-4 w-4" />
+                                      Ver Dashboard Completo
+                                  </Link>
+                              </Button>
+                          </CardContent>
+                      </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Visualize estatísticas consolidadas de todas as lojas e acesse o dashboard detalhado.</p>
+                    </TooltipContent>
+                  </Tooltip>
+              </div>
+              <div className="lg:col-span-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Card>
+                          <CardHeader>
+                              <CardTitle>Segurança e Diagnóstico</CardTitle>
+                              <CardDescription>Gerencie a segurança e verifique a saúde do sistema.</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                          <div className="space-y-6">
+                              <div className="space-y-2">
+                                  <Label>Alterar Senha de Admin Global</Label>
+                                  <div className="space-y-2">
+                                      <Input 
+                                          type="password"
+                                          placeholder="Nova Senha"
+                                          value={adminPasswords.new}
+                                          onChange={(e) => setAdminPasswords(p => ({...p, new: e.target.value}))}
+                                      />
+                                      <Input 
+                                          type="password"
+                                          placeholder="Confirmar Nova Senha"
+                                          value={adminPasswords.confirm}
+                                          onChange={(e) => setAdminPasswords(p => ({...p, confirm: e.target.value}))}
+                                      />
+                                  </div>
+                                  <Button onClick={handlePasswordChange} disabled={isUpdatingPassword}>
+                                      {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                      Alterar Senha
+                                  </Button>
+                              </div>
 
-                        <Separator />
-                        
-                         <div className="space-y-2">
-                            <Label>Manutenção do Banco de Dados</Label>
-                            <p className="text-sm text-muted-foreground">
-                                Use estas ferramentas para diagnósticos ou para a configuração inicial do sistema.
-                            </p>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <Button asChild variant="outline" className="w-full">
-                                    <Link href="/admin/db-schema">
-                                        <Database className="mr-2 h-4 w-4" />
-                                        Ver Schema
-                                    </Link>
-                                </Button>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" className="w-full">
-                                            <AlertTriangle className="mr-2 h-4 w-4" />
-                                            Configurar Banco
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Confirmar Ação</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`, `app_config`) se elas não existirem. 
-                                                É uma operação segura e **não apaga dados existentes**. Use para a configuração inicial ou para corrigir problemas de schema.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleResetDatabase} disabled={isResettingDb}>
-                                                {isResettingDb && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                                Confirmar e Configurar
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
-                        </div>
-                    </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-    </div>
+                              <Separator />
+                              
+                              <div className="space-y-2">
+                                  <Label>Manutenção do Banco de Dados</Label>
+                                  <p className="text-sm text-muted-foreground">
+                                      Use estas ferramentas para diagnósticos ou para a configuração inicial do sistema.
+                                  </p>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                      <Button asChild variant="outline" className="w-full">
+                                          <Link href="/admin/db-schema">
+                                              <Database className="mr-2 h-4 w-4" />
+                                              Ver Schema
+                                          </Link>
+                                      </Button>
+                                      <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                              <Button variant="destructive" className="w-full">
+                                                  <AlertTriangle className="mr-2 h-4 w-4" />
+                                                  Configurar Banco
+                                              </Button>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                              <AlertDialogHeader>
+                                                  <AlertDialogTitle>Confirmar Ação</AlertDialogTitle>
+                                                  <AlertDialogDescription>
+                                                      Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`, `app_config`) se elas não existirem. 
+                                                      É uma operação segura e **não apaga dados existentes**. Use para a configuração inicial ou para corrigir problemas de schema.
+                                                  </AlertDialogDescription>
+                                              </AlertDialogHeader>
+                                              <AlertDialogFooter>
+                                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                  <AlertDialogAction onClick={handleResetDatabase} disabled={isResettingDb}>
+                                                      {isResettingDb && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                                      Confirmar e Configurar
+                                                  </AlertDialogAction>
+                                              </AlertDialogFooter>
+                                          </AlertDialogContent>
+                                      </AlertDialog>
+                                  </div>
+                              </div>
+                          </div>
+                          </CardContent>
+                      </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Altere a senha de administrador global e realize manutenções no banco de dados.</p>
+                    </TooltipContent>
+                  </Tooltip>
+              </div>
+          </div>
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -435,8 +460,3 @@ export default function AdminDashboardPage() {
         </ClientOnly>
     )
 }
-
-    
-
-    
-
