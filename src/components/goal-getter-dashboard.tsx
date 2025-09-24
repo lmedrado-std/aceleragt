@@ -322,16 +322,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         for (const [key, value] of Object.entries(goals)) {
             if (value === null || value === undefined) {
-                if (typeof value === 'boolean') {
-                    cleanedGoals[key] = value;
+                if (key === 'performanceBonusEnabled') {
+                    cleanedGoals[key] = false;
                 } else {
                     cleanedGoals[key] = 0;
                 }
                 continue;
             }
 
-            if (typeof value === 'boolean') {
-                 cleanedGoals[key] = value;
+            if (key === 'performanceBonusEnabled') {
+                 cleanedGoals[key] = !!value;
                  continue;
             }
 
@@ -426,11 +426,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                            <TabsTrigger
                             key={seller.id}
                             value={seller.id}
-                            className={cn(
-                              "rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base transition-all font-medium",
-                              "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md",
-                              "hover:bg-blue-500/10"
-                            )}
+                            className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium flex items-center"
                            >
                             {seller.name}
                            </TabsTrigger>
@@ -447,7 +443,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <TooltipTrigger asChild>
                            <TabsTrigger
                             value="admin"
-                            className="px-4 py-2 text-base font-medium transition-all border-b-2 border-transparent rounded-t-md hover:bg-blue-500/10 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md"
+                            className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium flex items-center"
                            >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                            </TabsTrigger>

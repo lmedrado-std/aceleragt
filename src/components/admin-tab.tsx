@@ -531,10 +531,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="dashboard"
-                  className={
-                    "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center " +
-                    "data-[state=active]:border-b-blue-700"
-                  }
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -548,10 +545,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="vendedores"
-                  className={
-                    "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center " +
-                    "data-[state=active]:border-b-blue-700"
-                  }
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Vendedores
@@ -565,10 +559,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="lancamentos"
-                  className={
-                    "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center " +
-                    "data-[state=active]:border-b-blue-700"
-                  }
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
                 >
                   <BarChart className="mr-2 h-4 w-4" />
                   Lançamentos
@@ -582,10 +573,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="metas"
-                  className={
-                    "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center " +
-                    "data-[state=active]:border-b-blue-700"
-                  }
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
                 >
                   <Target className="mr-2 h-4 w-4" />
                   Metas &amp; Prêmios
@@ -821,8 +809,8 @@ export function AdminTab({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                         {goalTiers.map(tier => (
                             <div key={tier.id} className="space-y-2">
-                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="text" inputMode="decimal" step="0.01" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.goal}`} render={({ field }) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="text" inputMode="decimal" step="0.01" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.prize}`} render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
                         ))}
                     </div>
