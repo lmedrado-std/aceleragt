@@ -526,64 +526,64 @@ export function AdminTab({
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TooltipProvider>
-            <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b">
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <TabsTrigger
-                        value="dashboard"
-                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-                        >
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            Dashboard
-                        </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Visão geral do desempenho da equipe.</p>
-                    </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <TabsTrigger
-                        value="vendedores"
-                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-                        >
-                        <Users className="mr-2 h-4 w-4" />
-                        Vendedores
-                        </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Adicionar, editar ou remover vendedores.</p>
-                    </TooltipContent>
-                </Tooltip>
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <TabsTrigger
-                        value="lancamentos"
-                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-                        >
-                        <BarChart className="mr-2 h-4 w-4" />
-                        Lançamentos
-                        </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Inserir dados de vendas e importar de planilhas.</p>
-                    </TooltipContent>
-                </Tooltip>
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <TabsTrigger
-                        value="metas"
-                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-                        >
-                        <Target className="mr-2 h-4 w-4" />
-                        Metas &amp; Prêmios
-                        </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Configurar as metas e os valores dos prêmios.</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TabsList>
+          <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger
+                  value="dashboard"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Visão geral do desempenho da equipe.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger
+                  value="vendedores"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Vendedores
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Adicionar, editar ou remover vendedores.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger
+                  value="lancamentos"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <BarChart className="mr-2 h-4 w-4" />
+                  Lançamentos
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Inserir dados de vendas e importar de planilhas.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger
+                  value="metas"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <Target className="mr-2 h-4 w-4" />
+                  Metas &amp; Prêmios
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Configurar as metas e os valores dos prêmios.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TabsList>
         </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
@@ -840,9 +840,5 @@ export function AdminTab({
     </div>
   );
 }
-
-    
-
-    
 
     

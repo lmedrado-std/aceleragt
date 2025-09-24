@@ -58,14 +58,14 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
           <TabsList className="h-auto p-0 bg-transparent border-b">
             <TabsTrigger
               value="desempenho"
-              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <Trophy className="mr-2 h-4 w-4" />
               Meu Desempenho
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <BarChart className="mr-2 h-4 w-4" />
               Meus Lançamentos
@@ -127,7 +127,5 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated }: 
         </Tabs>
     )
 }
-
-    
 
     
