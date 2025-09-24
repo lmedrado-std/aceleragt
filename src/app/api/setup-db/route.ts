@@ -20,8 +20,8 @@ export async function GET() {
       CREATE TABLE IF NOT EXISTS sellers (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        avatar_id VARCHAR(50) NOT NULL,
+        password VARCHAR(255),
+        avatar_id VARCHAR(50),
         vendas NUMERIC(10, 2) DEFAULT 0,
         pa NUMERIC(5, 2) DEFAULT 0,
         ticket_medio NUMERIC(10, 2) DEFAULT 0,
@@ -78,6 +78,21 @@ export async function GET() {
       VALUES ('admin_password', 'supermoda')
       ON CONFLICT (key) DO NOTHING;
     `);
+
+    // Adicionar a coluna performanceBonusEnabled se ela não existir
+    try {
+      await prisma.$executeRawUnsafe(`
+        ALTER TABLE goals ADD COLUMN "performanceBonusEnabled" BOOLEAN DEFAULT FALSE;
+      `);
+    } catch (e) {
+      // Ignora o erro se a coluna já existir
+      if (e instanceof Error && e.message.includes('column "performanceBonusEnabled" of relation "goals" already exists')) {
+        // A coluna já existe, tudo bem.
+      } else {
+        throw e;
+      }
+    }
+
 
     return NextResponse.json({ message: 'Banco de dados configurado com sucesso!' }, { status: 200 });
 
