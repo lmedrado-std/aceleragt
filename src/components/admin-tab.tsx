@@ -345,7 +345,10 @@ export function AdminTab({
 
         const result = await incentiveProjection({
           seller: sellerForAI,
-          goals: fixedGoals,
+          goals: {
+            ...fixedGoals,
+            performanceBonusEnabled: !!fixedGoals.performanceBonusEnabled,
+          },
         });
         allIncentives[seller.id!] = result;
       }
@@ -844,3 +847,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
