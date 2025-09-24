@@ -524,26 +524,26 @@ export function AdminTab({
         <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b-2">
             <TabsTrigger
               value="dashboard"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard
             </TabsTrigger>
             <TabsTrigger
               value="vendedores"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
               👥 Vendedores
             </TabsTrigger>
             <TabsTrigger
               value="lancamentos"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
               📊 Lançamentos
             </TabsTrigger>
             <TabsTrigger
               value="metas"
-              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm"
+              className="border-b-2 border-transparent px-4 py-2 font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
             >
               🎯 Metas &amp; Prêmios
             </TabsTrigger>
