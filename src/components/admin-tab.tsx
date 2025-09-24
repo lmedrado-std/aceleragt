@@ -60,6 +60,7 @@ import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
 import { SellerAvatar } from "./seller-avatar";
 import { Switch } from "./ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
@@ -524,36 +525,66 @@ export function AdminTab({
       </AlertDialog>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b">
-            <TabsTrigger
-              value="dashboard"
-              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-            >
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
-            </TabsTrigger>
-            <TabsTrigger
-              value="vendedores"
-              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Vendedores
-            </TabsTrigger>
-            <TabsTrigger
-              value="lancamentos"
-              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-            >
-              <BarChart className="mr-2 h-4 w-4" />
-              Lançamentos
-            </TabsTrigger>
-            <TabsTrigger
-              value="metas"
-              className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
-            >
-              <Target className="mr-2 h-4 w-4" />
-              Metas &amp; Prêmios
-            </TabsTrigger>
-        </TabsList>
+        <TooltipProvider>
+            <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b">
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <TabsTrigger
+                        value="dashboard"
+                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+                        >
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                        </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Visão geral do desempenho da equipe.</p>
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <TabsTrigger
+                        value="vendedores"
+                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+                        >
+                        <Users className="mr-2 h-4 w-4" />
+                        Vendedores
+                        </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Adicionar, editar ou remover vendedores.</p>
+                    </TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <TabsTrigger
+                        value="lancamentos"
+                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+                        >
+                        <BarChart className="mr-2 h-4 w-4" />
+                        Lançamentos
+                        </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Inserir dados de vendas e importar de planilhas.</p>
+                    </TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <TabsTrigger
+                        value="metas"
+                        className="border-b-2 border-transparent px-4 py-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-sm data-[state=active]:border-b-transparent"
+                        >
+                        <Target className="mr-2 h-4 w-4" />
+                        Metas &amp; Prêmios
+                        </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Configurar as metas e os valores dos prêmios.</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TabsList>
+        </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
            <StoreAdminDashboard
