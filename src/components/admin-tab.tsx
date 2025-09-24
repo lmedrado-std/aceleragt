@@ -289,6 +289,10 @@ export function AdminTab({
         const parsed: any = {};
         for (const key in rawGoals) {
             const value = rawGoals[key];
+            if (key === 'performanceBonusEnabled') {
+                parsed[key] = !!value;
+                continue;
+            }
             if (typeof value === 'string') {
                 const parsedValue = parseFloat(value.replace(',', '.'));
                 parsed[key] = isNaN(parsedValue) ? value : parsedValue;
