@@ -422,7 +422,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                            <TabsTrigger
                             key={seller.id}
                             value={seller.id}
-                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-primary data-[state=active]:font-bold data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                            className="rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 data-[state=active]:bg-blue-600 data-[state=active]:font-bold data-[state=active]:text-white data-[state=active]:shadow-sm"
                            >
                             {seller.name}
                            </TabsTrigger>
@@ -441,7 +441,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             value="admin"
                             className={cn(
                               "rounded-t-md rounded-b-none border-b-2 border-transparent px-4 py-2 text-base transition-all font-medium",
-                              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md",
+                              "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-md",
                               "hover:bg-primary/90 hover:text-primary-foreground"
                             )}
                            >
@@ -500,4 +500,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     
 
     
-
