@@ -80,7 +80,7 @@ export function SellerTab({
             <TooltipTrigger asChild>
               <TabsTrigger
                 value="desempenho"
-                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
+                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
               >
                 <Trophy className="mr-2 h-4 w-4" />
                 Meu Desempenho
@@ -95,7 +95,7 @@ export function SellerTab({
             <TooltipTrigger asChild>
               <TabsTrigger
                 value="lancamentos"
-                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
+                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
               >
                 <BarChart className="mr-2 h-4 w-4" />
                 Meus Lançamentos

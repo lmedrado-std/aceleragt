@@ -538,7 +538,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="dashboard"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -552,7 +552,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="vendedores"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Vendedores
@@ -566,7 +566,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="lancamentos"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <BarChart className="mr-2 h-4 w-4" />
                   Lançamentos
@@ -580,7 +580,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="metas"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center"
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <Target className="mr-2 h-4 w-4" />
                   Metas &amp; Prêmios
