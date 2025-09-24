@@ -531,7 +531,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="dashboard"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -545,7 +545,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="vendedores"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Vendedores
@@ -559,7 +559,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="lancamentos"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
                 >
                   <BarChart className="mr-2 h-4 w-4" />
                   Lançamentos
@@ -573,7 +573,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="metas"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold transition-all px-4 py-2 rounded-t-md border-b-2 border-transparent hover:bg-blue-50 flex items-center"
                 >
                   <Target className="mr-2 h-4 w-4" />
                   Metas &amp; Prêmios
@@ -840,5 +840,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
