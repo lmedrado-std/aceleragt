@@ -586,7 +586,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="dashboard"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -600,7 +600,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="vendedores"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Vendedores
@@ -614,7 +614,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="lancamentos"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <BarChart className="mr-2 h-4 w-4" />
                   Lançamentos
@@ -628,7 +628,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="metas"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <Target className="mr-2 h-4 w-4" />
                   Metas &amp; Prêmios
@@ -642,7 +642,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="seguranca"
-                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
                   Segurança
@@ -925,7 +925,7 @@ export function AdminTab({
                 Defina uma nova senha para o acesso de gerente a esta loja. O administrador global ainda poderá acessar e redefinir esta senha.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 max-w-sm">
               <div className="space-y-2">
                 <Label htmlFor="new-store-password">Nova Senha</Label>
                 <div className="relative">
@@ -983,5 +983,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
