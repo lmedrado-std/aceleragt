@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, KeyRound, Loader2, Store } from 'lucide-react';
+import { ArrowLeft, KeyRound, Loader2, Store, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { Store as StoreType } from '@/lib/storage';
 import { Logo } from '@/components/logo';
 
 function StoreLoginComponent() {
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<StoreType | null>(null);
@@ -126,30 +127,52 @@ function StoreLoginComponent() {
         </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
         <Logo className="h-16 w-auto mb-4" />
-        <Card className="w-full">
-          <CardHeader className="items-center text-center">
-            <Store className="h-16 w-16 mb-4 text-primary"/>
+        <Card className="w-full shadow-lg border-primary/20">
+          <CardHeader className="items-center text-center bg-primary text-primary-foreground p-6 rounded-t-lg">
+            <Store className="h-12 w-12 mb-2 text-primary-foreground"/>
             <CardTitle>Login da Loja</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-primary-foreground/90">
                 Insira a senha para acessar a loja <strong>{store.name}</strong>.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
                <div className="space-y-2">
                   <Label htmlFor="password">Senha da Loja</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="********"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="********"
+                      required
+                      className="pr-10"
+                    />
+                     <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full px-3"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span className="sr-only">
+                        {showPassword ? "Esconder senha" : "Mostrar senha"}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Verificando...' : 'Entrar na Loja'}
-                <KeyRound />
+                 {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...
+                  </>
+                  ) : (
+                  <>
+                    Entrar na Loja <KeyRound className="ml-2"/>
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
