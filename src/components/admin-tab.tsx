@@ -62,6 +62,7 @@ import { cn } from "@/lib/utils";
 import { SellerAvatar } from "./seller-avatar";
 import { Switch } from "./ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
@@ -651,13 +652,19 @@ export function AdminTab({
         </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
-            {sellers && getValues().goals ? (
-              <StoreAdminDashboard
+            {sellers && getValues().goals && incentives ? (
+              <ErrorBoundary>
+                <StoreAdminDashboard
                   sellers={sellers}
                   goals={getValues().goals as Goals}
                   incentives={incentives}
                 />
-            ) : null}
+              </ErrorBoundary>
+            ) : (
+              <div className="p-6 text-center text-muted-foreground">
+                Carregando painel de administração...
+              </div>
+            )}
         </TabsContent>
         
         <TabsContent value="vendedores" className="mt-6">
