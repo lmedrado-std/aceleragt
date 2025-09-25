@@ -109,6 +109,7 @@ export function AdminTab({
   incentives
 }: AdminTabProps) {
   const { toast } = useToast();
+  const [activeAdminTab, setActiveAdminTab] = useState("dashboard");
   const [editingSellerId, setEditingSellerId] = useState<string | null>(null);
   const [editingSellerName, setEditingSellerName] = useState('');
   const [editingSellerPassword, setEditingSellerPassword] = useState('');
@@ -576,7 +577,7 @@ export function AdminTab({
           </AlertDialogContent>
       </AlertDialog>
 
-      <Tabs defaultValue="dashboard" className="w-full">
+      <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="w-full">
         <TooltipProvider>
           <TabsList className="grid w-full grid-flow-col auto-cols-auto h-auto p-0 bg-transparent border-b">
             <Tooltip>
