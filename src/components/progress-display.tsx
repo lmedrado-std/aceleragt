@@ -56,7 +56,7 @@ const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
     </div>
 );
 
-const CircularProgress = ({ percentage, colorClass }: { percentage: number, colorClass: string }) => {
+const CircularProgress = ({ percentage }: { percentage: number }) => {
     const radius = 50;
     const stroke = 10;
     const normalizedRadius = radius - stroke * 2;
@@ -77,7 +77,7 @@ const CircularProgress = ({ percentage, colorClass }: { percentage: number, colo
                     r={normalizedRadius}
                     cx={radius}
                     cy={radius}
-                    className="opacity-30"
+                    className="text-white/30"
                 />
                 <circle
                     stroke="currentColor"
@@ -85,13 +85,14 @@ const CircularProgress = ({ percentage, colorClass }: { percentage: number, colo
                     strokeWidth={stroke}
                     strokeDasharray={circumference + ' ' + circumference}
                     style={{ strokeDashoffset }}
+                    strokeLinecap="round"
                     r={normalizedRadius}
                     cx={radius}
                     cy={radius}
-                    className={cn("transition-all duration-300")}
+                    className="text-white transition-all duration-300"
                 />
             </svg>
-            <div className={cn("absolute inset-0 flex items-center justify-center text-2xl font-bold")}>
+            <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">
                 {Math.round(percentage)}%
             </div>
         </div>
@@ -172,18 +173,18 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     <div className="p-6 rounded-lg bg-blue-600 text-white">
                         <h3 className="text-lg font-semibold mb-4">Vendas até a Meta</h3>
                         <div className="flex items-center gap-4">
-                            <Progress value={salesPercentage} className="h-3 flex-1 [&>div]:bg-white" />
+                            <Progress value={salesPercentage} className="h-3 flex-1 bg-white/30 [&>div]:bg-white" />
                             <span className="text-lg font-bold">{formatPercentage(salesPercentage / 100)}</span>
                         </div>
                     </div>
                     {/* PA and Ticket to Goal */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div className="p-6 rounded-lg bg-green-500 text-white flex items-center justify-between gap-4">
-                            <CircularProgress percentage={paPercentage} colorClass="text-white" />
+                            <CircularProgress percentage={paPercentage} />
                             <h3 className="text-lg font-semibold text-right">PA até a Meta</h3>
                         </div>
                         <div className="p-6 rounded-lg bg-orange-500 text-white flex items-center justify-between gap-4">
-                             <CircularProgress percentage={ticketMedioPercentage} colorClass="text-white" />
+                            <CircularProgress percentage={ticketMedioPercentage} />
                             <h3 className="text-lg font-semibold text-right">Ticket Médio<br/>até a Meta</h3>
                         </div>
                     </div>
