@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
 import { RankingMetric } from "./goal-getter-dashboard";
-import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 type ProgressDisplaySalesData = Partial<Seller> & {
@@ -35,13 +35,13 @@ const formatCurrency = (value: number) =>
     style: "currency",
     currency: "BRL",
   }).format(value || 0);
-  
-const formatPercentage = (value: number) =>
-  new Intl.NumberFormat("pt-BR", {
-    style: "percent",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value || 0);
+
+const formatNumber = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value || 0);
+}
 
 const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
      <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
@@ -57,51 +57,150 @@ const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
     </div>
 );
 
-const CircularProgress = ({ percentage }: { percentage: number }) => {
-    const radius = 50;
-    const stroke = 10;
-    const normalizedRadius = radius - stroke * 2;
-    const circumference = normalizedRadius * 2 * Math.PI;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
+    const metas = [
+        { label: "Meta 1", value: goals.metaMinha, prize: goals.metaMinhaPrize },
+        { label: "Meta 2", value: goals.meta, prize: goals.metaPrize },
+        { label: "Meta 3", value: goals.metona, prize: goals.metonaPrize },
+    ];
+    const totalMeta = goals.metona;
+    const progressPercentage = totalMeta > 0 ? (vendas / totalMeta) * 100 : 0;
+
+    const findNextGoal = () => {
+        if (vendas < goals.metaMinha) return { label: "Meta 1", value: goals.metaMinha };
+        if (vendas < goals.meta) return { label: "Meta 2", value: goals.meta };
+        if (vendas < goals.metona) return { label: "Meta 3", value: goals.metona };
+        if (goals.performanceBonusEnabled && vendas < goals.metaLendaria) return { label: "Bônus", value: goals.metaLendaria };
+        return null;
+    };
+    const nextGoal = findNextGoal();
 
     return (
-        <div className="relative w-28 h-28 flex-shrink-0">
-            <svg
-                height={radius * 2}
-                width={radius * 2}
-                className="transform -rotate-90"
-            >
-                <circle
-                    stroke="currentColor"
-                    fill="transparent"
-                    strokeWidth={stroke}
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                    className="text-white/30"
-                />
-                <circle
-                    stroke="currentColor"
-                    fill="transparent"
-                    strokeWidth={stroke}
-                    strokeDasharray={circumference + ' ' + circumference}
-                    style={{ strokeDashoffset }}
-                    strokeLinecap="round"
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                    className="text-white transition-all duration-300"
-                />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-                 <span className="flex items-center justify-center text-2xl font-bold text-white bg-black/10 rounded-full h-16 w-16">
-                    {Math.round(percentage)}%
-                 </span>
+        <div>
+            <h4 className="font-semibold text-card-foreground">Vendas até a Meta</h4>
+            <p className="text-sm text-muted-foreground mb-3">Progresso em relação às metas principais de vendas.</p>
+            <div className="relative h-8 w-full rounded-full bg-muted">
+                {/* Metas como marcadores */}
+                {metas.map((meta, index) => {
+                    const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
+                    const achieved = vendas >= meta.value;
+                    return (
+                        <TooltipProvider key={index}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="absolute top-0 h-full flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
+                                        <div className={cn("h-full w-1", achieved ? "bg-green-500" : "bg-border")}></div>
+                                        <div className="absolute -top-6 text-xs font-medium text-muted-foreground">{meta.label}</div>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{meta.label}: {formatCurrency(meta.value)}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    );
+                })}
+
+                {/* Barra de Progresso */}
+                <div className="absolute top-0 left-0 h-full rounded-full bg-primary" style={{ width: `${progressPercentage}%` }}></div>
+
+                {/* Indicador de Meta Atingida */}
+                {metas.map((meta, index) => {
+                    const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
+                    if (vendas >= meta.value) {
+                         return (
+                            <div key={index} className="absolute top-0 flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
+                                <Trophy className="h-5 w-5 text-yellow-400 absolute -bottom-6" />
+                            </div>
+                        );
+                    }
+                    return null;
+                })}
+            </div>
+             <div className="mt-8 text-center text-sm">
+                {nextGoal ? (
+                    <p className="text-muted-foreground">
+                        Faltam <span className="font-bold text-primary">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-primary">{nextGoal.label}</span>!
+                    </p>
+                ) : (
+                    <p className="font-bold text-green-600 flex items-center justify-center gap-2"><Trophy/> Todas as metas principais foram atingidas! Parabéns!</p>
+                )}
             </div>
         </div>
     );
 };
 
+const CircularGauge = ({ label, currentValue, goals, goalPrefix, prizePrefix, unit }: { label: string; currentValue: number; goals: [number, number, number, number]; goalPrefix: string; prizePrefix: string; unit: 'currency' | 'number' }) => {
+    const findTier = () => {
+        if (currentValue >= goals[3]) return 4;
+        if (currentValue >= goals[2]) return 3;
+        if (currentValue >= goals[1]) return 2;
+        if (currentValue >= goals[0]) return 1;
+        return 0;
+    };
+    
+    const currentTier = findTier();
+    const nextGoalValue = currentTier < 4 ? goals[currentTier] : goals[3];
+    const progressPercentage = nextGoalValue > 0 ? (currentValue / nextGoalValue) * 100 : 0;
+    
+    const strokeWidth = 10;
+    const radius = 50;
+    const normalizedRadius = radius - strokeWidth / 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
+
+    const nextGoalInfo = () => {
+        if (currentTier < 4) {
+            const diff = nextGoalValue - currentValue;
+            const formattedDiff = unit === 'currency' ? formatCurrency(diff) : formatNumber(diff);
+            return `Faltam ${formattedDiff} para o Nível ${currentTier + 1}`;
+        }
+        return `Nível 4 atingido!`;
+    };
+
+    return (
+        <div className="flex flex-col items-center">
+            <h4 className="font-semibold text-card-foreground mb-2">{label}</h4>
+            <div className="relative w-28 h-28">
+                <svg height={radius * 2} width={radius * 2} className="-rotate-90">
+                    <circle
+                        className="text-muted"
+                        stroke="currentColor"
+                        fill="transparent"
+                        strokeWidth={strokeWidth}
+                        r={normalizedRadius}
+                        cx={radius}
+                        cy={radius}
+                    />
+                    <circle
+                        className={cn(currentValue >= nextGoalValue ? "text-green-500" : "text-primary")}
+                        stroke="currentColor"
+                        fill="transparent"
+                        strokeDasharray={circumference + ' ' + circumference}
+                        style={{ strokeDashoffset }}
+                        strokeWidth={strokeWidth}
+                        strokeLinecap="round"
+                        r={normalizedRadius}
+                        cx={radius}
+                        cy={radius}
+                    />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                         <span className="text-xl font-bold text-foreground">
+                            {currentValue > 0 ? (unit === 'currency' ? formatCurrency(currentValue) : formatNumber(currentValue)) : "0"}
+                        </span>
+                        {currentTier > 0 && <p className="text-xs font-bold text-green-500">Nível {currentTier}!</p>}
+                    </div>
+                </div>
+            </div>
+             <div className="mt-3 text-center text-xs text-muted-foreground">
+                <p>{nextGoalInfo()}</p>
+            </div>
+        </div>
+    );
+}
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
@@ -139,11 +238,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
           rankMessage = `Bora subir, ${name}! Você está em ${salesRank}º lugar. Continue se esforçando, o pódio te espera!`;
       }
   }
-  
-  const salesPercentage = goals.metona > 0 ? Math.min((vendas / goals.metona) * 100, 100) : 0;
-  const paPercentage = goals.paGoal4 > 0 ? Math.min((Number(pa) / goals.paGoal4) * 100, 100) : 0;
-  const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min((Number(ticketMedio) / goals.ticketMedioGoal4) * 100, 100) : 0;
-
 
   return (
     <div className="space-y-6">
@@ -168,34 +262,29 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
              <Card className="lg:col-span-2">
                 <CardHeader>
-                     <CardTitle className="text-xl">Painel de Desempenho do Vendedor</CardTitle>
-                    <CardDescription>Acompanhe seu progresso em relação às metas.</CardDescription>
+                     <CardTitle className="text-xl">Painel de Desempenho</CardTitle>
+                    <CardDescription>Acompanhe seu progresso em relação às metas e o que falta para o próximo nível.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {/* Sales to Goal */}
-                    <div className="p-6 rounded-lg bg-blue-600 text-white">
-                        <h3 className="text-lg font-semibold mb-4">Vendas até a Meta 3</h3>
-                        <div className="flex items-center gap-4">
-                            <Progress value={salesPercentage} className="h-3 flex-1 bg-white/30 [&>div]:bg-white" />
-                            <span className="text-lg font-bold">{formatPercentage(salesPercentage / 100)}</span>
-                        </div>
-                    </div>
-                    {/* PA and Ticket to Goal */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="p-6 rounded-lg bg-green-500 text-white flex items-center justify-between gap-4">
-                            <CircularProgress percentage={paPercentage} />
-                            <div className="text-right">
-                                <h3 className="text-lg font-semibold">PA até a Meta</h3>
-                                <p className="text-sm opacity-80">Nível 4</p>
-                            </div>
-                        </div>
-                        <div className="p-6 rounded-lg bg-orange-500 text-white flex items-center justify-between gap-4">
-                            <CircularProgress percentage={ticketMedioPercentage} />
-                             <div className="text-right">
-                                <h3 className="text-lg font-semibold">Ticket Médio</h3>
-                                <p className="text-sm opacity-80">Nível 4</p>
-                            </div>
-                        </div>
+                <CardContent className="space-y-8 pt-6">
+                    <SalesProgressBar vendas={Number(vendas)} goals={goals} />
+                    <Separator/>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <CircularGauge 
+                            label="Produtos por Atendimento (PA)"
+                            currentValue={Number(pa)}
+                            goals={[goals.paGoal1, goals.paGoal2, goals.paGoal3, goals.paGoal4]}
+                            goalPrefix="paGoal"
+                            prizePrefix="paPrize"
+                            unit="number"
+                        />
+                         <CircularGauge 
+                            label="Ticket Médio"
+                            currentValue={Number(ticketMedio)}
+                            goals={[goals.ticketMedioGoal1, goals.ticketMedioGoal2, goals.ticketMedioGoal3, goals.ticketMedioGoal4]}
+                            goalPrefix="ticketMedioGoal"
+                            prizePrefix="ticketMedioPrize"
+                            unit="currency"
+                        />
                     </div>
                 </CardContent>
             </Card>
@@ -231,10 +320,10 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                          {goals.performanceBonusEnabled && <TargetGoalItem label="Bônus Performance" value={formatCurrency(goals.metaLendaria)} />}
                         <Separator className="my-3"/>
                         <h4 className="font-semibold text-sm mb-2">Metas de PA</h4>
-                        <TargetGoalItem label="Nível 1" value={`${goals.paGoal1} PA`} />
-                        <TargetGoalItem label="Nível 2" value={`${goals.paGoal2} PA`} />
-                        <TargetGoalItem label="Nível 3" value={`${goals.paGoal3} PA`} />
-                        <TargetGoalItem label="Nível 4" value={`${goals.paGoal4} PA`} />
+                        <TargetGoalItem label="Nível 1" value={`${formatNumber(goals.paGoal1)} PA`} />
+                        <TargetGoalItem label="Nível 2" value={`${formatNumber(goals.paGoal2)} PA`} />
+                        <TargetGoalItem label="Nível 3" value={`${formatNumber(goals.paGoal3)} PA`} />
+                        <TargetGoalItem label="Nível 4" value={`${formatNumber(goals.paGoal4)} PA`} />
                         <Separator className="my-3"/>
                         <h4 className="font-semibold text-sm mb-2">Metas de Ticket Médio</h4>
                         <TargetGoalItem label="Nível 1" value={formatCurrency(goals.ticketMedioGoal1)} />
@@ -248,3 +337,4 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
+
