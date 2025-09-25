@@ -651,11 +651,13 @@ export function AdminTab({
         </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
-           <StoreAdminDashboard
-              sellers={sellers}
-              goals={getValues().goals as Goals}
-              incentives={incentives}
-            />
+            {sellers && getValues().goals && (
+              <StoreAdminDashboard
+                  sellers={sellers}
+                  goals={getValues().goals as Goals}
+                  incentives={incentives}
+                />
+            )}
         </TabsContent>
         
         <TabsContent value="vendedores" className="mt-6">
