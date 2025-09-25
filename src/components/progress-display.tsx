@@ -318,5 +318,3 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
-
-    
