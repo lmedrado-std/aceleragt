@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -92,8 +93,10 @@ const CircularProgress = ({ percentage }: { percentage: number }) => {
                     className="text-white transition-all duration-300"
                 />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">
-                {Math.round(percentage)}%
+            <div className="absolute inset-0 flex items-center justify-center">
+                 <span className="flex items-center justify-center text-2xl font-bold text-white bg-black/10 rounded-full h-16 w-16">
+                    {Math.round(percentage)}%
+                 </span>
             </div>
         </div>
     );
@@ -171,7 +174,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 <CardContent className="space-y-4">
                     {/* Sales to Goal */}
                     <div className="p-6 rounded-lg bg-blue-600 text-white">
-                        <h3 className="text-lg font-semibold mb-4">Vendas até a Meta</h3>
+                        <h3 className="text-lg font-semibold mb-4">Vendas até a Meta 3</h3>
                         <div className="flex items-center gap-4">
                             <Progress value={salesPercentage} className="h-3 flex-1 bg-white/30 [&>div]:bg-white" />
                             <span className="text-lg font-bold">{formatPercentage(salesPercentage / 100)}</span>
@@ -181,11 +184,17 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div className="p-6 rounded-lg bg-green-500 text-white flex items-center justify-between gap-4">
                             <CircularProgress percentage={paPercentage} />
-                            <h3 className="text-lg font-semibold text-right">PA até a Meta</h3>
+                            <div className="text-right">
+                                <h3 className="text-lg font-semibold">PA até a Meta</h3>
+                                <p className="text-sm opacity-80">Nível 4</p>
+                            </div>
                         </div>
                         <div className="p-6 rounded-lg bg-orange-500 text-white flex items-center justify-between gap-4">
                             <CircularProgress percentage={ticketMedioPercentage} />
-                            <h3 className="text-lg font-semibold text-right">Ticket Médio<br/>até a Meta</h3>
+                             <div className="text-right">
+                                <h3 className="text-lg font-semibold">Ticket Médio</h3>
+                                <p className="text-sm opacity-80">Nível 4</p>
+                            </div>
                         </div>
                     </div>
                 </CardContent>
