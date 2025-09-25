@@ -64,19 +64,20 @@ const CircularProgress = ({ percentage, colorClass }: { percentage: number, colo
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
-        <div className="relative w-28 h-28">
+        <div className="relative w-28 h-28 flex-shrink-0">
             <svg
                 height={radius * 2}
                 width={radius * 2}
                 className="transform -rotate-90"
             >
                 <circle
-                    stroke="hsl(var(--muted))"
+                    stroke="currentColor"
                     fill="transparent"
                     strokeWidth={stroke}
                     r={normalizedRadius}
                     cx={radius}
                     cy={radius}
+                    className="opacity-30"
                 />
                 <circle
                     stroke="currentColor"
@@ -87,12 +88,12 @@ const CircularProgress = ({ percentage, colorClass }: { percentage: number, colo
                     r={normalizedRadius}
                     cx={radius}
                     cy={radius}
-                    className={cn("transition-all duration-300", colorClass)}
+                    className={cn("transition-all duration-300")}
                 />
             </svg>
-            <span className={cn("absolute inset-0 flex items-center justify-center text-2xl font-bold", colorClass)}>
+            <div className={cn("absolute inset-0 flex items-center justify-center text-2xl font-bold")}>
                 {Math.round(percentage)}%
-            </span>
+            </div>
         </div>
     );
 };
@@ -137,7 +138,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   
   const salesPercentage = goals.metona > 0 ? Math.min((vendas / goals.metona) * 100, 100) : 0;
   const paPercentage = goals.paGoal4 > 0 ? Math.min((Number(pa) / goals.paGoal4) * 100, 100) : 0;
-  const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min((ticketMedio / goals.ticketMedioGoal4) * 100, 100) : 0;
+  const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min((Number(ticketMedio) / goals.ticketMedioGoal4) * 100, 100) : 0;
 
 
   return (
@@ -177,11 +178,11 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     </div>
                     {/* PA and Ticket to Goal */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="p-6 rounded-lg bg-green-500 text-white flex items-center justify-between">
+                         <div className="p-6 rounded-lg bg-green-500 text-white flex items-center justify-between gap-4">
                             <CircularProgress percentage={paPercentage} colorClass="text-white" />
                             <h3 className="text-lg font-semibold text-right">PA até a Meta</h3>
                         </div>
-                        <div className="p-6 rounded-lg bg-orange-500 text-white flex items-center justify-between">
+                        <div className="p-6 rounded-lg bg-orange-500 text-white flex items-center justify-between gap-4">
                              <CircularProgress percentage={ticketMedioPercentage} colorClass="text-white" />
                             <h3 className="text-lg font-semibold text-right">Ticket Médio<br/>até a Meta</h3>
                         </div>
