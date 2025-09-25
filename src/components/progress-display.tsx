@@ -51,21 +51,32 @@ const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, 
 
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
-        { label: "Meta 1", value: goals.metaMinha, prize: goals.metaMinhaPrize },
-        { label: "Meta 2", value: goals.meta, prize: goals.metaPrize },
-        { label: "Meta 3", value: goals.metona, prize: goals.metonaPrize },
+        { label: "Meta 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
+        { label: "Meta 2", value: goals.meta || 0, prize: goals.metaPrize || 0 },
+        { label: "Meta 3", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
     ];
-    const totalMeta = goals.metona;
+    const totalMeta = goals.metona || 0;
     const progressPercentage = totalMeta > 0 ? Math.min((vendas / totalMeta) * 100, 100) : 0;
 
     const findNextGoal = () => {
-        if (vendas < goals.metaMinha) return { label: "Meta 1", value: goals.metaMinha };
-        if (vendas < goals.meta) return { label: "Meta 2", value: goals.meta };
-        if (vendas < goals.metona) return { label: "Meta 3", value: goals.metona };
-        if (goals.performanceBonusEnabled && vendas < goals.metaLendaria) return { label: "Bônus", value: goals.metaLendaria };
+        if (vendas < (goals.metaMinha || 0)) return { label: "Meta 1", value: goals.metaMinha || 0 };
+        if (vendas < (goals.meta || 0)) return { label: "Meta 2", value: goals.meta || 0 };
+        if (vendas < (goals.metona || 0)) return { label: "Meta 3", value: goals.metona || 0 };
+        if (goals.performanceBonusEnabled && vendas < (goals.metaLendaria || 0)) return { label: "Bônus Performance", value: goals.metaLendaria || 0 };
         return null;
     };
     const nextGoal = findNextGoal();
+    
+    const getCongratsMessage = () => {
+        if (goals.performanceBonusEnabled && vendas >= (goals.metaLendaria || 0)) {
+            return "Você está na zona de Bônus Performance! Parabéns!";
+        }
+        if (vendas >= (goals.metona || 0)) {
+            return "Todas as metas principais foram atingidas! Parabéns!";
+        }
+        return null;
+    }
+    const congratsMessage = getCongratsMessage();
 
     return (
         <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 pt-12">
@@ -112,7 +123,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                         Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-white">{nextGoal.label}</span>!
                     </p>
                 ) : (
-                    <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> Todas as metas principais foram atingidas! Parabéns!</p>
+                    <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> {congratsMessage}</p>
                 )}
             </div>
         </Card>
@@ -149,7 +160,10 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardC
         if (currentTier !== -1) {
              return `${currentTierLabel} atingido!`;
         }
-        return `Faltam ${valueFormatter(goals[0].value)} para ${goals[0].label}`;
+        if (goals.length > 0 && goals[0].value > 0) {
+            return `Faltam ${valueFormatter(goals[0].value)} para ${goals[0].label}`;
+        }
+        return `Nenhuma meta de ${label} definida.`
     };
 
     return (
