@@ -116,6 +116,8 @@ export function AdminTab({
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [isCalculating, setIsCalculating] = useState(false);
   const [storePasswords, setStorePasswords] = useState({ new: '', confirm: '' });
+  const [showStorePassword, setShowStorePassword] = useState(false);
+  const [showConfirmStorePassword, setShowConfirmStorePassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importDialog, setImportDialog] = useState<{
       open: boolean;
@@ -926,23 +928,47 @@ export function AdminTab({
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="new-store-password">Nova Senha</Label>
-                <Input
-                  id="new-store-password"
-                  type="password"
-                  placeholder="Mínimo 4 caracteres"
-                  value={storePasswords.new}
-                  onChange={(e) => setStorePasswords(p => ({...p, new: e.target.value}))}
-                />
+                <div className="relative">
+                  <Input
+                    id="new-store-password"
+                    type={showStorePassword ? "text" : "password"}
+                    placeholder="Mínimo 4 caracteres"
+                    value={storePasswords.new}
+                    onChange={(e) => setStorePasswords(p => ({...p, new: e.target.value}))}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 h-full px-3"
+                    onClick={() => setShowStorePassword(!showStorePassword)}
+                  >
+                    {showStorePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-store-password">Confirmar Nova Senha</Label>
-                <Input
-                  id="confirm-store-password"
-                  type="password"
-                  placeholder="Repita a nova senha"
-                   value={storePasswords.confirm}
-                  onChange={(e) => setStorePasswords(p => ({...p, confirm: e.target.value}))}
-                />
+                 <div className="relative">
+                  <Input
+                    id="confirm-store-password"
+                    type={showConfirmStorePassword ? "text" : "password"}
+                    placeholder="Repita a nova senha"
+                    value={storePasswords.confirm}
+                    onChange={(e) => setStorePasswords(p => ({...p, confirm: e.target.value}))}
+                    className="pr-10"
+                  />
+                   <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 h-full px-3"
+                    onClick={() => setShowConfirmStorePassword(!showConfirmStorePassword)}
+                  >
+                    {showConfirmStorePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </CardContent>
             <CardFooter>
@@ -957,3 +983,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
