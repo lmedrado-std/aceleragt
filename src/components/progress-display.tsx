@@ -80,7 +80,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
         <div>
             <h4 className="font-semibold text-card-foreground">Vendas até a Meta</h4>
             <p className="text-sm text-muted-foreground mb-3">Progresso em relação às metas principais de vendas.</p>
-            <div className="relative h-8 w-full rounded-full bg-muted">
+            <div className="relative h-8 w-full rounded-full bg-muted mt-8">
                 {/* Metas como marcadores */}
                 {metas.map((meta, index) => {
                     const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
@@ -91,7 +91,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                 <TooltipTrigger asChild>
                                     <div className="absolute top-0 h-full flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                         <div className={cn("h-full w-1", achieved ? "bg-green-500" : "bg-border")}></div>
-                                        <div className="absolute -top-6 text-xs font-medium text-muted-foreground">{meta.label}</div>
+                                        <div className="absolute -top-7 text-xs font-medium text-muted-foreground">{meta.label}</div>
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -131,38 +131,52 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     );
 };
 
-const CircularGauge = ({ label, currentValue, goals, goalPrefix, prizePrefix, unit }: { label: string; currentValue: number; goals: [number, number, number, number]; goalPrefix: string; prizePrefix: string; unit: 'currency' | 'number' }) => {
-    const findTier = () => {
-        if (currentValue >= goals[3]) return 4;
-        if (currentValue >= goals[2]) return 3;
-        if (currentValue >= goals[1]) return 2;
-        if (currentValue >= goals[0]) return 1;
-        return 0;
-    };
+const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter }: { label: string; currentValue: number; goals: {value: number, label: string}[]; unit: string; valueFormatter: (value: number) => string; }) => {
     
-    const currentTier = findTier();
-    const nextGoalValue = currentTier < 4 ? goals[currentTier] : goals[3];
-    const progressPercentage = nextGoalValue > 0 ? (currentValue / nextGoalValue) * 100 : 0;
+    let currentTier = 0;
+    let nextGoalValue = goals[0]?.value || 0;
+    let nextGoalLabel = goals[0]?.label || 'Nível 1';
+
+    for (let i = goals.length - 1; i >= 0; i--) {
+        if (currentValue >= goals[i].value) {
+            currentTier = i + 1;
+            if (i < goals.length - 1) {
+                nextGoalValue = goals[i+1].value;
+                nextGoalLabel = goals[i+1].label;
+            } else {
+                nextGoalValue = goals[i].value; // Already at max tier
+                nextGoalLabel = goals[i].label;
+            }
+            break;
+        }
+    }
     
-    const strokeWidth = 10;
-    const radius = 50;
+     if (currentTier === 0 && goals.length > 0) {
+        nextGoalValue = goals[0].value;
+        nextGoalLabel = goals[0].label;
+    }
+
+
+    const progressPercentage = nextGoalValue > 0 ? Math.min((currentValue / nextGoalValue) * 100, 100) : 0;
+    
+    const strokeWidth = 12;
+    const radius = 60;
     const normalizedRadius = radius - strokeWidth / 2;
     const circumference = normalizedRadius * 2 * Math.PI;
     const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
 
     const nextGoalInfo = () => {
-        if (currentTier < 4) {
+        if (currentTier < goals.length) {
             const diff = nextGoalValue - currentValue;
-            const formattedDiff = unit === 'currency' ? formatCurrency(diff) : formatNumber(diff);
-            return `Faltam ${formattedDiff} para o Nível ${currentTier + 1}`;
+            return `Faltam ${valueFormatter(diff)} para ${nextGoalLabel}`;
         }
-        return `Nível 4 atingido!`;
+        return `${goals[goals.length-1].label} atingido!`;
     };
 
     return (
         <div className="flex flex-col items-center">
             <h4 className="font-semibold text-card-foreground mb-2">{label}</h4>
-            <div className="relative w-28 h-28">
+            <div className="relative" style={{width: radius*2, height: radius*2}}>
                 <svg height={radius * 2} width={radius * 2} className="-rotate-90">
                     <circle
                         className="text-muted"
@@ -186,16 +200,14 @@ const CircularGauge = ({ label, currentValue, goals, goalPrefix, prizePrefix, un
                         cy={radius}
                     />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                         <span className="text-xl font-bold text-foreground">
-                            {currentValue > 0 ? (unit === 'currency' ? formatCurrency(currentValue) : formatNumber(currentValue)) : "0"}
-                        </span>
-                        {currentTier > 0 && <p className="text-xs font-bold text-green-500">Nível {currentTier}!</p>}
-                    </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                     <span className="text-2xl font-bold text-foreground">
+                        {valueFormatter(currentValue)}
+                    </span>
+                    {currentTier > 0 && <p className="text-xs font-bold text-green-500 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-full">{goals[currentTier-1].label}!</p>}
                 </div>
             </div>
-             <div className="mt-3 text-center text-xs text-muted-foreground">
+             <div className="mt-3 text-center text-xs text-muted-foreground h-4">
                 <p>{nextGoalInfo()}</p>
             </div>
         </div>
@@ -239,6 +251,21 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
       }
   }
 
+  const paGoals = [
+    { value: goals.paGoal1, label: 'Nível 1' },
+    { value: goals.paGoal2, label: 'Nível 2' },
+    { value: goals.paGoal3, label: 'Nível 3' },
+    { value: goals.paGoal4, label: 'Nível 4' },
+  ];
+
+  const ticketGoals = [
+      { value: goals.ticketMedioGoal1, label: 'Nível 1' },
+      { value: goals.ticketMedioGoal2, label: 'Nível 2' },
+      { value: goals.ticketMedioGoal3, label: 'Nível 3' },
+      { value: goals.ticketMedioGoal4, label: 'Nível 4' },
+  ];
+
+
   return (
     <div className="space-y-6">
         <Card className="col-span-full bg-primary text-primary-foreground">
@@ -272,18 +299,16 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                        <CircularGauge 
                             label="Produtos por Atendimento (PA)"
                             currentValue={Number(pa)}
-                            goals={[goals.paGoal1, goals.paGoal2, goals.paGoal3, goals.paGoal4]}
-                            goalPrefix="paGoal"
-                            prizePrefix="paPrize"
-                            unit="number"
+                            goals={paGoals}
+                            unit="PA"
+                            valueFormatter={(val) => formatNumber(val)}
                         />
                          <CircularGauge 
                             label="Ticket Médio"
                             currentValue={Number(ticketMedio)}
-                            goals={[goals.ticketMedioGoal1, goals.ticketMedioGoal2, goals.ticketMedioGoal3, goals.ticketMedioGoal4]}
-                            goalPrefix="ticketMedioGoal"
-                            prizePrefix="ticketMedioPrize"
-                            unit="currency"
+                            goals={ticketGoals}
+                            unit="R$"
+                            valueFormatter={(val) => formatCurrency(val)}
                         />
                     </div>
                 </CardContent>
@@ -337,4 +362,3 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
-
