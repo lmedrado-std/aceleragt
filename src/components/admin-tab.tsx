@@ -576,7 +576,7 @@ export function AdminTab({
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TooltipProvider>
-          <TabsList className="grid w-full grid-cols-5 h-auto p-0 bg-transparent border-b">
+          <TabsList className="grid w-full grid-flow-col auto-cols-auto h-auto p-0 bg-transparent border-b">
             <Tooltip>
               <TooltipTrigger asChild>
                 <TabsTrigger
@@ -943,5 +943,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
