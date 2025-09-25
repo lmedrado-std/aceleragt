@@ -18,6 +18,7 @@ import {
   Users,
   BarChart,
   Target,
+  KeyRound,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -111,6 +112,7 @@ export function AdminTab({
   const [editingSellerPassword, setEditingSellerPassword] = useState('');
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [isCalculating, setIsCalculating] = useState(false);
+  const [storePasswords, setStorePasswords] = useState({ new: '', confirm: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importDialog, setImportDialog] = useState<{
       open: boolean;
@@ -491,6 +493,47 @@ export function AdminTab({
         }
     };
 
+    const handleStorePasswordChange = async () => {
+    if (storePasswords.new !== storePasswords.confirm) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "As senhas não coincidem.",
+      });
+      return;
+    }
+    if (!storePasswords.new || storePasswords.new.length < 4) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "A senha deve ter no mínimo 4 caracteres.",
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/stores/${storeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: storePasswords.new }),
+      });
+      if (!res.ok) {
+        throw new Error('Falha ao atualizar a senha da loja');
+      }
+      toast({
+        title: "Sucesso!",
+        description: "A senha da loja foi alterada com sucesso.",
+      });
+      setStorePasswords({ new: '', confirm: '' });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: (error as Error).message,
+      });
+    }
+  };
+
 
   return (
     <div className="space-y-8">
@@ -533,7 +576,7 @@ export function AdminTab({
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TooltipProvider>
-          <TabsList className="grid w-full grid-cols-4 h-auto p-0 bg-transparent border-b">
+          <TabsList className="grid w-full grid-cols-5 h-auto p-0 bg-transparent border-b">
             <Tooltip>
               <TooltipTrigger asChild>
                 <TabsTrigger
@@ -588,6 +631,20 @@ export function AdminTab({
               </TooltipTrigger>
               <TooltipContent>
                 <p>Configurar as metas e os valores dos prêmios.</p>
+              </TooltipContent>
+            </Tooltip>
+             <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger
+                  value="seguranca"
+                  className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                >
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Segurança
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Alterar a senha de acesso da loja.</p>
               </TooltipContent>
             </Tooltip>
           </TabsList>
@@ -843,11 +900,48 @@ export function AdminTab({
             </CardFooter>
           </Card>
         </TabsContent>
+
+        <TabsContent value="seguranca" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Alterar Senha da Loja</CardTitle>
+              <CardDescription>
+                Defina uma nova senha para o acesso de gerente a esta loja. O administrador global ainda poderá acessar e redefinir esta senha.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-store-password">Nova Senha</Label>
+                <Input
+                  id="new-store-password"
+                  type="password"
+                  placeholder="Mínimo 4 caracteres"
+                  value={storePasswords.new}
+                  onChange={(e) => setStorePasswords(p => ({...p, new: e.target.value}))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-store-password">Confirmar Nova Senha</Label>
+                <Input
+                  id="confirm-store-password"
+                  type="password"
+                  placeholder="Repita a nova senha"
+                   value={storePasswords.confirm}
+                  onChange={(e) => setStorePasswords(p => ({...p, confirm: e.target.value}))}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleStorePasswordChange}>
+                <Save className="mr-2 h-4 w-4" />
+                Salvar Nova Senha
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
-
-    
 
     
