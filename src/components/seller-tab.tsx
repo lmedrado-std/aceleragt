@@ -7,7 +7,7 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -48,6 +48,13 @@ const MetricCard = ({
       <p className="text-xs opacity-80">{description}</p>
     </CardContent>
   </Card>
+);
+
+const GoalItem = ({ label, value }: { label: string, value: string }) => (
+    <div className="flex justify-between items-center py-2 border-b last:border-0">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold">{value}</p>
+    </div>
 );
 
 export function SellerTab({
@@ -105,6 +112,20 @@ export function SellerTab({
               <p>Ver dados lançados pelo administrador</p>
             </TooltipContent>
           </Tooltip>
+           <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger
+                value="metas"
+                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+              >
+                <Target className="mr-2 h-4 w-4" />
+                Metas
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Consultar os valores de todas as metas</p>
+            </TooltipContent>
+          </Tooltip>
         </TabsList>
         
         <TabsContent value="desempenho" className="mt-6">
@@ -158,6 +179,54 @@ export function SellerTab({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+         <TabsContent value="metas" className="mt-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Quadro de Metas</CardTitle>
+                    <CardDescription>
+                        Consulte aqui todos os objetivos e prêmios do período.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-6 md:grid-cols-3">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Metas de Vendas</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <GoalItem label="Meta 1" value={`${formatCurrency(goals.metaMinha)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize)})`} />
+                            <GoalItem label="Meta 2" value={`${formatCurrency(goals.meta)} (Prêmio: ${formatCurrency(goals.metaPrize)})`} />
+                            <GoalItem label="Meta 3" value={`${formatCurrency(goals.metona)} (Prêmio: ${formatCurrency(goals.metonaPrize)})`} />
+                            {goals.performanceBonusEnabled && (
+                                <GoalItem label="Bônus Performance" value={`Acima de ${formatCurrency(goals.metaLendaria)}`} />
+                            )}
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Metas de PA</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <GoalItem label="Nível 1" value={`${(goals.paGoal1 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize1)})`} />
+                           <GoalItem label="Nível 2" value={`${(goals.paGoal2 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize2)})`} />
+                           <GoalItem label="Nível 3" value={`${(goals.paGoal3 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize3)})`} />
+                           <GoalItem label="Nível 4" value={`${(goals.paGoal4 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize4)})`} />
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Metas de Ticket Médio</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <GoalItem label="Nível 1" value={`${formatCurrency(goals.ticketMedioGoal1)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize1)})`} />
+                            <GoalItem label="Nível 2" value={`${formatCurrency(goals.ticketMedioGoal2)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize2)})`} />
+                            <GoalItem label="Nível 3" value={`${formatCurrency(goals.ticketMedioGoal3)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize3)})`} />
+                            <GoalItem label="Nível 4" value={`${formatCurrency(goals.ticketMedioGoal4)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize4)})`} />
+                        </CardContent>
+                    </Card>
+                </CardContent>
+            </Card>
         </TabsContent>
       </Tabs>
     </TooltipProvider>
