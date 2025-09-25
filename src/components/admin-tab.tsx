@@ -652,19 +652,22 @@ export function AdminTab({
         </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
-            {sellers && getValues().goals && incentives ? (
-              <ErrorBoundary>
-                <StoreAdminDashboard
-                  sellers={sellers}
-                  goals={getValues().goals as Goals}
-                  incentives={incentives}
-                />
-              </ErrorBoundary>
-            ) : (
-              <div className="p-6 text-center text-muted-foreground">
-                Carregando painel de administração...
+          {sellers && getValues().goals && incentives ? (
+            <ErrorBoundary>
+              <StoreAdminDashboard
+                sellers={sellers}
+                goals={getValues().goals as Goals}
+                incentives={incentives}
+              />
+            </ErrorBoundary>
+          ) : (
+            <div className="flex items-center justify-center p-12">
+              <div className="text-center text-muted-foreground">
+                <div className="text-lg mb-2">Carregando painel de administração...</div>
+                <div className="text-sm">Aguarde enquanto os dados são carregados.</div>
               </div>
-            )}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="vendedores" className="mt-6">
@@ -956,3 +959,4 @@ export function AdminTab({
     
 
     
+
