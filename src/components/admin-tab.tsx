@@ -651,13 +651,13 @@ export function AdminTab({
         </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
-            {sellers && getValues().goals && (
+            {sellers && getValues().goals ? (
               <StoreAdminDashboard
                   sellers={sellers}
                   goals={getValues().goals as Goals}
                   incentives={incentives}
                 />
-            )}
+            ) : null}
         </TabsContent>
         
         <TabsContent value="vendedores" className="mt-6">
@@ -945,5 +945,7 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
