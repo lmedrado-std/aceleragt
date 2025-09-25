@@ -49,14 +49,6 @@ const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, 
     </div>
 )
 
-const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
-    <div className="flex justify-between items-center text-sm py-2 border-b border-border/50 last:border-0">
-        <p className="text-muted-foreground">{label}</p>
-        <p className="font-semibold text-foreground">{value}</p>
-    </div>
-);
-
-
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
         { label: "Meta 1", value: goals.metaMinha, prize: goals.metaMinhaPrize },
@@ -274,11 +266,29 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
         </Card>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
                  <SalesProgressBar vendas={Number(vendas)} goals={goals} />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <CircularGauge 
+                        label="Produtos por Atendimento (PA)"
+                        currentValue={Number(pa)}
+                        goals={paGoals}
+                        unit="PA"
+                        valueFormatter={(val) => formatNumber(val)}
+                        cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
+                    />
+                    <CircularGauge 
+                        label="Ticket Médio"
+                        currentValue={Number(ticketMedio)}
+                        goals={ticketGoals}
+                        unit="R$"
+                        valueFormatter={(val) => formatCurrency(val)}
+                        cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
+                    />
+                </div>
             </div>
 
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1">
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
@@ -296,24 +306,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     </CardContent>
                 </Card>
             </div>
-        </div>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CircularGauge 
-                label="Produtos por Atendimento (PA)"
-                currentValue={Number(pa)}
-                goals={paGoals}
-                unit="PA"
-                valueFormatter={(val) => formatNumber(val)}
-                cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
-            />
-            <CircularGauge 
-                label="Ticket Médio"
-                currentValue={Number(ticketMedio)}
-                goals={ticketGoals}
-                unit="R$"
-                valueFormatter={(val) => formatCurrency(val)}
-                cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
-            />
         </div>
     </div>
   );
