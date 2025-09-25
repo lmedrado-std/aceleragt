@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -17,8 +16,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
 import { RankingMetric } from "./goal-getter-dashboard";
-import { Area, AreaChart, CartesianGrid, Label, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Progress } from "@/components/ui/progress";
 
 
 type ProgressDisplaySalesData = Partial<Seller> & {
@@ -58,6 +56,47 @@ const TargetGoalItem = ({ label, value }: { label: string; value: string }) => (
     </div>
 );
 
+const CircularProgress = ({ percentage, colorClass }: { percentage: number, colorClass: string }) => {
+    const radius = 50;
+    const stroke = 10;
+    const normalizedRadius = radius - stroke * 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    return (
+        <div className="relative w-28 h-28">
+            <svg
+                height={radius * 2}
+                width={radius * 2}
+                className="transform -rotate-90"
+            >
+                <circle
+                    stroke="hsl(var(--muted))"
+                    fill="transparent"
+                    strokeWidth={stroke}
+                    r={normalizedRadius}
+                    cx={radius}
+                    cy={radius}
+                />
+                <circle
+                    stroke="currentColor"
+                    fill="transparent"
+                    strokeWidth={stroke}
+                    strokeDasharray={circumference + ' ' + circumference}
+                    style={{ strokeDashoffset }}
+                    r={normalizedRadius}
+                    cx={radius}
+                    cy={radius}
+                    className={cn("transition-all duration-300", colorClass)}
+                />
+            </svg>
+            <span className={cn("absolute inset-0 flex items-center justify-center text-2xl font-bold", colorClass)}>
+                {Math.round(percentage)}%
+            </span>
+        </div>
+    );
+};
+
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
@@ -96,25 +135,10 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
       }
   }
   
-  // Data for charts
-  const salesPercentage = goals.metona > 0 ? Math.min(vendas / goals.metona, 1) : 0;
-  const paPercentage = goals.paGoal4 > 0 ? Math.min(Number(pa) / goals.paGoal4, 1) : 0;
-  const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min(ticketMedio / goals.ticketMedioGoal4, 1) : 0;
+  const salesPercentage = goals.metona > 0 ? Math.min((vendas / goals.metona) * 100, 100) : 0;
+  const paPercentage = goals.paGoal4 > 0 ? Math.min((Number(pa) / goals.paGoal4) * 100, 100) : 0;
+  const ticketMedioPercentage = goals.ticketMedioGoal4 > 0 ? Math.min((ticketMedio / goals.ticketMedioGoal4) * 100, 100) : 0;
 
-  const chartConfig = {
-    vendas: {
-      label: "Vendas",
-      color: "hsl(var(--primary))",
-    },
-    pa: {
-      label: "PA",
-      color: "hsl(var(--chart-2))",
-    },
-    ticketMedio: {
-        label: "Ticket Médio",
-        color: "hsl(var(--chart-3))"
-    }
-  } satisfies ChartConfig
 
   return (
     <div className="space-y-6">
@@ -137,102 +161,31 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
         </Card>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2">
+             <Card className="lg:col-span-2">
                 <CardHeader>
-                     <CardTitle className="text-xl">Progresso das Metas</CardTitle>
-                    <CardDescription>Veja o quão perto você está de bater suas metas.</CardDescription>
+                     <CardTitle className="text-xl">Painel de Desempenho do Vendedor</CardTitle>
+                    <CardDescription>Acompanhe seu progresso em relação às metas.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                   <div className="space-y-4 md:col-span-1">
-                       <h3 className="font-semibold">Meta de Vendas</h3>
-                       <div className="text-4xl font-bold text-foreground">{formatCurrency(vendas)}</div>
-                       <ChartContainer config={chartConfig} className="h-[150px] w-full">
-                            <AreaChart accessibilityLayer data={[{vendas, goal: goals.metona}]}>
-                                <defs>
-                                <linearGradient id="fillVendas" x1="0" y1="0" x2="0" y2="1">
-                                    <stop
-                                    offset="5%"
-                                    stopColor="var(--color-vendas)"
-                                    stopOpacity={0.8}
-                                    />
-                                    <stop
-                                    offset="95%"
-                                    stopColor="var(--color-vendas)"
-                                    stopOpacity={0.1}
-                                    />
-                                </linearGradient>
-                                </defs>
-                                <CartesianGrid vertical={false} />
-                                <YAxis 
-                                    dataKey="vendas" 
-                                    tickLine={false} 
-                                    axisLine={false} 
-                                    tickMargin={8} 
-                                    domain={[0, 'dataMax + 1000']} 
-                                    tickFormatter={(value) => formatCurrency(Number(value)).replace(/\,00$/,'').replace(/\s/g,'')}
-                                />
-                                <XAxis dataKey="month" hide />
-                                <ChartTooltip content={<ChartTooltipContent />} />
-                                <Area dataKey="vendas" type="natural" fill="url(#fillVendas)" stroke="var(--color-vendas)" />
-                            </AreaChart>
-                        </ChartContainer>
-                   </div>
-                   <div className="md:col-span-2 grid grid-cols-2 gap-6 items-center">
-                       <div className="flex flex-col items-center gap-2">
-                           <h3 className="font-semibold">Meta PA</h3>
-                           <ChartContainer config={chartConfig} className="h-32 w-32">
-                             <PieChart>
-                                <Pie data={[{ name: 'PA', value: paPercentage, fill: 'var(--color-pa)' }, { name: 'Restante', value: 1-paPercentage, fill: 'hsl(var(--muted))' }]} dataKey="value" nameKey="name" innerRadius={35} outerRadius={45} startAngle={90} endAngle={450} cornerRadius={5}>
-                                  <Label
-                                    content={({ viewBox }) => {
-                                      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                        return (
-                                          <text
-                                            x={viewBox.cx}
-                                            y={viewBox.cy}
-                                            textAnchor="middle"
-                                            dominantBaseline="middle"
-                                            className="fill-foreground text-xl font-bold"
-                                          >
-                                            {formatPercentage(paPercentage)}
-                                          </text>
-                                        );
-                                      }
-                                    }}
-                                  />
-                                </Pie>
-                              </PieChart>
-                           </ChartContainer>
-                           <p className="mt-2 font-medium">{Number(pa).toFixed(2)} / {goals.paGoal4}</p>
-                       </div>
-                       <div className="flex flex-col items-center gap-2">
-                           <h3 className="font-semibold">Meta Ticket Médio</h3>
-                           <ChartContainer config={chartConfig} className="h-32 w-32">
-                             <PieChart>
-                                <Pie data={[{ name: 'Ticket', value: ticketMedioPercentage, fill: 'var(--color-ticketMedio)' }, { name: 'Restante', value: 1-ticketMedioPercentage, fill: 'hsl(var(--muted))' }]} dataKey="value" nameKey="name" innerRadius={35} outerRadius={45} startAngle={90} endAngle={450} cornerRadius={5}>
-                                  <Label
-                                    content={({ viewBox }) => {
-                                      if (viewBox && "cx" in viewBox) {
-                                        return (
-                                          <text
-                                            x={viewBox.cx}
-                                            y={viewBox.cy}
-                                            textAnchor="middle"
-                                            dominantBaseline="middle"
-                                            className="fill-foreground text-xl font-bold"
-                                          >
-                                            {formatPercentage(ticketMedioPercentage)}
-                                          </text>
-                                        );
-                                      }
-                                    }}
-                                  />
-                                </Pie>
-                              </PieChart>
-                           </ChartContainer>
-                           <p className="mt-2 font-medium">{formatCurrency(ticketMedio)} / {formatCurrency(goals.ticketMedioGoal4)}</p>
-                       </div>
-                   </div>
+                <CardContent className="space-y-4">
+                    {/* Sales to Goal */}
+                    <div className="p-6 rounded-lg bg-blue-600 text-white">
+                        <h3 className="text-lg font-semibold mb-4">Vendas até a Meta</h3>
+                        <div className="flex items-center gap-4">
+                            <Progress value={salesPercentage} className="h-3 flex-1 [&>div]:bg-white" />
+                            <span className="text-lg font-bold">{formatPercentage(salesPercentage / 100)}</span>
+                        </div>
+                    </div>
+                    {/* PA and Ticket to Goal */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="p-6 rounded-lg bg-green-500 text-white flex items-center justify-between">
+                            <CircularProgress percentage={paPercentage} colorClass="text-white" />
+                            <h3 className="text-lg font-semibold text-right">PA até a Meta</h3>
+                        </div>
+                        <div className="p-6 rounded-lg bg-orange-500 text-white flex items-center justify-between">
+                             <CircularProgress percentage={ticketMedioPercentage} colorClass="text-white" />
+                            <h3 className="text-lg font-semibold text-right">Ticket Médio<br/>até a Meta</h3>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
