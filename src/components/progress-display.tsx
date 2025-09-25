@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -9,8 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Trophy,
-    Target
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -76,11 +76,10 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     const nextGoal = findNextGoal();
 
     return (
-        <div>
-            <h4 className="font-semibold text-card-foreground">Vendas até a Meta</h4>
-            <p className="text-sm text-muted-foreground mb-3">Progresso em relação às metas principais de vendas.</p>
-            <div className="relative h-8 w-full rounded-full bg-muted mt-8">
-                {/* Metas como marcadores */}
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
+            <h4 className="font-semibold text-white">Vendas até a Meta</h4>
+            <p className="text-sm text-white/80 mb-3">Progresso em relação às metas principais de vendas.</p>
+            <div className="relative h-8 w-full rounded-full bg-black/20 mt-8">
                 {metas.map((meta, index) => {
                     const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
                     const achieved = vendas >= meta.value;
@@ -89,8 +88,8 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="absolute top-0 h-full flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                                        <div className={cn("h-full w-1", achieved ? "bg-green-500" : "bg-border")}></div>
-                                        <div className="absolute -top-8 text-xs font-medium text-muted-foreground">{meta.label}</div>
+                                        <div className={cn("h-full w-1", achieved ? "bg-green-400" : "bg-white/30")}></div>
+                                        <div className="absolute -top-8 text-xs font-medium text-white/80">{meta.label}</div>
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -101,16 +100,14 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     );
                 })}
 
-                {/* Barra de Progresso */}
-                <div className="absolute top-0 left-0 h-full rounded-full bg-primary" style={{ width: `${progressPercentage}%` }}></div>
+                <div className="absolute top-0 left-0 h-full rounded-full bg-white" style={{ width: `${progressPercentage}%` }}></div>
 
-                {/* Indicador de Meta Atingida */}
                 {metas.map((meta, index) => {
                     const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
                     if (vendas >= meta.value) {
                          return (
                             <div key={index} className="absolute top-0 flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                                <Trophy className="h-5 w-5 text-yellow-400 absolute -bottom-6" />
+                                <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6" />
                             </div>
                         );
                     }
@@ -119,44 +116,32 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
             </div>
              <div className="mt-8 text-center text-sm">
                 {nextGoal ? (
-                    <p className="text-muted-foreground">
-                        Faltam <span className="font-bold text-primary">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-primary">{nextGoal.label}</span>!
+                    <p className="text-white/80">
+                        Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-white">{nextGoal.label}</span>!
                     </p>
                 ) : (
-                    <p className="font-bold text-green-600 flex items-center justify-center gap-2"><Trophy/> Todas as metas principais foram atingidas! Parabéns!</p>
+                    <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> Todas as metas principais foram atingidas! Parabéns!</p>
                 )}
             </div>
-        </div>
+        </Card>
     );
 };
 
-const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter }: { label: string; currentValue: number; goals: {value: number, label: string}[]; unit: string; valueFormatter: (value: number) => string; }) => {
+const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardClassName }: { label: string; currentValue: number; goals: {value: number, label: string}[]; unit: string; valueFormatter: (value: number) => string; cardClassName?: string }) => {
     
-    let currentTier = 0;
-    let nextGoalValue = goals[0]?.value || 0;
-    let nextGoalLabel = goals[0]?.label || 'Nível 1';
-
+    let currentTier = -1;
     for (let i = goals.length - 1; i >= 0; i--) {
-        if (currentValue >= goals[i].value) {
-            currentTier = i + 1;
-            if (i < goals.length - 1) {
-                nextGoalValue = goals[i+1].value;
-                nextGoalLabel = goals[i+1].label;
-            } else {
-                nextGoalValue = goals[i].value; // Already at max tier
-                nextGoalLabel = goals[i].label;
-            }
+        if (currentValue >= goals[i].value && goals[i].value > 0) {
+            currentTier = i;
             break;
         }
     }
-    
-     if (currentTier === 0 && goals.length > 0) {
-        nextGoalValue = goals[0].value;
-        nextGoalLabel = goals[0].label;
-    }
 
+    const nextGoalIndex = currentTier + 1;
+    const nextGoal = goals[nextGoalIndex] && goals[nextGoalIndex].value > 0 ? goals[nextGoalIndex] : null;
+    const currentTierLabel = currentTier !== -1 ? goals[currentTier].label : '';
 
-    const progressPercentage = nextGoalValue > 0 ? Math.min((currentValue / nextGoalValue) * 100, 100) : 0;
+    const progressPercentage = nextGoal ? Math.min((currentValue / nextGoal.value) * 100, 100) : (currentTier !== -1 ? 100 : 0);
     
     const strokeWidth = 14;
     const radius = 70;
@@ -165,20 +150,23 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter }: { l
     const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
 
     const nextGoalInfo = () => {
-        if (currentTier < goals.length) {
-            const diff = nextGoalValue - currentValue;
-            return `Faltam ${valueFormatter(diff)} para ${nextGoalLabel}`;
+        if (nextGoal) {
+            const diff = nextGoal.value - currentValue;
+            return `Faltam ${valueFormatter(diff)} para ${nextGoal.label}`;
         }
-        return `${goals[goals.length-1].label} atingido!`;
+        if (currentTier !== -1) {
+             return `${currentTierLabel} atingido!`;
+        }
+        return `Faltam ${valueFormatter(goals[0].value)} para ${goals[0].label}`;
     };
 
     return (
-        <div className="flex flex-col items-center">
-            <h4 className="font-semibold text-card-foreground mb-2">{label}</h4>
+        <Card className={cn("p-6 flex flex-col items-center", cardClassName)}>
+            <h4 className="font-semibold text-white mb-4">{label}</h4>
             <div className="relative" style={{width: radius*2, height: radius*2}}>
                 <svg height={radius * 2} width={radius * 2} className="-rotate-90">
                     <circle
-                        className="text-muted"
+                        className="text-black/20"
                         stroke="currentColor"
                         fill="transparent"
                         strokeWidth={strokeWidth}
@@ -187,7 +175,7 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter }: { l
                         cy={radius}
                     />
                     <circle
-                        className={cn(currentValue >= nextGoalValue ? "text-green-500" : "text-primary")}
+                        className="text-white"
                         stroke="currentColor"
                         fill="transparent"
                         strokeDasharray={circumference + ' ' + circumference}
@@ -199,17 +187,17 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter }: { l
                         cy={radius}
                     />
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                     <span className="text-2xl font-bold text-foreground">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
+                     <span className="text-2xl font-bold">
                         {valueFormatter(currentValue)}
                     </span>
-                    {currentTier > 0 && <p className="text-xs font-bold text-green-500 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-full">{goals[currentTier-1].label}!</p>}
+                    {currentTierLabel && <p className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">{currentTierLabel}!</p>}
                 </div>
             </div>
-             <div className="mt-3 text-center text-xs text-muted-foreground h-4">
+             <div className="mt-4 text-center text-xs text-white/80 h-4">
                 <p>{nextGoalInfo()}</p>
             </div>
-        </div>
+        </Card>
     );
 }
 
@@ -286,32 +274,9 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
         </Card>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-             <Card className="lg:col-span-2">
-                <CardHeader>
-                     <CardTitle className="text-xl">Painel de Desempenho</CardTitle>
-                    <CardDescription>Acompanhe seu progresso em relação às metas e o que falta para o próximo nível.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-8 pt-6">
-                    <SalesProgressBar vendas={Number(vendas)} goals={goals} />
-                    <Separator/>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <CircularGauge 
-                            label="Produtos por Atendimento (PA)"
-                            currentValue={Number(pa)}
-                            goals={paGoals}
-                            unit="PA"
-                            valueFormatter={(val) => formatNumber(val)}
-                        />
-                         <CircularGauge 
-                            label="Ticket Médio"
-                            currentValue={Number(ticketMedio)}
-                            goals={ticketGoals}
-                            unit="R$"
-                            valueFormatter={(val) => formatCurrency(val)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+             <div className="lg:col-span-2">
+                 <SalesProgressBar vendas={Number(vendas)} goals={goals} />
+            </div>
 
             <div className="lg:col-span-1 space-y-6">
                 <Card>
@@ -330,34 +295,28 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
                     </CardContent>
                 </Card>
-                
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl flex items-center gap-2"><Target /> Minhas Metas</CardTitle>
-                        <CardDescription>Valores definidos pelo gerente para este período.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-1">
-                        <h4 className="font-semibold text-sm mb-2">Metas de Vendas</h4>
-                        <TargetGoalItem label="Meta 1" value={formatCurrency(goals.metaMinha)} />
-                        <TargetGoalItem label="Meta 2" value={formatCurrency(goals.meta)} />
-                        <TargetGoalItem label="Meta 3" value={formatCurrency(goals.metona)} />
-                         {goals.performanceBonusEnabled && <TargetGoalItem label="Bônus Performance" value={formatCurrency(goals.metaLendaria)} />}
-                        <Separator className="my-3"/>
-                        <h4 className="font-semibold text-sm mb-2">Metas de PA</h4>
-                        <TargetGoalItem label="Nível 1" value={`${formatNumber(goals.paGoal1)} PA`} />
-                        <TargetGoalItem label="Nível 2" value={`${formatNumber(goals.paGoal2)} PA`} />
-                        <TargetGoalItem label="Nível 3" value={`${formatNumber(goals.paGoal3)} PA`} />
-                        <TargetGoalItem label="Nível 4" value={`${formatNumber(goals.paGoal4)} PA`} />
-                        <Separator className="my-3"/>
-                        <h4 className="font-semibold text-sm mb-2">Metas de Ticket Médio</h4>
-                        <TargetGoalItem label="Nível 1" value={formatCurrency(goals.ticketMedioGoal1)} />
-                        <TargetGoalItem label="Nível 2" value={formatCurrency(goals.ticketMedioGoal2)} />
-                        <TargetGoalItem label="Nível 3" value={formatCurrency(goals.ticketMedioGoal3)} />
-                        <TargetGoalItem label="Nível 4" value={formatCurrency(goals.ticketMedioGoal4)} />
-                    </CardContent>
-                </Card>
             </div>
+        </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CircularGauge 
+                label="Produtos por Atendimento (PA)"
+                currentValue={Number(pa)}
+                goals={paGoals}
+                unit="PA"
+                valueFormatter={(val) => formatNumber(val)}
+                cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
+            />
+            <CircularGauge 
+                label="Ticket Médio"
+                currentValue={Number(ticketMedio)}
+                goals={ticketGoals}
+                unit="R$"
+                valueFormatter={(val) => formatCurrency(val)}
+                cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
+            />
         </div>
     </div>
   );
 }
+
+    
