@@ -76,7 +76,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     const nextGoal = findNextGoal();
 
     return (
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 pt-12">
             <h4 className="font-semibold text-white">Vendas até a Meta</h4>
             <p className="text-sm text-white/80 mb-3">Progresso em relação às metas principais de vendas.</p>
             <div className="relative h-8 w-full rounded-full bg-black/20 mt-8">
@@ -144,7 +144,7 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardC
     const progressPercentage = nextGoal ? Math.min((currentValue / nextGoal.value) * 100, 100) : (currentTier !== -1 ? 100 : 0);
     
     const strokeWidth = 14;
-    const radius = 70;
+    const radius = 80;
     const normalizedRadius = radius - strokeWidth / 2;
     const circumference = normalizedRadius * 2 * Math.PI;
     const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
