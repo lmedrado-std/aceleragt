@@ -1,13 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect, ReactNode } from "react";
 
-export default function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
+interface Props {
+  children: ReactNode;
+}
 
+export default function ClientOnly({ children }: Props) {
+  const [isClient, setIsClient] = useState(false);
   useEffect(() => {
-    setMounted(true);
+    setIsClient(true);
   }, []);
-
-  if (!mounted) return null;
+  if (!isClient) {
+    return null;
+  }
   return <>{children}</>;
 }
