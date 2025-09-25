@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -17,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
 import { RankingMetric } from "./goal-getter-dashboard";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 
 type ProgressDisplaySalesData = Partial<Seller> & {
@@ -91,7 +90,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                 <TooltipTrigger asChild>
                                     <div className="absolute top-0 h-full flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                         <div className={cn("h-full w-1", achieved ? "bg-green-500" : "bg-border")}></div>
-                                        <div className="absolute -top-7 text-xs font-medium text-muted-foreground">{meta.label}</div>
+                                        <div className="absolute -top-8 text-xs font-medium text-muted-foreground">{meta.label}</div>
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -159,8 +158,8 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter }: { l
 
     const progressPercentage = nextGoalValue > 0 ? Math.min((currentValue / nextGoalValue) * 100, 100) : 0;
     
-    const strokeWidth = 12;
-    const radius = 60;
+    const strokeWidth = 14;
+    const radius = 70;
     const normalizedRadius = radius - strokeWidth / 2;
     const circumference = normalizedRadius * 2 * Math.PI;
     const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
