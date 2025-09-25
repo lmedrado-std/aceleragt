@@ -19,6 +19,7 @@ import {
   BarChart,
   Target,
   KeyRound,
+  Info,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -581,12 +582,12 @@ export function AdminTab({
 
       <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="w-full">
         <TooltipProvider>
-          <TabsList className="grid w-full grid-flow-col auto-cols-auto h-auto p-0 bg-transparent border-b">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="dashboard"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -600,7 +601,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="vendedores"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Vendedores
@@ -614,7 +615,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="lancamentos"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   <BarChart className="mr-2 h-4 w-4" />
                   Lançamentos
@@ -628,7 +629,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="metas"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   <Target className="mr-2 h-4 w-4" />
                   Metas &amp; Prêmios
@@ -642,7 +643,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="seguranca"
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-b-2 border-transparent data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
                   Segurança
@@ -656,22 +657,22 @@ export function AdminTab({
         </TooltipProvider>
 
         <TabsContent value="dashboard" className="mt-6">
-          {sellers && getValues().goals && incentives ? (
-            <ErrorBoundary>
-              <StoreAdminDashboard
-                sellers={sellers}
-                goals={getValues().goals as Goals}
-                incentives={incentives}
-              />
-            </ErrorBoundary>
-          ) : (
-            <div className="flex items-center justify-center p-12">
-              <div className="text-center text-muted-foreground">
-                <div className="text-lg mb-2">Carregando painel de administração...</div>
-                <div className="text-sm">Aguarde enquanto os dados são carregados.</div>
+          <ErrorBoundary>
+            {sellers && getValues().goals && incentives ? (
+                <StoreAdminDashboard
+                  sellers={sellers}
+                  goals={getValues().goals as Goals}
+                  incentives={incentives}
+                />
+            ) : (
+              <div className="flex items-center justify-center p-12">
+                <div className="text-center text-muted-foreground">
+                  <div className="text-lg mb-2">Carregando painel de administração...</div>
+                  <div className="text-sm">Aguarde enquanto os dados são carregados.</div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </ErrorBoundary>
         </TabsContent>
         
         <TabsContent value="vendedores" className="mt-6">
@@ -795,23 +796,37 @@ export function AdminTab({
                     )}
                 </div>
                 <div className="w-full sm:w-auto flex-shrink-0">
-                  <div className="p-4 border rounded-lg bg-muted/50 w-full sm:max-w-xs">
-                      <div className="flex flex-col items-start gap-2">
-                           <h3 className="font-semibold text-sm">Importar de Arquivo Excel</h3>
-                           <p className="text-xs text-muted-foreground mb-2">Colunas: reportgroup, totalliquido, etc.</p>
-                           <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline" className="w-full">
-                               <FileUp className="mr-2 h-4 w-4" />
-                               Importar Planilha
-                           </Button>
-                           <Input 
-                               type="file" 
-                               ref={fileInputRef} 
-                               className="hidden"
-                               accept=".xlsx, .xls"
-                               onChange={handleFileUpload}
-                           />
-                      </div>
-                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="p-4 border rounded-lg bg-muted/50 w-full sm:max-w-xs">
+                            <div className="flex flex-col items-start gap-2">
+                                <h3 className="font-semibold text-sm flex items-center gap-2">
+                                  Importar de Arquivo Excel
+                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                </h3>
+                                <p className="text-xs text-muted-foreground mb-2">Colunas: reportgroup, totalliquido, etc.</p>
+                                <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline" className="w-full">
+                                    <FileUp className="mr-2 h-4 w-4" />
+                                    Importar Planilha
+                                </Button>
+                                <Input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    className="hidden"
+                                    accept=".xlsx, .xls"
+                                    onChange={handleFileUpload}
+                                />
+                            </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="end" className="max-w-xs">
+                        <p className="font-bold">Como Gerar o Relatório:</p>
+                        <p>No sistema Seta, acesse:</p>
+                        <p>Relatórios &gt; Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
             </CardFooter>
           </Card>
