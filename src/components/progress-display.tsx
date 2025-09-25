@@ -56,7 +56,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
         { label: "Meta 3", value: goals.metona, prize: goals.metonaPrize },
     ];
     const totalMeta = goals.metona;
-    const progressPercentage = totalMeta > 0 ? (vendas / totalMeta) * 100 : 0;
+    const progressPercentage = totalMeta > 0 ? Math.min((vendas / totalMeta) * 100, 100) : 0;
 
     const findNextGoal = () => {
         if (vendas < goals.metaMinha) return { label: "Meta 1", value: goals.metaMinha };
