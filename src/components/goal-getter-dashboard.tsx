@@ -434,7 +434,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                            <TabsTrigger
                             key={seller.id}
                             value={seller.id}
-                            className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                            className={cn(
+                              "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium",
+                              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
+                              "hover:bg-muted/50"
+                            )}
                            >
                             {seller.name}
                            </TabsTrigger>
@@ -451,7 +455,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <TooltipTrigger asChild>
                            <TabsTrigger
                             value="admin"
-                            className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                            className={cn(
+                              "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium flex items-center",
+                              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
+                              "hover:bg-muted/50"
+                            )}
                            >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                            </TabsTrigger>
@@ -504,6 +512,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    
 
     
 

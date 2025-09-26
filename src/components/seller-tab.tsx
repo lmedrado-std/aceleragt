@@ -87,7 +87,11 @@ export function SellerTab({
             <TooltipTrigger asChild>
               <TabsTrigger
                 value="desempenho"
-                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                className={cn(
+                  "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center",
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
+                  "hover:bg-muted/50"
+                )}
               >
                 <Trophy className="mr-2 h-4 w-4" />
                 Meu Desempenho
@@ -102,7 +106,11 @@ export function SellerTab({
             <TooltipTrigger asChild>
               <TabsTrigger
                 value="lancamentos"
-                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                className={cn(
+                  "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center",
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
+                  "hover:bg-muted/50"
+                )}
               >
                 <BarChart className="mr-2 h-4 w-4" />
                 Meus Lançamentos
@@ -116,7 +124,11 @@ export function SellerTab({
             <TooltipTrigger asChild>
               <TabsTrigger
                 value="metas"
-                className="px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:border-b-blue-700"
+                className={cn(
+                  "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center",
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
+                  "hover:bg-muted/50"
+                )}
               >
                 <Target className="mr-2 h-4 w-4" />
                 Metas
@@ -232,3 +244,5 @@ export function SellerTab({
     </TooltipProvider>
   );
 }
+
+    
