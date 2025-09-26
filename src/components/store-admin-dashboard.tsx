@@ -3,8 +3,9 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Goals, Incentives, Seller } from "@/lib/storage";
-import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift, PartyPopper } from "lucide-react";
+import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift, PartyPopper, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 interface StoreAdminDashboardProps {
   sellers: Seller[];
@@ -124,6 +125,15 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
         <CardDescription>Resumo de desempenho da equipe e progresso das metas.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
+        
+        <Alert>
+          <Megaphone className="h-4 w-4" />
+          <AlertTitle>Dica de Gestão!</AlertTitle>
+          <AlertDescription>
+            Manter os lançamentos da equipe sempre atualizados deixará todos motivados com seus resultados. É importante fazer sempre o alinhamento do desempenho com a equipe!
+          </AlertDescription>
+        </Alert>
+
         {/* === KPIs === */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <InfoCard 
