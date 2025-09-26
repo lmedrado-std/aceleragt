@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -7,9 +6,12 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, RefreshCw, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import salesTipsData from "@/lib/sales-tips.json";
+import { useState, useEffect } from "react";
+import { Button } from "./ui/button";
 
 interface SellerTabProps {
   seller: Seller;
@@ -56,6 +58,73 @@ const GoalItem = ({ label, value }: { label: string, value: string }) => (
         <p className="text-sm font-semibold">{value}</p>
     </div>
 );
+
+type Tip = {
+  title: string;
+  url: string;
+  category: string;
+};
+
+const SalesTipsTab = () => {
+    const [tips, setTips] = useState<Tip[]>([]);
+
+    const getRandomTips = (count: number) => {
+        const shuffled = [...salesTipsData].sort(() => 0.5 - Math.random());
+        setTips(shuffled.slice(0, count));
+    };
+
+    useEffect(() => {
+        getRandomTips(4);
+    }, []);
+
+    const categoryColors: { [key: string]: string } = {
+        'Vendas': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+        'PA': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
+        'Ticket Médio': 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
+        'Objeções': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+        'Conversão': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+        'Atendimento': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Dicas para Vender Mais</CardTitle>
+                <CardDescription>
+                    Explore estes conteúdos para aprimorar suas técnicas e impulsionar seus resultados.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {tips.map((tip, index) => (
+                        <a href={tip.url} target="_blank" rel="noopener noreferrer" key={index} className="block group">
+                            <Card className="hover:shadow-md hover:border-primary/50 transition-all h-full">
+                                <CardContent className="p-4 flex flex-col justify-between h-full">
+                                    <div>
+                                        <div className="flex justify-between items-start">
+                                            <p className={`text-xs font-semibold px-2 py-0.5 rounded-full ${categoryColors[tip.category] || 'bg-muted'}`}>
+                                                {tip.category}
+                                            </p>
+                                            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        </div>
+                                        <p className="font-semibold mt-2 text-card-foreground">{tip.title}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </a>
+                    ))}
+                </div>
+            </CardContent>
+            <CardContent className="flex justify-center">
+                 <Button onClick={() => getRandomTips(4)}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Ver Novas Dicas
+                </Button>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export function SellerTab({
   seller,
@@ -136,6 +205,24 @@ export function SellerTab({
             </TooltipTrigger>
             <TooltipContent>
               <p>Consultar os valores de todas as metas</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger
+                value="dicas"
+                className={cn(
+                  "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all flex items-center",
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
+                  "hover:bg-muted/50"
+                )}
+              >
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Dicas
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Dicas e conteúdos para vender mais</p>
             </TooltipContent>
           </Tooltip>
         </TabsList>
@@ -240,9 +327,10 @@ export function SellerTab({
                 </CardContent>
             </Card>
         </TabsContent>
+        <TabsContent value="dicas" className="mt-6">
+            <SalesTipsTab />
+        </TabsContent>
       </Tabs>
     </TooltipProvider>
   );
 }
-
-    
