@@ -167,10 +167,10 @@ export function AdminTab({
   }, []);
 
   const handleAddSeller = async (name?: string, password?: string) => {
-    const newSellerName = name || getValues("newSellerName");
+    const newSellerName = (name || getValues("newSellerName"))?.trim();
     const newSellerPassword = password || getValues("newSellerPassword");
 
-    if (!newSellerName || newSellerName.trim() === "") {
+    if (!newSellerName) {
       setError("newSellerName", { type: "manual", message: "Nome é obrigatório." });
       return false;
     }
@@ -180,10 +180,16 @@ export function AdminTab({
     }
     clearErrors("newSellerName");
 
-    const finalPassword =
-      newSellerPassword && newSellerPassword.trim().length > 0
-        ? newSellerPassword.trim()
-        : newSellerName.trim().toLowerCase();
+    let finalPassword = newSellerPassword?.trim();
+
+    if (!finalPassword) {
+      if (newSellerName.length <= 3) {
+        finalPassword = "1234";
+      } else {
+        finalPassword = newSellerName.toLowerCase();
+      }
+    }
+
 
     if (finalPassword.length < 4) {
       setError("newSellerPassword", { type: "manual", message: "A senha deve ter no mínimo 4 caracteres." });
@@ -1023,5 +1029,7 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
