@@ -1,0 +1,47 @@
+/* components/TipsTab/CategoryFilter/styles.module.css */
+.categoryFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--category-color, var(--border));
+  background-color: transparent;
+  color: var(--category-color, var(--foreground));
+}
+
+.categoryButton:hover {
+  background-color: var(--category-color, var(--accent));
+  color: white;
+}
+
+.categoryButton.active {
+  background-color: var(--category-color, var(--primary));
+  color: white;
+  font-weight: 600;
+}
+
+.categoryButton[onClick*="all"] {
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.categoryButton[onClick*="all"].active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
+.categoryIcon {
+  font-size: 16px;
+}

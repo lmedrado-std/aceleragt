@@ -6,9 +6,11 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TipsTab } from "./TipsTab";
+
 
 interface SellerTabProps {
   seller: Seller;
@@ -81,19 +83,10 @@ export function SellerTab({
   return (
     <TooltipProvider>
       <Tabs defaultValue="desempenho" className="w-full">
-        <TabsList className="h-auto p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+        <TabsList className="h-auto p-1 bg-muted rounded-lg grid grid-cols-2 sm:grid-cols-4 w-full sm:w-max">
           <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger
-                value="desempenho"
-                className={cn(
-                  "relative px-4 py-2.5 rounded-md transition-all duration-200 font-medium text-sm flex items-center",
-                  "text-gray-600 dark:text-gray-400",
-                  "hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-gray-700/50",
-                  "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md",
-                  "data-[state=active]:hover:bg-blue-700 data-[state=active]:font-semibold"
-                )}
-              >
+              <TabsTrigger value="desempenho" className="tab-trigger-blue">
                 <Trophy className="mr-2 h-4 w-4" />
                 Meu Desempenho
               </TabsTrigger>
@@ -105,16 +98,7 @@ export function SellerTab({
           
           <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger
-                value="lancamentos"
-                className={cn(
-                  "relative px-4 py-2.5 rounded-md transition-all duration-200 font-medium text-sm flex items-center",
-                  "text-gray-600 dark:text-gray-400",
-                  "hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-gray-700/50",
-                  "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md",
-                  "data-[state=active]:hover:bg-blue-700 data-[state=active]:font-semibold"
-                )}
-              >
+              <TabsTrigger value="lancamentos" className="tab-trigger-blue">
                 <BarChart className="mr-2 h-4 w-4" />
                 Meus Lançamentos
               </TabsTrigger>
@@ -125,22 +109,24 @@ export function SellerTab({
           </Tooltip>
            <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger
-                value="metas"
-                className={cn(
-                  "relative px-4 py-2.5 rounded-md transition-all duration-200 font-medium text-sm flex items-center",
-                  "text-gray-600 dark:text-gray-400",
-                  "hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-gray-700/50",
-                  "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md",
-                  "data-[state=active]:hover:bg-blue-700 data-[state=active]:font-semibold"
-                )}
-              >
+              <TabsTrigger value="metas" className="tab-trigger-blue">
                 <Target className="mr-2 h-4 w-4" />
                 Metas
               </TabsTrigger>
             </TooltipTrigger>
             <TooltipContent>
               <p>Consultar os valores de todas as metas</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger value="dicas" className="tab-trigger-blue">
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Dicas
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Dicas e artigos para melhorar suas vendas</p>
             </TooltipContent>
           </Tooltip>
         </TabsList>
@@ -244,6 +230,10 @@ export function SellerTab({
                     </Card>
                 </CardContent>
             </Card>
+        </TabsContent>
+
+        <TabsContent value="dicas" className="mt-6">
+          <TipsTab />
         </TabsContent>
       </Tabs>
     </TooltipProvider>

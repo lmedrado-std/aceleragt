@@ -1,0 +1,67 @@
+/* components/TipsTab/styles.module.css */
+.tipsContainer {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--card);
+  border-radius: var(--radius-lg);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.header h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 8px;
+}
+
+.header p {
+  font-size: 16px;
+  color: var(--muted-foreground);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .controls {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.tipsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 16px;
+  color: var(--muted-foreground);
+}
+
+.noResults {
+  text-align: center;
+  padding: 48px;
+  color: var(--muted-foreground);
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.noResults p {
+  font-size: 16px;
+}
