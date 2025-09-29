@@ -292,8 +292,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     const tabFromUrl = searchParams.get("tab") || activeTab;
 
-    const trackView = (sellerId: string) => {
-        fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
+    const trackView = async (sellerId: string) => {
+        await fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
+        await loadSellers();
     };
 
     if (tabFromUrl === 'admin') {
@@ -304,12 +305,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     } else if (tabFromUrl && tabFromUrl !== 'loading') {
       const isSellerTab = sellers.some(s => s.id === tabFromUrl);
       
-      // Always track the view if it's a seller tab and the user is authenticated in some way
-      if (isSellerTab && (isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl))) {
+      if (isSellerTab) {
         trackView(tabFromUrl);
       }
 
-      // Then, check for permission and redirect if necessary
       const canView = isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl);
       if (!canView && isSellerTab) {
           const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
@@ -317,7 +316,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           router.push(sellerLoginUrl);
       }
     }
-  }, [storeId, activeTab, searchParams, router, loading, sellers, isStoreAdmin, isAdmin]);
+  }, [storeId, activeTab, searchParams, router, loading, sellers, isStoreAdmin, isAdmin, loadSellers]);
 
 
   const handleIncentivesCalculated = useCallback(
@@ -526,5 +525,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
-
-    
