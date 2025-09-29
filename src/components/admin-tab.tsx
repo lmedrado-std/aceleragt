@@ -147,8 +147,7 @@ export function AdminTab({
     "goals.legendariaBonusValorPremio",
   ]);
   const performanceBonusEnabled = watch("goals.performanceBonusEnabled");
-  const corridinhaEnabled = watch("goals.corridinhaEnabled");
-
+  
   useEffect(() => {
     if (lastUpdated) {
         setFormattedLastUpdated(
@@ -161,7 +160,7 @@ export function AdminTab({
             })
         );
     }
-}, [lastUpdated]);
+  }, [lastUpdated]);
 
   const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -170,13 +169,14 @@ export function AdminTab({
   }, []);
 
   const handleNumericBlur = useCallback((field: ControllerRenderProps<any, any>) => {
-      const value = field.value;
-      if (typeof value === 'string' && value.trim() !== '') {
-          const num = parseFloat(value.replace(',', '.'));
-          if (!isNaN(num)) {
-              field.onChange(num);
-          }
+      let value = field.value;
+      if (typeof value === 'string') {
+        const num = parseFloat(value.replace(',', '.'));
+        if (!isNaN(num)) {
+          value = num;
+        }
       }
+      field.onChange(value);
   }, []);
 
   const handleAddSeller = async (name?: string, password?: string) => {
@@ -316,7 +316,7 @@ export function AdminTab({
         const parsed: any = {};
         for (const key in rawGoals) {
             const value = rawGoals[key];
-            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+            if (key === 'performanceBonusEnabled') {
                 parsed[key] = !!value;
                 continue;
             }
