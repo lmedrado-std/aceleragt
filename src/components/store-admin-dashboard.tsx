@@ -122,16 +122,12 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
       <CardHeader>
         <CardTitle>Dashboard da Loja</CardTitle>
         <CardDescription>Resumo de desempenho da equipe e progresso das metas.</CardDescription>
+        <CardDescription className="pt-2 text-xs text-muted-foreground flex items-center gap-2">
+            <Megaphone className="h-4 w-4" />
+            Manter os lançamentos atualizados deixará todos motivados com seus resultados.
+          </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        
-        <Alert>
-          <Megaphone className="h-4 w-4" />
-          <AlertTitle>Dica de Gestão!</AlertTitle>
-          <AlertDescription>
-            Manter os lançamentos da equipe sempre atualizados deixará todos motivados com seus resultados. É importante fazer sempre o alinhamento do desempenho com a equipe!
-          </AlertDescription>
-        </Alert>
 
         {/* === KPIs === */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
