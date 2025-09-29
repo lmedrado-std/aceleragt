@@ -70,7 +70,7 @@ export function TipsTab() {
       {!loading && videos.length > 0 && (
         <div className={styles.tipsGrid}>
           {videos.map((video, index) => (
-            <a href={video.url} target="_blank" rel="noopener noreferrer" key={video.url || index}>
+            <a href={video.url} target="_blank" rel="noopener noreferrer" key={video.url || index} className="block no-underline">
               <Card className="group flex flex-col hover:border-primary transition-all h-full">
                 <CardHeader>
                   <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
