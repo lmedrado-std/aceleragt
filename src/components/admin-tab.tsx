@@ -1,4 +1,3 @@
-
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -658,7 +657,7 @@ export function AdminTab({
                    )}
                 >
                   <Target className="mr-2 h-4 w-4" />
-                  Metas &amp; Prêmios
+                  Metas & Prêmios
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent>
@@ -789,7 +788,7 @@ export function AdminTab({
               {sellers.length === 0 ? (
                   <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {sellers.map((seller, index) => (
                     <Card key={seller.id} className="overflow-hidden">
                         <CardHeader className="flex flex-row items-center gap-4 bg-muted/50 p-4">
@@ -929,6 +928,29 @@ export function AdminTab({
                         )}
                     </div>
                 </div>
+                <Separator/>
+                <div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                    <div className="pr-4">
+                      <h4 className="font-medium text-md text-card-foreground">Bônus Corridinha Diária</h4>
+                      <p className="text-sm text-muted-foreground">Ative para habilitar o bônus diário.</p>
+                    </div>
+                    <FormField
+                      control={control}
+                      name="goals.corridinhaEnabled"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
                  <Separator/>
                  <div>
                     <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Produtos por Atendimento (PA)</h3>
@@ -1029,7 +1051,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
-
-    
