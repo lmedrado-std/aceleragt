@@ -946,7 +946,7 @@ export function AdminTab({
                   <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
                     <div className="pr-4">
                       <h4 className="font-medium text-md text-card-foreground">Bônus Corridinha Diária</h4>
-                      <p className="text-sm text-muted-foreground">Ative para habilitar a inserção do bônus diário.</p>
+                      <p className="text-sm text-muted-foreground">Ative para habilitar a inserção do bônus diário na aba "Lançamentos".</p>
                     </div>
                     <FormField
                       control={control}
