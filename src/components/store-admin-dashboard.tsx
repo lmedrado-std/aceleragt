@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -126,6 +125,14 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
       </CardHeader>
       <CardContent className="space-y-8">
         
+        <Alert>
+          <Megaphone className="h-4 w-4" />
+          <AlertTitle>Dica de Gestão!</AlertTitle>
+          <AlertDescription>
+            Manter os lançamentos da equipe sempre atualizados deixará todos motivados com seus resultados. É importante fazer sempre o alinhamento do desempenho com a equipe!
+          </AlertDescription>
+        </Alert>
+
         {/* === KPIs === */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <InfoCard 
@@ -238,14 +245,6 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
             </Card>
         </div>
         
-        <Alert>
-          <Megaphone className="h-4 w-4" />
-          <AlertTitle>Dica de Gestão!</AlertTitle>
-          <AlertDescription>
-            Manter os lançamentos da equipe sempre atualizados deixará todos motivados com seus resultados. É importante fazer sempre o alinhamento do desempenho com a equipe!
-          </AlertDescription>
-        </Alert>
-
       </CardContent>
     </Card>
   );
