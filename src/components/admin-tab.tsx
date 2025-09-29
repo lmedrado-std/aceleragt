@@ -1,4 +1,3 @@
-
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -23,8 +22,9 @@ import {
   TrendingUp,
   Check,
   Loader2,
+  Megaphone,
 } from "lucide-react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { FormValues } from "./goal-getter-dashboard";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,6 +130,7 @@ export function AdminTab({
       notFound: string[];
       found: ParsedRow[];
   }>({ open: false, notFound: [], found: [] });
+  const [formattedLastUpdated, setFormattedLastUpdated] = useState<string | null>(null);
 
 
   const {
@@ -148,6 +149,21 @@ export function AdminTab({
     "goals.legendariaBonusValorPremio",
   ]);
   const performanceBonusEnabled = watch("goals.performanceBonusEnabled");
+  const corridinhaEnabled = watch("goals.corridinhaEnabled");
+
+  useEffect(() => {
+    if (lastUpdated) {
+        setFormattedLastUpdated(
+            new Date(lastUpdated).toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+            })
+        );
+    }
+}, [lastUpdated]);
 
   const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -308,7 +324,7 @@ export function AdminTab({
         const parsed: any = {};
         for (const key in rawGoals) {
             const value = rawGoals[key];
-            if (key === 'performanceBonusEnabled') {
+            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
                 parsed[key] = !!value;
                 continue;
             }
@@ -390,16 +406,6 @@ export function AdminTab({
       setIsCalculating(false);
     }
   };
-  
-  const formattedLastUpdated = lastUpdated
-    ? new Date(lastUpdated).toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
     
   const proceedWithImport = (rows: ParsedRow[]) => {
       let updatedCount = 0;
@@ -1059,5 +1065,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    

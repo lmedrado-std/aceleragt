@@ -48,6 +48,7 @@ function StorePageContent() {
   const [error, setError] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [formattedLastUpdated, setFormattedLastUpdated] = useState<string | null>(null);
   
   const params = useParams();
   const router = useRouter();
@@ -109,15 +110,22 @@ function StorePageContent() {
     loadStoreData();
   }, [loadStoreData]);
 
-  const formattedLastUpdated = store?.last_incentive_calculation
-    ? new Date(store.last_incentive_calculation).toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
+  useEffect(() => {
+    if (store?.last_incentive_calculation) {
+      setFormattedLastUpdated(
+        new Date(store.last_incentive_calculation).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    } else {
+      setFormattedLastUpdated(null);
+    }
+  }, [store?.last_incentive_calculation]);
+
 
   if (error) {
      return (
