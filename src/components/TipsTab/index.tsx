@@ -77,8 +77,16 @@ export function TipsTab() {
                     <p className="text-sm text-muted-foreground">{video.description}</p>
                     </CardContent>
                     <div className="p-4 pt-0 mt-auto">
-                    <Button onClick={() => handleOpenVideo(video.url)} variant="ghost" size="sm" className="w-full justify-start text-primary">
-                        <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-primary"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleOpenVideo(video.url);
+                      }}
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" /> Assistir no YouTube
                     </Button>
                     </div>
                 </Card>
