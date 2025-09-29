@@ -8,13 +8,10 @@ import { usePathname } from "next/navigation";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isAdminPage = pathname.startsWith('/admin');
-    const isHomePage = pathname === '/';
-    
-    const showSidebar = isHomePage || isAdminPage;
+    const isLoginPage = pathname.includes('/login');
 
-    if (!showSidebar) {
-        return <main className="flex flex-1 flex-col p-4 lg:p-6">{children}</main>;
+    if (isLoginPage) {
+        return <main>{children}</main>;
     }
 
     return (

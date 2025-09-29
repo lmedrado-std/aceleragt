@@ -93,6 +93,22 @@ function StorePageContent() {
         if (showToast) {
             toast({ title: "Dados atualizados", description: "As informações da loja foram recarregadas." });
         }
+
+        if (storeData?.last_incentive_calculation) {
+          const date = new Date(storeData.last_incentive_calculation);
+          setFormattedLastUpdated(
+            date.toLocaleString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          );
+        } else {
+          setFormattedLastUpdated(null);
+        }
+
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : "Ocorreu um erro ao carregar os dados da loja.";
         setError(errorMessage);
@@ -109,24 +125,6 @@ function StorePageContent() {
   useEffect(() => {
     loadStoreData();
   }, [loadStoreData]);
-
-  useEffect(() => {
-    if (store?.last_incentive_calculation) {
-      const date = new Date(store.last_incentive_calculation);
-      setFormattedLastUpdated(
-        date.toLocaleString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-    } else {
-      setFormattedLastUpdated(null);
-    }
-  }, [store?.last_incentive_calculation]);
-
 
   if (error) {
      return (
@@ -268,5 +266,3 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
-
-    
