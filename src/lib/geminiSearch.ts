@@ -1,5 +1,13 @@
 
-export async function buscarVideosGemini(query: string) {
+export interface Video {
+  title: string;
+  url: string;
+  channel: string;
+  publishedAt: string;
+  description: string;
+}
+
+export async function buscarVideosGemini(query: string): Promise<Video[]> {
   const GEMINI_API_KEY = "AIzaSyDlKzUk76TeGv0rmeU2qDYLi1mrvz8i5sE";
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -37,26 +45,24 @@ export async function buscarVideosGemini(query: string) {
     }
 
     const data = await res.json();
-    let videos = [];
+    let videos: Video[] = [];
 
     if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
       let rawText = data.candidates[0].content.parts[0].text;
       
-      // Limpa a resposta, removendo os blocos de código ```json e ```
       rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
       try {
         videos = JSON.parse(rawText);
       } catch (e) {
         console.error("Falha ao fazer parse do JSON principal. Tentando extrair múltiplos objetos.", e);
-        // Fallback: Tenta extrair múltiplos objetos JSON se o parse do array falhar
         try {
             const regex = /{[\s\S]*?}/g;
             const matches = rawText.match(regex);
             if (matches) {
               videos = matches.map(match => {
-                  try { return JSON.parse(match) } catch { return null }
-              }).filter(Boolean);
+                  try { return JSON.parse(match) as Video } catch { return null }
+              }).filter((v): v is Video => v !== null);
             }
         } catch (fallbackError) {
              console.error("Falha no fallback de extração de JSON.", fallbackError);
@@ -70,4 +76,47 @@ export async function buscarVideosGemini(query: string) {
     console.error("Erro ao se comunicar com a API do Gemini:", error);
     return [];
   }
+}
+
+export async function buscarVideosGeminiComFallback(query: string): Promise<Video[]> {
+  let videos = await buscarVideosGemini(query);
+  
+  if (!videos || videos.length === 0) {
+    console.log(`Fallback 1: Buscando por "vendas ${query}"`);
+    videos = await buscarVideosGemini(`vendas ${query}`);
+  }
+  
+  if (!videos || videos.length === 0) {
+    console.log(`Fallback 2: Buscando por "sales tips ${query}" em inglês`);
+    videos = await buscarVideosGemini(`sales tips ${query}`);
+  }
+
+  if (!videos || videos.length === 0) {
+    console.log("Fallback final: Retornando vídeos estáticos.");
+    videos = [
+      {
+        title: "8 TÉCNICAS DE VENDAS INFALÍVEIS! | Thiago Concer",
+        url: "https://www.youtube.com/watch?v=Q03Xaaipb60",
+        channel: "Thiago Concer",
+        publishedAt: "1 ano atrás",
+        description: "Aprenda 8 técnicas de vendas que funcionam para vender qualquer coisa, para qualquer pessoa, em qualquer lugar."
+      },
+      {
+        title: "Como Vender Mais e Melhor? 10 Dicas Práticas",
+        url: "https://www.youtube.com/watch?v=qD35gHk0-i4",
+        channel: "Sebrae",
+        publishedAt: "4 anos atrás",
+        description: "Confira 10 dicas práticas de como vender mais e melhor, para que o seu negócio tenha sucesso no mercado."
+      },
+      {
+        title: "COMO QUEBRAR QUALQUER OBJEÇÃO DE VENDAS - O GUIA DEFINITIVO",
+        url: "https://www.youtube.com/watch?v=73z-Y9W-31M",
+        channel: "Jordão Felix",
+        publishedAt: "2 anos atrás",
+        description: "Um guia definitivo para quebrar qualquer objeção que seu cliente apresente na hora da venda."
+      }
+    ];
+  }
+  
+  return videos;
 }

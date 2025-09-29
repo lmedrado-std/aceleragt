@@ -1,18 +1,11 @@
+
 // components/TipsTab/index.tsx
 import React, { useState, useEffect } from 'react';
-import { buscarVideosGemini } from '@/lib/geminiSearch';
+import { buscarVideosGeminiComFallback, Video } from '@/lib/geminiSearch';
 import styles from './styles.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-
-interface Video {
-  title: string;
-  url: string;
-  channel: string;
-  publishedAt: string;
-  description: string;
-}
 
 const categorias = [
   "Objeções de Vendas",
@@ -30,7 +23,7 @@ export function TipsTab() {
 
   useEffect(() => {
     setLoading(true);
-    buscarVideosGemini(categoria)
+    buscarVideosGeminiComFallback(categoria)
       .then(res => setVideos(res || []))
       .catch(err => {
         console.error("Erro ao buscar vídeos:", err);
