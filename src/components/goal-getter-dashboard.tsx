@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +50,7 @@ const goalsSchema = z.object({
   legendariaBonusValorVenda: z.coerce.number().default(0),
   legendariaBonusValorPremio: z.coerce.number().default(0),
   performanceBonusEnabled: z.boolean().default(false),
+  corridinhaEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
   paPrize1: z.coerce.number().default(0),
   paGoal2: z.coerce.number().default(0),
@@ -115,7 +115,7 @@ const parseForAI = (value: any): number => {
 const parseGoalsForAI = (rawGoals: any): Goals => {
     const parsed: any = {};
     for (const key in rawGoals) {
-        if (key === 'performanceBonusEnabled') {
+        if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
             parsed[key] = !!rawGoals[key];
         } else {
             parsed[key] = parseForAI(rawGoals[key]);
@@ -294,13 +294,17 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     const tabFromUrl = searchParams.get("tab") || activeTab;
 
     const trackView = async (sellerId: string) => {
-        await fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
-        await loadSellers(); // Recarrega os dados para refletir a nova contagem
+        try {
+            await fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
+            await loadSellers();
+        } catch (error) {
+            console.error("Failed to track view:", error);
+        }
     };
 
     if (tabFromUrl === 'admin') {
       if (!isAdminGlobal() && !isStoreAuthenticated(storeId)) {
-        const redirectUrl = `/dashboard/${storeId}?tab=admin`;
+        const redirectUrl = `/loja/${storeId}/dashboard?tab=admin`;
         router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(redirectUrl)}`);
       }
     } else if (tabFromUrl && tabFromUrl !== 'loading') {
@@ -312,7 +316,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
       const canView = isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl);
       if (!canView && isSellerTab) {
-          const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
+          const sellerDashboardUrl = `/loja/${storeId}/dashboard?tab=${tabFromUrl}`;
           const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
           router.push(sellerLoginUrl);
       }
@@ -345,7 +349,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         for (const [key, value] of Object.entries(goals)) {
             if (value === null || value === undefined) {
-                if (key === 'performanceBonusEnabled') {
+                if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
                     cleanedGoals[key] = false;
                 } else {
                     cleanedGoals[key] = 0;
@@ -353,7 +357,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 continue;
             }
 
-            if (key === 'performanceBonusEnabled') {
+            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
                  cleanedGoals[key] = !!value;
                  continue;
             }
@@ -375,6 +379,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         }
         
         cleanedGoals.performanceBonusEnabled = !!cleanedGoals.performanceBonusEnabled;
+        cleanedGoals.corridinhaEnabled = !!cleanedGoals.corridinhaEnabled;
 
         // Ensure store_id is not nested inside the goals object
         delete cleanedGoals.store_id;
@@ -398,7 +403,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
-    router.push(`/dashboard/${storeId}?tab=${newTab}`, { scroll: false });
+    router.push(`/loja/${storeId}/dashboard?tab=${newTab}`, { scroll: false });
   };
   
   if (loading || activeTab === "loading" || !currentStore) {
@@ -510,5 +515,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
-
-    

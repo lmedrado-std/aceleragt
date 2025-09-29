@@ -17,7 +17,7 @@ import AppLayout from "@/components/app-layout";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNextRouter>) {
-  const lojaDashboardUrl = `/dashboard/${storeId}?tab=admin`;
+  const lojaDashboardUrl = `/loja/${storeId}/dashboard?tab=admin`;
   if (isAdminGlobal() || isStoreAuthenticated(storeId)) {
     router.push(lojaDashboardUrl);
   } else {
@@ -26,7 +26,7 @@ function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNex
 }
 
 function handleSellerAccess(storeId: string, sellerId: string, router: ReturnType<typeof useNextRouter>) {
-  const sellerDashboardUrl = `/dashboard/${storeId}?tab=${sellerId}`;
+  const sellerDashboardUrl = `/loja/${storeId}/dashboard?tab=${sellerId}`;
 
   // Case 1: User has direct access to the seller's dashboard.
   if (isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(sellerId)) {

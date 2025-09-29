@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -107,7 +106,7 @@ export function Sidebar() {
                 key={store.id} 
                 href={`/loja/${store.id}`} 
                 icon={<StoreIcon size={20} />} 
-                isActive={pathname.startsWith(`/loja/${store.id}`) || pathname.startsWith(`/dashboard/${store.id}`)}
+                isActive={pathname.startsWith(`/loja/${store.id}`)}
             >
               {store.name}
             </NavLink>
