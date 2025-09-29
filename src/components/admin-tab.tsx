@@ -68,8 +68,6 @@ import { SellerAvatar } from "./seller-avatar";
 import { Switch } from "./ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -174,15 +172,9 @@ export function AdminTab({
   const handleNumericBlur = useCallback((field: ControllerRenderProps<any, any>) => {
       const value = field.value;
       if (typeof value === 'string' && value.trim() !== '') {
-          const num = parseFloat(value);
+          const num = parseFloat(value.replace(',', '.'));
           if (!isNaN(num)) {
-              let formattedValue = num.toFixed(2);
-              if (formattedValue.endsWith('.00')) {
-                  formattedValue = String(parseInt(formattedValue));
-              } else if (formattedValue.endsWith('0')) {
-                  formattedValue = formattedValue.slice(0, -1);
-              }
-              field.onChange(formattedValue.replace('.', ','));
+              field.onChange(num);
           }
       }
   }, []);
@@ -787,12 +779,14 @@ export function AdminTab({
                         <>
                             <div className="flex-grow">
                                 <p className="font-medium">{seller.name ?? 'Vendedor sem nome'}</p>
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
-                                        {seller.last_viewed_at ? `visto ${formatDistanceToNow(new Date(seller.last_viewed_at), { locale: ptBR, addSuffix: true })}` : 'nunca acessou'}
-                                    </span>
-                                    <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count || 0} acessos</span>
-                                </div>
+                                {seller.last_viewed_at && (
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
+                                            visto por último há {new Date(seller.last_viewed_at).toLocaleDateString()}
+                                        </span>
+                                        <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count || 0} acessos</span>
+                                    </div>
+                                )}
                             </div>
                           <div className="flex items-center flex-shrink-0">
                             <Button size="icon" variant="ghost" type="button" onClick={() => startEditing(seller)}><Edit/></Button>
