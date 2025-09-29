@@ -45,6 +45,33 @@ function getVideosFallback(query: string): Video[] {
         publishedAt: "1 semana atrás",
         description: "Como criar experiências memoráveis no atendimento ao cliente para fidelizar e vender mais."
       }
+    ],
+    "Técnicas de Conversão": [
+      {
+        title: "10 GATILHOS MENTAIS Para VENDER MAIS | Técnicas de Persuasão",
+        url: "https://www.youtube.com/watch?v=4_z7WGgV4_4",
+        channel: "Diego Maia",
+        publishedAt: "6 meses atrás",
+        description: "Aprenda os gatilhos mentais mais poderosos para aumentar suas conversões e vender mais."
+      }
+    ],
+    "Aumentar PA": [
+      {
+        title: "Aumente em 40% a sua conversão em Vendas no Varejo com essa técnica",
+        url: "https://www.youtube.com/watch?v=3bGrB4Fk4sk",
+        channel: "Sebrae",
+        publishedAt: "4 anos atrás",
+        description: "Técnicas eficazes para aumentar o número de peças vendidas por cliente e a conversão."
+      }
+    ],
+    "Fechamento de Vendas": [
+      {
+        title: "AS 7 MELHORES TÉCNICAS DE FECHAMENTO DE VENDAS",
+        url: "https://www.youtube.com/watch?v=B11j2uX-s3g",
+        channel: "Thiago Concer",
+        publishedAt: "2 anos atrás",
+        description: "Domine as técnicas de fechamento mais eficazes para converter prospects em clientes."
+      }
     ]
   };
 
@@ -63,7 +90,7 @@ function getVideosFallback(query: string): Video[] {
 
 export async function buscarVideosGeminiComFallback(query: string): Promise<Video[]> {
   const GEMINI_API_KEY = "AIzaSyDlKzUk76TeGv0rmeU2qDYLi1mrvz8i5sE";
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   const prompt = `
     Liste no mínimo 3 e no máximo 8 vídeos do YouTube lançados nos últimos anos, em português, sobre "${query}".
