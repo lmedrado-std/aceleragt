@@ -5,6 +5,7 @@ import { Goals, Incentives, Seller } from "@/lib/storage";
 import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift, PartyPopper, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StoreAdminDashboardProps {
   sellers: Seller[];
@@ -47,11 +48,18 @@ const GoalAchievementItem = ({ label, goalValue, sellers, sellersReached }: { la
     );
 };
 
-const PrizeBreakdownItem = ({ label, value, colorClass }: { label: string; value: number, colorClass?: string }) => (
-    <div className="flex justify-between items-center text-sm py-1.5 border-b border-border/50 last:border-0">
-        <p className="text-muted-foreground">{label}</p>
-        <p className={cn("font-semibold text-foreground", colorClass)}>{formatCurrency(value)}</p>
-    </div>
+const PrizeBreakdownItem = ({ label, value, colorClass, tooltipContent }: { label: string; value: number, colorClass?: string, tooltipContent: React.ReactNode }) => (
+    <Tooltip>
+        <TooltipTrigger asChild>
+            <div className="flex justify-between items-center text-sm py-1.5 border-b border-border/50 last:border-0 cursor-help">
+                <p className="text-muted-foreground">{label}</p>
+                <p className={cn("font-semibold text-foreground", colorClass)}>{formatCurrency(value)}</p>
+            </div>
+        </TooltipTrigger>
+        <TooltipContent>
+            {tooltipContent}
+        </TooltipContent>
+    </Tooltip>
 );
 
 
@@ -115,6 +123,37 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const celebration = highestGoalAchieved();
 
   const medals = ["🥇", "🥈", "🥉"];
+
+  const getSellersForPrize = (prizeKey: keyof typeof prizeBreakdown) => {
+    const incentiveKeyMap = {
+        meta1: 'meta1Premio',
+        meta2: 'meta2Premio',
+        meta3: 'meta3Premio',
+        lendaria: 'legendariaBonus',
+        pa: 'paBonus',
+        ticketMedio: 'ticketMedioBonus',
+        corridinha: 'corridinhaDiariaBonus',
+    };
+    const incentiveKey = incentiveKeyMap[prizeKey] as keyof (typeof incentives[string]);
+
+    const contributingSellers = sellers.filter(seller => {
+        const incentive = incentives[seller.id];
+        return incentive && (incentive[incentiveKey] || 0) > 0;
+    });
+
+    if (contributingSellers.length === 0) {
+        return <p>Nenhum vendedor atingiu este prêmio.</p>;
+    }
+
+    return (
+        <div>
+            <p className="font-bold mb-1">Vendedores:</p>
+            <ul className="list-disc pl-4">
+                {contributingSellers.map(s => <li key={s.id}>{s.name}</li>)}
+            </ul>
+        </div>
+    );
+};
 
 
   return (
@@ -203,13 +242,15 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                     <CardDescription>Valores pagos por categoria de incentivo.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <PrizeBreakdownItem label="Prêmio Meta 1" value={prizeBreakdown.meta1} />
-                    <PrizeBreakdownItem label="Prêmio Meta 2" value={prizeBreakdown.meta2} />
-                    <PrizeBreakdownItem label="Prêmio Meta 3" value={prizeBreakdown.meta3} />
-                    {goals.performanceBonusEnabled && <PrizeBreakdownItem label="Bônus Performance" value={prizeBreakdown.lendaria} />}
-                    <PrizeBreakdownItem label="Bônus PA" value={prizeBreakdown.pa} />
-                    <PrizeBreakdownItem label="Bônus Ticket Médio" value={prizeBreakdown.ticketMedio} />
-                    <PrizeBreakdownItem label="Bônus Corridinha" value={prizeBreakdown.corridinha} />
+                    <TooltipProvider>
+                        <PrizeBreakdownItem label="Prêmio Meta 1" value={prizeBreakdown.meta1} tooltipContent={getSellersForPrize('meta1')} />
+                        <PrizeBreakdownItem label="Prêmio Meta 2" value={prizeBreakdown.meta2} tooltipContent={getSellersForPrize('meta2')} />
+                        <PrizeBreakdownItem label="Prêmio Meta 3" value={prizeBreakdown.meta3} tooltipContent={getSellersForPrize('meta3')} />
+                        {goals.performanceBonusEnabled && <PrizeBreakdownItem label="Bônus Performance" value={prizeBreakdown.lendaria} tooltipContent={getSellersForPrize('lendaria')} />}
+                        <PrizeBreakdownItem label="Bônus PA" value={prizeBreakdown.pa} tooltipContent={getSellersForPrize('pa')} />
+                        <PrizeBreakdownItem label="Bônus Ticket Médio" value={prizeBreakdown.ticketMedio} tooltipContent={getSellersForPrize('ticketMedio')} />
+                        <PrizeBreakdownItem label="Bônus Corridinha" value={prizeBreakdown.corridinha} tooltipContent={getSellersForPrize('corridinha')} />
+                    </TooltipProvider>
                 </CardContent>
             </Card>
 
