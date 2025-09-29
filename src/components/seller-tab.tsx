@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -7,12 +6,10 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, TrendingUp } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface SellerTabProps {
   seller: Seller;
@@ -142,26 +139,6 @@ export function SellerTab({
             </h2>
             <p className="text-muted-foreground">Aqui está um resumo do seu progresso e ganhos projetados.</p>
         </div>
-
-        {viewedByAdmin && (
-          <Card className="mb-6 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700/50">
-              <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-blue-800 dark:text-blue-300">
-                  <p className="text-sm font-semibold">Você está visualizando como administrador.</p>
-                  <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1.5">
-                          <Clock className="h-4 w-4" />
-                          <span>
-                              Último acesso: {seller.last_viewed_at ? formatDistanceToNow(new Date(seller.last_viewed_at), { locale: ptBR, addSuffix: true }) : 'nunca'}
-                          </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                           <TrendingUp className="h-4 w-4" />
-                           <span>Acessos: {seller.view_count || 0}</span>
-                      </div>
-                  </div>
-              </CardContent>
-          </Card>
-        )}
         
         <TabsContent value="desempenho" className="mt-6">
           <ProgressDisplay salesData={salesData} incentives={incentives} rankings={rankings} />
