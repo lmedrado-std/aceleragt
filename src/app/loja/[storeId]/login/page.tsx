@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,11 +22,11 @@ function StoreLoginComponent() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
   const { toast } = useToast();
   
   const redirectUrl = searchParams.get('redirect') || '/';
-  // Acessar o storeId dos parâmetros da rota, não dos query params
-  const storeId = (useRouter() as any).params?.storeId;
+  const storeId = params.storeId as string;
 
 
   useEffect(() => {
@@ -144,7 +144,7 @@ function StoreLoginComponent() {
                   <div className="relative">
                     <Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="********"
@@ -196,5 +196,3 @@ export default function StoreLoginPage() {
         </Suspense>
     )
 }
-
-    
