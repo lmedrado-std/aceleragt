@@ -51,7 +51,6 @@ const goalsSchema = z.object({
   legendariaBonusValorVenda: z.coerce.number().default(0),
   legendariaBonusValorPremio: z.coerce.number().default(0),
   performanceBonusEnabled: z.boolean().default(false),
-  corridinhaEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
   paPrize1: z.coerce.number().default(0),
   paGoal2: z.coerce.number().default(0),
@@ -116,7 +115,7 @@ const parseForAI = (value: any): number => {
 const parseGoalsForAI = (rawGoals: any): Goals => {
     const parsed: any = {};
     for (const key in rawGoals) {
-        if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+        if (key === 'performanceBonusEnabled') {
             parsed[key] = !!rawGoals[key];
         } else {
             parsed[key] = parseForAI(rawGoals[key]);
@@ -346,7 +345,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         for (const [key, value] of Object.entries(goals)) {
             if (value === null || value === undefined) {
-                if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+                if (key === 'performanceBonusEnabled') {
                     cleanedGoals[key] = false;
                 } else {
                     cleanedGoals[key] = 0;
@@ -354,7 +353,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 continue;
             }
 
-            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+            if (key === 'performanceBonusEnabled') {
                  cleanedGoals[key] = !!value;
                  continue;
             }

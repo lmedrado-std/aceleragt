@@ -148,7 +148,6 @@ export function AdminTab({
     "goals.legendariaBonusValorPremio",
   ]);
   const performanceBonusEnabled = watch("goals.performanceBonusEnabled");
-  const corridinhaEnabled = watch("goals.corridinhaEnabled");
 
   const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -309,7 +308,7 @@ export function AdminTab({
         const parsed: any = {};
         for (const key in rawGoals) {
             const value = rawGoals[key];
-            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+            if (key === 'performanceBonusEnabled') {
                 parsed[key] = !!value;
                 continue;
             }
@@ -331,7 +330,7 @@ export function AdminTab({
             vendas: getValues(`sellers.${sellerIndex}.vendas`),
             pa: getValues(`sellers.${sellerIndex}.pa`),
             ticket_medio: getValues(`sellers.${sellerIndex}.ticket_medio`),
-            corridinha_diaria: corridinhaEnabled ? getValues(`sellers.${sellerIndex}.corridinha_diaria`) : 0,
+            corridinha_diaria: getValues(`sellers.${sellerIndex}.corridinha_diaria`),
         };
         
         const parsedSellerData: any = {};
@@ -564,7 +563,6 @@ export function AdminTab({
     toast.update(id, {
       title: "Metas Salvas!",
       description: "As novas metas e prêmios foram salvos com sucesso.",
-      action: <CheckCircle className="text-green-500" />
     });
     setIsSavingGoals(false);
   }
@@ -620,7 +618,7 @@ export function AdminTab({
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
                    )}
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -639,7 +637,7 @@ export function AdminTab({
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
                    )}
                 >
                   <Users className="mr-2 h-4 w-4" />
@@ -658,7 +656,7 @@ export function AdminTab({
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
                    )}
                 >
                   <BarChart className="mr-2 h-4 w-4" />
@@ -677,7 +675,7 @@ export function AdminTab({
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
                    )}
                 >
                   <Target className="mr-2 h-4 w-4" />
@@ -696,7 +694,7 @@ export function AdminTab({
                     "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
                    )}
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
@@ -832,7 +830,7 @@ export function AdminTab({
                                 <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
                                 <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
                                 <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                {corridinhaEnabled && <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} /> }
+                                <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
                             </div>
                         </CardContent>
                     </Card>
@@ -960,40 +958,7 @@ export function AdminTab({
                         )}
                     </div>
                 </div>
-                <Separator/>
-                <div>
-                  <FormField
-                      control={control}
-                      name="goals.corridinhaEnabled"
-                      render={({ field }) => (
-                          <FormItem className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                              <div className="space-y-0.5">
-                                  <Tooltip>
-                                      <TooltipTrigger asChild>
-                                          <FormLabel className="text-base flex items-center gap-2 cursor-pointer">
-                                              Bônus Corridinha Diária
-                                              <Info className="h-4 w-4 text-muted-foreground"/>
-                                          </FormLabel>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                          <p>{field.value ? "Ativado: O campo para inserir o bônus aparecerá na aba 'Lançamentos'." : "Desativado: O campo de bônus diário ficará oculto."}</p>
-                                      </TooltipContent>
-                                  </Tooltip>
-                                  <p className={cn("text-sm", field.value ? "text-green-600" : "text-muted-foreground")}>
-                                      {field.value ? "Corridinha Ativada" : "Corridinha Desativada"}
-                                  </p>
-                              </div>
-                              <FormControl>
-                                  <Switch
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                      disabled={isSavingGoals}
-                                  />
-                              </FormControl>
-                          </FormItem>
-                      )}
-                  />
-                </div>
+                
                  <Separator/>
                  <div>
                     <h3 className="font-semibold text-lg mb-4 text-card-foreground">Metas de Produtos por Atendimento (PA)</h3>

@@ -63,6 +63,7 @@ model goals {
   ticketMedioPrize3          Int?     @default(0) @map("ticketMedioPrize3")
   ticketMedioGoal4           Int?     @default(0) @map("ticketMedioGoal4")
   ticketMedioPrize4          Int?     @default(0) @map("ticketMedioPrize4")
+  corridinhaEnabled          Boolean? @default(false) @map("corridinhaEnabled")
 }
 
 model app_config {
