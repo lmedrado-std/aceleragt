@@ -463,7 +463,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <TooltipTrigger asChild>
                            <TabsTrigger
                             value="admin"
-                            className="flex items-center"
                            >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                            </TabsTrigger>
