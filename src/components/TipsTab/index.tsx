@@ -5,6 +5,10 @@ import styles from './styles.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 const categorias = [
   "Objeções de Vendas",
@@ -45,26 +49,44 @@ export function TipsTab() {
         </div>
       </div>
       
-      <div className={styles.tipsGrid}>
-        {videos.map((video, index) => (
-          <a href={video.url} target="_blank" rel="noopener noreferrer" key={index} className="block no-underline">
-            <Card className="group flex flex-col hover:border-primary transition-all h-full">
-              <CardHeader>
-                <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
-                <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground">{video.description}</p>
-              </CardContent>
-              <div className="p-4 pt-0 mt-auto">
-                 <Button variant="ghost" size="sm" className="w-full justify-start text-primary">
-                    <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
-                 </Button>
-              </div>
-            </Card>
-          </a>
-        ))}
-      </div>
+        <Swiper
+            modules={[Navigation]}
+            slidesPerView={1}
+            spaceBetween={24}
+            navigation
+            breakpoints={{
+            640: { slidesPerView: 1 },
+            900: { slidesPerView: 2 },
+            1200: { slidesPerView: 3 }
+            }}
+            style={{ padding: '4px 4px 32px 4px' }}
+        >
+            {videos.map((video, index) => (
+            <SwiperSlide key={index} style={{ height: 'auto' }}>
+                <a
+                href={video.url.startsWith('http') ? video.url : `https://${video.url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block no-underline h-full"
+                >
+                <Card className="group flex flex-col hover:border-primary transition-all h-full">
+                    <CardHeader>
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
+                    <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                    <p className="text-sm text-muted-foreground">{video.description}</p>
+                    </CardContent>
+                    <div className="p-4 pt-0 mt-auto">
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-primary">
+                        <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
+                    </Button>
+                    </div>
+                </Card>
+                </a>
+            </SwiperSlide>
+            ))}
+        </Swiper>
     </div>
   );
 }
