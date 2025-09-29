@@ -164,7 +164,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
         <div className="!mt-4 p-3 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800/50">
             <CardDescription className="text-yellow-800 dark:text-yellow-300 text-xs flex items-center gap-2">
                 <Megaphone className="h-4 w-4" />
-                Manter os lançamentos atualizados deixará todos motivados com seus resultados.
+                Manter os lançamentos atualizados deixará todos motivados com seus resultados. Atualize sempre ao fechar a loja ou logo que iniciar os trabalhos, mantendo os vendedores sempre atualizados.
             </CardDescription>
         </div>
       </CardHeader>
@@ -196,94 +196,92 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
             <InfoCard 
                 title="Ticket Médio da Equipe" 
                 value={formatCurrency(averageTicketMedio)} 
-                icon={<Ticket className="h-4 w-4" />} 
-                description="Valor médio por venda"
+                icon={<Ticket className="h-4 w-4" />}
+                description="Média de valor por venda"
                 className="bg-gradient-to-br from-orange-500 to-orange-700 text-white"
             />
         </div>
 
-        {celebration && (
-            <Card className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
-                <CardContent className="p-4 flex items-center gap-4">
-                    <PartyPopper className="h-8 w-8 text-green-600 dark:text-green-400" />
-                    <div>
-                        <h3 className="font-bold text-lg text-green-800 dark:text-green-300">Parabéns, Equipe!</h3>
-                        <p className="text-green-700 dark:text-green-300/90">{celebration.message}</p>
-                    </div>
-                </CardContent>
-            </Card>
-        )}
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* === Goal Achievement by Sellers === */}
-            <Card className="lg:col-span-1">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5" />
-                        Metas atingidas pela equipe.
-                    </CardTitle>
-                     <CardDescription>Quantos vendedores alcançaram cada nível.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                   <GoalAchievementItem label="Meta 1" goalValue={goals.metaMinha} sellers={sellers} sellersReached={sellersInMetinha} />
-                   <GoalAchievementItem label="Meta 2" goalValue={goals.meta} sellers={sellers} sellersReached={sellersInMeta} />
-                   <GoalAchievementItem label="Meta 3" goalValue={goals.metona} sellers={sellers} sellersReached={sellersInMetona} />
-                   {goals.performanceBonusEnabled && <GoalAchievementItem label="Bônus Performance" goalValue={goals.metaLendaria} sellers={sellers} sellersReached={sellersInLendaria} />}
-                </CardContent>
-            </Card>
-
-             {/* === Prize Breakdown === */}
-            <Card className="lg:col-span-1">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Gift className="h-5 w-5" />
-                        Detalhamento dos Prêmios
-                    </CardTitle>
-                    <CardDescription>Valores pagos por categoria de incentivo.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <TooltipProvider>
-                        <PrizeBreakdownItem label="Prêmio Meta 1" value={prizeBreakdown.meta1} tooltipContent={getSellersForPrize('meta1')} />
-                        <PrizeBreakdownItem label="Prêmio Meta 2" value={prizeBreakdown.meta2} tooltipContent={getSellersForPrize('meta2')} />
-                        <PrizeBreakdownItem label="Prêmio Meta 3" value={prizeBreakdown.meta3} tooltipContent={getSellersForPrize('meta3')} />
-                        {goals.performanceBonusEnabled && <PrizeBreakdownItem label="Bônus Performance" value={prizeBreakdown.lendaria} tooltipContent={getSellersForPrize('lendaria')} />}
-                        <PrizeBreakdownItem label="Bônus PA" value={prizeBreakdown.pa} tooltipContent={getSellersForPrize('pa')} />
-                        <PrizeBreakdownItem label="Bônus Ticket Médio" value={prizeBreakdown.ticketMedio} tooltipContent={getSellersForPrize('ticketMedio')} />
-                        <PrizeBreakdownItem label="Bônus Corridinha" value={prizeBreakdown.corridinha} tooltipContent={getSellersForPrize('corridinha')} />
-                    </TooltipProvider>
-                </CardContent>
-            </Card>
-
-
-            {/* === Summary & Top Performer === */}
-             <Card className="bg-secondary/50 lg:col-span-1">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-yellow-500" />
-                        Pódio de Vendas
-                    </CardTitle>
-                    <CardDescription>{sellers.length} vendedores na competição</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {topSellers.length > 0 ? (
-                        topSellers.map((seller, index) => (
-                           <div key={seller.id} className="flex items-center gap-4 p-3 rounded-lg bg-background">
-                               <span className="text-2xl w-6 text-center">{medals[index]}</span>
-                               <div className="flex-grow">
-                                   <p className="font-bold text-base truncate">{seller.name}</p>
-                                   <p className="text-sm font-semibold text-primary">{formatCurrency(seller.vendas)}</p>
-                               </div>
+        {/* === Main Grid === */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* === Left Column: Ranking & Goals === */}
+            <div className="lg:col-span-2 space-y-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Trophy className="text-yellow-500"/> Pódio de Vendas</CardTitle>
+                        <CardDescription>Os 3 melhores vendedores por total de vendas.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {topSellers.length > 0 ? (
+                           <div className="space-y-4">
+                            {topSellers.map((seller, index) => (
+                                <div key={seller.id} className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xl font-bold w-6">{medals[index]}</span>
+                                        <p className="font-semibold text-foreground">{seller.name}</p>
+                                    </div>
+                                    <p className="font-bold text-lg text-primary">{formatCurrency(seller.vendas || 0)}</p>
+                                </div>
+                            ))}
                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center p-6 rounded-lg bg-background flex items-center justify-center h-full">
-                             <p className="text-muted-foreground">Sem dados de vendas para formar o pódio.</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                        ) : (
+                            <p className="text-center text-sm text-muted-foreground py-4">Nenhuma venda registrada ainda para formar o pódio.</p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {celebration && (
+                    <Alert className="border-green-600 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300">
+                        <PartyPopper className="h-4 w-4 !text-green-600" />
+                        <AlertTitle className="font-bold">Parabéns, Equipe! - {celebration.name} Atingida!</AlertTitle>
+                        <AlertDescription>{celebration.message}</AlertDescription>
+                    </Alert>
+                )}
+                
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Goal /> Progresso das Metas da Equipe</CardTitle>
+                        <CardDescription>Quantos vendedores atingiram cada nível de meta de vendas.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {sellersReachedAnyGoal ? (
+                            <div className="space-y-2">
+                                <GoalAchievementItem label="Meta 1" goalValue={goals.metaMinha || 0} sellers={sellers} sellersReached={sellersInMetinha} />
+                                <GoalAchievementItem label="Meta 2" goalValue={goals.meta || 0} sellers={sellers} sellersReached={sellersInMeta} />
+                                <GoalAchievementItem label="Meta 3" goalValue={goals.metona || 0} sellers={sellers} sellersReached={sellersInMetona} />
+                                {goals.performanceBonusEnabled && <GoalAchievementItem label="Bônus Performance" goalValue={goals.metaLendaria || 0} sellers={sellers} sellersReached={sellersInLendaria} />}
+                            </div>
+                        ) : (
+                            <p className="text-center text-sm text-muted-foreground py-4">Nenhum vendedor atingiu as metas de vendas ainda. Vamos lá, equipe!</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* === Right Column: Prize Breakdown === */}
+            <div className="lg:col-span-1">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Gift /> Detalhamento de Prêmios</CardTitle>
+                        <CardDescription>Distribuição total dos prêmios para a equipe.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <TooltipProvider>
+                            <div className="space-y-1">
+                                <PrizeBreakdownItem label="Prêmios Meta 1" value={prizeBreakdown.meta1} colorClass="text-green-600 dark:text-green-400" tooltipContent={getSellersForPrize('meta1')} />
+                                <PrizeBreakdownItem label="Prêmios Meta 2" value={prizeBreakdown.meta2} colorClass="text-green-600 dark:text-green-400" tooltipContent={getSellersForPrize('meta2')} />
+                                <PrizeBreakdownItem label="Prêmios Meta 3" value={prizeBreakdown.meta3} colorClass="text-green-600 dark:text-green-400" tooltipContent={getSellersForPrize('meta3')} />
+                                {goals.performanceBonusEnabled && <PrizeBreakdownItem label="Bônus Performance" value={prizeBreakdown.lendaria} colorClass="text-green-600 dark:text-green-400" tooltipContent={getSellersForPrize('lendaria')} />}
+                                <PrizeBreakdownItem label="Bônus PA" value={prizeBreakdown.pa} colorClass="text-purple-600 dark:text-purple-400" tooltipContent={getSellersForPrize('pa')} />
+                                <PrizeBreakdownItem label="Bônus Ticket Médio" value={prizeBreakdown.ticketMedio} colorClass="text-orange-600 dark:text-orange-400" tooltipContent={getSellersForPrize('ticketMedio')} />
+                                <PrizeBreakdownItem label="Bônus Corridinha" value={prizeBreakdown.corridinha} colorClass="text-blue-600 dark:text-blue-400" tooltipContent={getSellersForPrize('corridinha')} />
+                            </div>
+                        </TooltipProvider>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
-        
       </CardContent>
     </Card>
   );
