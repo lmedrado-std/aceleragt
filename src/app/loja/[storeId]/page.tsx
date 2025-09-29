@@ -21,7 +21,7 @@ function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNex
   if (isAdminGlobal() || isStoreAuthenticated(storeId)) {
     router.push(lojaDashboardUrl);
   } else {
-    router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(lojaDashboardUrl)}`);
+    router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(lojaDashboardUrl)}`);
   }
 }
 
@@ -112,8 +112,9 @@ function StorePageContent() {
 
   useEffect(() => {
     if (store?.last_incentive_calculation) {
+      const date = new Date(store.last_incentive_calculation);
       setFormattedLastUpdated(
-        new Date(store.last_incentive_calculation).toLocaleString("pt-BR", {
+        date.toLocaleString("pt-BR", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
@@ -267,3 +268,5 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
+
+    

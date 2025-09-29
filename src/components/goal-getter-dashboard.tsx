@@ -301,7 +301,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     if (tabFromUrl === 'admin') {
       if (!isAdminGlobal() && !isStoreAuthenticated(storeId)) {
         const redirectUrl = `/dashboard/${storeId}?tab=admin`;
-        router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(redirectUrl)}`);
+        router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(redirectUrl)}`);
       }
     } else if (tabFromUrl && tabFromUrl !== 'loading') {
       const isSellerTab = sellers.some(s => s.id === tabFromUrl);
@@ -510,3 +510,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    
