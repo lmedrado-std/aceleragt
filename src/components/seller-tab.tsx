@@ -90,7 +90,7 @@ export function SellerTab({
         <TabsList className="h-auto p-1 bg-muted rounded-lg grid grid-cols-2 sm:grid-cols-4 w-full sm:w-max">
           <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger value="desempenho" className="tab-trigger-blue">
+              <TabsTrigger value="desempenho">
                 <Trophy className="mr-2 h-4 w-4" />
                 Meu Desempenho
               </TabsTrigger>
@@ -102,7 +102,7 @@ export function SellerTab({
           
           <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger value="lancamentos" className="tab-trigger-blue">
+              <TabsTrigger value="lancamentos">
                 <BarChart className="mr-2 h-4 w-4" />
                 Meus Lançamentos
               </TabsTrigger>
@@ -113,7 +113,7 @@ export function SellerTab({
           </Tooltip>
            <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger value="metas" className="tab-trigger-blue">
+              <TabsTrigger value="metas">
                 <Target className="mr-2 h-4 w-4" />
                 Metas
               </TabsTrigger>
@@ -124,7 +124,7 @@ export function SellerTab({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TabsTrigger value="dicas" className="tab-trigger-blue">
+              <TabsTrigger value="dicas">
                 <Lightbulb className="mr-2 h-4 w-4" />
                 Dicas
               </TabsTrigger>
