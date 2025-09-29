@@ -4,9 +4,9 @@ export async function buscarVideosGemini(query: string) {
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
   const prompt = `
-    Liste os 8 melhores e mais recentes vídeos do YouTube em português sobre "${query}".
-    Retorne apenas um array de objetos JSON, sem nenhum outro texto ou formatação.
-    O array deve seguir exatamente este formato: 
+    Liste no mínimo 3 e no máximo 8 vídeos do YouTube lançados nos últimos anos, em português, sobre "${query}".
+    Se não for possível, liste vídeos relacionados ao tema, incluindo conteúdos motivacionais, técnicas, dicas ou exemplos práticos para vendedores.
+    Responda SEMPRE apenas o array de objetos JSON, sem explicação, sem código, sem nada antes ou depois:
     [
       {
         "title": "Título do Vídeo",
@@ -52,9 +52,12 @@ export async function buscarVideosGemini(query: string) {
         // Fallback: Tenta extrair múltiplos objetos JSON se o parse do array falhar
         try {
             const regex = /{[\s\S]*?}/g;
-            videos = [...rawText.matchAll(regex)].map(match => {
-                try { return JSON.parse(match[0]) } catch { return null }
-            }).filter(Boolean);
+            const matches = rawText.match(regex);
+            if (matches) {
+              videos = matches.map(match => {
+                  try { return JSON.parse(match) } catch { return null }
+              }).filter(Boolean);
+            }
         } catch (fallbackError) {
              console.error("Falha no fallback de extração de JSON.", fallbackError);
              videos = [];
