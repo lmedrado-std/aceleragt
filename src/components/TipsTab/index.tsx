@@ -1,95 +1,98 @@
 // components/TipsTab/index.tsx
 import React, { useState, useEffect } from 'react';
-import { TipCard } from './TipCard';
-import { CategoryFilter } from './CategoryFilter';
-import { SearchBar } from './SearchBar';
+import { buscarVideosGemini } from '@/lib/geminiSearch';
 import styles from './styles.module.css';
-import salesTips from '@/lib/sales-tips.json';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Loader2, ExternalLink } from 'lucide-react';
+import { Button } from '../ui/button';
 
-interface Tip {
-  id: number;
+interface Video {
   title: string;
   url: string;
-  category: string;
-  type: 'video' | 'article';
-  platform: string;
-  duration: string;
-  level: 'basico' | 'intermediario' | 'avancado';
+  channel: string;
+  publishedAt: string;
   description: string;
-  thumbnail?: string;
 }
 
-interface Category {
-  name: string;
-  color: string;
-  icon: string;
-}
+const categorias = [
+  "Objeções de Vendas",
+  "Aumentar Ticket Médio",
+  "Atendimento ao Cliente",
+  "Técnicas de Conversão",
+  "Aumentar PA",
+  "Fechamento de Vendas"
+];
 
 export function TipsTab() {
-  const [tips, setTips] = useState<Tip[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [categoria, setCategoria] = useState(categorias[0]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadTipsData();
-  }, []);
-
-  const loadTipsData = () => {
-    try {
-      setTips(salesTips.educational_content as Tip[]);
-      setCategories(salesTips.categories);
-    } catch (error) {
-      console.error('Erro ao carregar dicas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredTips = tips.filter(tip => {
-    const matchesCategory = selectedCategory === 'all' || tip.category === selectedCategory;
-    const matchesSearch = tip.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tip.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  if (loading) {
-    return <div className={styles.loading}>Carregando dicas...</div>;
-  }
+    setLoading(true);
+    buscarVideosGemini(categoria)
+      .then(res => setVideos(res || []))
+      .catch(err => {
+        console.error("Erro ao buscar vídeos:", err);
+        setVideos([]);
+      })
+      .finally(() => setLoading(false));
+  }, [categoria]);
 
   return (
     <div className={styles.tipsContainer}>
       <div className={styles.header}>
-        <h2>Dicas para Vendedores</h2>
-        <p>Aprimore suas habilidades com conteúdo selecionado</p>
+        <h2>Dicas em Vídeo para Vendedores</h2>
+        <p>Conteúdo sempre novo para aprimorar suas habilidades, direto do YouTube.</p>
       </div>
 
       <div className={styles.controls}>
-        <SearchBar 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-        />
-        <CategoryFilter
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
+        <div className={styles.categoryFilter}>
+          {categorias.map(cat => (
+            <Button
+              key={cat}
+              variant={categoria === cat ? "default" : "outline"}
+              onClick={() => setCategoria(cat)}
+              className="transition-all"
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
       </div>
 
-      <div className={styles.tipsGrid}>
-        {filteredTips.map(tip => (
-          <TipCard
-            key={tip.id}
-            tip={tip}
-            category={categories.find(cat => cat.name === tip.category)}
-          />
-        ))}
-      </div>
+      {loading && (
+        <div className={styles.loading}>
+          <Loader2 className="mr-2 h-8 w-8 animate-spin text-primary" />
+          <p>Buscando os melhores vídeos sobre "{categoria}"...</p>
+        </div>
+      )}
 
-      {filteredTips.length === 0 && (
+      {!loading && videos.length === 0 && (
         <div className={styles.noResults}>
-          <p>Nenhuma dica encontrada para os filtros selecionados.</p>
+          <h3>Nenhum vídeo encontrado</h3>
+          <p>Não foi possível carregar os vídeos no momento. Por favor, tente outra categoria ou volte mais tarde.</p>
+        </div>
+      )}
+      
+      {!loading && videos.length > 0 && (
+        <div className={styles.tipsGrid}>
+          {videos.map((video, index) => (
+            <Card as="a" href={video.url} target="_blank" rel="noopener noreferrer" key={video.url || index} className="group flex flex-col hover:border-primary transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
+                <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-sm text-muted-foreground">{video.description}</p>
+              </CardContent>
+              <div className="p-4 pt-0 mt-auto">
+                 <Button variant="ghost" size="sm" className="w-full justify-start text-primary">
+                    <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
+                 </Button>
+              </div>
+            </Card>
+          ))}
         </div>
       )}
     </div>

@@ -3,8 +3,6 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: var(--card);
-  border-radius: var(--radius-lg);
 }
 
 .header {
@@ -31,12 +29,11 @@
   margin-bottom: 32px;
 }
 
-@media (min-width: 768px) {
-  .controls {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
+.categoryFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
 }
 
 .tipsGrid {
@@ -45,23 +42,23 @@
   gap: 24px;
 }
 
-.loading {
+.loading, .noResults {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 200px;
+  min-height: 200px;
   font-size: 16px;
   color: var(--muted-foreground);
-}
-
-.noResults {
   text-align: center;
-  padding: 48px;
-  color: var(--muted-foreground);
   background-color: var(--muted);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  padding: 24px;
 }
 
-.noResults p {
-  font-size: 16px;
+.noResults h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 8px;
 }
