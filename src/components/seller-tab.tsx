@@ -6,7 +6,7 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
@@ -130,6 +130,14 @@ export function SellerTab({
             </TooltipContent>
           </Tooltip>
         </TabsList>
+
+        <div className="my-6">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <User className="h-6 w-6 text-primary" />
+                Painel de {seller.name}
+            </h2>
+            <p className="text-muted-foreground">Aqui está um resumo do seu progresso e ganhos projetados.</p>
+        </div>
         
         <TabsContent value="desempenho" className="mt-6">
           <ProgressDisplay salesData={salesData} incentives={incentives} rankings={rankings} />
