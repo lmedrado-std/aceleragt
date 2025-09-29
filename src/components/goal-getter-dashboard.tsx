@@ -508,6 +508,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                       incentives={incentives[seller.id!] || null}
                       rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null}
                       lastUpdated={lastUpdated}
+                      viewedByAdmin={isAdmin || isStoreAdmin}
                     />
                   </TabsContent>
                 ))}
