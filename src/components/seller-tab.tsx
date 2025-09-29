@@ -87,7 +87,7 @@ export function SellerTab({
   return (
     <TooltipProvider>
       <Tabs defaultValue="desempenho" className="w-full">
-        <TabsList className="h-auto p-1 bg-muted rounded-lg grid grid-cols-2 sm:grid-cols-4 w-full sm:w-max">
+        <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-4 w-full sm:w-max gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <TabsTrigger value="desempenho">
