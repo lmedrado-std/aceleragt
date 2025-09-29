@@ -1,4 +1,3 @@
-
 // components/TipsTab/index.tsx
 import React, { useState, useEffect } from 'react';
 import { buscarVideosGeminiComFallback, Video } from '@/lib/geminiSearch';
@@ -71,20 +70,22 @@ export function TipsTab() {
       {!loading && videos.length > 0 && (
         <div className={styles.tipsGrid}>
           {videos.map((video, index) => (
-            <Card as="a" href={video.url} target="_blank" rel="noopener noreferrer" key={video.url || index} className="group flex flex-col hover:border-primary transition-all">
-              <CardHeader>
-                <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
-                <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground">{video.description}</p>
-              </CardContent>
-              <div className="p-4 pt-0 mt-auto">
-                 <Button variant="ghost" size="sm" className="w-full justify-start text-primary">
-                    <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
-                 </Button>
-              </div>
-            </Card>
+            <a href={video.url} target="_blank" rel="noopener noreferrer" key={video.url || index}>
+              <Card className="group flex flex-col hover:border-primary transition-all h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
+                  <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-sm text-muted-foreground">{video.description}</p>
+                </CardContent>
+                <div className="p-4 pt-0 mt-auto">
+                   <Button variant="ghost" size="sm" className="w-full justify-start text-primary">
+                      <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
+                   </Button>
+                </div>
+              </Card>
+            </a>
           ))}
         </div>
       )}
