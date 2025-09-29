@@ -288,7 +288,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   // Route protection & View Tracking
   useEffect(() => {
-    if (loading) return;
+    if (loading || !sellers) return;
 
     const tabFromUrl = searchParams.get("tab") || activeTab;
 
@@ -301,18 +301,24 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         const redirectUrl = `/dashboard/${storeId}?tab=admin`;
         router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(redirectUrl)}`);
       }
-    } else if (tabFromUrl && tabFromUrl !== 'loading') { // It's a seller tab
-        const canView = isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl);
-        
-        if (canView) {
-            trackView(tabFromUrl);
-        } else {
-            const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
-            const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
-            router.push(sellerLoginUrl);
-        }
+    } else if (tabFromUrl && tabFromUrl !== 'loading') {
+      const isSellerTab = sellers.some(s => s.id === tabFromUrl);
+      
+      // Always track the view if it's a seller tab and the user is authenticated in some way
+      if (isSellerTab && (isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl))) {
+        trackView(tabFromUrl);
+      }
+
+      // Then, check for permission and redirect if necessary
+      const canView = isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl);
+      if (!canView && isSellerTab) {
+          const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
+          const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
+          router.push(sellerLoginUrl);
+      }
     }
-  }, [storeId, activeTab, searchParams, router, loading, isStoreAdmin, isAdmin, sellers]);
+  }, [storeId, activeTab, searchParams, router, loading, sellers, isStoreAdmin, isAdmin]);
+
 
   const handleIncentivesCalculated = useCallback(
     (newIncentives: Incentives, newLastUpdated: string) => {
