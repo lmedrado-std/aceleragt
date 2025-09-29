@@ -296,7 +296,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
     const trackView = async (sellerId: string) => {
         await fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
-        await loadSellers();
+        await loadSellers(); // Recarrega os dados para refletir a nova contagem
     };
 
     if (tabFromUrl === 'admin') {
@@ -307,7 +307,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     } else if (tabFromUrl && tabFromUrl !== 'loading') {
       const isSellerTab = sellers.some(s => s.id === tabFromUrl);
       
-      if (isSellerTab) {
+      if (isSellerTab && !isAdminGlobal() && !isStoreAuthenticated(storeId)) {
         trackView(tabFromUrl);
       }
 
@@ -390,14 +390,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             const errorData = await res.json();
             throw new Error(errorData.details || errorData.error || 'Falha ao salvar metas');
         }
-        toast({
-            title: "Metas Salvas!",
-            description: "As novas metas e prêmios foram salvos com sucesso.",
-            action: <CheckCircle className="text-green-500" />
-        });
+        
     } catch(error) {
         console.error(error);
-        toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
+        toast({ variant: 'destructive', title: 'Erro ao Salvar Metas', description: (error as Error).message });
     }
   };
 
@@ -498,7 +494,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                       incentives={incentives[seller.id!] || null}
                       rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null}
                       lastUpdated={lastUpdated}
-                      viewedByAdmin={isAdmin || isStoreAdmin}
                     />
                   </TabsContent>
                 ))}

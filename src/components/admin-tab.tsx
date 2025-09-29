@@ -22,6 +22,7 @@ import {
   Info,
   TrendingUp,
   Check,
+  Loader2,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -119,6 +120,7 @@ export function AdminTab({
   const [editingSellerPassword, setEditingSellerPassword] = useState('');
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isSavingGoals, setIsSavingGoals] = useState(false);
   const [storePasswords, setStorePasswords] = useState({ new: '', confirm: '' });
   const [showStorePassword, setShowStorePassword] = useState(false);
   const [showConfirmStorePassword, setShowConfirmStorePassword] = useState(false);
@@ -550,6 +552,23 @@ export function AdminTab({
     }
   };
 
+  const onSaveGoals = async () => {
+    setIsSavingGoals(true);
+    const { id } = toast({
+      title: "Salvando Metas...",
+      description: "Aguarde enquanto aplicamos as novas configurações.",
+    });
+    
+    await handleSaveGoals();
+
+    toast.update(id, {
+      title: "Metas Salvas!",
+      description: "As novas metas e prêmios foram salvos com sucesso.",
+      action: <CheckCircle className="text-green-500" />
+    });
+    setIsSavingGoals(false);
+  }
+
 
   return (
     <div className="space-y-8">
@@ -846,7 +865,7 @@ export function AdminTab({
                             <div className="flex flex-col items-start gap-2">
                                 <h3 className="font-semibold text-sm flex items-center gap-2">
                                   Importar de Arquivo Excel
-                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                  <Info className="h-4 w-4" />
                                 </h3>
                                 <p className="text-xs text-muted-foreground mb-2">Colunas: reportgroup, totalliquido, etc.</p>
                                 <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline" className="w-full">
@@ -943,26 +962,37 @@ export function AdminTab({
                 </div>
                 <Separator/>
                 <div>
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                    <div className="pr-4">
-                      <h4 className="font-medium text-md text-card-foreground">Bônus Corridinha Diária</h4>
-                      <p className="text-sm text-muted-foreground">Ative para habilitar a inserção do bônus diário na aba "Lançamentos".</p>
-                    </div>
-                    <FormField
+                  <FormField
                       control={control}
                       name="goals.corridinhaEnabled"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
+                          <FormItem className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                              <div className="space-y-0.5">
+                                  <Tooltip>
+                                      <TooltipTrigger asChild>
+                                          <FormLabel className="text-base flex items-center gap-2 cursor-pointer">
+                                              Bônus Corridinha Diária
+                                              <Info className="h-4 w-4 text-muted-foreground"/>
+                                          </FormLabel>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                          <p>{field.value ? "Ativado: O campo para inserir o bônus aparecerá na aba 'Lançamentos'." : "Desativado: O campo de bônus diário ficará oculto."}</p>
+                                      </TooltipContent>
+                                  </Tooltip>
+                                  <p className={cn("text-sm", field.value ? "text-green-600" : "text-muted-foreground")}>
+                                      {field.value ? "Corridinha Ativada" : "Corridinha Desativada"}
+                                  </p>
+                              </div>
+                              <FormControl>
+                                  <Switch
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                      disabled={isSavingGoals}
+                                  />
+                              </FormControl>
+                          </FormItem>
                       )}
-                    />
-                  </div>
+                  />
                 </div>
                  <Separator/>
                  <div>
@@ -990,9 +1020,9 @@ export function AdminTab({
                 </div>
             </CardContent>
             <CardFooter>
-                 <Button onClick={handleSaveGoals} >
-                    <Save className="mr-2 h-4 w-4" />
-                    Salvar Metas
+                 <Button onClick={onSaveGoals} disabled={isSavingGoals}>
+                    {isSavingGoals ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
+                    {isSavingGoals ? "Salvando..." : "Salvar Metas"}
                  </Button>
             </CardFooter>
           </Card>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -17,7 +18,6 @@ interface SellerTabProps {
   incentives: IncentiveProjectionOutput | null;
   rankings: Record<RankingMetric, number> | null;
   lastUpdated: string | null;
-  viewedByAdmin: boolean;
 }
 
 const formatCurrency = (value: number) =>
@@ -64,7 +64,6 @@ export function SellerTab({
   incentives,
   rankings,
   lastUpdated,
-  viewedByAdmin,
 }: SellerTabProps) {
   const salesData = {
     ...seller,
