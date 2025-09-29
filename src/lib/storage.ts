@@ -11,6 +11,8 @@ export interface Seller {
   ticket_medio: number;
   corridinha_diaria: number;
   password?: string;
+  last_viewed_at?: string | null;
+  view_count?: number | null;
 }
 
 export interface Goals {

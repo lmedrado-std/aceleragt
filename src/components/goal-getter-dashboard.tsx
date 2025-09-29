@@ -35,6 +35,8 @@ const sellerSchema = z.object({
   pa: z.coerce.number().min(0).default(0),
   ticket_medio: z.coerce.number().min(0).default(0),
   corridinha_diaria: z.coerce.number().min(0).default(0),
+  last_viewed_at: z.string().optional().nullable(),
+  view_count: z.number().optional().nullable(),
 });
 
 const goalsSchema = z.object({
@@ -284,13 +286,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     loadInitialData();
   }, [loadInitialData]);
 
-  // Route protection
+  // Route protection & View Tracking
   useEffect(() => {
     if (loading) return;
 
     const tabFromUrl = searchParams.get("tab") || activeTab;
 
-    if (isAdminGlobal()) return; // Global admin can access anything
+    const trackView = (sellerId: string) => {
+        fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
+    };
+
+    if (isAdminGlobal()) {
+        // Global admin can see all, but let's track if they view a specific seller tab
+        if (tabFromUrl !== 'admin' && sellers.some(s => s.id === tabFromUrl)) {
+            trackView(tabFromUrl);
+        }
+        return;
+    }
 
     if (tabFromUrl === 'admin') {
       if (!isStoreAuthenticated(storeId)) {
@@ -298,14 +310,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(redirectUrl)}`);
       }
     } else if (tabFromUrl && tabFromUrl !== 'loading') { // It's a seller tab
-      if (!isStoreAuthenticated(storeId) && !isSellerAuthenticated(tabFromUrl)) {
-        const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
-        const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
-        const lojaLoginUrl = `/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(sellerLoginUrl)}`;
-        router.push(lojaLoginUrl);
-      }
+        if (isSellerAuthenticated(tabFromUrl) || isStoreAuthenticated(storeId)) {
+             trackView(tabFromUrl);
+        } else {
+            const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
+            const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
+            router.push(sellerLoginUrl);
+        }
     }
-  }, [storeId, activeTab, searchParams, router, loading, isStoreAdmin]);
+  }, [storeId, activeTab, searchParams, router, loading, isStoreAdmin, isAdmin, sellers]);
 
   const handleIncentivesCalculated = useCallback(
     (newIncentives: Incentives, newLastUpdated: string) => {
@@ -512,13 +525,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
-
-    
-
-    
-
-    
-
-    
-
-    

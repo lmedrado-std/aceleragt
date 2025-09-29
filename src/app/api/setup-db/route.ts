@@ -26,7 +26,9 @@ export async function GET() {
         pa NUMERIC(5, 2) DEFAULT 0,
         ticket_medio NUMERIC(10, 2) DEFAULT 0,
         corridinha_diaria NUMERIC(10, 2) DEFAULT 0,
-        store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE
+        store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+        last_viewed_at TIMESTAMPTZ,
+        view_count INTEGER DEFAULT 0
       );
     `);
 
@@ -91,6 +93,32 @@ export async function GET() {
       } else {
         throw e;
       }
+    }
+    
+    // Adicionar a coluna last_viewed_at se ela não existir
+    try {
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE sellers ADD COLUMN "last_viewed_at" TIMESTAMPTZ;
+        `);
+    } catch (e) {
+        if (e instanceof Error && e.message.includes('column "last_viewed_at" of relation "sellers" already exists')) {
+            // Coluna já existe
+        } else {
+            throw e;
+        }
+    }
+
+    // Adicionar a coluna view_count se ela não existir
+    try {
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE sellers ADD COLUMN "view_count" INTEGER DEFAULT 0;
+        `);
+    } catch (e) {
+        if (e instanceof Error && e.message.includes('column "view_count" of relation "sellers" already exists')) {
+            // Coluna já existe
+        } else {
+            throw e;
+        }
     }
 
 

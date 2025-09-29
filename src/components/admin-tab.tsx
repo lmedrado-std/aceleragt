@@ -1,3 +1,4 @@
+
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -19,6 +20,7 @@ import {
   Target,
   KeyRound,
   Info,
+  TrendingUp,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -64,7 +66,8 @@ import { SellerAvatar } from "./seller-avatar";
 import { Switch } from "./ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { ErrorBoundary } from "./ErrorBoundary";
-
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -709,7 +712,7 @@ export function AdminTab({
           <Card>
             <CardHeader>
               <CardTitle>Gerenciar Vendedores</CardTitle>
-              <CardDescription>Adicione, edite ou remova vendedores da sua equipe.</CardDescription>
+              <CardDescription>Adicione, edite ou remova vendedores e acompanhe o engajamento.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
@@ -742,10 +745,10 @@ export function AdminTab({
                 <div className="space-y-2">
                   {sellers.length === 0 ? <p className="text-muted-foreground text-sm">Nenhum vendedor cadastrado ainda.</p> :
                   sellers.map((seller) => (
-                    <div key={seller.id} className="flex items-center justify-between gap-2 p-3 rounded-lg bg-muted">
-                      {editingSellerId === seller.id ? (
+                    <div key={seller.id} className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg bg-muted">
+                        {editingSellerId === seller.id ? (
                         <>
-                          <div className="flex-grow space-y-2">
+                          <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2">
                              <Input value={editingSellerName} onChange={e => setEditingSellerName(e.target.value)} className="h-9" autoFocus/>
                              <Input type={showPassword[seller.id] ? "text" : "password"} value={editingSellerPassword} onChange={e => setEditingSellerPassword(e.target.value)} className="h-9" />
                           </div>
@@ -757,8 +760,16 @@ export function AdminTab({
                         </>
                       ) : (
                         <>
-                          <span className="font-medium">{seller.name ?? 'Vendedor sem nome'}</span>
-                          <div className="flex items-center">
+                            <div className="flex-grow">
+                                <p className="font-medium">{seller.name ?? 'Vendedor sem nome'}</p>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
+                                        {seller.last_viewed_at ? `visto ${formatDistanceToNow(new Date(seller.last_viewed_at), { locale: ptBR, addSuffix: true })}` : 'nunca acessou'}
+                                    </span>
+                                    <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count || 0} acessos</span>
+                                </div>
+                            </div>
+                          <div className="flex items-center flex-shrink-0">
                             <Button size="icon" variant="ghost" type="button" onClick={() => startEditing(seller)}><Edit/></Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" type="button"><Trash2 /></Button></AlertDialogTrigger>
