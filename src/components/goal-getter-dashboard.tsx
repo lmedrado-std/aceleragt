@@ -24,6 +24,7 @@ import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { TipsTab } from "./TipsTab";
 
 const sellerSchema = z.object({
   id: z.string(),
@@ -50,6 +51,7 @@ const goalsSchema = z.object({
   legendariaBonusValorVenda: z.coerce.number().default(0),
   legendariaBonusValorPremio: z.coerce.number().default(0),
   performanceBonusEnabled: z.boolean().default(false),
+  corridinhaEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
   paPrize1: z.coerce.number().default(0),
   paGoal2: z.coerce.number().default(0),
@@ -114,7 +116,7 @@ const parseForAI = (value: any): number => {
 const parseGoalsForAI = (rawGoals: any): Goals => {
     const parsed: any = {};
     for (const key in rawGoals) {
-        if (key === 'performanceBonusEnabled') {
+        if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
             parsed[key] = !!rawGoals[key];
         } else {
             parsed[key] = parseForAI(rawGoals[key]);
@@ -344,7 +346,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
         for (const [key, value] of Object.entries(goals)) {
             if (value === null || value === undefined) {
-                if (key === 'performanceBonusEnabled') {
+                if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
                     cleanedGoals[key] = false;
                 } else {
                     cleanedGoals[key] = 0;
@@ -352,7 +354,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                 continue;
             }
 
-            if (key === 'performanceBonusEnabled') {
+            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
                  cleanedGoals[key] = !!value;
                  continue;
             }
@@ -439,18 +441,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <div className="overflow-x-auto pb-2">
-                  <TabsList className="h-auto p-0 bg-transparent border-b-0">
+                  <TabsList className="h-auto p-0 bg-transparent gap-2">
                     {sellers.length > 0 ? sellers.map((seller) => (
                       <Tooltip key={seller.id}>
                         <TooltipTrigger asChild>
                            <TabsTrigger
-                            key={seller.id}
                             value={seller.id}
-                            className={cn(
-                              "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium",
-                              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
-                              "hover:bg-muted/50"
-                            )}
                            >
                             {seller.name}
                            </TabsTrigger>
@@ -467,11 +463,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         <TooltipTrigger asChild>
                            <TabsTrigger
                             value="admin"
-                            className={cn(
-                              "px-4 py-2 rounded-t-md border-b-2 border-transparent transition-all font-medium flex items-center",
-                              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:border-b-blue-700",
-                              "hover:bg-muted/50"
-                            )}
+                            className="flex items-center"
                            >
                             <ShieldCheck className="h-5 w-5 mr-2" /> Admin
                            </TabsTrigger>

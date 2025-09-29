@@ -21,6 +21,7 @@ import {
   KeyRound,
   Info,
   TrendingUp,
+  Check,
 } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -145,6 +146,7 @@ export function AdminTab({
     "goals.legendariaBonusValorPremio",
   ]);
   const performanceBonusEnabled = watch("goals.performanceBonusEnabled");
+  const corridinhaEnabled = watch("goals.corridinhaEnabled");
 
   const handleNumericChange = useCallback((onChange: (value: any) => void, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -305,7 +307,7 @@ export function AdminTab({
         const parsed: any = {};
         for (const key in rawGoals) {
             const value = rawGoals[key];
-            if (key === 'performanceBonusEnabled') {
+            if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
                 parsed[key] = !!value;
                 continue;
             }
@@ -327,7 +329,7 @@ export function AdminTab({
             vendas: getValues(`sellers.${sellerIndex}.vendas`),
             pa: getValues(`sellers.${sellerIndex}.pa`),
             ticket_medio: getValues(`sellers.${sellerIndex}.ticket_medio`),
-            corridinha_diaria: getValues(`sellers.${sellerIndex}.corridinha_diaria`),
+            corridinha_diaria: corridinhaEnabled ? getValues(`sellers.${sellerIndex}.corridinha_diaria`) : 0,
         };
         
         const parsedSellerData: any = {};
@@ -811,7 +813,7 @@ export function AdminTab({
                                 <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
                                 <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
                                 <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                {corridinhaEnabled && <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} /> }
                             </div>
                         </CardContent>
                     </Card>
@@ -944,7 +946,7 @@ export function AdminTab({
                   <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
                     <div className="pr-4">
                       <h4 className="font-medium text-md text-card-foreground">Bônus Corridinha Diária</h4>
-                      <p className="text-sm text-muted-foreground">Ative para habilitar o bônus diário.</p>
+                      <p className="text-sm text-muted-foreground">Ative para habilitar a inserção do bônus diário.</p>
                     </div>
                     <FormField
                       control={control}
