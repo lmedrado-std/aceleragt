@@ -90,72 +90,45 @@ function getVideosFallback(query: string): Video[] {
 
 export async function buscarVideosGeminiComFallback(query: string): Promise<Video[]> {
   const GEMINI_API_KEY = "AIzaSyDlKzUk76TeGv0rmeU2qDYLi1mrvz8i5sE";
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/chat-bison-001:generateMessage?key=${GEMINI_API_KEY}`;
 
-  const prompt = `
-    Liste no mínimo 3 e no máximo 8 vídeos do YouTube lançados nos últimos anos, em português, sobre "${query}".
-    Se não for possível, liste vídeos relacionados ao tema, incluindo conteúdos motivacionais, técnicas, dicas ou exemplos práticos para vendedores.
-    Responda SEMPRE apenas o array de objetos JSON, sem explicação, sem código, sem nada antes ou depois:
-    [
-      {
-        "title": "Título do Vídeo",
-        "url": "https://www.youtube.com/watch?v=...",
-        "channel": "Nome do Canal",
-        "publishedAt": "Data de Publicação (ex: '3 meses atrás' ou '20/05/2024')",
-        "description": "Uma breve descrição do vídeo com no máximo 150 caracteres."
-      }
-    ]
-  `;
-  
-  const body = {
-    contents: [
-      { role: "user", parts: [{ text: prompt }] }
-    ]
+  const prompt = {
+    // prompt id para chat API
+    "prompt": {
+      "messages": [
+        { "author": "user", "content": `
+Liste no mínimo 3 e no máximo 8 vídeos do YouTube lançados nos últimos anos, em português, sobre "${query}".
+Se não for possível, liste vídeos relacionados ao tema.
+Responda apenas o array JSON de objetos:
+[
+  {
+    "title": "Título do Vídeo",
+    "url": "https://www.youtube.com/watch?v=...",
+    "channel": "Nome do Canal",
+    "publishedAt": "Data",
+    "description": "Descrição curta."
+  }
+]
+` }
+      ]
+    }
   };
 
   try {
-    console.log("🔍 Buscando vídeos para:", query);
-
     const res = await fetch(GEMINI_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(prompt)
     });
-
-    if (!res.ok) {
-      console.error("❌ Erro na API Gemini:", res.status, await res.text());
-      return getVideosFallback(query);
-    }
-
+    if (!res.ok) return getVideosFallback(query);
     const data = await res.json();
-    console.log("📊 Resposta da API:", data);
-
+    const text = data?.candidates?.[0]?.message?.content || "";
+    const raw = text.replace(/``````/g, "").trim();
     let videos: Video[] = [];
-
-    if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      let rawText = data.candidates[0].content.parts[0].text;
-      console.log("📝 Texto bruto:", rawText);
-      
-      rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-
-      try {
-        videos = JSON.parse(rawText);
-        console.log("✅ Vídeos parseados:", videos);
-      } catch (e) {
-        console.error("❌ Falha no parse JSON:", e);
-        return getVideosFallback(query);
-      }
-    }
-
-    if (!videos || videos.length === 0) {
-      console.log("⚠️ Nenhum vídeo retornado, usando fallback");
-      return getVideosFallback(query);
-    }
-
-    return videos;
-
-  } catch (error) {
-    console.error("💥 Erro geral:", error);
+    try { videos = JSON.parse(raw); }
+    catch { return getVideosFallback(query); }
+    return videos.length ? videos : getVideosFallback(query);
+  } catch {
     return getVideosFallback(query);
   }
 }
