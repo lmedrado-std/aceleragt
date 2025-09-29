@@ -27,6 +27,11 @@ export function TipsTab() {
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
 
+  const handleOpenVideo = (url: string) => {
+    const videoUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(videoUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className={styles.tipsContainer}>
       <div className={styles.header}>
@@ -63,12 +68,6 @@ export function TipsTab() {
         >
             {videos.map((video, index) => (
             <SwiperSlide key={index} style={{ height: 'auto' }}>
-                <a
-                href={video.url.startsWith('http') ? video.url : `https://${video.url}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block no-underline h-full"
-                >
                 <Card className="group flex flex-col hover:border-primary transition-all h-full">
                     <CardHeader>
                     <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
@@ -78,12 +77,11 @@ export function TipsTab() {
                     <p className="text-sm text-muted-foreground">{video.description}</p>
                     </CardContent>
                     <div className="p-4 pt-0 mt-auto">
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-primary">
+                    <Button onClick={() => handleOpenVideo(video.url)} variant="ghost" size="sm" className="w-full justify-start text-primary">
                         <ExternalLink className="mr-2 h-4 w-4"/> Assistir no YouTube
                     </Button>
                     </div>
                 </Card>
-                </a>
             </SwiperSlide>
             ))}
         </Swiper>
