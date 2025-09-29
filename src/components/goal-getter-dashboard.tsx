@@ -296,22 +296,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         fetch(`/api/sellers/${sellerId}/track-view`, { method: 'POST' });
     };
 
-    if (isAdminGlobal()) {
-        // Global admin can see all, but let's track if they view a specific seller tab
-        if (tabFromUrl !== 'admin' && sellers.some(s => s.id === tabFromUrl)) {
-            trackView(tabFromUrl);
-        }
-        return;
-    }
-
     if (tabFromUrl === 'admin') {
-      if (!isStoreAuthenticated(storeId)) {
+      if (!isAdminGlobal() && !isStoreAuthenticated(storeId)) {
         const redirectUrl = `/dashboard/${storeId}?tab=admin`;
         router.push(`/login/loja?storeId=${storeId}&redirect=${encodeURIComponent(redirectUrl)}`);
       }
     } else if (tabFromUrl && tabFromUrl !== 'loading') { // It's a seller tab
-        if (isSellerAuthenticated(tabFromUrl) || isStoreAuthenticated(storeId)) {
-             trackView(tabFromUrl);
+        const canView = isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(tabFromUrl);
+        
+        if (canView) {
+            trackView(tabFromUrl);
         } else {
             const sellerDashboardUrl = `/dashboard/${storeId}?tab=${tabFromUrl}`;
             const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
@@ -526,3 +520,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    
