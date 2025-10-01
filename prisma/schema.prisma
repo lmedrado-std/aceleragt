@@ -18,6 +18,7 @@ model stores {
   last_incentive_calculation DateTime? @db.Timestamptz
   sellers                    sellers[]
   goals                      goals?
+  history                    SellerHistory[]
 }
 
 model sellers {
@@ -69,4 +70,27 @@ model goals {
 model app_config {
   key   String @id @db.VarChar(255)
   value String?
+}
+
+model SellerHistory {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  period       String   @db.VarChar(100)
+  createdAt    DateTime @default(now())
+
+  // Snapshot data
+  vendas       Decimal  @default(0) @db.Decimal(10, 2)
+  pa           Decimal  @default(0) @db.Decimal(5, 2)
+  ticket_medio Decimal  @default(0) @db.Decimal(10, 2)
+  total_prize  Decimal  @default(0) @db.Decimal(10, 2)
+  
+  // Denormalized data for resilience
+  seller_id    String   @db.Uuid
+  seller_name  String
+
+  // Relation to the store
+  store_id     String   @db.Uuid
+  store        stores   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id, createdAt(sort: Desc)])
+  @@index([seller_id])
 }

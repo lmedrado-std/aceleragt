@@ -13,11 +13,7 @@ Para rodar este projeto corretamente, você precisa configurar as variáveis de 
 
 **1. Desenvolvimento Local:**
 
--   Crie um arquivo chamado `.env.local` na raiz do projeto.
--   Adicione a sua string de conexão do banco de dados (PostgreSQL local ou uma branch de desenvolvimento do Neon) neste arquivo:
 
-    ```
-    DATABASE_URL="postgresql://USUARIO:SENHA@HOST:PORTA/NOME_DO_BANCO"
     ```
 
     O arquivo `.env.local` é ignorado pelo Git, então suas credenciais estarão seguras.
