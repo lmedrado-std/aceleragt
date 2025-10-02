@@ -171,7 +171,7 @@ function StorePageContent() {
                         <TooltipTrigger asChild>
                           <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="bg-white/90 text-primary hover:bg-white">
                               <Shield className="mr-2 h-4 w-4" />
-                              <span className="hidden sm:inline">Painel do Gerente</span>
+                              <span className="hidden sm:inline">Painel do Gestor</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
