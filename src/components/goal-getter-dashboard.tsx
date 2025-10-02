@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +7,18 @@ import { z } from "zod";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ShieldCheck, Home, CheckCircle, Loader2, History, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { ShieldCheck, Home, CheckCircle, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import { type IncentiveProjectionOutput, incentiveProjection } from "@/ai/flows/incentive-projection";
 import { Button } from "@/components/ui/button";
@@ -109,25 +121,26 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
     const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
     const { toast } = useToast();
 
-    useEffect(() => {
-        const fetchPeriods = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const res = await fetch(`/api/history?storeId=${storeId}`);
-                if (!res.ok) throw new Error('Falha ao buscar histórico de períodos.');
-                const periods: ArchivedPeriod[] = await res.json();
-                setPeriods(periods);
-            } catch (e) {
-                const errorMessage = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.';
-                setError(errorMessage);
-                toast({ variant: 'destructive', title: 'Erro', description: errorMessage });
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPeriods();
+    const fetchPeriods = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch(`/api/history?storeId=${storeId}`);
+            if (!res.ok) throw new Error('Falha ao buscar histórico de períodos.');
+            const periods: ArchivedPeriod[] = await res.json();
+            setPeriods(periods);
+        } catch (e) {
+            const errorMessage = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.';
+            setError(errorMessage);
+            toast({ variant: 'destructive', title: 'Erro', description: errorMessage });
+        } finally {
+            setLoading(false);
+        }
     }, [storeId, toast]);
+
+    useEffect(() => {
+        fetchPeriods();
+    }, [fetchPeriods]);
 
     const handleAccordionChange = async (value: string) => {
         if (!value || details[value]) return;
@@ -142,6 +155,29 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
             toast({ variant: 'destructive', title: 'Erro', description: e instanceof Error ? e.message : 'Não foi possível carregar os detalhes.' });
         } finally {
             setLoadingDetails(prev => ({ ...prev, [value]: false }));
+        }
+    };
+
+    const handleDeletePeriod = async (periodName: string) => {
+        try {
+            const res = await fetch(`/api/history?storeId=${storeId}&period=${encodeURIComponent(periodName)}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Falha ao remover período.');
+            }
+            toast({
+                title: 'Sucesso!',
+                description: `Período "${periodName}" removido.`,
+            });
+            fetchPeriods(); // Refresh the list
+        } catch (e) {
+            toast({
+                variant: 'destructive',
+                title: 'Erro ao Remover',
+                description: e instanceof Error ? e.message : 'Não foi possível remover o período.',
+            });
         }
     };
 
@@ -176,7 +212,38 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
 
                         return (
                             <AccordionItem value={value} key={value}>
-                                <AccordionTrigger><div className='flex justify-between w-full pr-4'><span>{period}</span><span className='text-muted-foreground'>{`Vendedores: ${sellerCount}`}</span></div></AccordionTrigger>
+                                <AccordionTrigger>
+                                  <div className='flex justify-between items-center w-full pr-4'>
+                                    <span>{period}</span>
+                                    <div className="flex items-center gap-4">
+                                      <span className='text-muted-foreground text-sm'>{`Vendedores: ${sellerCount}`}</span>
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Esta ação removerá permanentemente o período de histórico <span className="font-bold">"{period}"</span>. Esta ação não pode ser desfeita.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={() => handleDeletePeriod(period)}
+                                                    className="bg-destructive hover:bg-destructive/90"
+                                                >
+                                                    Remover
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </div>
+                                  </div>
+                                </AccordionTrigger>
                                 <AccordionContent>
                                     {loadingDetails[value] && <div className="flex items-center justify-center p-4"><Loader2 className="mr-2 h-6 w-6 animate-spin" /><span>Carregando...</span></div>}
                                     {periodData?.current && (

@@ -66,3 +66,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Erro ao buscar detalhes do período' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const period = searchParams.get('period');
+  const storeId = searchParams.get('storeId');
+
+  if (!storeId || !period) {
+    return NextResponse.json({ error: 'storeId e period são obrigatórios' }, { status: 400 });
+  }
+
+  try {
+    const deleteResult = await prisma.SellerHistory.deleteMany({
+      where: {
+        store_id: storeId,
+        period: period,
+      },
+    });
+
+    if (deleteResult.count === 0) {
+      return NextResponse.json({ message: 'Nenhum registro encontrado para este período.' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: `Período "${period}" removido com sucesso.`, count: deleteResult.count });
+  } catch (error) {
+    console.error('[API DELETE /api/history] ERRO:', error);
+    return NextResponse.json({ error: 'Erro ao remover período do histórico.' }, { status: 500 });
+  }
+}
