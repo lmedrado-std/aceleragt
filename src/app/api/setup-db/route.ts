@@ -65,6 +65,23 @@ export async function GET() {
         "ticketMedioPrize4" INTEGER DEFAULT 0
       );
     `);
+    
+    // Tabela de Histórico de Vendedores
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "SellerHistory" (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          period TEXT NOT NULL,
+          vendas NUMERIC(10, 2) NOT NULL,
+          pa NUMERIC(5, 2) NOT NULL,
+          ticket_medio NUMERIC(10, 2) NOT NULL,
+          total_prize NUMERIC(10, 2) NOT NULL,
+          seller_id UUID NOT NULL,
+          seller_name TEXT NOT NULL,
+          store_id UUID NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
 
     // Tabela de Configurações do Aplicativo
     await prisma.$executeRawUnsafe(`
@@ -115,6 +132,19 @@ export async function GET() {
         `);
     } catch (e) {
         if (e instanceof Error && e.message.includes('column "view_count" of relation "sellers" already exists')) {
+            // Coluna já existe
+        } else {
+            throw e;
+        }
+    }
+
+     // Adicionar a coluna created_at se ela não existir na SellerHistory
+    try {
+        await prisma.$executeRawUnsafe(`
+            ALTER TABLE "SellerHistory" ADD COLUMN "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
+        `);
+    } catch (e) {
+        if (e instanceof Error && e.message.includes('column "created_at" of relation "SellerHistory" already exists')) {
             // Coluna já existe
         } else {
             throw e;

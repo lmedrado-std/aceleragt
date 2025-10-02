@@ -16,15 +16,22 @@ export async function GET(req: NextRequest) {
   try {
     // Mode 2: Fetch detailed history for a specific period with comparison
     if (periodName && storeId) {
-      // Find all unique periods for the store, sorted chronologically to find the previous one
+       // Find all unique periods for the store, sorted chronologically to find the previous one
       const allPeriodsForStore = await prisma.sellerHistory.findMany({
         where: { store_id: storeId },
         distinct: ['period'],
-        orderBy: { created_at: 'asc' }, // Assuming created_at exists and marks when the archive was made
-        select: { period: true },
+        orderBy: { created_at: 'asc' },
+        select: { period: true, created_at: true },
       });
 
-      const periodNames = allPeriodsForStore.map(p => p.period);
+      const uniquePeriods = allPeriodsForStore.reduce((acc, current) => {
+        if (!acc.find(item => item.period === current.period)) {
+          acc.push(current);
+        }
+        return acc;
+      }, [] as {period: string, created_at: Date | null}[]);
+      
+      const periodNames = uniquePeriods.map(p => p.period);
       const currentPeriodIndex = periodNames.findIndex(p => p === periodName);
       
       let previousPeriodName: string | null = null;
@@ -61,7 +68,7 @@ export async function GET(req: NextRequest) {
       _count: {
         seller_id: true,
       },
-      orderBy: {
+       orderBy: {
         period: 'desc',
       },
     });
