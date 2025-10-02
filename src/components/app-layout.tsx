@@ -9,9 +9,10 @@ import { usePathname } from "next/navigation";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isLoginPage = pathname.includes('/login');
+    const isDashboardPage = pathname.includes('/dashboard');
 
-    if (isLoginPage) {
-        return <main>{children}</main>;
+    if (isLoginPage || isDashboardPage) {
+        return <main className="flex-1 flex flex-col p-4 lg:p-6">{children}</main>;
     }
 
     return (
