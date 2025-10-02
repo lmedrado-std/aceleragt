@@ -364,17 +364,17 @@ export function AdminTab({
         });
         
         const sellerForAI = {
-          id: seller.id,
-          name: seller.name,
-          avatarId: String(seller.avatar_id || "avatar1"),
-          password: String(seller.password || "password"),
-          vendas: Number(parsedSellerData.vendas) || 0,
-          pa: Number(parsedSellerData.pa) || 0,
-          ticketMedio: Number(parsedSellerData.ticket_medio) || 0,
-          corridinhaDiaria: Number(parsedSellerData.corridinha_diaria) || 0,
+            id: seller.id,
+            name: seller.name,
+            avatarId: String(seller.avatar_id || "avatar1"),
+            password: String(seller.password || "password"),
+            vendas: Number(parsedSellerData.vendas) || 0,
+            pa: Number(parsedSellerData.pa) || 0,
+            ticketMedio: Number(parsedSellerData.ticket_medio) || 0,
+            corridinhaDiaria: Number(parsedSellerData.corridinha_diaria) || 0,
         };
-        
-        console.log("Enviando para IA:", JSON.stringify(sellerForAI, null, 2));
+
+        console.log("sellerForAI:", JSON.stringify(sellerForAI, null, 2));
 
         const result = await incentiveProjection({
           seller: sellerForAI,
