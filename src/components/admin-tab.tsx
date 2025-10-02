@@ -307,7 +307,11 @@ export function AdminTab({
     setIsCalculating(true);
     try {
       if (!sellers || sellers.length === 0) {
-        toast({ variant: "destructive", title: "Nenhum vendedor", description: "Não há vendedores para calcular incentivos." });
+        toast({
+          variant: "destructive",
+          title: "Nenhum vendedor encontrado",
+          description: "Não há vendedores para calcular incentivos. Adicione vendedores primeiro.",
+        });
         setIsCalculating(false);
         return;
       }
@@ -318,20 +322,20 @@ export function AdminTab({
       const parseGoals = (rawGoals: any): Goals => {
         const parsed: any = {};
         for (const key in rawGoals) {
-            const value = rawGoals[key];
-            if (key === 'performanceBonusEnabled') {
-                parsed[key] = !!value;
-                continue;
-            }
-            if (typeof value === 'string') {
-                const parsedValue = parseFloat(value.replace(',', '.'));
-                parsed[key] = isNaN(parsedValue) ? value : parsedValue;
-            } else {
-                parsed[key] = value;
-            }
+          const value = rawGoals[key];
+          if (key === 'performanceBonusEnabled') {
+            parsed[key] = !!value;
+            continue;
+          }
+          if (typeof value === 'string') {
+            const parsedValue = parseFloat(value.replace(',', '.'));
+            parsed[key] = isNaN(parsedValue) ? value : parsedValue;
+          } else {
+            parsed[key] = value;
+          }
         }
         return parsed as Goals;
-      }
+      };
 
       const fixedGoals = parseGoals(currentGoals);
 
@@ -374,7 +378,7 @@ export function AdminTab({
             corridinhaDiaria: Number(parsedSellerData.corridinha_diaria) || 0,
         };
 
-        console.log("sellerForAI:", JSON.stringify(sellerForAI, null, 2));
+        console.log("input IA", { seller: sellerForAI, goals: fixedGoals });
 
         const result = await incentiveProjection({
           seller: sellerForAI,
