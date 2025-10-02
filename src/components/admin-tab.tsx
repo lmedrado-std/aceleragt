@@ -1065,7 +1065,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
-
-  
