@@ -363,15 +363,13 @@ export function AdminTab({
         const sellerForAI = {
           id: seller.id,
           name: seller.name,
-          avatarId: seller.avatar_id,
-          password: seller.password,
+          avatarId: seller.avatar_id || "avatar1",
+          password: seller.password || "password",
           vendas: parsedSellerData.vendas,
           pa: parsedSellerData.pa,
           ticketMedio: parsedSellerData.ticket_medio,
           corridinhaDiaria: parsedSellerData.corridinha_diaria,
         };
-
-        console.log("Objeto sellerForAI:", JSON.stringify(sellerForAI, null, 2));
 
         const result = await incentiveProjection({
           seller: sellerForAI,
@@ -1067,5 +1065,7 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
