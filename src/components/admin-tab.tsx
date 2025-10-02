@@ -369,7 +369,7 @@ export function AdminTab({
           pa: parsedSellerData.pa,
           ticketMedio: parsedSellerData.ticket_medio,
           corridinhaDiaria: parsedSellerData.corridinha_diaria,
-        }
+        };
 
         console.log("Objeto sellerForAI:", JSON.stringify(sellerForAI, null, 2));
 
@@ -1072,3 +1072,4 @@ export function AdminTab({
     
     
 
+    
