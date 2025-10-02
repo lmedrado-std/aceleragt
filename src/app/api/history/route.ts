@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     const distinct = await prisma.SellerHistory.findMany({
       where: { store_id: storeId },
       distinct: ['period'],
-      orderBy: { created_at: 'asc' },
+      orderBy: { createdAt: 'asc' },
       select: { period: true },
     });
     const names = distinct.map(d => d.period);
