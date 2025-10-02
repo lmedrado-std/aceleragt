@@ -115,23 +115,23 @@ const incentiveProjectionFlow = ai.defineFlow(
       legendariaBonus = Math.max(0, bonusCalculation);
     }
 
-    if (seller.pa >= goals.paGoal4) {
+    if (seller.pa >= goals.paGoal4 && goals.paGoal4 > 0) {
       paBonus = goals.paPrize4;
-    } else if (seller.pa >= goals.paGoal3) {
+    } else if (seller.pa >= goals.paGoal3 && goals.paGoal3 > 0) {
       paBonus = goals.paPrize3;
-    } else if (seller.pa >= goals.paGoal2) {
+    } else if (seller.pa >= goals.paGoal2 && goals.paGoal2 > 0) {
       paBonus = goals.paPrize2;
-    } else if (seller.pa >= goals.paGoal1) {
+    } else if (seller.pa >= goals.paGoal1 && goals.paGoal1 > 0) {
       paBonus = goals.paPrize1;
     }
 
-    if (seller.ticketMedio >= goals.ticketMedioGoal4) {
+    if (seller.ticketMedio >= goals.ticketMedioGoal4 && goals.ticketMedioGoal4 > 0) {
       ticketMedioBonus = goals.ticketMedioPrize4;
-    } else if (seller.ticketMedio >= goals.ticketMedioGoal3) {
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal3 && goals.ticketMedioGoal3 > 0) {
       ticketMedioBonus = goals.ticketMedioPrize3;
-    } else if (seller.ticketMedio >= goals.ticketMedioGoal2) {
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal2 && goals.ticketMedioGoal2 > 0) {
       ticketMedioBonus = goals.ticketMedioPrize2;
-    } else if (seller.ticketMedio >= goals.ticketMedioGoal1) {
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal1 && goals.ticketMedioGoal1 > 0) {
       ticketMedioBonus = goals.ticketMedioPrize1;
     }
 
