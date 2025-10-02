@@ -306,15 +306,15 @@ export function AdminTab({
   const handleCalculateIncentives = async () => {
     setIsCalculating(true);
     try {
+      if (!sellers || sellers.length === 0) {
+        toast({ variant: "destructive", title: "Nenhum vendedor", description: "Não há vendedores para calcular incentivos." });
+        return;
+      }
+
       const currentGoals = getValues().goals;
       const allIncentives: Incentives = {};
 
-      if (!sellers || sellers.some(s => !s.id)) {
-          toast({ variant: "destructive", title: "Erro", description: "Dados de vendedores incompletos." });
-          return;
-      }
-      
-       const parseGoals = (rawGoals: any): Goals => {
+      const parseGoals = (rawGoals: any): Goals => {
         const parsed: any = {};
         for (const key in rawGoals) {
             const value = rawGoals[key];
@@ -335,6 +335,8 @@ export function AdminTab({
       const fixedGoals = parseGoals(currentGoals);
 
       for (const seller of sellers) {
+        if (!seller || !seller.id) continue;
+
         const sellerIndex = sellers.findIndex(s => s.id === seller.id);
         const sellerDataForUpdate = {
             vendas: getValues(`sellers.${sellerIndex}.vendas`),
@@ -365,11 +367,14 @@ export function AdminTab({
           name: seller.name,
           avatarId: seller.avatar_id || "avatar1",
           password: seller.password || "password",
-          vendas: parsedSellerData.vendas,
-          pa: parsedSellerData.pa,
-          ticketMedio: parsedSellerData.ticket_medio,
-          corridinhaDiaria: parsedSellerData.corridinha_diaria,
+          vendas: Number(parsedSellerData.vendas) || 0,
+          pa: Number(parsedSellerData.pa) || 0,
+          ticketMedio: Number(parsedSellerData.ticket_medio) || 0,
+          corridinhaDiaria: Number(parsedSellerData.corridinha_diaria) || 0,
         };
+
+        // Log para depuração
+        console.log("Enviando para IA:", JSON.stringify(sellerForAI, null, 2));
 
         const result = await incentiveProjection({
           seller: sellerForAI,
@@ -392,7 +397,7 @@ export function AdminTab({
 
       toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados e os dados salvos." });
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao calcular incentivos:", err);
       const errorMessage = err instanceof Error ? err.message : "Falha ao calcular incentivos.";
       toast({ variant: "destructive", title: "Erro de Cálculo", description: errorMessage });
     } finally {

@@ -1,3 +1,4 @@
+
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "../../../lib/db";
 
@@ -9,9 +10,8 @@ import { prisma } from "../../../lib/db";
  *    by providing `period` and `storeId` query parameters.
  */
 export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl;
-  const periodName = searchParams.get('period');
-  const storeId = searchParams.get('storeId');
+  const periodName = req.nextUrl.searchParams.get('period');
+  const storeId = req.nextUrl.searchParams.get('storeId');
 
   try {
     // Mode 2: Fetch detailed history for a specific period with comparison

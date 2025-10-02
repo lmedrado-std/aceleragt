@@ -3,8 +3,7 @@ import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const storeId = searchParams.get('storeId');
+  const storeId = request.nextUrl.searchParams.get('storeId');
 
   if (!storeId) {
     return NextResponse.json({ error: 'O ID da loja é obrigatório' }, { status: 400 });

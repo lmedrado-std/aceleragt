@@ -4,9 +4,7 @@ import { NextResponse, NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest, context: any) {
   const storeId = context.params.id;
-
-  const { searchParams } = request.nextUrl;
-  const includePassword = searchParams.get('includePassword') === 'true';
+  const includePassword = request.nextUrl.searchParams.get('includePassword') === 'true';
 
   try {
     const store = await prisma.stores.findUnique({
