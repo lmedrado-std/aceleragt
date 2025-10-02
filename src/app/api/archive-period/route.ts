@@ -1,21 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/db";
 import { z } from "zod";
+import { incentiveProjection, IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
+import { Goals, Seller } from "@/lib/storage";
 
 const archivePeriodSchema = z.object({
   storeId: z.string().uuid(),
   periodName: z.string().min(1, "O nome do período é obrigatório."),
 });
 
-// Função simples para calcular prêmios (substitui a calculatePrizes que não existe)
-function calculateSimplePrizes(sellers: any[], goals: any) {
-  return {
-    results: sellers.map((seller) => ({
-      sellerId: seller.id,
-      totalPrize: 0, // Por enquanto, sem prêmios até implementar a lógica real
-    })),
-  };
+// Helper to calculate the total prize from the incentive projection output
+function calculateTotalPrize(incentives: IncentiveProjectionOutput | null): number {
+  if (!incentives) return 0;
+  return Object.values(incentives).reduce((sum, value) => sum + (value || 0), 0);
 }
+
+// Helper to parse values that might be strings or numbers
+const parseForAI = (value: any): number => {
+    if (typeof value === 'string') {
+        const parsedValue = parseFloat(value.replace(',', '.'));
+        return isNaN(parsedValue) ? 0 : parsedValue;
+    }
+    return Number(value) || 0;
+};
+
+// Helper to parse goals for the AI flow
+const parseGoalsForAI = (rawGoals: any): Goals => {
+    const parsed: any = {};
+    for (const key in rawGoals) {
+        if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+            parsed[key] = !!rawGoals[key];
+        } else {
+            parsed[key] = parseForAI(rawGoals[key]);
+        }
+    }
+    return parsed as Goals;
+};
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,35 +49,50 @@ export async function POST(req: NextRequest) {
 
     const { storeId, periodName } = parsed.data;
 
-    // Start a transaction to ensure all or nothing is done
     const result = await prisma.$transaction(async (tx) => {
       const sellers = await tx.sellers.findMany({
         where: { store_id: storeId },
       });
 
-      const goals = await tx.goals.findUnique({
+      const goalsData = await tx.goals.findUnique({
         where: { store_id: storeId },
       });
 
-      if (!goals) {
+      if (!goalsData) {
         throw new Error("Metas não encontradas para esta loja.");
       }
+      
+      const goals = parseGoalsForAI(goalsData);
+      
+      const historyData = [];
 
-      const { results: prizeResults } = calculateSimplePrizes(sellers, goals);
+      for (const seller of sellers) {
+        // Calculate incentives for this seller
+        const sellerForAI = {
+            id: seller.id,
+            name: seller.name,
+            avatarId: String(seller.avatar_id || 'avatar1'),
+            password: String(seller.password || 'password'),
+            vendas: parseForAI(seller.vendas),
+            pa: parseForAI(seller.pa),
+            ticketMedio: parseForAI(seller.ticket_medio),
+            corridinhaDiaria: parseForAI(seller.corridinha_diaria),
+        };
+        
+        const incentives = await incentiveProjection({ seller: sellerForAI, goals });
+        const totalPrize = calculateTotalPrize(incentives);
 
-      const historyData = sellers.map((seller) => {
-        const prizeInfo = prizeResults.find((p) => p.sellerId === seller.id);
-        return {
+        historyData.push({
           period: periodName,
           vendas: seller.vendas ?? 0,
           pa: seller.pa ?? 0,
           ticket_medio: seller.ticket_medio ?? 0,
-          total_prize: prizeInfo?.totalPrize ?? 0,
+          total_prize: totalPrize,
           seller_id: seller.id,
           seller_name: seller.name,
           store_id: storeId,
-        };
-      });
+        });
+      }
 
       // 1. Save the historical data
       await tx.SellerHistory.createMany({
