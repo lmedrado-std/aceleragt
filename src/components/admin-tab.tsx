@@ -359,8 +359,7 @@ export function AdminTab({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parsedSellerData)
         });
-
-        // Map snake_case from DB/form to camelCase for AI flow
+        
         const sellerForAI = {
           id: seller.id,
           name: seller.name,
@@ -837,8 +836,6 @@ export function AdminTab({
                             </Card>
                             ))}
                         </div>
-                        <Separator />
-                        <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onSellersChange} />
                     </div>
                 ) : (
                     <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
@@ -896,6 +893,9 @@ export function AdminTab({
                 </div>
             </CardFooter>
           </Card>
+           <div className="mt-8">
+              <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onSellersChange} />
+            </div>
         </TabsContent>
         
         <TabsContent value="metas" className="mt-6">
