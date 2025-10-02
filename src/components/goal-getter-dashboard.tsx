@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -90,7 +91,7 @@ export type Rankings = Record<string, Record<RankingMetric, number>>;
 
 // --- HISTORY FEATURE COMPONENTS & TYPES (MOVED FROM ADMIN) ---
 interface ArchivedPeriod { period: string; storeId: string; sellerCount: number; }
-interface SellerHistoryDetail { id: string; period: string; seller_id: string; seller_name: string; vendas: number; pa: number; ticket_medio: number; total_prize: number; }
+interface SellerHistoryDetail { id: string; period: string; seller_id: string; seller_name: string; vendas: number; pa: number; ticket_medio: number; total_prize: number; createdAt: string; }
 interface PeriodComparisonData { current: SellerHistoryDetail[]; previous: SellerHistoryDetail[]; }
 
 const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value || 0);
@@ -473,10 +474,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <div className="overflow-x-auto pb-2"><TabsList className="h-auto p-0 bg-transparent gap-2">
-                    {sellers.map((seller) => (<Tooltip key={seller.id}><TooltipTrigger asChild><TabsTrigger value={seller.id}>{seller.name}</TabsTrigger></TooltipTrigger><TooltipContent><p>Acessar painel de {seller.name}</p></TooltipContent></Tooltip>))}
-                    {(isAdmin || isStoreAdmin) && (<Tooltip><TooltipTrigger asChild><TabsTrigger value="admin"><ShieldCheck className="h-5 w-5 mr-2" /> Admin</TabsTrigger></TooltipTrigger><TooltipContent><p>Painel do Gerente da Loja</p></TooltipContent></Tooltip>)}
-                </TabsList></div>
+                <div className="flex flex-col sm:flex-row justify-between items-center border-b">
+                    <TabsList className="h-auto p-0 bg-transparent gap-2 overflow-x-auto">
+                        {sellers.map((seller) => (<Tooltip key={seller.id}><TooltipTrigger asChild><TabsTrigger value={seller.id}>{seller.name}</TabsTrigger></TooltipTrigger><TooltipContent><p>Acessar painel de {seller.name}</p></TooltipContent></Tooltip>))}
+                    </TabsList>
+                    {(isAdmin || isStoreAdmin) && (
+                        <TabsList className="h-auto p-0 bg-transparent hidden sm:flex">
+                             <Tooltip><TooltipTrigger asChild><TabsTrigger value="admin"><ShieldCheck className="h-5 w-5 mr-2" /> Admin</TabsTrigger></TooltipTrigger><TooltipContent><p>Painel do Gerente da Loja</p></TooltipContent></Tooltip>
+                        </TabsList>
+                    )}
+                </div>
 
                 {(isAdmin || isStoreAdmin) && (
                   <TabsContent value="admin" className="mt-6">
