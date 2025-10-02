@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw, Moon, Sun } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
-import { useParams, useRouter,useRouter as useNextRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/li
 import AppLayout from "@/components/app-layout";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
-function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNextRouter>) {
+function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useRouter>) {
   const lojaDashboardUrl = `/loja/${storeId}/dashboard?tab=admin`;
   if (isAdminGlobal() || isStoreAuthenticated(storeId)) {
     router.push(lojaDashboardUrl);
@@ -25,7 +25,7 @@ function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useNex
   }
 }
 
-function handleSellerAccess(storeId: string, sellerId: string, router: ReturnType<typeof useNextRouter>) {
+function handleSellerAccess(storeId: string, sellerId: string, router: ReturnType<typeof useRouter>) {
   const sellerDashboardUrl = `/loja/${storeId}/dashboard?tab=${sellerId}`;
 
   // Case 1: User has direct access to the seller's dashboard.
