@@ -97,23 +97,40 @@ interface PeriodComparisonData { current: SellerHistoryDetail[]; previous: Selle
 const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value || 0);
 
 function Comparison({ current, previous }: { current: number; previous: number | undefined; }) {
-  if (previous == null) return null;
+  if (previous === undefined) return null;
   const diff = current - previous;
   if(diff === 0 && current === 0) return null;
-  const percent = previous === 0 ? (current > 0 ? 100.0 : 0) : (diff / previous) * 100;
   const isUp = diff > 0;
   const isDown = diff < 0;
   const color = isUp ? 'text-green-600' : isDown ? 'text-red-600' : 'text-muted-foreground';
   const Icon = isUp ? ArrowUpRight : isDown ? ArrowDownRight : Minus;
+
+  let percentText;
+  if (previous === 0) {
+    if (current > 0) {
+      percentText = "Novo";
+    } else {
+      return null; // Both are 0
+    }
+  } else {
+    const percent = (diff / previous) * 100;
+    if (Math.abs(percent) === Infinity || isNaN(percent)) {
+        percentText = '...';
+    } else {
+        percentText = `${percent.toFixed(0)}%`;
+    }
+  }
+
   return (
     <span className={`ml-2 text-xs font-mono flex items-center gap-1 ${color}`}>
       <Icon className="w-3 h-3" />
-      {previous === 0 && current > 0 ? 'Novo' : `${percent.toFixed(0)}%`}
+      {percentText}
     </span>
   );
 }
 
-function ArchivedPeriods({ storeId }: { storeId: string }) {
+
+function ArchivedPeriods({ storeId, onArchiveSuccess }: { storeId: string; onArchiveSuccess: () => void }) {
     const [periods, setPeriods] = useState<ArchivedPeriod[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -141,6 +158,12 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
     useEffect(() => {
         fetchPeriods();
     }, [fetchPeriods]);
+    
+    useEffect(() => {
+      if (onArchiveSuccess) {
+        onArchiveSuccess(fetchPeriods);
+      }
+    },[onArchiveSuccess, fetchPeriods])
 
     const handleAccordionChange = async (value: string) => {
         if (!value || details[value]) return;
@@ -323,6 +346,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [onArchiveSuccessCallback, setOnArchiveSuccessCallback] = useState<(() => void) | null>(null);
+
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -503,8 +528,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
                 {(isAdmin || isStoreAdmin) && (
                   <TabsContent value="admin" className="mt-6">
-                    <AdminTab form={form} storeId={storeId} sellers={sellers} onSellersChange={loadSellers} onIncentivesCalculated={handleIncentivesCalculated} handleSaveGoals={handleSaveGoals} lastUpdated={lastUpdated} incentives={incentives} />
-                    <div className="mt-8"><ArchivedPeriods storeId={storeId} /></div>
+                    <AdminTab
+                      form={form}
+                      storeId={storeId}
+                      sellers={sellers}
+                      onSellersChange={loadSellers}
+                      onIncentivesCalculated={handleIncentivesCalculated}
+                      handleSaveGoals={handleSaveGoals}
+                      lastUpdated={lastUpdated}
+                      incentives={incentives}
+                      onArchiveSuccess={() => onArchiveSuccessCallback && onArchiveSuccessCallback()}
+                    />
+                    <div className="mt-8">
+                      <ArchivedPeriods storeId={storeId} onArchiveSuccess={(callback) => setOnArchiveSuccessCallback(() => callback)} />
+                    </div>
                   </TabsContent>
                 )}
 

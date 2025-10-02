@@ -94,6 +94,7 @@ interface AdminTabProps {
   handleSaveGoals: () => void;
   lastUpdated: string | null;
   incentives: Incentives;
+  onArchiveSuccess: () => void;
 }
 
 type ParsedRow = {
@@ -111,7 +112,8 @@ export function AdminTab({
   onIncentivesCalculated,
   handleSaveGoals,
   lastUpdated,
-  incentives
+  incentives,
+  onArchiveSuccess,
 }: AdminTabProps) {
   const { toast } = useToast();
   const [activeAdminTab, setActiveAdminTab] = useState("dashboard");
@@ -903,7 +905,7 @@ export function AdminTab({
             </CardFooter>
           </Card>
            <div className="mt-8">
-              <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onSellersChange} />
+              <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onArchiveSuccess} />
             </div>
         </TabsContent>
         
