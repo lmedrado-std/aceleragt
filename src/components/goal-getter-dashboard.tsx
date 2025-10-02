@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -282,8 +283,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         const sellerForAI = {
             id: seller.id,
             name: seller.name,
-            avatarId: String(seller.avatar_id || "avatar1"),
-            password: String(seller.password || "password"),
+            avatarId: String(seller.avatar_id || 'avatar1'),
+            password: String(seller.password || 'password'),
             vendas: parseForAI(seller.vendas),
             pa: parseForAI(seller.pa),
             ticketMedio: parseForAI(seller.ticket_medio),
