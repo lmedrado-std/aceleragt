@@ -474,15 +474,31 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <div className="flex flex-col sm:flex-row justify-between items-center border-b">
-                    <TabsList className="h-auto p-0 bg-transparent gap-2 overflow-x-auto">
-                        {sellers.map((seller) => (<Tooltip key={seller.id}><TooltipTrigger asChild><TabsTrigger value={seller.id}>{seller.name}</TabsTrigger></TooltipTrigger><TooltipContent><p>Acessar painel de {seller.name}</p></TooltipContent></Tooltip>))}
-                    </TabsList>
-                    {(isAdmin || isStoreAdmin) && (
-                        <TabsList className="h-auto p-0 bg-transparent hidden sm:flex">
-                             <Tooltip><TooltipTrigger asChild><TabsTrigger value="admin"><ShieldCheck className="h-5 w-5 mr-2" /> Admin</TabsTrigger></TooltipTrigger><TooltipContent><p>Painel do Gerente da Loja</p></TooltipContent></Tooltip>
-                        </TabsList>
-                    )}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-2 gap-4">
+                  {(isAdmin || isStoreAdmin) && (
+                      <TabsList className="h-auto p-0 bg-transparent">
+                          <Tooltip>
+                              <TooltipTrigger asChild>
+                                  <TabsTrigger value="admin" className="px-4 py-2 text-base">
+                                      <ShieldCheck className="h-5 w-5 mr-2" /> Painel do Gestor
+                                  </TabsTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Acessar o painel de gerenciamento da loja</p></TooltipContent>
+                          </Tooltip>
+                      </TabsList>
+                  )}
+                  <div className="flex-1 min-w-0">
+                      <TabsList className="h-auto p-0 bg-transparent gap-2 overflow-x-auto">
+                          {sellers.map((seller) => (
+                              <Tooltip key={seller.id}>
+                                  <TooltipTrigger asChild>
+                                      <TabsTrigger value={seller.id}>{seller.name}</TabsTrigger>
+                                  </TooltipTrigger>
+                                  <TooltipContent><p>Acessar painel de {seller.name}</p></TooltipContent>
+                              </Tooltip>
+                          ))}
+                      </TabsList>
+                  </div>
                 </div>
 
                 {(isAdmin || isStoreAdmin) && (
