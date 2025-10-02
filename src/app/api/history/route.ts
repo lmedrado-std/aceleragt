@@ -1,89 +1,93 @@
 
-import { NextResponse, NextRequest } from "next/server";
-import { prisma } from "../../../lib/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
-/**
- * GET /api/history
- * Fetches historical data. Can be used in two modes:
- * 1. List all unique archived periods by calling it without query parameters.
- * 2. Fetch detailed history for a specific period (and its preceding period for comparison)
- *    by providing `period` and `storeId` query parameters.
- */
-export async function GET(req: NextRequest) {
-  const periodName = req.nextUrl.searchParams.get('period');
-  const storeId = req.nextUrl.searchParams.get('storeId');
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const period = searchParams.get('period');
+  const storeId = searchParams.get('storeId');
 
-  try {
-    // Mode 2: Fetch detailed history for a specific period with comparison
-    if (periodName && storeId) {
-       // Find all unique periods for the store, sorted chronologically to find the previous one
-      const allPeriodsForStore = await prisma.sellerHistory.findMany({
+  // Validação dos parâmetros
+  if (!storeId) {
+    return NextResponse.json({ error: 'storeId é obrigatório' }, { status: 400 });
+  }
+  
+  // Modo 1: listar períodos disponíveis para a loja
+  if (!period) {
+    try {
+      const periods = await prisma.sellerHistory.groupBy({
+        by: ['period', 'store_id'],
+        where: { store_id: storeId },
+        _count: { seller_id: true },
+        orderBy: { 
+          // Idealmente, a ordenação deveria ser por uma data, 
+          // mas por período funciona se o formato for consistente (ex: AAAA-MM)
+          period: 'desc' 
+        },
+      });
+      
+      const storePeriods = await prisma.sellerHistory.findMany({
         where: { store_id: storeId },
         distinct: ['period'],
-        orderBy: { created_at: 'asc' },
-        select: { period: true, created_at: true },
+        orderBy: { created_at: 'desc' },
+        select: { period: true, store_id: true, created_at: true }
+      });
+      
+      const periodCounts = await prisma.sellerHistory.groupBy({
+        where: { store_id: storeId },
+        by: ['period'],
+        _count: { seller_id: true }
       });
 
-      const uniquePeriods = allPeriodsForStore.reduce((acc, current) => {
-        if (!acc.find(item => item.period === current.period)) {
-          acc.push(current);
-        }
+      const countsMap = periodCounts.reduce((acc, curr) => {
+        acc[curr.period] = curr._count.seller_id;
         return acc;
-      }, [] as {period: string, created_at: Date | null}[]);
-      
-      const periodNames = uniquePeriods.map(p => p.period);
-      const currentPeriodIndex = periodNames.findIndex(p => p === periodName);
-      
-      let previousPeriodName: string | null = null;
-      if (currentPeriodIndex > 0) {
-        previousPeriodName = periodNames[currentPeriodIndex - 1];
-      }
+      }, {} as Record<string, number>);
 
-      // Fetch details for the current period
-      const currentPeriodDetails = await prisma.sellerHistory.findMany({
-        where: { period: periodName, store_id: storeId },
-        orderBy: { seller_name: 'asc' },
-      });
-
-      let previousPeriodDetails: any[] = [];
-      if (previousPeriodName) {
-        previousPeriodDetails = await prisma.sellerHistory.findMany({
-          where: { period: previousPeriodName, store_id: storeId },
-          orderBy: { seller_name: 'asc' },
-        });
-      }
+      const formatted = storePeriods.map(p => ({
+        period: p.period,
+        storeId: p.store_id,
+        sellerCount: countsMap[p.period] || 0,
+      }));
       
-      // Combine data for comparison
-      const responseData = {
-        current: currentPeriodDetails,
-        previous: previousPeriodDetails,
-      };
+      return NextResponse.json(formatted);
 
-      return NextResponse.json(responseData);
+    } catch (error) {
+      console.error('[API GET /api/history] ERRO listagem:', error);
+      return NextResponse.json({ error: 'Erro ao listar períodos' }, { status: 500 });
     }
+  }
 
-    // Mode 1: List all unique archived periods
-    const periods = await prisma.sellerHistory.groupBy({
-      by: ["period", "store_id"],
-      _count: {
-        seller_id: true,
-      },
-       orderBy: {
-        period: 'desc',
-      },
+  // Modo 2: detalhes de um período específico
+  try {
+    // buscar todos os períodos do store para determinar o anterior
+    const distinct = await prisma.sellerHistory.findMany({
+      where: { store_id: storeId },
+      distinct: ['period'],
+      orderBy: { created_at: 'asc' }, // Ordena pela data de criação do registro
+      select: { period: true },
+    });
+    const names = distinct.map(d => d.period);
+    const idx = names.indexOf(period);
+    const prev = idx > 0 ? names[idx - 1] : null;
+
+    // buscar detalhes do período atual
+    const current = await prisma.sellerHistory.findMany({
+      where: { store_id: storeId, period },
+      orderBy: { seller_name: 'asc' },
     });
 
-    const formatted = periods.map(p => ({
-      period: p.period,
-      storeId: p.store_id,
-      sellerCount: p._count.seller_id,
-    }));
+    // buscar detalhes do período anterior (se existir)
+    const previous = prev
+      ? await prisma.sellerHistory.findMany({
+          where: { store_id: storeId, period: prev },
+          orderBy: { seller_name: 'asc' },
+        })
+      : [];
 
-    return NextResponse.json(formatted);
-
+    return NextResponse.json({ current, previous });
   } catch (error) {
-    console.error("Erro ao buscar histórico:", error);
-    const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado.";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    console.error('[API GET /api/history] ERRO detalhes:', error);
+    return NextResponse.json({ error: 'Erro ao buscar detalhes do período' }, { status: 500 });
   }
 }
