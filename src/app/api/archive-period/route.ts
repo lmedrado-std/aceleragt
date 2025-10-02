@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       });
 
       // 1. Save the historical data
-      await tx.sellerHistory.createMany({
+      await tx.SellerHistory.createMany({
         data: historyData,
       });
 

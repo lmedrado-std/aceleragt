@@ -6,7 +6,7 @@ const random = (min: number, max: number) => Math.random() * (max - min) + min;
 // Main function to populate history
 export async function populateHistoryForStore(storeName: string) {
   console.log(`Buscando loja: ${storeName}`);
-  const store = await prisma.store.findFirst({
+  const store = await prisma.stores.findFirst({
     where: { name: storeName },
   });
 
@@ -25,7 +25,7 @@ export async function populateHistoryForStore(storeName: string) {
   console.log(`${sellers.length} vendedores encontrados.`);
 
   // Clear existing history for this store to avoid duplicates
-  await prisma.sellerHistory.deleteMany({
+  await prisma.SellerHistory.deleteMany({
     where: { store_id: store.id },
   });
   console.log('Histórico anterior da loja foi limpo.');
@@ -64,7 +64,7 @@ export async function populateHistoryForStore(storeName: string) {
   }
 
   console.log(`Gerando ${historyData.length} registros históricos...`);
-  await prisma.sellerHistory.createMany({
+  await prisma.SellerHistory.createMany({
     data: historyData,
   });
 
