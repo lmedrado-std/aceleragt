@@ -97,40 +97,38 @@ interface PeriodComparisonData { current: SellerHistoryDetail[]; previous: Selle
 const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value || 0);
 
 function Comparison({ current, previous }: { current: number; previous: number | undefined; }) {
-  if (previous === undefined) return null;
+  if (previous === undefined || previous === null || isNaN(previous)) return null;
+
+  if (previous === 0) {
+    if (current > 0) {
+      return <span className="ml-2 text-xs font-mono flex items-center gap-1 text-green-600">Novo</span>;
+    }
+    return null; // both are 0
+  }
+
   const diff = current - previous;
-  if(diff === 0 && current === 0) return null;
+  if (diff === 0) return null;
+
+  const percent = (diff / previous) * 100;
+  if (!isFinite(percent)) {
+    return <span className="ml-2 text-xs font-mono flex items-center gap-1 text-muted-foreground">—</span>;
+  }
+  
   const isUp = diff > 0;
   const isDown = diff < 0;
   const color = isUp ? 'text-green-600' : isDown ? 'text-red-600' : 'text-muted-foreground';
   const Icon = isUp ? ArrowUpRight : isDown ? ArrowDownRight : Minus;
 
-  let percentText;
-  if (previous === 0) {
-    if (current > 0) {
-      percentText = "Novo";
-    } else {
-      return null; // Both are 0
-    }
-  } else {
-    const percent = (diff / previous) * 100;
-    if (Math.abs(percent) === Infinity || isNaN(percent)) {
-        percentText = '...';
-    } else {
-        percentText = `${percent.toFixed(0)}%`;
-    }
-  }
-
   return (
     <span className={`ml-2 text-xs font-mono flex items-center gap-1 ${color}`}>
       <Icon className="w-3 h-3" />
-      {percentText}
+      {`${percent.toFixed(0)}%`}
     </span>
   );
 }
 
 
-function ArchivedPeriods({ storeId, onArchiveSuccess }: { storeId: string; onArchiveSuccess: () => void }) {
+function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: string; onDataNeedsRefresh: (callback: () => void) => void }) {
     const [periods, setPeriods] = useState<ArchivedPeriod[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -149,21 +147,18 @@ function ArchivedPeriods({ storeId, onArchiveSuccess }: { storeId: string; onArc
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.';
             setError(errorMessage);
-            toast({ variant: 'destructive', title: 'Erro', description: errorMessage });
         } finally {
             setLoading(false);
         }
-    }, [storeId, toast]);
+    }, [storeId]);
 
     useEffect(() => {
         fetchPeriods();
     }, [fetchPeriods]);
     
     useEffect(() => {
-      if (onArchiveSuccess) {
-        onArchiveSuccess(fetchPeriods);
-      }
-    },[onArchiveSuccess, fetchPeriods])
+      onDataNeedsRefresh(fetchPeriods);
+    },[onDataNeedsRefresh, fetchPeriods])
 
     const handleAccordionChange = async (value: string) => {
         if (!value || details[value]) return;
@@ -234,7 +229,7 @@ function ArchivedPeriods({ storeId, onArchiveSuccess }: { storeId: string; onArc
                         const previousDataMap = periodData?.previous.reduce((acc, seller) => { acc[seller.seller_id] = seller; return acc; }, {} as Record<string, SellerHistoryDetail>);
 
                         return (
-                            <AccordionItem value={value} key={value}>
+                             <AccordionItem value={value} key={value}>
                                 <div className="flex items-center w-full">
                                     <AccordionTrigger className="flex-1">
                                       <div className='flex justify-between items-center w-full pr-4'>
@@ -346,7 +341,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [onArchiveSuccessCallback, setOnArchiveSuccessCallback] = useState<(() => void) | null>(null);
+  const [dataRefreshCallback, setDataRefreshCallback] = useState<() => void>(() => () => {});
 
   
   const form = useForm<FormValues>({
@@ -537,10 +532,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                       handleSaveGoals={handleSaveGoals}
                       lastUpdated={lastUpdated}
                       incentives={incentives}
-                      onArchiveSuccess={() => onArchiveSuccessCallback && onArchiveSuccessCallback()}
+                      onArchiveSuccess={dataRefreshCallback}
                     />
                     <div className="mt-8">
-                      <ArchivedPeriods storeId={storeId} onArchiveSuccess={(callback) => setOnArchiveSuccessCallback(() => callback)} />
+                      <ArchivedPeriods storeId={storeId} onDataNeedsRefresh={(callback) => setDataRefreshCallback(() => callback)} />
                     </div>
                   </TabsContent>
                 )}
