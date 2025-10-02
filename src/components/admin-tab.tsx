@@ -817,32 +817,32 @@ export function AdminTab({
               <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
             </CardHeader>
             <CardContent>
-              {sellers.length > 0 ? (
-                <div className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {sellers.map((seller, index) => (
-                      <Card key={seller.id} className="overflow-hidden">
-                          <CardHeader className="flex flex-row items-center gap-4 bg-muted/50 p-4">
-                            <SellerAvatar avatarId={seller.avatar_id} className="h-12 w-12"/>
-                            <CardTitle className="text-xl">{seller.name ?? 'Vendedor sem nome'}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="p-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                  <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                  <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                  <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
-                              </div>
-                          </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                  <Separator />
-                  <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onSellersChange} />
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
-              )}
+                {sellers.length > 0 ? (
+                    <div className="space-y-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {sellers.map((seller, index) => (
+                            <Card key={seller.id} className="overflow-hidden">
+                                <CardHeader className="flex flex-row items-center gap-4 bg-muted/50 p-4">
+                                    <SellerAvatar avatarId={seller.avatar_id} className="h-12 w-12"/>
+                                    <CardTitle className="text-xl">{seller.name ?? 'Vendedor sem nome'}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                        <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                        <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                        <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            ))}
+                        </div>
+                        <Separator />
+                        <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onSellersChange} />
+                    </div>
+                ) : (
+                    <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
+                )}
             </CardContent>
              <CardFooter className="flex flex-wrap items-start justify-between gap-6 border-t pt-6">
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -1065,3 +1065,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
