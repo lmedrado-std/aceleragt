@@ -9,7 +9,7 @@ import { prisma } from "../../../lib/db";
  *    by providing `period` and `storeId` query parameters.
  */
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = req.nextUrl;
   const periodName = searchParams.get('period');
   const storeId = searchParams.get('storeId');
 

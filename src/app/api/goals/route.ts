@@ -1,11 +1,10 @@
 
 import { prisma } from '@/lib/db';
-import { NextResponse } from 'next/server';
-import { URL } from 'url';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const storeId = url.searchParams.get('storeId');
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const storeId = searchParams.get('storeId');
 
   if (!storeId) {
     return NextResponse.json({ error: 'O ID da loja é obrigatório' }, { status: 400 });
