@@ -22,7 +22,7 @@ const SellerSchema = z.object({
   pa: z.coerce.number().default(0),
   ticketMedio: z.coerce.number().default(0),
   corridinhaDiaria: z.coerce.number().default(0),
-  password: z.string().optional(),
+  password: z.string(),
 });
 
 const GoalsSchema = z.object({

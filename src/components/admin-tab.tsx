@@ -308,6 +308,7 @@ export function AdminTab({
     try {
       if (!sellers || sellers.length === 0) {
         toast({ variant: "destructive", title: "Nenhum vendedor", description: "Não há vendedores para calcular incentivos." });
+        setIsCalculating(false);
         return;
       }
 
@@ -365,15 +366,14 @@ export function AdminTab({
         const sellerForAI = {
           id: seller.id,
           name: seller.name,
-          avatarId: seller.avatar_id || "avatar1",
-          password: seller.password || "password",
+          avatarId: String(seller.avatar_id || "avatar1"),
+          password: String(seller.password || "password"),
           vendas: Number(parsedSellerData.vendas) || 0,
           pa: Number(parsedSellerData.pa) || 0,
           ticketMedio: Number(parsedSellerData.ticket_medio) || 0,
           corridinhaDiaria: Number(parsedSellerData.corridinha_diaria) || 0,
         };
-
-        // Log para depuração
+        
         console.log("Enviando para IA:", JSON.stringify(sellerForAI, null, 2));
 
         const result = await incentiveProjection({
@@ -1070,7 +1070,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
-
-    
