@@ -214,14 +214,17 @@ const parseForAI = (value: any): number => {
         const parsedValue = parseFloat(value.replace(',', '.'));
         return isNaN(parsedValue) ? 0 : parsedValue;
     }
-    return value || 0;
+    return Number(value) || 0;
 };
 
 const parseGoalsForAI = (rawGoals: any): Goals => {
     const parsed: any = {};
     for (const key in rawGoals) {
-        if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') parsed[key] = !!rawGoals[key];
-        else parsed[key] = parseForAI(rawGoals[key]);
+        if (key === 'performanceBonusEnabled' || key === 'corridinhaEnabled') {
+            parsed[key] = !!rawGoals[key];
+        } else {
+            parsed[key] = parseForAI(rawGoals[key]);
+        }
     }
     return parsed as Goals;
 };
@@ -270,27 +273,31 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   }, []);
   
   const calculateAllIncentives = useCallback(async (sellersData: Seller[], goalsData: any) => {
+    if (!sellersData || sellersData.length === 0) {
+        setIncentives({});
+        return;
+    }
     const allIncentives: Incentives = {};
     const goals = parseGoalsForAI(goalsData);
     for (const seller of sellersData) {
         const sellerForAI = {
-          id: seller.id,
-          name: seller.name,
-          vendas: parseForAI(seller.vendas),
-          pa: parseForAI(seller.pa),
-          ticketMedio: parseForAI(seller.ticket_medio),
-          corridinhaDiaria: parseForAI(seller.corridinha_diaria),
+            id: seller.id,
+            name: seller.name,
+            avatarId: String(seller.avatar_id || "avatar1"),
+            password: String(seller.password || "password"),
+            vendas: parseForAI(seller.vendas),
+            pa: parseForAI(seller.pa),
+            ticketMedio: parseForAI(seller.ticket_medio),
+            corridinhaDiaria: parseForAI(seller.corridinha_diaria),
         };
         
-        // <<< DIAGNOSTIC LOGS ADDED AS REQUESTED >>>
-        console.log("sellerForAI:", sellerForAI);
         console.log("input IA:", { seller: sellerForAI, goals });
 
         const result: IncentiveProjectionOutput = await incentiveProjection({ seller: sellerForAI, goals });
         allIncentives[seller.id!] = result;
     }
     setIncentives(allIncentives);
-  }, []);
+}, []);
 
   const loadSellers = useCallback(async () => {
     try {
