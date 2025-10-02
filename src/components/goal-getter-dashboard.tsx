@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -105,6 +104,7 @@ function Comparison({ current, previous }: { current: number; previous: number |
 function ArchivedPeriods({ storeId }: { storeId: string }) {
     const [periods, setPeriods] = useState<ArchivedPeriod[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [details, setDetails] = useState<Record<string, PeriodComparisonData>>({});
     const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
     const { toast } = useToast();
@@ -112,13 +112,16 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
     useEffect(() => {
         const fetchPeriods = async () => {
             setLoading(true);
+            setError(null);
             try {
                 const res = await fetch(`/api/history?storeId=${storeId}`);
                 if (!res.ok) throw new Error('Falha ao buscar histórico de períodos.');
-                const data = await res.json();
-                setPeriods(data);
+                const periods: ArchivedPeriod[] = await res.json();
+                setPeriods(periods);
             } catch (e) {
-                toast({ variant: 'destructive', title: 'Erro', description: e instanceof Error ? e.message : 'Não foi possível carregar o histórico.' });
+                const errorMessage = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.';
+                setError(errorMessage);
+                toast({ variant: 'destructive', title: 'Erro', description: errorMessage });
             } finally {
                 setLoading(false);
             }
@@ -131,7 +134,7 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
         const [period, currentStoreId] = value.split('|');
         setLoadingDetails(prev => ({ ...prev, [value]: true }));
         try {
-            const res = await fetch(`/api/history?period=${encodeURIComponent(period)}&storeId=${currentStoreId}`);
+            const res = await fetch(`/api/history?storeId=${currentStoreId}&period=${encodeURIComponent(period)}`);
             if (!res.ok) throw new Error(`Falha ao buscar detalhes.`);
             const data = await res.json();
             setDetails(prev => ({ ...prev, [value]: data }));
@@ -143,6 +146,20 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
     };
 
     if (loading) return <div className="flex items-center justify-center h-24"><Loader2 className="mr-2 h-8 w-8 animate-spin" /><p>Carregando histórico...</p></div>;
+    
+    if (error) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><History /> Histórico de Períodos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-destructive">{error}</p>
+                </CardContent>
+            </Card>
+        );
+    }
+    
     if (periods.length === 0) return (
         <Card><CardHeader><CardTitle className="flex items-center gap-2"><History /> Histórico de Períodos</CardTitle></CardHeader><CardContent><p className='text-muted-foreground'>Nenhum período da sua loja foi arquivado ainda.</p></CardContent></Card>
     );
