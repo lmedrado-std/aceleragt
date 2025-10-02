@@ -112,11 +112,10 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
         const fetchPeriods = async () => {
             setLoading(true);
             try {
-                const res = await fetch('/api/history');
+                const res = await fetch(`/api/history?storeId=${storeId}`);
                 if (!res.ok) throw new Error('Falha ao buscar histórico de períodos.');
-                const allPeriods: ArchivedPeriod[] = await res.json();
-                const storePeriods = allPeriods.filter(p => p.storeId === storeId);
-                setPeriods(storePeriods);
+                const data = await res.json();
+                setPeriods(data);
             } catch (e) {
                 toast({ variant: 'destructive', title: 'Erro', description: e instanceof Error ? e.message : 'Não foi possível carregar o histórico.' });
             } finally {

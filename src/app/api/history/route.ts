@@ -15,22 +15,11 @@ export async function GET(request: NextRequest) {
   // Modo 1: listar períodos disponíveis para a loja
   if (!period) {
     try {
-      const periods = await prisma.sellerHistory.groupBy({
-        by: ['period', 'store_id'],
-        where: { store_id: storeId },
-        _count: { seller_id: true },
-        orderBy: { 
-          // Idealmente, a ordenação deveria ser por uma data, 
-          // mas por período funciona se o formato for consistente (ex: AAAA-MM)
-          period: 'desc' 
-        },
-      });
-      
       const storePeriods = await prisma.sellerHistory.findMany({
         where: { store_id: storeId },
         distinct: ['period'],
         orderBy: { created_at: 'desc' },
-        select: { period: true, store_id: true, created_at: true }
+        select: { period: true, store_id: true }
       });
       
       const periodCounts = await prisma.sellerHistory.groupBy({
