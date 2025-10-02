@@ -371,6 +371,8 @@ export function AdminTab({
           corridinhaDiaria: parsedSellerData.corridinha_diaria,
         }
 
+        console.log("Objeto sellerForAI:", JSON.stringify(sellerForAI, null, 2));
+
         const result = await incentiveProjection({
           seller: sellerForAI,
           goals: {
@@ -1069,3 +1071,4 @@ export function AdminTab({
     
     
     
+
