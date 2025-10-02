@@ -15,31 +15,25 @@ export async function GET(request: NextRequest) {
   // Modo 1: listar períodos disponíveis para a loja
   if (!period) {
     try {
-      const storePeriods = await prisma.sellerHistory.findMany({
-        where: { store_id: storeId },
-        distinct: ['period'],
-        orderBy: { created_at: 'desc' },
-        select: { period: true, store_id: true }
-      });
-      
-      const periodCounts = await prisma.sellerHistory.groupBy({
-        where: { store_id: storeId },
+      const periodGroups = await prisma.sellerHistory.groupBy({
         by: ['period'],
-        _count: { seller_id: true }
+        where: { store_id: storeId },
+        _count: {
+          _all: true,
+        },
+        orderBy: {
+          period: 'desc',
+        },
       });
 
-      const countsMap = periodCounts.reduce((acc, curr) => {
-        acc[curr.period] = curr._count.seller_id;
-        return acc;
-      }, {} as Record<string, number>);
-
-      const formatted = storePeriods.map(p => ({
+      // A consulta acima nos dá o nome do período e a contagem. Formatamos para o frontend.
+      const formattedPeriods = periodGroups.map(p => ({
         period: p.period,
-        storeId: p.store_id,
-        sellerCount: countsMap[p.period] || 0,
+        storeId: storeId, // Adicionamos o storeId para consistência
+        sellerCount: p._count._all,
       }));
       
-      return NextResponse.json(formatted);
+      return NextResponse.json(formattedPeriods);
 
     } catch (error) {
       console.error('[API GET /api/history] ERRO listagem:', error);
@@ -50,31 +44,31 @@ export async function GET(request: NextRequest) {
   // Modo 2: detalhes de um período específico
   try {
     // buscar todos os períodos do store para determinar o anterior
-    const distinct = await prisma.sellerHistory.findMany({
+    const distinctPeriods = await prisma.sellerHistory.findMany({
       where: { store_id: storeId },
       distinct: ['period'],
-      orderBy: { created_at: 'asc' }, // Ordena pela data de criação do registro
+      orderBy: { created_at: 'asc' }, // Ordena pela data de criação para garantir a ordem correta
       select: { period: true },
     });
-    const names = distinct.map(d => d.period);
-    const idx = names.indexOf(period);
-    const prev = idx > 0 ? names[idx - 1] : null;
+    const periodNames = distinctPeriods.map(d => d.period);
+    const currentIndex = periodNames.indexOf(period);
+    const previousPeriodName = currentIndex > 0 ? periodNames[currentIndex - 1] : null;
 
     // buscar detalhes do período atual
-    const current = await prisma.sellerHistory.findMany({
+    const currentPeriodDetails = await prisma.sellerHistory.findMany({
       where: { store_id: storeId, period },
       orderBy: { seller_name: 'asc' },
     });
 
     // buscar detalhes do período anterior (se existir)
-    const previous = prev
+    const previousPeriodDetails = previousPeriodName
       ? await prisma.sellerHistory.findMany({
-          where: { store_id: storeId, period: prev },
+          where: { store_id: storeId, period: previousPeriodName },
           orderBy: { seller_name: 'asc' },
         })
       : [];
 
-    return NextResponse.json({ current, previous });
+    return NextResponse.json({ current: currentPeriodDetails, previous: previousPeriodDetails });
   } catch (error) {
     console.error('[API GET /api/history] ERRO detalhes:', error);
     return NextResponse.json({ error: 'Erro ao buscar detalhes do período' }, { status: 500 });
