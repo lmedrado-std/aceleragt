@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,7 +6,7 @@ import { z } from "zod";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ShieldCheck, Home, CheckCircle, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2 } from "lucide-react";
+import { ShieldCheck, Home, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -127,8 +126,8 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
         try {
             const res = await fetch(`/api/history?storeId=${storeId}`);
             if (!res.ok) throw new Error('Falha ao buscar histórico de períodos.');
-            const periods: ArchivedPeriod[] = await res.json();
-            setPeriods(periods);
+            const periodsData: ArchivedPeriod[] = await res.json();
+            setPeriods(periodsData);
         } catch (e) {
             const errorMessage = e instanceof Error ? e.message : 'Não foi possível carregar o histórico.';
             setError(errorMessage);
@@ -212,38 +211,38 @@ function ArchivedPeriods({ storeId }: { storeId: string }) {
 
                         return (
                             <AccordionItem value={value} key={value}>
-                                <AccordionTrigger>
-                                  <div className='flex justify-between items-center w-full pr-4'>
-                                    <span>{period}</span>
-                                    <div className="flex items-center gap-4">
-                                      <span className='text-muted-foreground text-sm'>{`Vendedores: ${sellerCount}`}</span>
-                                      <AlertDialog>
-                                        <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Esta ação removerá permanentemente o período de histórico <span className="font-bold">"{period}"</span>. Esta ação não pode ser desfeita.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                <AlertDialogAction
-                                                    onClick={() => handleDeletePeriod(period)}
-                                                    className="bg-destructive hover:bg-destructive/90"
-                                                >
-                                                    Remover
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    </div>
-                                  </div>
-                                </AccordionTrigger>
+                                <div className="flex items-center w-full">
+                                    <AccordionTrigger className="flex-1">
+                                      <div className='flex justify-between items-center w-full pr-4'>
+                                        <span>{period}</span>
+                                        <span className='text-muted-foreground text-sm'>{`Vendedores: ${sellerCount}`}</span>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0">
+                                              <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                              <AlertDialogDescription>
+                                                  Esta ação removerá permanentemente o período de histórico <span className="font-bold">"{period}"</span>. Esta ação não pode ser desfeita.
+                                              </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                              <AlertDialogAction
+                                                  onClick={() => handleDeletePeriod(period)}
+                                                  className="bg-destructive hover:bg-destructive/90"
+                                              >
+                                                  Remover
+                                              </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
                                 <AccordionContent>
                                     {loadingDetails[value] && <div className="flex items-center justify-center p-4"><Loader2 className="mr-2 h-6 w-6 animate-spin" /><span>Carregando...</span></div>}
                                     {periodData?.current && (
