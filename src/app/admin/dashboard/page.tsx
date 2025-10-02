@@ -75,7 +75,8 @@ function ArchivedPeriods() {
         try {
             const res = await fetch(`/api/history?period=${encodeURIComponent(period)}&storeId=${storeId}`);
             if (!res.ok) throw new Error(`Falha ao buscar detalhes para o período ${period}.`);
-            setDetails(prev => ({ ...prev, [value]: await res.json() }));
+            const data = await res.json();
+            setDetails(prev => ({ ...prev, [value]: data }));
         } catch (e) {
             toast({ variant: 'destructive', title: 'Erro', description: e instanceof Error ? e.message : 'Não foi possível carregar os detalhes.' });
         } finally {
