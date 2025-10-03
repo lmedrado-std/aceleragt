@@ -121,7 +121,7 @@ export function Sidebar() {
             {renderThemeToggle()}
         </div>
         <div className="px-3 py-2 text-xs text-center text-white/70 space-y-1">
-            <p>v1.0.1 - Build Estável</p>
+            <p>V1.0.1 Build Estavel</p>
             <p>RyannBreston desenvolvedor</p>
             <p>© {new Date().getFullYear()} Acelera GT.</p>
         </div>
