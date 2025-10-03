@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -164,7 +165,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
         <div className="!mt-4 p-3 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800/50">
             <CardDescription className="text-yellow-800 dark:text-yellow-300 text-xs flex items-center gap-2">
                 <Megaphone className="h-4 w-4" />
-                Manter os lançamentos atualizados deixará todos motivados com seus resultados. Atualize sempre ao fechar a loja ou logo que iniciar os trabalhos, mantendo os vendedores sempre atualizados.
+                Mantenha os lançamentos de vendas sempre atualizados para motivar a equipe. Atualizações diárias, seja no início ou no final do dia, garantem que todos vejam seu progresso em tempo real.
             </CardDescription>
         </div>
       </CardHeader>
