@@ -563,14 +563,15 @@ export function AdminTab({
 
   const onSaveGoals = async () => {
     setIsSavingGoals(true);
-    const { id } = toast({
+    const toastInstance = toast({
       title: "Salvando Metas...",
       description: "Aguarde enquanto aplicamos as novas configurações.",
     });
     
     await handleSaveGoals();
 
-    toast.update(id, {
+    toastInstance.update({
+      id: toastInstance.id,
       title: "Metas Salvas!",
       description: "As novas metas e prêmios foram salvos com sucesso.",
     });
