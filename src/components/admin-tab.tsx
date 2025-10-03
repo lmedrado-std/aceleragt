@@ -576,7 +576,7 @@ export function AdminTab({
       description: "As novas metas e prêmios foram salvos com sucesso.",
     });
     setIsSavingGoals(false);
-  }
+  };
 
 
   return (
@@ -1077,3 +1077,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
