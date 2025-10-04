@@ -24,7 +24,7 @@ interface Seller {
 export function WheelManager({ storeId }: WheelManagerProps) {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [creditsMap, setCreditsMap] = useState<Record<string, number>>({});
-  const [recentSpins, setRecentSpins] = useState([]);
+  const [recentSpins, setRecentSpins] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalSpins: 0, totalValue: 0 });
   const [selectedSeller, setSelectedSeller] = useState<string>('');
   const [grantAmount, setGrantAmount] = useState(1);
@@ -45,7 +45,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
       const statusData = await statusRes.json();
       setCreditsMap(statusData.creditsMap);
-      setRecentSpins(statusData.spins.slice(0, 10));
+      setRecentSpins(Array.isArray(statusData.spins) ? statusData.spins.slice(0, 10) : []);
       setStats(statusData.stats);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -259,7 +259,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
                   <TableCell>
                     {new Date(spin.createdAt).toLocaleDateString('pt-BR')}
                   </TableCell>
-                  <TableCell>{spin.sellerId}</TableCell>
+                  <TableCell>{sellers.find(s => s.id === spin.sellerId)?.name || spin.sellerId}</TableCell>
                   <TableCell>{spin.segment.label}</TableCell>
                   <TableCell>
                     <Badge variant={spin.status === 'paid' ? 'default' : 

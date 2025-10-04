@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       creditsMap,
-      spins,
+      spins: spins || [],
       stats: {
         totalSpins: stats._count.id,
         totalValue: stats._sum.segment?.value || 0
