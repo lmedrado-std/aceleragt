@@ -3,13 +3,15 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Seller } from '@/lib/storage';
 
 interface PrizeWheelProps {
   storeId: string;
-  onSpinResult?: (result: any) => void;
+  sellerId: string;
 }
 
 interface WheelSegment {
@@ -22,55 +24,50 @@ interface WheelSegment {
   weight: number;
 }
 
-export function PrizeWheel({ storeId, onSpinResult }: PrizeWheelProps) {
+export function PrizeWheel({ storeId, sellerId }: PrizeWheelProps) {
   const [segments, setSegments] = useState<WheelSegment[]>([]);
   const [spinning, setSpinning] = useState(false);
-  const [selectedSeller, setSelectedSeller] = useState('');
-  const [sellers, setSellers] = useState<any[]>([]);
-  const [creditsMap, setCreditsMap] = useState<Record<string, number>>({});
+  const [credits, setCredits] = useState(0);
+  const [loading, setLoading] = useState(true);
   const wheelRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     loadWheelData();
-  }, [storeId]);
+  }, [storeId, sellerId]);
 
   const loadWheelData = async () => {
+    setLoading(true);
     try {
       // Carregar configurações da roleta
       const settingsRes = await fetch(`/api/wheel/settings?storeId=${storeId}`);
+      if (!settingsRes.ok) throw new Error("Falha ao carregar a roleta.");
       const settingsData = await settingsRes.json();
       setSegments(settingsData.segments || []);
 
-      // Carregar vendedores e créditos
+      // Carregar créditos do vendedor
       const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
+      if (!statusRes.ok) throw new Error("Falha ao carregar seus giros.");
       const statusData = await statusRes.json();
-      setCreditsMap(statusData.creditsMap);
+      setCredits(statusData.creditsMap[sellerId] || 0);
 
-      // Carregar vendedores (adapte conforme sua API)
-      const sellersRes = await fetch(`/api/sellers?storeId=${storeId}`);
-      const sellersData = await sellersRes.json();
-      setSellers(sellersData);
     } catch (error) {
-      console.error('Erro ao carregar dados da roleta:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: (error as Error).message || 'Não foi possível carregar os dados da roleta.'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const spinWheel = async () => {
-    if (!selectedSeller) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Selecione um vendedor para girar a roleta'
-      });
-      return;
-    }
-
-    if ((creditsMap[selectedSeller] || 0) < 1) {
+    if (credits < 1) {
       toast({
         variant: 'destructive',
         title: 'Sem giros',
-        description: 'Este vendedor não possui giros disponíveis'
+        description: 'Você não possui giros disponíveis. Fale com seu gerente!'
       });
       return;
     }
@@ -81,47 +78,27 @@ export function PrizeWheel({ storeId, onSpinResult }: PrizeWheelProps) {
       const res = await fetch('/api/wheel/spin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storeId,
-          sellerId: selectedSeller
-        })
+        body: JSON.stringify({ storeId, sellerId })
       });
 
       const result = await res.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      // Animar a roleta
+      if (!result.success) throw new Error(result.error);
+      
       await animateWheel(result.segmentIndex);
-
-      // Mostrar resultado
+      
       toast({
         title: '🎉 Parabéns!',
-        description: `Prêmio: ${result.prize.label}`,
+        description: `Você ganhou: ${result.prize.label}`,
         duration: 5000
       });
-
-      // Callback para componente pai
-      if (onSpinResult) {
-        onSpinResult({
-          ...result,
-          sellerId: selectedSeller
-        });
-      }
-
-      // Atualizar créditos localmente
-      setCreditsMap(prev => ({
-        ...prev,
-        [selectedSeller]: result.remainingCredits
-      }));
+      
+      setCredits(result.remainingCredits);
 
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Erro',
-        description: error.message || 'Erro ao girar a roleta'
+        title: 'Erro ao girar',
+        description: error.message || 'Não foi possível completar o giro.'
       });
     } finally {
       setSpinning(false);
@@ -130,136 +107,102 @@ export function PrizeWheel({ storeId, onSpinResult }: PrizeWheelProps) {
 
   const animateWheel = (winningIndex: number): Promise<void> => {
     return new Promise((resolve) => {
-      if (!wheelRef.current) {
-        resolve();
-        return;
-      }
+      if (!wheelRef.current) return resolve();
 
       const wheel = wheelRef.current;
       const segmentAngle = 360 / segments.length;
-      const targetAngle = (winningIndex * segmentAngle) + (segmentAngle / 2);
-      const spinAngle = 360 * 5 + (360 - targetAngle); // 5 voltas + posição final
+      const randomOffset = Math.random() * (segmentAngle * 0.8) - (segmentAngle * 0.4);
+      const targetAngle = (winningIndex * segmentAngle) + (segmentAngle / 2) + randomOffset;
+      const currentRotation = parseInt(wheel.style.transform.replace(/[^\d-]/g, '') || '0');
+      const spinAngle = currentRotation + (360 * 5) + (360 - (targetAngle % 360));
 
-      wheel.style.transition = 'transform 3s cubic-bezier(0.23, 1, 0.32, 1)';
+      wheel.style.transition = 'transform 4s cubic-bezier(0.25, 1, 0.5, 1)';
       wheel.style.transform = `rotate(${spinAngle}deg)`;
 
-      setTimeout(resolve, 3000);
+      setTimeout(resolve, 4000);
     });
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="mt-2 text-muted-foreground">Carregando roleta...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (segments.length === 0) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">
-            Configure os prêmios da roleta primeiro na aba "Configurar Prêmios"
-          </div>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          A roleta de prêmios ainda não foi configurada para esta loja.
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle>🎡 Roleta de Prêmios</CardTitle>
+        <CardDescription>Gire a roleta e ganhe prêmios instantâneos!</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Seletor de vendedor */}
-        <div className="flex gap-4 items-end">
-          <div className="flex-1">
-            <label className="text-sm font-medium">Vendedor para girar</label>
-            <select
-              value={selectedSeller}
-              onChange={(e) => setSelectedSeller(e.target.value)}
-              className="w-full p-2 border rounded-md"
-              disabled={spinning}
-            >
-              <option value="">Selecione um vendedor</option>
-              {sellers
-                .filter(seller => (creditsMap[seller.id] || 0) > 0)
-                .map(seller => (
-                <option key={seller.id} value={seller.id}>
-                  {seller.name} ({creditsMap[seller.id]} giros)
-                </option>
-              ))}
-            </select>
-          </div>
+      <CardContent className="flex flex-col lg:flex-row items-center justify-center gap-8 p-8">
+        <div className="relative flex-shrink-0">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-10 w-0 h-0 border-x-8 border-x-transparent border-b-12 border-b-destructive" style={{borderBottomWidth: '12px'}}></div>
           
+          <div 
+            ref={wheelRef}
+            className="w-80 h-80 rounded-full border-8 border-primary/20 shadow-lg"
+            style={{ 
+              background: `conic-gradient(${segments.map((seg, i) => {
+                const startAngle = (i / segments.length) * 360;
+                const endAngle = ((i + 1) / segments.length) * 360;
+                return `${seg.color} ${startAngle}deg ${endAngle}deg`;
+              }).join(', ')})`,
+              transition: 'transform 0.1s ease-out'
+            }}
+          >
+            {segments.map((segment, index) => {
+              const angle = (360 / segments.length);
+              const rotation = angle * index + angle / 2;
+              return (
+                <div
+                  key={segment.id}
+                  className="absolute w-full h-full flex items-start justify-center"
+                  style={{ transform: `rotate(${rotation}deg)` }}
+                >
+                  <span className="text-white font-bold text-sm transform -rotate-90 origin-center translate-y-8 max-w-[50%] text-center">
+                    {segment.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center gap-4 text-center">
+          <div className="bg-muted p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground">Você tem</p>
+            <p className="text-4xl font-bold text-primary">{credits}</p>
+            <p className="text-sm text-muted-foreground">{credits === 1 ? 'giro disponível' : 'giros disponíveis'}</p>
+          </div>
+
           <Button 
             onClick={spinWheel} 
-            disabled={spinning || !selectedSeller || (creditsMap[selectedSeller] || 0) < 1}
+            disabled={spinning || credits < 1}
             size="lg"
+            className="w-full text-lg font-bold"
           >
-            {spinning ? 'Girando...' : 'GIRAR ROLETA! 🎯'}
+            {spinning ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Girando...
+              </>
+            ) : 'GIRAR A ROLETA!'}
           </Button>
-        </div>
-
-        {/* Roleta visual */}
-        <div className="flex justify-center">
-          <div className="relative">
-            {/* Ponteiro */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-10">
-              <div className="w-0 h-0 border-l-4 border-r-4 border-b-6 border-transparent border-b-black"></div>
-            </div>
-            
-            {/* Roleta */}
-            <div 
-              ref={wheelRef}
-              className="w-80 h-80 rounded-full border-4 border-gray-300 overflow-hidden"
-              style={{ 
-                background: `conic-gradient(${segments.map((seg, i) => {
-                  const startAngle = (i / segments.length) * 360;
-                  const endAngle = ((i + 1) / segments.length) * 360;
-                  return `${seg.color} ${startAngle}deg ${endAngle}deg`;
-                }).join(', ')})`
-              }}
-            >
-              {segments.map((segment, index) => {
-                const angle = (360 / segments.length) * index;
-                const textAngle = angle + (180 / segments.length);
-                
-                return (
-                  <div
-                    key={segment.id}
-                    className="absolute w-full h-full flex items-center justify-center text-white font-bold text-sm"
-                    style={{
-                      transform: `rotate(${textAngle}deg)`,
-                      transformOrigin: 'center'
-                    }}
-                  >
-                    <div 
-                      className="text-center"
-                      style={{ 
-                        transform: `rotate(${-textAngle}deg)`,
-                        maxWidth: '60px'
-                      }}
-                    >
-                      {segment.label}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Legenda dos prêmios */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {segments.map((segment) => (
-            <div key={segment.id} className="flex items-center gap-2">
-              <div 
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: segment.color }}
-              />
-              <span className="text-sm">{segment.label}</span>
-              {segment.weight > 0 && (
-                <Badge variant="outline" className="text-xs">
-                  {segment.weight}%
-                </Badge>
-              )}
-            </div>
-          ))}
         </div>
       </CardContent>
     </Card>

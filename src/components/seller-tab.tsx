@@ -253,7 +253,7 @@ export function SellerTab({
         </TabsContent>
         
         <TabsContent value="roleta" className="mt-6">
-            <PrizeWheel storeId={seller.store_id} />
+            <PrizeWheel storeId={seller.store_id} sellerId={seller.id} />
         </TabsContent>
 
         <TabsContent value="dicas" className="mt-6">
@@ -263,5 +263,3 @@ export function SellerTab({
     </TooltipProvider>
   );
 }
-
-    
