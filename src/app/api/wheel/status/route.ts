@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       creditsMap,
       spins: spins || [],
       stats: {
-        totalSpins: stats._count.id,
+        totalSpins: stats._count.id || 0,
         totalValue: stats._sum.segment?.value || 0
       }
     });
@@ -53,3 +53,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Erro ao buscar status" }, { status: 500 });
   }
 }
+
+    

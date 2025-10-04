@@ -44,9 +44,9 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       // Carregar status da roleta
       const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
       const statusData = await statusRes.json();
-      setCreditsMap(statusData.creditsMap);
+      setCreditsMap(statusData.creditsMap || {});
       setRecentSpins(Array.isArray(statusData.spins) ? statusData.spins.slice(0, 10) : []);
-      setStats(statusData.stats);
+      setStats(statusData.stats || { totalSpins: 0, totalValue: 0 });
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     }
@@ -125,7 +125,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSpins}</div>
+            <div className="text-2xl font-bold">{stats?.totalSpins ?? 0}</div>
           </CardContent>
         </Card>
         
@@ -135,7 +135,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {stats.totalValue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">R$ {(stats?.totalValue ?? 0).toFixed(2)}</div>
           </CardContent>
         </Card>
         
@@ -285,3 +285,5 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     </div>
   );
 }
+
+    
