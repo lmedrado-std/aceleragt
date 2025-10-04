@@ -7,10 +7,11 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
+import { PrizeWheel } from "./prize-wheel";
 
 interface SellerTabProps {
   seller: Seller;
@@ -83,7 +84,7 @@ export function SellerTab({
   return (
     <TooltipProvider>
       <Tabs defaultValue="desempenho" className="w-full">
-        <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-4 w-full sm:w-max gap-2">
+        <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-5 w-full sm:w-max gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <TabsTrigger value="desempenho">
@@ -116,6 +117,17 @@ export function SellerTab({
             </TooltipTrigger>
             <TooltipContent>
               <p>Consultar os valores de todas as metas</p>
+            </TooltipContent>
+          </Tooltip>
+           <Tooltip>
+            <TooltipTrigger asChild>
+              <TabsTrigger value="roleta">
+                <Gift className="mr-2 h-4 w-4" />
+                Roleta de Prêmios
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Gire a roleta para ganhar prêmios!</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -239,6 +251,10 @@ export function SellerTab({
                 </CardContent>
             </Card>
         </TabsContent>
+        
+        <TabsContent value="roleta" className="mt-6">
+            <PrizeWheel storeId={seller.store_id} />
+        </TabsContent>
 
         <TabsContent value="dicas" className="mt-6">
           <TipsTab />
@@ -247,3 +263,5 @@ export function SellerTab({
     </TooltipProvider>
   );
 }
+
+    

@@ -94,3 +94,74 @@ model SellerHistory {
   @@index([store_id, createdAt(sort: Desc)])
   @@index([seller_id])
 }
+
+// Créditos de giros por vendedor
+model PrizeWheelCredits {
+  id        String   @id @default(cuid())
+  storeId   String
+  sellerId  String
+  credits   Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([storeId, sellerId])
+  @@map("prize_wheel_credits")
+}
+
+// Configurações da roleta por loja
+model PrizeWheelSettings {
+  id        String               @id @default(cuid())
+  storeId   String               @unique
+  isActive  Boolean              @default(true)
+  segments  PrizeWheelSegment[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@map("prize_wheel_settings")
+}
+
+// Segmentos/prêmios da roleta
+model PrizeWheelSegment {
+  id          String              @id @default(cuid())
+  settingsId  String
+  settings    PrizeWheelSettings  @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+  
+  // Configurações do prêmio
+  label       String              // "R$ 10,00", "Perfume Natura", "Vale 20% Off"
+  type        String              // "money", "product", "voucher"
+  value       Decimal?            @db.Decimal(10,2) // Valor monetário
+  description String?             // Descrição detalhada
+  
+  // Configurações visuais
+  color       String              @default("#3B82F6")
+  weight      Int                 @default(10) // Peso para probabilidade
+  position    Int                 // Posição na roleta (0-7)
+  isActive    Boolean             @default(true)
+  
+  // Relacionamentos
+  spins       PrizeWheelSpins[]
+  
+  @@map("prize_wheel_segments")
+}
+
+// Histórico de giros realizados
+model PrizeWheelSpins {
+  id          String            @id @default(cuid())
+  storeId     String
+  sellerId    String
+  grantedBy   String            // ID do gerente que concedeu
+  
+  // Prêmio sorteado
+  segmentId   String
+  segment     PrizeWheelSegment @relation(fields: [segmentId], references: [id])
+  
+  // Status e controle
+  status      String            @default("pending") // "pending", "paid", "delivered"
+  notes       String?           // Observações
+  
+  // Timestamps
+  createdAt   DateTime          @default(now())
+  claimedAt   DateTime?
+  paidAt      DateTime?
+  
+  @@map("prize_wheel_spins")
+}

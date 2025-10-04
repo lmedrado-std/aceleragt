@@ -24,6 +24,7 @@ import {
   Check,
   Loader2,
   Megaphone,
+  Gift,
 } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -70,6 +71,7 @@ import { Switch } from "./ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ArchivePeriodCard } from "./archive-period-card";
+import { PrizeWheelTab } from "./prize-wheel-tab";
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -620,7 +622,7 @@ export function AdminTab({
 
       <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="w-full">
         <TooltipProvider>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             <Tooltip>
               <TooltipTrigger asChild>
                 <TabsTrigger
@@ -695,6 +697,25 @@ export function AdminTab({
               </TooltipTrigger>
               <TooltipContent>
                 <p>Configurar as metas e os valores dos prêmios.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger
+                  value="roleta"
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    "disabled:pointer-events-none disabled:opacity-50",
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
+                   )}
+                >
+                  <Gift className="mr-2 h-4 w-4" />
+                  Roleta
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Gerenciar roleta de prêmios.</p>
               </TooltipContent>
             </Tooltip>
              <Tooltip>
@@ -1010,6 +1031,10 @@ export function AdminTab({
             </CardFooter>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="roleta" className="mt-6">
+          <PrizeWheelTab storeId={storeId} />
+        </TabsContent>
 
         <TabsContent value="seguranca" className="mt-6">
           <Card>
@@ -1077,5 +1102,7 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
