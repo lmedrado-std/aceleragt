@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -420,7 +421,7 @@ function AdminPageComponent() {
                                               <AlertDialogHeader>
                                                   <AlertDialogTitle>Confirmar Ação</AlertDialogTitle>
                                                   <AlertDialogDescription>
-                                                      Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`, `app_config`) se elas não existirem. 
+                                                      Esta ação irá verificar e criar as tabelas necessárias (`stores`, `sellers`, `goals`, `app_config`, `PrizeWheel...`). 
                                                       É uma operação segura e **não apaga dados existentes**. Use para a configuração inicial ou para corrigir problemas de schema.
                                                   </AlertDialogDescription>
                                               </AlertDialogHeader>
