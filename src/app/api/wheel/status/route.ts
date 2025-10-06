@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -39,9 +40,23 @@ export async function GET(req: NextRequest) {
 
     const totalSpins = await prisma.prizeWheelSpins.count({ where: { storeId } });
 
-    const totalValue = spins
-      .filter(spin => spin.segment && spin.segment.type === 'money' && spin.segment.value)
-      .reduce((sum, spin) => sum + Number(spin.segment.value), 0);
+    const totalValueAgg = await prisma.prizeWheelSpins.aggregate({
+      where: {
+        storeId: storeId,
+        segment: {
+          type: 'money'
+        }
+      },
+      _sum: {
+        segment: {
+          select: {
+            value: true
+          }
+        }
+      }
+    });
+
+    const totalValue = totalValueAgg._sum.segment?.value ?? 0;
 
     const response = {
       creditsMap: credits.reduce((acc, credit) => {
@@ -51,7 +66,7 @@ export async function GET(req: NextRequest) {
       spins: spins || [],
       stats: {
         totalSpins: totalSpins || 0,
-        totalValue: totalValue || 0,
+        totalValue: Number(totalValue) || 0,
       },
     };
 
