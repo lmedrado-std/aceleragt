@@ -149,7 +149,7 @@ export async function GET() {
       CREATE TABLE IF NOT EXISTS loja_restricao (
         id SERIAL PRIMARY KEY,
         loja_id TEXT NOT NULL,
-        modo VARCHAR(10) NOT NULL DEFAULT 'OU',
+        modo VARCHAR(10) NOT NULL DEFAULT 'OU', -- 'E' ou 'OU'
         criado_em TIMESTAMPTZ DEFAULT now(),
         alterado_em TIMESTAMPTZ DEFAULT now()
       );
@@ -162,7 +162,7 @@ export async function GET() {
         nome VARCHAR(128) NOT NULL,
         latitude DOUBLE PRECISION NOT NULL,
         longitude DOUBLE PRECISION NOT NULL,
-        raio INTEGER NOT NULL,
+        raio INTEGER NOT NULL, -- metros
         descricao TEXT,
         ativo BOOLEAN NOT NULL DEFAULT TRUE
       );

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Switch } from "./ui/switch";
 import { Trash2, Plus, Save, MapPin, Wifi, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "./ui/separator";
 
 interface Area {
     id?: number;
@@ -72,7 +73,10 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ storeId, ...settings }),
             });
-            if (!res.ok) throw new Error("Falha ao salvar configurações.");
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Falha ao salvar configurações.");
+            }
             toast({ title: "Sucesso", description: "Configurações de restrição de login salvas." });
         } catch (error) {
             toast({ variant: "destructive", title: "Erro", description: (error as Error).message });
@@ -166,7 +170,7 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
                     </div>
                     <div className="space-y-2">
                         {settings.areas.map((area, index) => (
-                            <div key={index} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                            <div key={area.id || `new-area-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                 <div className="md:col-span-3"><Label>Nome</Label><Input value={area.nome} onChange={e => updateArea(index, 'nome', e.target.value)} placeholder="Ex: Loja Centro"/></div>
                                 <div className="md:col-span-3"><Label>Latitude</Label><Input type="number" value={area.latitude} onChange={e => updateArea(index, 'latitude', parseFloat(e.target.value))}/></div>
                                 <div className="md:col-span-3"><Label>Longitude</Label><Input type="number" value={area.longitude} onChange={e => updateArea(index, 'longitude', parseFloat(e.target.value))}/></div>
@@ -191,7 +195,7 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
                     </div>
                     <div className="space-y-2">
                          {settings.wifis.map((wifi, index) => (
-                            <div key={index} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                            <div key={wifi.id || `new-wifi-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                 <div className="md:col-span-5"><Label>Nome Amigável</Label><Input value={wifi.nome} onChange={e => updateWifi(index, 'nome', e.target.value)} placeholder="Ex: Wi-Fi da Loja"/></div>
                                 <div className="md:col-span-5"><Label>SSID (Nome da Rede)</Label><Input value={wifi.ssid} onChange={e => updateWifi(index, 'ssid', e.target.value)} placeholder="O nome exato que aparece no celular"/></div>
                                  <div className="flex items-center gap-2 md:col-span-2">
@@ -214,4 +218,3 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
         </Card>
     );
 }
-

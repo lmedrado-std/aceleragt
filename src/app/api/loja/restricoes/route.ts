@@ -20,7 +20,7 @@ const wifiSchema = z.object({
 });
 
 const settingsSchema = z.object({
-  storeId: z.string().uuid(),
+  storeId: z.string(),
   modo: z.enum(["E", "OU"]),
   areas: z.array(areaSchema),
   wifis: z.array(wifiSchema),
@@ -36,11 +36,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [restricao, areas, wifis] = await Promise.all([
-      prisma.loja_restricao.findFirst({ where: { loja_id: storeId } }),
-      prisma.loja_area_permitida.findMany({ where: { loja_id: storeId }, orderBy: { id: 'asc' } }),
-      prisma.loja_wifi_permitido.findMany({ where: { loja_id: storeId }, orderBy: { id: 'asc' } }),
-    ]);
+    const restricao = await prisma.loja_restricao.findFirst({ where: { loja_id: storeId } });
+    const areas = await prisma.loja_area_permitida.findMany({ where: { loja_id: storeId }, orderBy: { id: 'asc' } });
+    const wifis = await prisma.loja_wifi_permitido.findMany({ where: { loja_id: storeId }, orderBy: { id: 'asc' } });
 
     return NextResponse.json({
       modo: restricao?.modo || "OU",
@@ -66,38 +64,47 @@ export async function POST(req: NextRequest) {
     
     await prisma.$transaction(async (tx) => {
         // Upsert Modo
+        const existingRestriction = await tx.loja_restricao.findFirst({ where: { loja_id: storeId } });
         await tx.loja_restricao.upsert({
-            where: { id: (await tx.loja_restricao.findFirst({ where: { loja_id: storeId } }))?.id || -1 },
+            where: { id: existingRestriction?.id || -1 },
             create: { loja_id: storeId, modo },
             update: { modo, alterado_em: new Date() },
         });
 
         // Sync Áreas
         const existingAreas = await tx.loja_area_permitida.findMany({ where: { loja_id: storeId } });
-        const areasToDelete = existingAreas.filter(ea => !areas.some(na => na.id === ea.id));
-        await tx.loja_area_permitida.deleteMany({ where: { id: { in: areasToDelete.map(a => a.id) } } });
-        
-        for (const area of areas) {
+        const areasToUpdate = areas.filter(a => a.id && existingAreas.some(ea => ea.id === a.id));
+        const areasToCreate = areas.filter(a => !a.id);
+        const areaIdsToKeep = areas.map(a => a.id).filter(Boolean);
+        const areasToDelete = existingAreas.filter(ea => !areaIdsToKeep.includes(ea.id));
+
+        if (areasToDelete.length > 0) {
+            await tx.loja_area_permitida.deleteMany({ where: { id: { in: areasToDelete.map(a => a.id) } } });
+        }
+        for (const area of areasToUpdate) {
             const { id, ...areaData } = area;
-            if (id) {
-                await tx.loja_area_permitida.update({ where: { id }, data: { ...areaData, loja_id: storeId } });
-            } else {
-                await tx.loja_area_permitida.create({ data: { ...areaData, loja_id: storeId } });
-            }
+            await tx.loja_area_permitida.update({ where: { id }, data: { ...areaData } });
+        }
+        if (areasToCreate.length > 0) {
+            await tx.loja_area_permitida.createMany({ data: areasToCreate.map(({id, ...a}) => ({ ...a, loja_id: storeId })) });
         }
         
         // Sync Wifis
         const existingWifis = await tx.loja_wifi_permitido.findMany({ where: { loja_id: storeId } });
-        const wifisToDelete = existingWifis.filter(ew => !wifis.some(nw => nw.id === ew.id));
-        await tx.loja_wifi_permitido.deleteMany({ where: { id: { in: wifisToDelete.map(w => w.id) } } });
+        const wifisToUpdate = wifis.filter(w => w.id && existingWifis.some(ew => ew.id === w.id));
+        const wifisToCreate = wifis.filter(w => !w.id);
+        const wifiIdsToKeep = wifis.map(w => w.id).filter(Boolean);
+        const wifisToDelete = existingWifis.filter(ew => !wifiIdsToKeep.includes(ew.id));
 
-        for (const wifi of wifis) {
+        if (wifisToDelete.length > 0) {
+            await tx.loja_wifi_permitido.deleteMany({ where: { id: { in: wifisToDelete.map(w => w.id) } } });
+        }
+        for (const wifi of wifisToUpdate) {
             const { id, ...wifiData } = wifi;
-            if (id) {
-                await tx.loja_wifi_permitido.update({ where: { id }, data: { ...wifiData, loja_id: storeId } });
-            } else {
-                await tx.loja_wifi_permitido.create({ data: { ...wifiData, loja_id: storeId } });
-            }
+            await tx.loja_wifi_permitido.update({ where: { id }, data: { ...wifiData } });
+        }
+        if (wifisToCreate.length > 0) {
+            await tx.loja_wifi_permitido.createMany({ data: wifisToCreate.map(({id, ...w}) => ({ ...w, loja_id: storeId })) });
         }
     });
 
