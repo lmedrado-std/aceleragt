@@ -36,12 +36,30 @@ export async function GET(req: NextRequest) {
       include: { segments: { orderBy: { position: 'asc' } } },
     });
 
-    if (!settings) {
-      // Se não existir, cria uma configuração vazia. O frontend cuidará do resto.
-      settings = await prisma.prizeWheelSettings.create({
-        data: { storeId },
-        include: { segments: true },
+    if (!settings || settings.segments.length === 0) {
+       // Se não existir, cria uma configuração padrão com os novos prêmios
+      const defaultSettings = await prisma.prizeWheelSettings.upsert({
+        where: { storeId },
+        update: {},
+        create: {
+          storeId,
+          segments: {
+            create: [
+              { label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
+              { label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
+              { label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
+              { label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
+            ]
+          }
+        },
+        include: {
+          segments: {
+            where: { isActive: true },
+            orderBy: { position: 'asc' }
+          }
+        }
       });
+      return createSafeResponse(defaultSettings);
     }
 
     return createSafeResponse(settings);
@@ -64,32 +82,40 @@ export async function POST(req: NextRequest) {
     }
 
     // Garante que os dados do segmento estão no formato correto para o Prisma
-    const segmentsToCreate = segments.map((s: any) => ({
+    const segmentsToCreate = segments.map((s: any, index: number) => ({
       label: s.label,
       type: s.type,
-      value: s.value !== null ? s.value : undefined,
+      value: s.type === 'money' && s.value !== null ? s.value : null,
       description: s.description,
       color: s.color,
       weight: s.weight !== null ? s.weight : 10,
-      position: s.position,
+      position: index, // Usa o index do array para garantir a ordem
       isActive: true,
     }));
 
-    const updatedSettings = await prisma.prizeWheelSettings.upsert({
-      where: { storeId },
-      update: {
-        segments: {
-          deleteMany: {},
-          create: segmentsToCreate,
-        },
-      },
-      create: {
-        storeId,
-        segments: { 
-          create: segmentsToCreate 
-        },
-      },
-      include: { segments: { orderBy: { position: 'asc' }} },
+    const updatedSettings = await prisma.$transaction(async (tx) => {
+        // Encontra ou cria as configurações da loja
+        const settings = await tx.prizeWheelSettings.upsert({
+            where: { storeId },
+            create: { storeId },
+            update: {},
+        });
+
+        // Deleta os segmentos antigos
+        await tx.prizeWheelSegment.deleteMany({
+            where: { settingsId: settings.id },
+        });
+
+        // Cria os novos segmentos
+        await tx.prizeWheelSegment.createMany({
+            data: segmentsToCreate.map(s => ({ ...s, settingsId: settings.id })),
+        });
+        
+        // Retorna as configurações atualizadas com os novos segmentos
+        return tx.prizeWheelSettings.findUnique({
+            where: { id: settings.id },
+            include: { segments: { orderBy: { position: 'asc' } } },
+        });
     });
 
     return createSafeResponse(updatedSettings);
