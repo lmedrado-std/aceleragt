@@ -7,11 +7,21 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
-import { PrizeWheel } from "./prize-wheel";
+import dynamic from 'next/dynamic';
+
+const PrizeWheel = dynamic(() => import('./prize-wheel').then(mod => mod.PrizeWheel), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center h-96 w-full rounded-lg bg-muted/30">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Carregando roleta de prêmios...</p>
+    </div>
+  )
+});
 
 interface SellerTabProps {
   seller: Seller;

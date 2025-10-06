@@ -1,244 +1,189 @@
 
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Save, Settings } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Trash2, GripVertical } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { ColorPicker } from '@/components/color-picker';
 
 interface Segment {
-  id?: string;
+  id: string;
   label: string;
-  type: 'money' | 'product' | 'voucher';
-  value?: number;
-  description?: string;
+  type: string;
+  value?: number | null;
+  description?: string | null;
+  color?: string;
   weight: number;
-  color: string;
-  isActive: boolean;
+  position: number;
 }
 
 interface WheelSettingsProps {
   storeId: string;
 }
 
-const colors = [
-  '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', 
-  '#EF4444', '#EC4899', '#F97316', '#6366F1'
-];
-
 export function WheelSettings({ storeId }: WheelSettingsProps) {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [configured, setConfigured] = useState<boolean | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadSettings();
-  }, [storeId]);
+    const fetchSettings = async () => {
+      setLoading(true);
+      setConfigured(null);
+      try {
+        const res = await fetch(`/api/wheel/settings?storeId=${storeId}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
 
-  const loadSettings = async () => {
-    try {
-      const res = await fetch(`/api/wheel/settings?storeId=${storeId}`);
-      const data = await res.json();
-      setSegments(data.segments || []);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Falha ao carregar configurações da roleta'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (data.configured === false || !data.segments) {
+          setConfigured(false);
+          setSegments([]); 
+        } else {
+          setSegments(data.segments);
+          setConfigured(true);
+        }
+      } catch (error) {
+        setConfigured(false);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar configurações da roleta.' });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, [storeId, toast]);
 
-  const addSegment = () => {
-    setSegments(prev => [...prev, {
-      label: '',
-      type: 'money',
-      value: 5,
-      weight: 10,
-      color: colors[prev.length % colors.length],
-      isActive: true
-    }]);
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(segments);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setSegments(items.map((item, index) => ({ ...item, position: index })));
   };
 
   const updateSegment = (index: number, field: keyof Segment, value: any) => {
-    setSegments(prev => prev.map((seg, i) => 
-      i === index ? { ...seg, [field]: value } : seg
-    ));
+    const newSegments = [...segments];
+    const segment = { ...newSegments[index], [field]: value };
+
+    if (field === 'type' && value !== 'money') {
+      segment.value = null;
+    }
+    if (field === 'value') {
+      segment.value = value === '' ? null : Number(value);
+    }
+
+    newSegments[index] = segment;
+    setSegments(newSegments);
   };
 
-  const removeSegment = (index: number) => {
-    if (segments.length <= 2) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'É necessário ter pelo menos 2 segmentos na roleta'
-      });
-      return;
-    }
-    setSegments(prev => prev.filter((_, i) => i !== index));
-  };
+  const addSegment = () => setSegments([...segments, { id: `new-${Date.now()}`, label: '', type: 'money', weight: 10, position: segments.length, color: '#3B82F6' }]);
+  const removeSegment = (index: number) => setSegments(segments.filter((_, i) => i !== index));
 
   const saveSettings = async () => {
     setSaving(true);
     try {
-      // Validações
-      if (segments.length < 2) {
-        throw new Error('É necessário ter pelo menos 2 segmentos');
-      }
-      
-      if (segments.some(s => !s.label.trim())) {
-        throw new Error('Todos os segmentos precisam ter um rótulo');
-      }
+      if (segments.length < 2 || segments.length > 12) throw new Error('A roleta deve ter entre 2 e 12 segmentos.');
+      if (segments.some(s => !s.label.trim())) throw new Error('Todos os segmentos precisam ter um rótulo.');
 
       const res = await fetch('/api/wheel/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeId, segments })
+        body: JSON.stringify({ storeId, segments }),
       });
 
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.error || 'Falha ao salvar');
       }
-
-      toast({
-        title: 'Sucesso!',
-        description: 'Configurações da roleta salvas com sucesso'
-      });
+      const updatedSettings = await res.json();
+      setSegments(updatedSettings.segments);
+      setConfigured(true); 
+      toast({ title: 'Sucesso', description: 'Configurações da roleta salvas com sucesso!' });
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: error.message || 'Falha ao salvar configurações'
-      });
+      toast({ variant: 'destructive', title: 'Erro ao salvar', description: error.message });
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Carregando configurações...</div>;
+    return <div className="text-center p-8">Carregando roleta…</div>;
+  }
+  
+  if (configured === false) {
+    return (
+      <div className="p-4 bg-gray-50 rounded-lg text-center">
+        <h3 className="text-lg font-semibold mb-2">Roleta não configurada</h3>
+        <p className="text-sm text-gray-600 mb-4">A roleta ainda não foi configurada para esta loja.</p>
+        <Button onClick={() => { setConfigured(true); addSegment(); addSegment(); }}>
+          Criar Nova Roleta
+        </Button>
+      </div>
+    );
+  }
+
+  if (segments.length === 0) {
+    return (
+      <div className="p-4 bg-yellow-50 rounded-lg text-center">
+        <h3 className="text-lg font-semibold mb-2 text-yellow-900">Nenhum Prêmio Definido</h3>
+        <p className="text-sm text-yellow-800 mb-4">A roleta está configurada, mas não tem nenhum prêmio. Adicione pelo menos dois para começar.</p>
+        <Button onClick={addSegment}>
+          Adicionar Primeiro Prêmio
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
-          Configurar Prêmios da Roleta
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {segments.map((segment, index) => (
-          <div key={index} className="grid grid-cols-12 gap-3 items-end p-4 border rounded-lg">
-            <div className="col-span-3">
-              <Label>Rótulo do Prêmio</Label>
-              <Input
-                value={segment.label}
-                onChange={(e) => updateSegment(index, 'label', e.target.value)}
-                placeholder="Ex: R$ 10,00"
-              />
+    <div className="space-y-6 p-4">
+      <h3 className="text-xl font-semibold">Configurar Prêmios da Roleta</h3>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="segments">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+              {segments.map((segment, index) => (
+                <Draggable key={segment.id} draggableId={segment.id} index={index}>
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.draggableProps} className="flex items-center gap-2 p-3 bg-white rounded-lg border shadow-sm">
+                      <div {...provided.dragHandleProps} className="cursor-grab p-2">
+                        <GripVertical className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <Input placeholder="Rótulo do prêmio" value={segment.label} onChange={e => updateSegment(index, 'label', e.target.value)} className="flex-grow" />
+                      <Select value={segment.type} onValueChange={value => updateSegment(index, 'type', value)}>
+                        <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="money">Dinheiro</SelectItem>
+                          <SelectItem value="voucher">Voucher</SelectItem>
+                          <SelectItem value="product">Produto</SelectItem>
+                          <SelectItem value="retry">Tente Novamente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {segment.type === 'money' && (
+                        <Input type="number" placeholder="Valor (R$)" value={segment.value ?? ''} onChange={e => updateSegment(index, 'value', e.target.value)} className="w-[100px]" />
+                      )}
+                       <Input type="number" placeholder="Peso" value={segment.weight} onChange={e => updateSegment(index, 'weight', Number(e.target.value))} className="w-[80px]" />
+                       <ColorPicker color={segment.color || '#3B82F6'} onChange={color => updateSegment(index, 'color', color)} />
+                      <Button variant="ghost" size="icon" onClick={() => removeSegment(index)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-            
-            <div className="col-span-2">
-              <Label>Tipo</Label>
-              <Select
-                value={segment.type}
-                onValueChange={(value) => updateSegment(index, 'type', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="money">💰 Dinheiro</SelectItem>
-                  <SelectItem value="product">🎁 Produto</SelectItem>
-                  <SelectItem value="voucher">🎫 Vale</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {segment.type === 'money' && (
-              <div className="col-span-2">
-                <Label>Valor (R$)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={segment.value || ''}
-                  onChange={(e) => updateSegment(index, 'value', parseFloat(e.target.value))}
-                />
-              </div>
-            )}
-
-            {(segment.type === 'product' || segment.type === 'voucher') && (
-              <div className="col-span-2">
-                <Label>Descrição</Label>
-                <Input
-                  value={segment.description || ''}
-                  onChange={(e) => updateSegment(index, 'description', e.target.value)}
-                  placeholder="Descreva o prêmio"
-                />
-              </div>
-            )}
-
-            <div className="col-span-1">
-              <Label>Peso</Label>
-              <Input
-                type="number"
-                value={segment.weight}
-                onChange={(e) => updateSegment(index, 'weight', parseInt(e.target.value) || 0)}
-                min="0"
-                max="100"
-              />
-            </div>
-
-            <div className="col-span-1">
-              <Label>Cor</Label>
-              <input
-                type="color"
-                value={segment.color}
-                onChange={(e) => updateSegment(index, 'color', e.target.value)}
-                className="w-full h-10 rounded border cursor-pointer"
-              />
-            </div>
-
-            <div className="col-span-1">
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => removeSegment(index)}
-                disabled={segments.length <= 2}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-
-        <div className="flex gap-3">
-          <Button onClick={addSegment} variant="outline">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Segmento
-          </Button>
-          
-          <Button onClick={saveSettings} disabled={saving}>
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Salvando...' : 'Salvar Configurações'}
-          </Button>
-        </div>
-
-        <div className="text-sm text-muted-foreground border-t pt-4">
-          <strong>Dica:</strong> O peso determina a probabilidade do prêmio ser sorteado. 
-          Quanto maior o peso, maior a chance.
-        </div>
-      </CardContent>
-    </Card>
+          )}
+        </Droppable>
+      </DragDropContext>
+      <div className="flex justify-between items-center">
+        <Button variant="outline" onClick={addSegment} disabled={segments.length >= 12}>
+          Adicionar Prêmio
+        </Button>
+        <Button onClick={saveSettings} disabled={saving || segments.length < 2}>
+          {saving ? 'Salvando...' : 'Salvar Configuração'}
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -730,7 +730,7 @@ export function AdminTab({
                    )}
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
-                  Segurança
+                  Configurações e Segurança
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent>

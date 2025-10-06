@@ -2,116 +2,103 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// GET - Buscar configurações da loja
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const storeId = searchParams.get('storeId');
-  
-  if (!storeId) {
-    return NextResponse.json({ error: "storeId obrigatório" }, { status: 400 });
-  }
+// Helper para criar uma resposta JSON segura, convertendo tipos de dados do Prisma
+const createSafeResponse = (settings: any) => {
+  const segments = (settings?.segments || []).map((s: any) => ({
+    id: s.id,
+    label: s.label,
+    type: s.type,
+    value: s.value !== null ? Number(s.value) : null, // Converte Decimal para Number
+    description: s.description,
+    color: s.color,
+    weight: s.weight !== null ? Number(s.weight) : null, // Converte Decimal para Number
+    position: s.position,
+    isActive: s.isActive,
+  }));
 
+  return NextResponse.json({
+    configured: segments.length > 0,
+    segments: segments,
+  });
+}
+
+// GET /api/wheel/settings?storeId=...
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const storeId = searchParams.get("storeId");
+    if (!storeId) {
+      return NextResponse.json({ error: "storeId é obrigatório" }, { status: 400 });
+    }
+
     let settings = await prisma.prizeWheelSettings.findUnique({
       where: { storeId },
-      include: {
-        segments: {
-          where: { isActive: true },
-          orderBy: { position: 'asc' }
-        }
-      }
+      include: { segments: { orderBy: { position: 'asc' } } },
     });
 
-    // Criar configuração padrão se não existir
     if (!settings) {
-      settings = await createDefaultSettings(storeId);
+      // Se não existir, cria uma configuração vazia. O frontend cuidará do resto.
+      settings = await prisma.prizeWheelSettings.create({
+        data: { storeId },
+        include: { segments: true },
+      });
     }
 
-    return NextResponse.json(settings);
-  } catch (error) {
-    console.error("[GET /api/wheel/settings]", error);
-    return NextResponse.json({ error: "Erro ao buscar configurações" }, { status: 500 });
+    return createSafeResponse(settings);
+
+  } catch (err: any) {
+    console.error("Erro em GET /api/wheel/settings:", { error: err.message, stack: err.stack });
+    return NextResponse.json(
+      { error: "Erro interno ao carregar configurações da roleta.", details: err.message },
+      { status: 500 }
+    );
   }
 }
 
-// POST - Salvar configurações
+// POST /api/wheel/settings
 export async function POST(req: NextRequest) {
-  const { storeId, segments } = await req.json();
-  
-  if (!storeId || !segments) {
-    return NextResponse.json({ error: "Dados obrigatórios faltando" }, { status: 400 });
-  }
-
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Upsert settings
-      let settings = await tx.prizeWheelSettings.upsert({
-        where: { storeId },
-        create: { storeId },
-        update: { updatedAt: new Date() }
-      });
+    const { storeId, segments } = await req.json();
+    if (!storeId || !Array.isArray(segments)) {
+      return NextResponse.json({ error: "Dados inválidos (storeId e segments são obrigatórios)" }, { status: 400 });
+    }
 
-      // Remover segmentos antigos
-      await tx.prizeWheelSegment.deleteMany({
-        where: { settingsId: settings.id }
-      });
+    // Garante que os dados do segmento estão no formato correto para o Prisma
+    const segmentsToCreate = segments.map((s: any) => ({
+      label: s.label,
+      type: s.type,
+      value: s.value !== null ? s.value : undefined,
+      description: s.description,
+      color: s.color,
+      weight: s.weight !== null ? s.weight : 10,
+      position: s.position,
+      isActive: true,
+    }));
 
-      // Criar novos segmentos
-      await tx.prizeWheelSegment.createMany({
-        data: segments.map((seg: any, index: number) => ({
-          settingsId: settings.id,
-          label: seg.label,
-          type: seg.type,
-          value: seg.value || null,
-          description: seg.description || null,
-          weight: seg.weight || 10,
-          color: seg.color || "#3B82F6",
-          position: index,
-          isActive: seg.isActive !== false
-        }))
-      });
-
-      return await tx.prizeWheelSettings.findUnique({
-        where: { storeId },
-        include: {
-          segments: {
-            where: { isActive: true },
-            orderBy: { position: 'asc' }
-          }
-        }
-      });
+    const updatedSettings = await prisma.prizeWheelSettings.upsert({
+      where: { storeId },
+      update: {
+        segments: {
+          deleteMany: {},
+          create: segmentsToCreate,
+        },
+      },
+      create: {
+        storeId,
+        segments: { 
+          create: segmentsToCreate 
+        },
+      },
+      include: { segments: { orderBy: { position: 'asc' }} },
     });
 
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("[POST /api/wheel/settings]", error);
-    return NextResponse.json({ error: "Erro ao salvar" }, { status: 500 });
-  }
-}
+    return createSafeResponse(updatedSettings);
 
-// Função para criar configuração padrão
-async function createDefaultSettings(storeId: string) {
-  return await prisma.prizeWheelSettings.create({
-    data: {
-      storeId,
-      segments: {
-        create: [
-          { label: "R$ 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
-          { label: "R$ 7,00", type: "money", value: 7, weight: 20, position: 1, color: "#3B82F6" },
-          { label: "R$ 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#8B5CF6" },
-          { label: "R$ 12,00", type: "money", value: 12, weight: 15, position: 3, color: "#F59E0B" },
-          { label: "R$ 15,00", type: "money", value: 15, weight: 10, position: 4, color: "#EF4444" },
-          { label: "Vale Desconto", type: "voucher", description: "10% de desconto", weight: 10, position: 5, color: "#EC4899" },
-          { label: "Produto Especial", type: "product", description: "Brinde da loja", weight: 5, position: 6, color: "#F97316" },
-          { label: "TENTE NOVAMENTE", type: "retry", weight: 0, position: 7, color: "#6B7280" }
-        ]
-      }
-    },
-    include: {
-      segments: {
-        where: { isActive: true },
-        orderBy: { position: 'asc' }
-      }
-    }
-  });
+  } catch (err: any) {
+    console.error("Erro em POST /api/wheel/settings:", { error: err.message, stack: err.stack });
+    return NextResponse.json(
+      { error: "Erro interno ao salvar configurações da roleta.", details: err.message },
+      { status: 500 }
+    );
+  }
 }
