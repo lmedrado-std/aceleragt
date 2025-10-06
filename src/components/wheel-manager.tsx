@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -106,10 +105,12 @@ export function WheelManager({ storeId }: WheelManagerProps) {
 
   const handleSpinResult = (result: any) => {
     // Atualizar créditos após giro
-    setCreditsMap(prev => ({
-      ...prev,
-      [result.sellerId]: result.remainingCredits
-    }));
+    if (result.sellerId && result.remainingCredits !== undefined) {
+      setCreditsMap(prev => ({
+        ...prev,
+        [result.sellerId]: result.remainingCredits
+      }));
+    }
 
     // Recarregar dados para atualizar histórico
     loadData();
@@ -195,8 +196,9 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       </Card>
 
       {/* Roleta de Prêmios */}
-      <PrizeWheel 
-        storeId={storeId} 
+      <PrizeWheel
+        storeId={storeId}
+        sellerId={selectedSeller}
         onSpinResult={handleSpinResult}
       />
 
@@ -285,5 +287,3 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     </div>
   );
 }
-
-    

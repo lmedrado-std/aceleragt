@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Wheel } from 'react-custom-roulette';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 interface PrizeWheelProps {
   storeId: string;
   sellerId: string;
+  onSpinResult?: (result: any) => void;
 }
 
 interface Segment {
@@ -19,7 +19,7 @@ interface Segment {
   color?: string;
 }
 
-export function PrizeWheel({ storeId, sellerId }: PrizeWheelProps) {
+export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps) {
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -45,10 +45,14 @@ export function PrizeWheel({ storeId, sellerId }: PrizeWheelProps) {
           setConfigured(true);
           setSegments(settingsData.segments || []);
           
-          const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
-          if (!statusRes.ok) throw new Error('Falha ao carregar seus giros.');
-          const statusData = await statusRes.json();
-          setCredits(statusData.creditsMap[sellerId] || 0);
+          if (sellerId) {
+            const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
+            if (!statusRes.ok) throw new Error('Falha ao carregar seus giros.');
+            const statusData = await statusRes.json();
+            setCredits(statusData.creditsMap[sellerId] || 0);
+          } else {
+            setCredits(0);
+          }
         }
       } catch (error) {
         setConfigured(false);
@@ -62,13 +66,13 @@ export function PrizeWheel({ storeId, sellerId }: PrizeWheelProps) {
       }
     };
 
-    if (storeId && sellerId) {
+    if (storeId) {
       loadInitialData();
     }
   }, [storeId, sellerId, toast]);
 
   const handleSpinClick = async () => {
-    if (credits > 0) {
+    if (credits > 0 && sellerId) {
       try {
         const res = await fetch('/api/wheel/spin', {
           method: 'POST',
@@ -80,7 +84,13 @@ export function PrizeWheel({ storeId, sellerId }: PrizeWheelProps) {
           throw new Error(errorData.error || 'Falha ao girar a roleta');
         }
         const result = await res.json();
-        const prizeIndex = segments.findIndex(s => s.id === result.segmentId);
+        
+        if (onSpinResult) {
+          onSpinResult(result);
+        }
+
+        const prizeIndex = segments.findIndex(s => s.id === result.prize.id);
+
         if (prizeIndex !== -1) {
           setPrizeNumber(prizeIndex);
           setSpinResult(segments[prizeIndex]);
@@ -131,7 +141,7 @@ export function PrizeWheel({ storeId, sellerId }: PrizeWheelProps) {
             fontSize={12}
         />
 
-        <Button onClick={handleSpinClick} disabled={credits <= 0 || mustSpin || segments.length === 0} className="w-full max-w-xs py-6 text-xl font-bold">
+        <Button onClick={handleSpinClick} disabled={credits <= 0 || mustSpin || segments.length === 0 || !sellerId} className="w-full max-w-xs py-6 text-xl font-bold">
             {mustSpin ? 'GIRANDO...' : 'GIRAR'}
         </Button>
 
