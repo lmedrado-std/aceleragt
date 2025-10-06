@@ -90,6 +90,95 @@ export async function GET() {
         value TEXT
       );
     `);
+    
+    // --- TABELAS DA ROLETA DE PRÊMIOS ---
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PrizeWheelSettings" (
+        id TEXT NOT NULL PRIMARY KEY,
+        "storeId" TEXT NOT NULL UNIQUE,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP(3) NOT NULL
+      );
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PrizeWheelSegment" (
+          id TEXT NOT NULL PRIMARY KEY,
+          "settingsId" TEXT NOT NULL,
+          label TEXT NOT NULL,
+          type TEXT NOT NULL,
+          value DECIMAL(10,2),
+          description TEXT,
+          weight INTEGER NOT NULL DEFAULT 10,
+          color TEXT NOT NULL DEFAULT '#3B82F6',
+          "isActive" BOOLEAN NOT NULL DEFAULT true,
+          position INTEGER NOT NULL,
+          CONSTRAINT "PrizeWheelSegment_settingsId_fkey" FOREIGN KEY ("settingsId") REFERENCES "PrizeWheelSettings" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+      );
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PrizeWheelCredits" (
+          id TEXT NOT NULL PRIMARY KEY,
+          "storeId" TEXT NOT NULL,
+          "sellerId" TEXT NOT NULL,
+          credits INTEGER NOT NULL DEFAULT 0,
+          "updatedAt" TIMESTAMP(3) NOT NULL
+      );
+    `);
+     await prisma.$executeRawUnsafe(`
+        CREATE UNIQUE INDEX IF NOT EXISTS "PrizeWheelCredits_storeId_sellerId_key" ON "PrizeWheelCredits"("storeId", "sellerId");
+     `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PrizeWheelSpins" (
+          id TEXT NOT NULL PRIMARY KEY,
+          "storeId" TEXT NOT NULL,
+          "sellerId" TEXT NOT NULL,
+          "grantedBy" TEXT NOT NULL,
+          "segmentId" TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'pending',
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "claimedAt" TIMESTAMP(3),
+          CONSTRAINT "PrizeWheelSpins_segmentId_fkey" FOREIGN KEY ("segmentId") REFERENCES "PrizeWheelSegment" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+      );
+    `);
+    
+    // --- TABELAS DE RESTRIÇÃO DE LOGIN ---
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS loja_restricao (
+        id SERIAL PRIMARY KEY,
+        loja_id TEXT NOT NULL,
+        modo VARCHAR(10) NOT NULL DEFAULT 'OU',
+        criado_em TIMESTAMPTZ DEFAULT now(),
+        alterado_em TIMESTAMPTZ DEFAULT now()
+      );
+    `);
+    
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS loja_area_permitida (
+        id SERIAL PRIMARY KEY,
+        loja_id TEXT NOT NULL,
+        nome VARCHAR(128) NOT NULL,
+        latitude DOUBLE PRECISION NOT NULL,
+        longitude DOUBLE PRECISION NOT NULL,
+        raio INTEGER NOT NULL,
+        descricao TEXT,
+        ativo BOOLEAN NOT NULL DEFAULT TRUE
+      );
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS loja_wifi_permitido (
+        id SERIAL PRIMARY KEY,
+        loja_id TEXT NOT NULL,
+        nome VARCHAR(128) NOT NULL,
+        ssid VARCHAR(128) NOT NULL,
+        descricao TEXT,
+        ativo BOOLEAN NOT NULL DEFAULT TRUE
+      );
+    `);
+
 
     // Inserir senha de admin padrão, se não existir
     await prisma.$executeRawUnsafe(`
@@ -152,7 +241,7 @@ export async function GET() {
     }
 
 
-    return NextResponse.json({ message: 'Banco de dados configurado com sucesso!' }, { status: 200 });
+    return NextResponse.json({ message: 'Banco de dados configurado com sucesso! Tabelas da Roleta de Prêmios, Restrições de Login e outras foram verificadas/criadas.' }, { status: 200 });
 
   } catch (error) {
     console.error('[API /api/setup-db] ERRO:', error);

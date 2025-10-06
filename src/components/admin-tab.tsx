@@ -74,6 +74,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { ArchivePeriodCard } from "./archive-period-card";
 import { PrizeWheelTab } from "./prize-wheel-tab";
 import { ArchivedPeriods } from "./goal-getter-dashboard";
+import LoginRestrictionSettings from "./login-restriction-settings";
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -736,7 +737,7 @@ export function AdminTab({
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Alterar a senha de acesso da loja.</p>
+                <p>Alterar a senha de acesso da loja e outras configurações.</p>
               </TooltipContent>
             </Tooltip>
           </TabsList>
@@ -1042,66 +1043,69 @@ export function AdminTab({
         </TabsContent>
 
         <TabsContent value="seguranca" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Alterar Senha da Loja</CardTitle>
-              <CardDescription>
-                Defina uma nova senha para o acesso de gerente a esta loja. O administrador global ainda poderá acessar e redefinir esta senha.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 max-w-sm">
-              <div className="space-y-2">
-                <Label htmlFor="new-store-password">Nova Senha</Label>
-                <div className="relative">
-                  <Input
-                    id="new-store-password"
-                    type={showStorePassword ? "text" : "password"}
-                    placeholder="Mínimo 4 caracteres"
-                    value={storePasswords.new}
-                    onChange={(e) => setStorePasswords(p => ({...p, new: e.target.value}))}
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute inset-y-0 right-0 h-full px-3"
-                    onClick={() => setShowStorePassword(!showStorePassword)}
-                  >
-                    {showStorePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Alterar Senha da Loja</CardTitle>
+                <CardDescription>
+                  Defina uma nova senha para o acesso de gerente a esta loja. O administrador global ainda poderá acessar e redefinir esta senha.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 max-w-sm">
+                <div className="space-y-2">
+                  <Label htmlFor="new-store-password">Nova Senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="new-store-password"
+                      type={showStorePassword ? "text" : "password"}
+                      placeholder="Mínimo 4 caracteres"
+                      value={storePasswords.new}
+                      onChange={(e) => setStorePasswords(p => ({...p, new: e.target.value}))}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full px-3"
+                      onClick={() => setShowStorePassword(!showStorePassword)}
+                    >
+                      {showStorePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-store-password">Confirmar Nova Senha</Label>
-                 <div className="relative">
-                  <Input
-                    id="confirm-store-password"
-                    type={showConfirmStorePassword ? "text" : "password"}
-                    placeholder="Repita a nova senha"
-                    value={storePasswords.confirm}
-                    onChange={(e) => setStorePasswords(p => ({...p, confirm: e.target.value}))}
-                    className="pr-10"
-                  />
-                   <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute inset-y-0 right-0 h-full px-3"
-                    onClick={() => setShowConfirmStorePassword(!showConfirmStorePassword)}
-                  >
-                    {showConfirmStorePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-store-password">Confirmar Nova Senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirm-store-password"
+                      type={showConfirmStorePassword ? "text" : "password"}
+                      placeholder="Repita a nova senha"
+                      value={storePasswords.confirm}
+                      onChange={(e) => setStorePasswords(p => ({...p, confirm: e.target.value}))}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full px-3"
+                      onClick={() => setShowConfirmStorePassword(!showConfirmStorePassword)}
+                    >
+                      {showConfirmStorePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleStorePasswordChange}>
-                <Save className="mr-2 h-4 w-4" />
-                Salvar Nova Senha
-              </Button>
-            </CardFooter>
-          </Card>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleStorePasswordChange}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Salvar Nova Senha
+                </Button>
+              </CardFooter>
+            </Card>
+            <LoginRestrictionSettings storeId={storeId} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
