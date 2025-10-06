@@ -11,6 +11,7 @@ import { Switch } from "./ui/switch";
 import { Trash2, Plus, Save, MapPin, Wifi, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
+import { z } from "zod";
 
 interface Area {
     id?: number;
@@ -33,6 +34,30 @@ interface RestrictionSettings {
     areas: Area[];
     wifis: Wifi[];
 }
+
+const areaSchema = z.object({
+  id: z.number().optional(),
+  nome: z.string().min(1, "O nome da área é obrigatório."),
+  latitude: z.coerce.number({ invalid_type_error: "Latitude deve ser um número." }),
+  longitude: z.coerce.number({ invalid_type_error: "Longitude deve ser um número." }),
+  raio: z.coerce.number().min(1, "O raio deve ser maior que zero."),
+  ativo: z.boolean(),
+});
+
+const wifiSchema = z.object({
+    id: z.number().optional(),
+    nome: z.string().min(1, "O nome amigável do Wi-Fi é obrigatório."),
+    ssid: z.string().min(1, "O SSID (Nome da Rede) é obrigatório."),
+    ativo: z.boolean(),
+});
+
+const settingsSchema = z.object({
+  storeId: z.string(),
+  modo: z.enum(["E", "OU"]),
+  areas: z.array(areaSchema),
+  wifis: z.array(wifiSchema),
+});
+
 
 export default function LoginRestrictionSettings({ storeId }: { storeId: string }) {
     const { toast } = useToast();
@@ -67,11 +92,27 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
 
     const handleSave = async () => {
         setSaving(true);
+
+        const dataToValidate = { storeId, ...settings };
+        const validation = settingsSchema.safeParse(dataToValidate);
+
+        if (!validation.success) {
+            const firstError = validation.error.errors[0];
+            const errorMessage = `${firstError.path.join('.')}: ${firstError.message}`;
+            toast({
+                variant: 'destructive',
+                title: 'Erro de Validação',
+                description: errorMessage || "Por favor, verifique os campos preenchidos."
+            });
+            setSaving(false);
+            return;
+        }
+
         try {
             const res = await fetch(`/api/loja/restricoes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ storeId, ...settings }),
+                body: JSON.stringify(validation.data), // Send validated data
             });
             if (!res.ok) {
                 const errorData = await res.json();
@@ -218,3 +259,5 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
         </Card>
     );
 }
+
+    
