@@ -25,6 +25,7 @@ import {
   Loader2,
   Megaphone,
   Gift,
+  History,
 } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -72,6 +73,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ArchivePeriodCard } from "./archive-period-card";
 import { PrizeWheelTab } from "./prize-wheel-tab";
+import { ArchivedPeriods } from "./goal-getter-dashboard";
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -843,92 +845,95 @@ export function AdminTab({
         </TabsContent>
 
         <TabsContent value="lancamentos" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Lançamentos de Desempenho</CardTitle>
-              <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {sellers.length > 0 ? (
-                    <div className="space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {sellers.map((seller, index) => (
-                            <Card key={seller.id} className="overflow-hidden">
-                                <CardHeader className="flex flex-row items-center gap-4 bg-muted/50 p-4">
-                                    <SellerAvatar avatarId={seller.avatar_id} className="h-12 w-12"/>
-                                    <CardTitle className="text-xl">{seller.name ?? 'Vendedor sem nome'}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                        <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                        <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode-="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                        <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
-                )}
-            </CardContent>
-             <CardFooter className="flex flex-wrap items-start justify-between gap-6 border-t pt-6">
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                    {sellers.length > 0 && (
-                        <Button onClick={handleCalculateIncentives} disabled={isCalculating} className="w-full sm:w-auto">
-                            <Calculator className="mr-2" />
-                            {isCalculating ? "Calculando e salvando..." : "Calcular e Salvar Lançamentos"}
-                        </Button>
-                    )}
-                    {formattedLastUpdated && (
-                        <div className="text-sm text-muted-foreground flex items-center gap-2">
-                           <Clock className="h-4 w-4" />
-                           <span>
-                               Última atualização: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
-                           </span>
-                        </div>
-                    )}
-                </div>
-                <div className="w-full sm:w-auto flex-shrink-0">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="p-4 border rounded-lg bg-muted/50 w-full sm:max-w-xs">
-                            <div className="flex flex-col items-start gap-2">
-                                <h3 className="font-semibold text-sm flex items-center gap-2">
-                                  Importar de Arquivo Excel
-                                  <Info className="h-4 w-4" />
-                                </h3>
-                                <p className="text-xs text-muted-foreground mb-2">Colunas: reportgroup, totalliquido, etc.</p>
-                                <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline" className="w-full">
-                                    <FileUp className="mr-2 h-4 w-4" />
-                                    Importar Planilha
-                                </Button>
-                                <Input 
-                                    type="file" 
-                                    ref={fileInputRef} 
-                                    className="hidden"
-                                    accept=".xlsx, .xls"
-                                    onChange={handleFileUpload}
-                                />
-                            </div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" align="end" className="max-w-xs">
-                        <p className="font-bold">Como Gerar o Relatório:</p>
-                        <p>No sistema Seta, acesse:</p>
-                        <p>Relatórios &gt; Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-            </CardFooter>
-          </Card>
-           <div className="mt-8">
-              <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onArchiveSuccess} />
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Lançamentos de Desempenho</CardTitle>
+                <CardDescription>Insira os valores de Vendas, PA e Ticket Médio para cada vendedor.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  {sellers.length > 0 ? (
+                      <div className="space-y-8">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {sellers.map((seller, index) => (
+                              <Card key={seller.id} className="overflow-hidden">
+                                  <CardHeader className="flex flex-row items-center gap-4 bg-muted/50 p-4">
+                                      <SellerAvatar avatarId={seller.avatar_id} className="h-12 w-12"/>
+                                      <CardTitle className="text-xl">{seller.name ?? 'Vendedor sem nome'}</CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="p-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                          <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                          <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><Input type="text" inputMode-="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                          <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
+                                      </div>
+                                  </CardContent>
+                              </Card>
+                              ))}
+                          </div>
+                      </div>
+                  ) : (
+                      <p className="text-muted-foreground text-center py-4">Adicione vendedores na aba "Vendedores" para começar.</p>
+                  )}
+              </CardContent>
+              <CardFooter className="flex flex-wrap items-start justify-between gap-6 border-t pt-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                      {sellers.length > 0 && (
+                          <Button onClick={handleCalculateIncentives} disabled={isCalculating} className="w-full sm:w-auto">
+                              <Calculator className="mr-2" />
+                              {isCalculating ? "Calculando e salvando..." : "Calcular e Salvar Lançamentos"}
+                          </Button>
+                      )}
+                      {formattedLastUpdated && (
+                          <div className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>
+                                Última atualização: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
+                            </span>
+                          </div>
+                      )}
+                  </div>
+                  <div className="w-full sm:w-auto flex-shrink-0">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-4 border rounded-lg bg-muted/50 w-full sm:max-w-xs">
+                              <div className="flex flex-col items-start gap-2">
+                                  <h3 className="font-semibold text-sm flex items-center gap-2">
+                                    Importar de Arquivo Excel
+                                    <Info className="h-4 w-4" />
+                                  </h3>
+                                  <p className="text-xs text-muted-foreground mb-2">Colunas: reportgroup, totalliquido, etc.</p>
+                                  <Button onClick={() => fileInputRef.current?.click()} size="sm" variant="outline" className="w-full">
+                                      <FileUp className="mr-2 h-4 w-4" />
+                                      Importar Planilha
+                                  </Button>
+                                  <Input 
+                                      type="file" 
+                                      ref={fileInputRef} 
+                                      className="hidden"
+                                      accept=".xlsx, .xls"
+                                      onChange={handleFileUpload}
+                                  />
+                              </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" align="end" className="max-w-xs">
+                          <p className="font-bold">Como Gerar o Relatório:</p>
+                          <p>No sistema Seta, acesse:</p>
+                          <p>Relatórios &gt; Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+              </CardFooter>
+            </Card>
+            <ArchivePeriodCard storeId={storeId} onArchiveSuccess={onArchiveSuccess} />
+            <div className="mt-8">
+              <ArchivedPeriods storeId={storeId} onDataNeedsRefresh={onArchiveSuccess} />
             </div>
+          </div>
         </TabsContent>
         
         <TabsContent value="metas" className="mt-6">

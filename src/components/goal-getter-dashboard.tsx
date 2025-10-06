@@ -128,7 +128,7 @@ function Comparison({ current, previous }: { current: number; previous: number |
 }
 
 
-function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: string; onDataNeedsRefresh: (callback: () => void) => void }) {
+export function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: string; onDataNeedsRefresh: (callback: () => void) => void }) {
     const [periods, setPeriods] = useState<ArchivedPeriod[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -534,9 +534,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                       incentives={incentives}
                       onArchiveSuccess={dataRefreshCallback}
                     />
-                    <div className="mt-8">
-                      <ArchivedPeriods storeId={storeId} onDataNeedsRefresh={(callback) => setDataRefreshCallback(() => callback)} />
-                    </div>
                   </TabsContent>
                 )}
 
