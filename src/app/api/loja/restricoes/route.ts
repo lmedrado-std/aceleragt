@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
         }
         for (const area of areasToUpdate) {
             const { id, ...areaData } = area;
-            await tx.loja_area_permitida.update({ where: { id }, data: { ...areaData } });
+            await tx.loja_area_permitida.update({ where: { id: id! }, data: { ...areaData } });
         }
         if (areasToCreate.length > 0) {
             await tx.loja_area_permitida.createMany({ data: areasToCreate.map(({id, ...a}) => ({ ...a, loja_id: storeId })) });
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
         }
         for (const wifi of wifisToUpdate) {
             const { id, ...wifiData } = wifi;
-            await tx.loja_wifi_permitido.update({ where: { id }, data: { ...wifiData } });
+            await tx.loja_wifi_permitido.update({ where: { id: id! }, data: { ...wifiData } });
         }
         if (wifisToCreate.length > 0) {
             await tx.loja_wifi_permitido.createMany({ data: wifisToCreate.map(({id, ...w}) => ({ ...w, loja_id: storeId })) });
