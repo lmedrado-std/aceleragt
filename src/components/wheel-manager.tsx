@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,9 +7,20 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Gift, Users, TrendingUp } from 'lucide-react';
+import { Gift, Users, TrendingUp, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PrizeWheel } from './prize-wheel';
+import dynamic from 'next/dynamic';
+
+const PrizeWheel = dynamic(() => import('./prize-wheel').then(mod => mod.PrizeWheel), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center h-96 w-full rounded-lg bg-muted/30">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Carregando roleta de prêmios...</p>
+    </div>
+  )
+});
+
 
 interface WheelManagerProps {
   storeId: string;
@@ -287,3 +299,5 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     </div>
   );
 }
+
+    
