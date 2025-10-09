@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "storeId é obrigatório" }, { status: 400 });
     }
 
-    let settings = await prisma.prizeWheelSettings.findUnique({
+    let settings = await prisma.prizeWheelSettings.findFirst({
       where: { storeId },
       include: { segments: { orderBy: { position: 'asc' } } },
     });
@@ -39,13 +39,13 @@ export async function GET(req: NextRequest) {
     if (!settings || settings.segments.length === 0) {
        // Se não existir, cria uma configuração padrão com os novos prêmios
       const defaultSettings = await prisma.$transaction(async (tx) => {
-        let existingSettings = await tx.prizeWheelSettings.findUnique({
+        let existingSettings = await tx.prizeWheelSettings.findFirst({
             where: { storeId },
         });
 
         if (!existingSettings) {
             existingSettings = await tx.prizeWheelSettings.create({
-                data: { storeId },
+                data: { storeId, id: `settings_${storeId}` },
             });
         }
 
@@ -55,14 +55,14 @@ export async function GET(req: NextRequest) {
         // Cria os novos segmentos padrão
         await tx.prizeWheelSegment.createMany({
             data: [
-              { settingsId: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
-              { settingsId: existingSettings.id, label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
-              { settingsId: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
-              { settingsId: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
+              { id: `seg_${storeId}_1`, settingsId: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
+              { id: `seg_${storeId}_2`, settingsId: existingSettings.id, label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
+              { id: `seg_${storeId}_3`, settingsId: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
+              { id: `seg_${storeId}_4`, settingsId: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
             ],
         });
         
-        return tx.prizeWheelSettings.findUnique({
+        return tx.prizeWheelSettings.findFirst({
             where: { id: existingSettings.id },
             include: { segments: { orderBy: { position: 'asc' } } },
         });
@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
 
     // Garante que os dados do segmento estão no formato correto para o Prisma
     const segmentsToCreate = segments.map((s: any, index: number) => ({
+      id: s.id || `seg_${storeId}_${index}`,
       label: s.label,
       type: s.type,
       value: s.type === 'money' && s.value !== null ? s.value : null,
@@ -104,8 +105,8 @@ export async function POST(req: NextRequest) {
     const updatedSettings = await prisma.$transaction(async (tx) => {
         // Encontra ou cria as configurações da loja
         const settings = await tx.prizeWheelSettings.upsert({
-            where: { storeId },
-            create: { storeId },
+            where: { id: `settings_${storeId}` },
+            create: { storeId, id: `settings_${storeId}` },
             update: {},
         });
 
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
         });
         
         // Retorna as configurações atualizadas com os novos segmentos
-        return tx.prizeWheelSettings.findUnique({
+        return tx.prizeWheelSettings.findFirst({
             where: { id: settings.id },
             include: { segments: { orderBy: { position: 'asc' } } },
         });

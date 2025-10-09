@@ -36,7 +36,10 @@ export function WheelSettings({ storeId }: WheelSettingsProps) {
       setConfigured(null);
       try {
         const res = await fetch(`/api/wheel/settings?storeId=${storeId}`);
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.details || "Falha ao carregar configurações.");
+        };
         const data = await res.json();
 
         if (data.configured === false || !data.segments) {
@@ -48,7 +51,7 @@ export function WheelSettings({ storeId }: WheelSettingsProps) {
         }
       } catch (error) {
         setConfigured(false);
-        toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao carregar configurações da roleta.' });
+        toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
       } finally {
         setLoading(false);
       }
@@ -96,7 +99,7 @@ export function WheelSettings({ storeId }: WheelSettingsProps) {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Falha ao salvar');
+        throw new Error(error.details || error.error || 'Falha ao salvar');
       }
       const updatedSettings = await res.json();
       setSegments(updatedSettings.segments);
@@ -147,7 +150,7 @@ export function WheelSettings({ storeId }: WheelSettingsProps) {
               {segments.map((segment, index) => (
                 <Draggable key={segment.id} draggableId={segment.id} index={index}>
                   {(provided) => (
-                    <div ref={provided.innerRef} {...provided.draggableProps} className="flex items-center gap-2 p-3 bg-white rounded-lg border shadow-sm">
+                    <div ref={provided.innerRef} {...provided.draggableProps} className="flex items-center gap-2 p-3 bg-white dark:bg-muted/50 rounded-lg border shadow-sm">
                       <div {...provided.dragHandleProps} className="cursor-grab p-2">
                         <GripVertical className="h-5 w-5 text-gray-400" />
                       </div>
