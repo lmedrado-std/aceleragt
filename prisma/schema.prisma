@@ -163,3 +163,31 @@ model PrizeWheelSpins {
 
   @@map("prize_wheel_spins")
 }
+
+model loja_area_permitida {
+  id        Int     @id @default(autoincrement())
+  loja_id   String  @db.Uuid
+  nome      String  @db.VarChar(128)
+  latitude  Float
+  longitude Float
+  raio      Int
+  descricao String?
+  ativo     Boolean @default(true)
+}
+
+model loja_restricao {
+  id          Int       @id @default(autoincrement())
+  loja_id     String    @db.Uuid
+  modo        String    @default("OU") @db.VarChar(10)
+  criado_em   DateTime? @default(now()) @db.Timestamptz(6)
+  alterado_em DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model loja_wifi_permitido {
+  id        Int     @id @default(autoincrement())
+  loja_id   String  @db.Uuid
+  nome      String  @db.VarChar(128)
+  ssid      String  @db.VarChar(128)
+  descricao String?
+  ativo     Boolean @default(true)
+}

@@ -1,6 +1,6 @@
 
 import { prisma } from '@/lib/db';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Goals } from '@/lib/storage'; // Assuming this type is still relevant or can be adapted
 
 // These are the default goals for a new store.
@@ -33,7 +33,7 @@ const defaultGoals: Omit<Goals, 'store_id' | 'id'> = {
   ticketMedioPrize4: 20,
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const stores = await prisma.stores.findMany({
       orderBy: { name: 'asc' },
@@ -49,7 +49,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { name, themeColor } = await request.json();
 

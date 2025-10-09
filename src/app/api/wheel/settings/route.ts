@@ -11,7 +11,7 @@ const createSafeResponse = (settings: any) => {
     value: s.value !== null ? Number(s.value) : null, // Converte Decimal para Number
     description: s.description,
     color: s.color,
-    weight: s.weight !== null ? Number(s.weight) : null, // Converte Decimal para Number
+    weight: s.weight !== null ? Number(s.weight) : 10, // Garante que o peso tenha um valor padrão
     position: s.position,
     isActive: s.isActive,
   }));
@@ -38,26 +38,30 @@ export async function GET(req: NextRequest) {
 
     if (!settings || settings.segments.length === 0) {
        // Se não existir, cria uma configuração padrão com os novos prêmios
-      const defaultSettings = await prisma.prizeWheelSettings.upsert({
-        where: { storeId },
-        update: {},
-        create: {
-          storeId,
-          segments: {
-            create: [
-              { label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
-              { label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
-              { label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
-              { label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
-            ]
-          }
-        },
-        include: {
-          segments: {
-            where: { isActive: true },
-            orderBy: { position: 'asc' }
-          }
-        }
+      const defaultSettings = await prisma.$transaction(async (tx) => {
+        const upsertedSettings = await tx.prizeWheelSettings.upsert({
+            where: { storeId },
+            update: {},
+            create: { storeId },
+        });
+
+        // Deleta segmentos antigos para garantir um estado limpo
+        await tx.prizeWheelSegment.deleteMany({ where: { settingsId: upsertedSettings.id } });
+
+        // Cria os novos segmentos padrão
+        await tx.prizeWheelSegment.createMany({
+            data: [
+              { settingsId: upsertedSettings.id, label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
+              { settingsId: upsertedSettings.id, label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
+              { settingsId: upsertedSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
+              { settingsId: upsertedSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
+            ],
+        });
+        
+        return tx.prizeWheelSettings.findUnique({
+            where: { id: upsertedSettings.id },
+            include: { segments: { orderBy: { position: 'asc' } } },
+        });
       });
       return createSafeResponse(defaultSettings);
     }

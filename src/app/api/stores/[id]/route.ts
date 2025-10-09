@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest, context: any) {
-  const storeId = context.params.id;
+  const { id: storeId } = await context.params; // ✅ CORRIGIDO
   const includePassword = request.nextUrl.searchParams.get('includePassword') === 'true';
 
   try {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, context: any) {
 }
 
 export async function PUT(request: NextRequest, context: any) {
-  const storeId = context.params.id;
+  const { id: storeId } = await context.params; // ✅ CORRIGIDO
 
   try {
     const body = await request.json();
@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest, context: any) {
 }
 
 export async function DELETE(request: NextRequest, context: any) {
-  const storeId = context.params.id;
+  const { id: storeId } = await context.params; // ✅ CORRIGIDO
 
   try {
     await prisma.stores.delete({

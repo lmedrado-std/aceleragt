@@ -13,12 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
 import { z } from "zod";
 
+// --- Tipos e Schemas Zod ---
 interface Area {
     id?: number;
     nome: string;
-    latitude: number;
-    longitude: number;
-    raio: number;
+    latitude: number | string;
+    longitude: number | string;
+    raio: number | string;
     ativo: boolean;
 }
 
@@ -38,9 +39,9 @@ interface RestrictionSettings {
 const areaSchema = z.object({
   id: z.number().optional(),
   nome: z.string().min(1, "O nome da área é obrigatório."),
-  latitude: z.coerce.number({ invalid_type_error: "Latitude deve ser um número." }),
-  longitude: z.coerce.number({ invalid_type_error: "Longitude deve ser um número." }),
-  raio: z.coerce.number().min(1, "O raio deve ser maior que zero."),
+  latitude: z.coerce.number({ required_error: "Latitude é obrigatória.", invalid_type_error: "Latitude deve ser um número válido." }),
+  longitude: z.coerce.number({ required_error: "Longitude é obrigatória.", invalid_type_error: "Longitude deve ser um número válido." }),
+  raio: z.coerce.number({ required_error: "Raio é obrigatório.", invalid_type_error: "Raio deve ser um número." }).min(1, "O raio deve ser maior que zero."),
   ativo: z.boolean(),
 });
 
@@ -58,7 +59,7 @@ const settingsSchema = z.object({
   wifis: z.array(wifiSchema),
 });
 
-
+// --- Componente Principal ---
 export default function LoginRestrictionSettings({ storeId }: { storeId: string }) {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
@@ -92,17 +93,21 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
 
     const handleSave = async () => {
         setSaving(true);
-
-        const dataToValidate = { storeId, ...settings };
-        const validation = settingsSchema.safeParse(dataToValidate);
+        const validation = settingsSchema.safeParse({ storeId, ...settings });
 
         if (!validation.success) {
-            const firstError = validation.error.errors[0];
-            const errorMessage = `${firstError.path.join('.')}: ${firstError.message}`;
+            const formattedErrors = validation.error.flatten().fieldErrors;
+            const errorMessages = Object.entries(formattedErrors)
+                .map(([field, errors]) => {
+                    if(Array.isArray(errors)) return errors.join(', ');
+                    return null;
+                })
+                .filter(Boolean);
+
             toast({
-                variant: 'destructive',
-                title: 'Erro de Validação',
-                description: errorMessage || "Por favor, verifique os campos preenchidos."
+                variant: "destructive",
+                title: "Dados Inválidos",
+                description: errorMessages.join("\n") || "Por favor, verifique os campos em vermelho."
             });
             setSaving(false);
             return;
@@ -112,7 +117,7 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
             const res = await fetch(`/api/loja/restricoes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(validation.data), // Send validated data
+                body: JSON.stringify(validation.data),
             });
             if (!res.ok) {
                 const errorData = await res.json();
@@ -120,19 +125,13 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
             }
             toast({ title: "Sucesso", description: "Configurações de restrição de login salvas." });
         } catch (error) {
-            toast({ variant: "destructive", title: "Erro", description: (error as Error).message });
+            toast({ variant: "destructive", title: "Erro no Servidor", description: (error as Error).message });
         } finally {
             setSaving(false);
         }
     };
     
-    // --- Handlers para Áreas ---
-    const addArea = () => {
-        setSettings(prev => ({
-            ...prev,
-            areas: [...prev.areas, { nome: "", latitude: 0, longitude: 0, raio: 100, ativo: true }]
-        }));
-    };
+    const addArea = () => setSettings(prev => ({ ...prev, areas: [...prev.areas, { nome: "", latitude: "", longitude: "", raio: "100", ativo: true }] }));
     const updateArea = (index: number, field: keyof Area, value: any) => {
         setSettings(prev => {
             const newAreas = [...prev.areas];
@@ -140,17 +139,9 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
             return { ...prev, areas: newAreas };
         });
     };
-    const removeArea = (index: number) => {
-        setSettings(prev => ({ ...prev, areas: prev.areas.filter((_, i) => i !== index) }));
-    };
+    const removeArea = (index: number) => setSettings(prev => ({ ...prev, areas: prev.areas.filter((_, i) => i !== index) }));
 
-    // --- Handlers para Wi-Fi ---
-    const addWifi = () => {
-        setSettings(prev => ({
-            ...prev,
-            wifis: [...prev.wifis, { nome: "", ssid: "", ativo: true }]
-        }));
-    };
+    const addWifi = () => setSettings(prev => ({ ...prev, wifis: [...prev.wifis, { nome: "", ssid: "", ativo: true }] }));
     const updateWifi = (index: number, field: keyof Wifi, value: any) => {
         setSettings(prev => {
             const newWifis = [...prev.wifis];
@@ -158,64 +149,47 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
             return { ...prev, wifis: newWifis };
         });
     };
-    const removeWifi = (index: number) => {
-        setSettings(prev => ({ ...prev, wifis: prev.wifis.filter((_, i) => i !== index) }));
-    };
+    const removeWifi = (index: number) => setSettings(prev => ({ ...prev, wifis: prev.wifis.filter((_, i) => i !== index) }));
 
     if (loading) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Restrições de Login do Vendedor</CardTitle>
-                    <CardDescription>Carregando configurações...</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center items-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                </CardContent>
-            </Card>
-        )
+            <Card><CardHeader><CardTitle>Restrições de Login do Vendedor</CardTitle><CardDescription>Carregando configurações...</CardDescription></CardHeader>
+                <CardContent className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></CardContent></Card>
+        );
     }
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Restrições de Login do Vendedor</CardTitle>
-                <CardDescription>
-                    Defina locais e redes Wi-Fi permitidas para que os vendedores possam acessar o painel.
-                    Esta funcionalidade requer que o vendedor autorize o uso da localização no navegador.
-                </CardDescription>
+                <CardDescription>Defina locais e redes Wi-Fi permitidas para que os vendedores possam acessar o painel. Requer autorização de localização no navegador do vendedor.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div>
                     <Label>Modo de Verificação</Label>
                      <Select value={settings.modo} onValueChange={(value: "E" | "OU") => setSettings(prev => ({...prev, modo: value}))}>
-                        <SelectTrigger className="w-[280px]">
-                            <SelectValue placeholder="Selecione o modo" />
-                        </SelectTrigger>
+                        <SelectTrigger className="w-[280px]"><SelectValue placeholder="Selecione o modo" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="OU">Uma das opções (Localização OU Wi-Fi)</SelectItem>
                             <SelectItem value="E">Ambas as opções (Localização E Wi-Fi)</SelectItem>
                         </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground mt-1">
-                        "OU" permite o login se o vendedor estiver na área ou no Wi-Fi. "E" exige ambos.
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">"OU" permite o login se uma das condições for atendida. "E" exige ambas.</p>
                 </div>
                 <Separator />
                 
-                {/* Gerenciamento de Áreas */}
                 <div className="space-y-4">
                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium flex items-center gap-2"><MapPin className="h-5 w-5" /> Áreas Geográficas Permitidas</h3>
+                        <h3 className="text-lg font-medium flex items-center gap-2"><MapPin className="h-5 w-5" /> Áreas Geográficas</h3>
                         <Button variant="outline" size="sm" onClick={addArea}><Plus className="mr-2 h-4 w-4"/> Adicionar Área</Button>
                     </div>
                     <div className="space-y-2">
                         {settings.areas.map((area, index) => (
                             <div key={area.id || `new-area-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                 <div className="md:col-span-3"><Label>Nome</Label><Input value={area.nome} onChange={e => updateArea(index, 'nome', e.target.value)} placeholder="Ex: Loja Centro"/></div>
-                                <div className="md:col-span-3"><Label>Latitude</Label><Input type="number" value={area.latitude} onChange={e => updateArea(index, 'latitude', parseFloat(e.target.value))}/></div>
-                                <div className="md:col-span-3"><Label>Longitude</Label><Input type="number" value={area.longitude} onChange={e => updateArea(index, 'longitude', parseFloat(e.target.value))}/></div>
-                                <div className="md:col-span-1"><Label>Raio (m)</Label><Input type="number" value={area.raio} onChange={e => updateArea(index, 'raio', parseInt(e.target.value))}/></div>
+                                <div className="md:col-span-3"><Label>Latitude</Label><Input type="text" inputMode="decimal" value={area.latitude} onChange={e => updateArea(index, 'latitude', e.target.value)}/></div>
+                                <div className="md:col-span-3"><Label>Longitude</Label><Input type="text" inputMode="decimal" value={area.longitude} onChange={e => updateArea(index, 'longitude', e.target.value)}/></div>
+                                <div className="md:col-span-1"><Label>Raio (m)</Label><Input type="text" inputMode="decimal" value={area.raio} onChange={e => updateArea(index, 'raio', e.target.value)}/></div>
                                 <div className="flex items-center gap-2 md:col-span-2">
                                      <div className="flex flex-col items-center"><Label>Ativo</Label><Switch checked={area.ativo} onCheckedChange={checked => updateArea(index, 'ativo', checked)}/></div>
                                      <Button variant="ghost" size="icon" onClick={() => removeArea(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
@@ -228,7 +202,6 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
                 
                 <Separator />
 
-                {/* Gerenciamento de Wi-Fi */}
                  <div className="space-y-4">
                      <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium flex items-center gap-2"><Wifi className="h-5 w-5" /> Redes Wi-Fi Permitidas</h3>
@@ -251,13 +224,11 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
 
             </CardContent>
             <CardFooter>
-                <Button onClick={handleSave} disabled={saving}>
+                <Button onClick={handleSave} disabled={saving || loading}>
                     {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
-                    Salvar Restrições
+                    {saving ? "Salvando..." : "Salvar Restrições"}
                 </Button>
             </CardFooter>
         </Card>
     );
 }
-
-    

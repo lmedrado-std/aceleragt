@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from 'react';
 import { Wheel } from 'react-custom-roulette';
 import { Button } from '@/components/ui/button';
