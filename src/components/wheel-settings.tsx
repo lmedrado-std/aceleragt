@@ -149,7 +149,7 @@ export function WheelSettings({ storeId }: WheelSettingsProps) {
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
               {segments.map((segment, index) => (
-                <Draggable key={segment.id} draggableId={segment.id} index={index}>
+                <Draggable key={segment.id} draggableId={String(segment.id)} index={index}>
                   {(provided) => (
                     <div ref={provided.innerRef} {...provided.draggableProps} className="flex items-center gap-2 p-3 bg-white dark:bg-muted/50 rounded-lg border shadow-sm">
                       <div {...provided.dragHandleProps} className="cursor-grab p-2">

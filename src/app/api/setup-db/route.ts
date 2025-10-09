@@ -103,7 +103,7 @@ export async function GET() {
 
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSegment" (
-          id TEXT NOT NULL PRIMARY KEY,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           "settingsId" TEXT NOT NULL,
           label TEXT NOT NULL,
           type TEXT NOT NULL,
@@ -136,7 +136,7 @@ export async function GET() {
           "storeId" TEXT NOT NULL,
           "sellerId" TEXT NOT NULL,
           "grantedBy" TEXT NOT NULL,
-          "segmentId" TEXT NOT NULL,
+          "segmentId" UUID NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
           "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           "claimedAt" TIMESTAMP(3),

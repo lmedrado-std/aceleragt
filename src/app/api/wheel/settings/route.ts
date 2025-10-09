@@ -56,10 +56,10 @@ export async function GET(req: NextRequest) {
         // Cria os novos segmentos padrão
         await tx.prizeWheelSegment.createMany({
             data: [
-              { id: `seg_${storeId}_1`, settingsId: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: new Decimal(5.00), weight: 25, position: 0, color: "#10B981", isActive: true },
-              { id: `seg_${storeId}_2`, settingsId: existingSettings.id, label: "não foi dessa vez", type: "retry", value: new Decimal(0.00), weight: 40, position: 1, color: "#6B7280", isActive: true },
-              { id: `seg_${storeId}_3`, settingsId: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: new Decimal(10.00), weight: 15, position: 2, color: "#3B82F6", isActive: true },
-              { id: `seg_${storeId}_4`, settingsId: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: new Decimal(15.00), weight: 5, position: 3, color: "#F59E0B", isActive: true }
+              { settingsId: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: new Decimal(5.00), weight: 25, position: 0, color: "#10B981", isActive: true },
+              { settingsId: existingSettings.id, label: "não foi dessa vez", type: "retry", value: new Decimal(0.00), weight: 40, position: 1, color: "#6B7280", isActive: true },
+              { settingsId: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: new Decimal(10.00), weight: 15, position: 2, color: "#3B82F6", isActive: true },
+              { settingsId: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: new Decimal(15.00), weight: 5, position: 3, color: "#F59E0B", isActive: true }
             ],
         });
         
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     // Garante que os dados do segmento estão no formato correto para o Prisma
     const segmentsToCreate = segments.map((s: any, index: number) => ({
-      id: s.id || `seg_${storeId}_${index}`,
+      // O ID será gerado pelo banco de dados, então o removemos dos dados de criação
       label: s.label,
       type: s.type,
       value: s.type === 'money' && s.value !== null ? new Decimal(s.value) : null,
