@@ -17,6 +17,7 @@ interface Segment {
   color?: string;
   weight: number;
   position: number;
+  isActive: boolean;
 }
 
 interface WheelSettingsProps {
@@ -82,7 +83,7 @@ export function WheelSettings({ storeId }: WheelSettingsProps) {
     setSegments(newSegments);
   };
 
-  const addSegment = () => setSegments([...segments, { id: `new-${Date.now()}`, label: '', type: 'money', weight: 10, position: segments.length, color: '#3B82F6' }]);
+  const addSegment = () => setSegments([...segments, { id: `new-${Date.now()}`, label: '', type: 'money', weight: 10, position: segments.length, color: '#3B82F6', isActive: true }]);
   const removeSegment = (index: number) => setSegments(segments.filter((_, i) => i !== index));
 
   const saveSettings = async () => {
