@@ -39,27 +39,31 @@ export async function GET(req: NextRequest) {
     if (!settings || settings.segments.length === 0) {
        // Se não existir, cria uma configuração padrão com os novos prêmios
       const defaultSettings = await prisma.$transaction(async (tx) => {
-        const upsertedSettings = await tx.prizeWheelSettings.upsert({
+        let existingSettings = await tx.prizeWheelSettings.findUnique({
             where: { storeId },
-            update: {},
-            create: { storeId },
         });
 
+        if (!existingSettings) {
+            existingSettings = await tx.prizeWheelSettings.create({
+                data: { storeId },
+            });
+        }
+
         // Deleta segmentos antigos para garantir um estado limpo
-        await tx.prizeWheelSegment.deleteMany({ where: { settingsId: upsertedSettings.id } });
+        await tx.prizeWheelSegment.deleteMany({ where: { settingsId: existingSettings.id } });
 
         // Cria os novos segmentos padrão
         await tx.prizeWheelSegment.createMany({
             data: [
-              { settingsId: upsertedSettings.id, label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
-              { settingsId: upsertedSettings.id, label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
-              { settingsId: upsertedSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
-              { settingsId: upsertedSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
+              { settingsId: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: 5, weight: 25, position: 0, color: "#10B981" },
+              { settingsId: existingSettings.id, label: "não foi dessa vez", type: "retry", value: 0, weight: 40, position: 1, color: "#6B7280" },
+              { settingsId: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: 10, weight: 15, position: 2, color: "#3B82F6" },
+              { settingsId: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: 15, weight: 5, position: 3, color: "#F59E0B" }
             ],
         });
         
         return tx.prizeWheelSettings.findUnique({
-            where: { id: upsertedSettings.id },
+            where: { id: existingSettings.id },
             include: { segments: { orderBy: { position: 'asc' } } },
         });
       });
