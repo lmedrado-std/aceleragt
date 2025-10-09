@@ -11,7 +11,7 @@ import { Gift, Users, TrendingUp, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import dynamic from 'next/dynamic';
 
-const PrizeWheel = dynamic(() => import('./prize-wheel').then(mod => mod.PrizeWheel), {
+const PrizeWheel = dynamic(() => import('@/components/prize-wheel').then(mod => mod.PrizeWheel), {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center justify-center h-96 w-full rounded-lg bg-muted/30">
@@ -299,5 +299,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     </div>
   );
 }
+
+    
 
     
