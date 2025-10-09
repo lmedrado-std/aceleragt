@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 
         if (!existingSettings) {
             existingSettings = await tx.prizeWheelSettings.create({
-                data: { storeId, id: `settings_${storeId}` },
+                data: { id: `settings_${storeId}`, storeId },
             });
         }
 
@@ -104,11 +104,15 @@ export async function POST(req: NextRequest) {
 
     const updatedSettings = await prisma.$transaction(async (tx) => {
         // Encontra ou cria as configurações da loja
-        const settings = await tx.prizeWheelSettings.upsert({
-            where: { id: `settings_${storeId}` },
-            create: { storeId, id: `settings_${storeId}` },
-            update: {},
+        let settings = await tx.prizeWheelSettings.findFirst({
+            where: { storeId },
         });
+
+        if (!settings) {
+            settings = await tx.prizeWheelSettings.create({
+                data: { id: `settings_${storeId}`, storeId },
+            });
+        }
 
         // Deleta os segmentos antigos
         await tx.prizeWheelSegment.deleteMany({
@@ -117,7 +121,7 @@ export async function POST(req: NextRequest) {
 
         // Cria os novos segmentos
         await tx.prizeWheelSegment.createMany({
-            data: segmentsToCreate.map(s => ({ ...s, settingsId: settings.id })),
+            data: segmentsToCreate.map(s => ({ ...s, settingsId: settings!.id })),
         });
         
         // Retorna as configurações atualizadas com os novos segmentos
