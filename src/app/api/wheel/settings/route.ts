@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
         if (!existingSettings) {
             existingSettings = await tx.prizeWheelSettings.create({
-                data: { id: `settings_${storeId}`, store_id: storeId },
+                data: { store_id: storeId },
             });
         }
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
 
         if (!settings) {
             settings = await tx.prizeWheelSettings.create({
-                data: { id: `settings_${storeId}`, store_id: storeId },
+                data: { store_id: storeId },
             });
         }
 

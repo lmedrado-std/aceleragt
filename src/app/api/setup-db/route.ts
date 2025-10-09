@@ -94,8 +94,8 @@ export async function GET() {
     // --- TABELAS DA ROLETA DE PRÊMIOS ---
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSettings" (
-        id TEXT NOT NULL PRIMARY KEY,
-        "store_id" TEXT NOT NULL UNIQUE,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        store_id TEXT NOT NULL UNIQUE,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL
       );
@@ -104,7 +104,7 @@ export async function GET() {
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSegment" (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          "settingsId" TEXT NOT NULL,
+          "settingsId" UUID NOT NULL,
           label TEXT NOT NULL,
           type TEXT NOT NULL,
           value DECIMAL(10,2),
@@ -119,22 +119,22 @@ export async function GET() {
 
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelCredits" (
-          id TEXT NOT NULL PRIMARY KEY,
-          "store_id" TEXT NOT NULL,
-          "seller_id" TEXT NOT NULL,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          store_id TEXT NOT NULL,
+          seller_id TEXT NOT NULL,
           credits INTEGER NOT NULL DEFAULT 0,
           "updatedAt" TIMESTAMP(3) NOT NULL
       );
     `);
      await prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "PrizeWheelCredits_store_id_seller_id_key" ON "PrizeWheelCredits"("store_id", "seller_id");
+        CREATE UNIQUE INDEX IF NOT EXISTS "PrizeWheelCredits_store_id_seller_id_key" ON "PrizeWheelCredits"(store_id, seller_id);
      `);
 
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSpins" (
-          id TEXT NOT NULL PRIMARY KEY,
-          "store_id" TEXT NOT NULL,
-          "seller_id" TEXT NOT NULL,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          store_id TEXT NOT NULL,
+          seller_id TEXT NOT NULL,
           "grantedBy" TEXT NOT NULL,
           "segmentId" UUID NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
