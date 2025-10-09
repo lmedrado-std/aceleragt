@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return await prisma.$transaction(async (tx) => {
       // Verificar créditos disponíveis
       const credit = await tx.prizeWheelCredits.findUnique({
-        where: { storeId_sellerId: { storeId, sellerId } }
+        where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } }
       });
       
       if (!credit || credit.credits < 1) {
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
       // Buscar configurações da roleta
       const settings = await tx.prizeWheelSettings.findUnique({
-        where: { storeId },
+        where: { store_id: storeId },
         include: {
           segments: {
             where: { isActive: true },
@@ -55,15 +55,15 @@ export async function POST(req: NextRequest) {
 
       // Decrementar crédito
       await tx.prizeWheelCredits.update({
-        where: { storeId_sellerId: { storeId, sellerId } },
+        where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } },
         data: { credits: { decrement: 1 } }
       });
 
       // Registrar giro
       const spin = await tx.prizeWheelSpins.create({
         data: {
-          storeId,
-          sellerId,
+          store_id: storeId,
+          seller_id: sellerId,
           grantedBy: "system",
           segmentId: segment.id,
           status: "pending"

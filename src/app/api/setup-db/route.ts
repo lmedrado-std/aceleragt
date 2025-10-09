@@ -95,7 +95,7 @@ export async function GET() {
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSettings" (
         id TEXT NOT NULL PRIMARY KEY,
-        "storeId" TEXT NOT NULL UNIQUE,
+        "store_id" TEXT NOT NULL UNIQUE,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL
       );
@@ -120,21 +120,21 @@ export async function GET() {
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelCredits" (
           id TEXT NOT NULL PRIMARY KEY,
-          "storeId" TEXT NOT NULL,
-          "sellerId" TEXT NOT NULL,
+          "store_id" TEXT NOT NULL,
+          "seller_id" TEXT NOT NULL,
           credits INTEGER NOT NULL DEFAULT 0,
           "updatedAt" TIMESTAMP(3) NOT NULL
       );
     `);
      await prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "PrizeWheelCredits_storeId_sellerId_key" ON "PrizeWheelCredits"("storeId", "sellerId");
+        CREATE UNIQUE INDEX IF NOT EXISTS "PrizeWheelCredits_store_id_seller_id_key" ON "PrizeWheelCredits"("store_id", "seller_id");
      `);
 
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSpins" (
           id TEXT NOT NULL PRIMARY KEY,
-          "storeId" TEXT NOT NULL,
-          "sellerId" TEXT NOT NULL,
+          "store_id" TEXT NOT NULL,
+          "seller_id" TEXT NOT NULL,
           "grantedBy" TEXT NOT NULL,
           "segmentId" UUID NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',

@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const record = await prisma.prizeWheelCredits.upsert({
-      where: { storeId_sellerId: { storeId, sellerId } },
-      create: { storeId, sellerId, credits },
+      where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } },
+      create: { store_id: storeId, seller_id: sellerId, credits },
       update: { credits: { increment: credits } }
     });
 

@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     }
 
     let settings = await prisma.prizeWheelSettings.findFirst({
-      where: { storeId },
+      where: { store_id: storeId },
       include: { segments: { orderBy: { position: 'asc' } } },
     });
 
@@ -41,12 +41,12 @@ export async function GET(req: NextRequest) {
        // Se não existir, cria uma configuração padrão com os novos prêmios
       const defaultSettings = await prisma.$transaction(async (tx) => {
         let existingSettings = await tx.prizeWheelSettings.findFirst({
-            where: { storeId },
+            where: { store_id: storeId },
         });
 
         if (!existingSettings) {
             existingSettings = await tx.prizeWheelSettings.create({
-                data: { id: `settings_${storeId}`, storeId },
+                data: { id: `settings_${storeId}`, store_id: storeId },
             });
         }
 
@@ -106,12 +106,12 @@ export async function POST(req: NextRequest) {
     const updatedSettings = await prisma.$transaction(async (tx) => {
         // Encontra ou cria as configurações da loja
         let settings = await tx.prizeWheelSettings.findFirst({
-            where: { storeId },
+            where: { store_id: storeId },
         });
 
         if (!settings) {
             settings = await tx.prizeWheelSettings.create({
-                data: { id: `settings_${storeId}`, storeId },
+                data: { id: `settings_${storeId}`, store_id: storeId },
             });
         }
 
