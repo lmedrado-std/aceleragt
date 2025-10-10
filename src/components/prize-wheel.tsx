@@ -50,7 +50,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           const formattedSegments = settingsData.segments?.map((s: any) => ({
             id: s.id,
             option: s.label,
-            style: { backgroundColor: s.color || '#ffffff', textColor: '#000000' },
+            style: { backgroundColor: s.color || '#ffffff', textColor: '#ffffff' },
             type: s.type,
             value: s.value,
             description: s.description,
@@ -137,7 +137,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
-        <div className="text-center text-lg font-semibold bg-primary text-primary-foreground py-2 px-4 rounded-lg shadow-md">
+        <div className="text-center text-lg font-semibold bg-primary text-primary-foreground py-2 px-4 rounded-full shadow-md">
             <p>Você tem {credits} giro(s)</p>
         </div>
       
@@ -148,9 +148,10 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             onStopSpinning={() => {
                 setMustSpin(false);
             }}
-            radiusLineWidth={0}
-            outerBorderWidth={5}
-            fontSize={12}
+            radiusLineWidth={1}
+            outerBorderWidth={10}
+            fontSize={16}
+            textDistance={60}
         />
 
         <Button onClick={handleSpinClick} disabled={credits <= 0 || mustSpin || segments.length === 0 || !sellerId} className="w-full max-w-xs py-6 text-xl font-bold">
