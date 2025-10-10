@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -29,26 +30,41 @@ export function WheelManager({ storeId }: WheelManagerProps) {
   const [selectedSeller, setSelectedSeller] = useState<string>('');
   const [grantAmount, setGrantAmount] = useState(1);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    if (storeId) {
+      loadData();
+    }
   }, [storeId]);
 
   const loadData = async () => {
+    setLoading(true);
     try {
-      // Carregar vendedores (adapte conforme sua API)
+      // Carregar vendedores
       const sellersRes = await fetch(`/api/sellers?storeId=${storeId}`);
+      if (!sellersRes.ok) throw new Error("Falha ao carregar vendedores.");
       const sellersData = await sellersRes.json();
       setSellers(sellersData);
 
       // Carregar status da roleta
       const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
+      if (!statusRes.ok) throw new Error("Falha ao carregar dados da roleta.");
       const statusData = await statusRes.json();
+
       setCreditsMap(statusData.creditsMap || {});
       setRecentSpins(Array.isArray(statusData.spins) ? statusData.spins.slice(0, 10) : []);
       setStats(statusData.stats || { totalSpins: 0, totalValue: 0 });
+
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+      toast({
+          variant: "destructive",
+          title: "Erro ao carregar dados",
+          description: error instanceof Error ? error.message : "Não foi possível buscar as informações."
+      })
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -57,7 +73,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: 'Selecione um vendedor e quantidade válida'
+        description: 'Selecione um vendedor e uma quantidade válida.'
       });
       return;
     }
@@ -77,7 +93,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.error);
+        throw new Error(data.error || "Falha ao conceder giros.");
       }
 
       toast({
@@ -95,26 +111,22 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: error.message || 'Falha ao conceder giros'
+        description: error.message
       });
     }
   };
 
-  const handleSpinResult = (result: any) => {
-    // Atualizar créditos após giro
-    if (result.sellerId && result.remainingCredits !== undefined) {
-      setCreditsMap(prev => ({
-        ...prev,
-        [result.sellerId]: result.remainingCredits
-      }));
-    }
-
-    // Recarregar dados para atualizar histórico
-    loadData();
-  };
-
   const sellersWithCredits = sellers.filter(seller => creditsMap[seller.id] > 0);
   const sellerNamesWithCredits = sellersWithCredits.map(seller => seller.name).join(', ');
+
+  if (loading) {
+    return (
+        <div className="flex flex-col items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary"/>
+            <p className="mt-4 text-muted-foreground">Carregando gerenciador da roleta...</p>
+        </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -143,7 +155,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Card>
+                    <Card className="cursor-help">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Vendedores com Giros</CardTitle>
                             <Users className="h-4 w-4 text-muted-foreground" />
@@ -172,13 +184,13 @@ export function WheelManager({ storeId }: WheelManagerProps) {
           <CardTitle>Conceder Giros para Vendedores</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium">Vendedor</label>
               <select
                 value={selectedSeller}
                 onChange={(e) => setSelectedSeller(e.target.value)}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded-md mt-1"
               >
                 <option value="">Selecione um vendedor</option>
                 {sellers.map(seller => (
@@ -189,7 +201,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
               </select>
             </div>
             
-            <div>
+            <div className="w-full sm:w-auto">
               <label className="text-sm font-medium">Quantidade</label>
               <Input
                 type="number"
@@ -197,52 +209,14 @@ export function WheelManager({ storeId }: WheelManagerProps) {
                 max="10"
                 value={grantAmount}
                 onChange={(e) => setGrantAmount(parseInt(e.target.value) || 1)}
-                className="w-20"
+                className="w-full sm:w-24 mt-1"
               />
             </div>
             
-            <Button onClick={grantCredits}>
+            <Button onClick={grantCredits} className="w-full sm:w-auto">
               Conceder Giros
             </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Lista de vendedores com giros */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Vendedores com Giros Disponíveis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vendedor</TableHead>
-                <TableHead>Giros Disponíveis</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sellers
-                .filter(seller => creditsMap[seller.id] > 0)
-                .map(seller => (
-                <TableRow key={seller.id}>
-                  <TableCell>{seller.name}</TableCell>
-                  <TableCell>{creditsMap[seller.id] || 0}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">Ativo</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {sellers.filter(seller => creditsMap[seller.id] > 0).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
-                    Nenhum vendedor com giros disponíveis
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
         </CardContent>
       </Card>
 
@@ -293,10 +267,3 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     </div>
   );
 }
-
-    
-
-    
-
-
-

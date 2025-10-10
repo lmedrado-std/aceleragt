@@ -28,13 +28,13 @@ export async function GET(req: NextRequest) {
 
     // A roleta existe, então prossiga com a busca dos dados.
     const credits = await prisma.prizeWheelCredits.findMany({
-      where: { store_id: storeId, credits: { gt: 0 } },
+      where: { store_id: storeId },
     });
 
     const spins = await prisma.prizeWheelSpins.findMany({
       where: { store_id: storeId },
       include: { segment: true },
-      orderBy: { created_at: 'desc' }, // Corrigido!
+      orderBy: { created_at: 'desc' },
       take: limit,
     });
 
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         acc[credit.seller_id] = credit.credits;
         return acc;
       }, {} as Record<string, number>),
-      spins: spins ? spins.map(spin => ({ ...spin, createdAt: spin.created_at })) : [], // Mapeando para o frontend
+      spins: spins ? spins.map(spin => ({ ...spin, createdAt: spin.created_at })) : [],
       stats: {
         totalSpins: totalSpins || 0,
         totalValue: Number(totalValue) || 0,
@@ -79,6 +79,6 @@ export async function GET(req: NextRequest) {
       creditsMap: {},
       spins: [],
       stats: { totalSpins: 0, totalValue: 0 },
-    }, { status: 200 });
+    }, { status: 500 });
   }
 }
