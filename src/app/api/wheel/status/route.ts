@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const storeId = searchParams.get('storeId');
-  const limit = parseInt(searchParams.get('limit') || '50');
 
   if (!storeId) {
     return NextResponse.json({ error: "storeId obrigatório" }, { status: 400 });
@@ -35,20 +34,19 @@ export async function GET(req: NextRequest) {
         where: { store_id: storeId },
         include: { segment: true },
         orderBy: { created_at: 'desc' },
-        take: limit,
+        take: 50,
       })
     ]);
     
-    // 3. Construir o mapa de créditos
-    const creditsMap = credits.reduce((acc, credit) => {
-      acc[credit.seller_id] = credit.credits;
-      return acc;
-    }, {} as Record<string, number>);
+    // 3. Construir o mapa de créditos de forma segura
+    const creditsMap = Object.fromEntries(
+        credits.map(c => [c.seller_id, Number(c.credits || 0)])
+    );
 
     // 4. Calcular estatísticas de forma segura
     const totalSpins = spins.length;
     const totalValue = spins
-      .filter(spin => spin.segment.type === 'money' && spin.segment.value)
+      .filter(spin => spin.segment && spin.segment.type === 'money' && spin.segment.value)
       .reduce((sum, spin) => sum + (spin.segment.value ? Number(spin.segment.value) : 0), 0);
       
     const response = {
@@ -62,11 +60,15 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(response);
 
-  } catch (error) {
-    console.error("[GET /api/wheel/status] Erro inesperado:", error);
+  } catch (error: any) {
+    console.error("[GET /api/wheel/status] Erro inesperado:", {
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+    });
     return NextResponse.json({
         error: "Erro interno do servidor ao buscar status da roleta.",
-        details: error instanceof Error ? error.message : "Erro desconhecido",
+        details: error.message || "Erro desconhecido",
     }, { status: 500 });
   }
 }
