@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface PrizeWheelProps {
   storeId: string;
@@ -42,9 +43,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       if (!statusRes.ok) return;
       const statusData = await statusRes.json();
       const newCredits = statusData.creditsMap[sellerId] || 0;
-      if (newCredits !== credits) {
-        setCredits(newCredits);
-      }
+      setCredits(newCredits);
     } catch (error) {
        // Silently fail, don't show toast for polling
       console.error("Credit poll failed:", error);
@@ -96,12 +95,10 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     if (storeId) {
       loadInitialData();
       
-      // Start polling for credits
       if (pollingRef.current) clearInterval(pollingRef.current);
-      pollingRef.current = setInterval(fetchCredits, 10000); // every 10 seconds
+      pollingRef.current = setInterval(fetchCredits, 10000); 
     }
     
-    // Cleanup on unmount
     return () => {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
@@ -142,7 +139,12 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   };
 
   if (loading) {
-    return <div className="text-center p-8">Carregando roleta...</div>;
+    return (
+        <div className="flex flex-col items-center justify-center h-96 w-full rounded-lg bg-muted/30">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">Carregando roleta de prêmios...</p>
+        </div>
+    );
   }
 
   if (configured === false) {
@@ -167,11 +169,8 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             <p>Você tem {credits} giro(s)</p>
         </div>
         
-        {/* Roulette structure with stand and pointer */}
         <div className="relative flex flex-col items-center">
-            {/* Stand */}
             <div className="w-48 h-40 bg-yellow-800/20 dark:bg-yellow-200/20 rounded-t-lg shadow-inner-lg" style={{ clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)' }}></div>
-            {/* Pointer */}
             <div 
               className="absolute -top-2 z-10 w-0 h-0"
               style={{
@@ -181,7 +180,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               }}
             ></div>
 
-            {/* Wheel */}
             <div className="absolute top-12">
               <Wheel
                   mustStartSpinning={mustSpin}
@@ -200,7 +198,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               />
             </div>
 
-            {/* Base */}
             <div className="w-64 h-12 bg-yellow-800/10 dark:bg-yellow-200/10 rounded-b-lg mt-[-1px]"></div>
         </div>
 
