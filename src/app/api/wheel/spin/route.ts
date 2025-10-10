@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -14,6 +13,7 @@ function pickSegment(segments: any[]) {
     random -= segments[i].weight;
   }
   
+  // Fallback para o primeiro segmento, caso algo dê errado
   return { segment: segments[0], index: 0 };
 }
 
@@ -36,22 +36,22 @@ export async function POST(req: NextRequest) {
       }
 
       // Buscar configurações da roleta
-      const settings = await tx.prizeWheelSettings.findUnique({
+      const settings = await tx.prizeWheelSettings.findFirst({
         where: { store_id: storeId },
         include: {
-          segments: {
-            where: { isActive: true },
+          prize_wheel_segments: { // Corrigido para o nome do relacionamento
+            where: { is_active: true }, // Corrigido para is_active
             orderBy: { position: 'asc' }
           }
         }
       });
 
-      if (!settings || settings.segments.length === 0) {
+      if (!settings || settings.prize_wheel_segments.length === 0) {
         throw new Error("Roleta não configurada para esta loja");
       }
 
       // Sortear prêmio
-      const { segment, index } = pickSegment(settings.segments);
+      const { segment, index } = pickSegment(settings.prize_wheel_segments);
 
       // Decrementar crédito
       await tx.prizeWheelCredits.update({
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
           store_id: storeId,
           seller_id: sellerId,
           grantedBy: "system",
-          segmentId: segment.id,
+          segmentId: segment.id, // Corrigido para segmentId
           status: "pending"
         },
         include: { segment: true }
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         success: true,
         segmentIndex: index,
         prize: {
-          id: segment.id,
+          id: segment.id, // Garantindo que o id do segmento seja retornado
           label: segment.label,
           type: segment.type,
           value: segment.value,

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -12,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from "react";
+import { trackSellerView } from "@/lib/tracking";
 
 const PrizeWheel = dynamic(() => import('./prize-wheel').then(mod => mod.PrizeWheel), {
   ssr: false,
@@ -80,6 +81,13 @@ export function SellerTab({
     ...seller,
     goals,
   };
+
+  useEffect(() => {
+    if (seller.id) {
+      trackSellerView(seller.id);
+    }
+  }, [seller.id]);
+
 
   const formattedLastUpdated = lastUpdated
     ? new Date(lastUpdated).toLocaleString("pt-BR", {

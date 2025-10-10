@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,18 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Gift, Users, TrendingUp, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import dynamic from 'next/dynamic';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-
-const PrizeWheel = dynamic(() => import('@/components/prize-wheel').then(mod => mod.PrizeWheel), {
-  ssr: false,
-  loading: () => (
-    <div className="flex flex-col items-center justify-center h-96 w-full rounded-lg bg-muted/30">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Carregando roleta de prêmios...</p>
-    </div>
-  )
-});
 
 
 interface WheelManagerProps {
@@ -224,13 +212,6 @@ export function WheelManager({ storeId }: WheelManagerProps) {
         </CardContent>
       </Card>
 
-      {/* Roleta de Prêmios */}
-      <PrizeWheel
-        storeId={storeId}
-        sellerId={selectedSeller}
-        onSpinResult={handleSpinResult}
-      />
-
       {/* Lista de vendedores com giros */}
       <Card>
         <CardHeader>
@@ -320,3 +301,4 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     
 
     
+
