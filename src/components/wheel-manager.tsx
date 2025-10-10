@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Gift, Users, TrendingUp, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import dynamic from 'next/dynamic';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 const PrizeWheel = dynamic(() => import('@/components/prize-wheel').then(mod => mod.PrizeWheel), {
   ssr: false,
@@ -128,6 +129,9 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     loadData();
   };
 
+  const sellersWithCredits = sellers.filter(seller => creditsMap[seller.id] > 0);
+  const sellerNamesWithCredits = sellersWithCredits.map(seller => seller.name).join(', ');
+
   return (
     <div className="space-y-6">
       {/* Cards de estatísticas */}
@@ -152,17 +156,30 @@ export function WheelManager({ storeId }: WheelManagerProps) {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vendedores com Giros</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Object.keys(creditsMap).filter(k => creditsMap[k] > 0).length}
-            </div>
-          </CardContent>
-        </Card>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Vendedores com Giros</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                            {sellersWithCredits.length}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TooltipTrigger>
+                <TooltipContent>
+                    {sellersWithCredits.length > 0 ? (
+                        <p>{sellerNamesWithCredits}</p>
+                    ) : (
+                        <p>Nenhum vendedor tem giros disponíveis.</p>
+                    )}
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Seção de concessão de giros */}
