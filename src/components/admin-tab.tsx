@@ -26,6 +26,7 @@ import {
   Megaphone,
   Gift,
   History,
+  Calendar,
 } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -75,6 +76,7 @@ import { ArchivePeriodCard } from "./archive-period-card";
 import { PrizeWheelTab } from "./prize-wheel-tab";
 import { ArchivedPeriods } from "./goal-getter-dashboard";
 import LoginRestrictionSettings from "./login-restriction-settings";
+import { DatePicker } from "./ui/date-picker";
 
 const goalTiers: { id: string; goal: keyof GoalsFormValues; prize: keyof GoalsFormValues }[] = [
   { id: "Nível 1", goal: "paGoal1", prize: "paPrize1" },
@@ -933,7 +935,7 @@ export function AdminTab({
            <Card>
             <CardHeader>
                 <CardTitle>Configuração de Metas e Prêmios</CardTitle>
-                <CardDescription>Defina os objetivos para Vendas, PA e Ticket Médio.</CardDescription>
+                <CardDescription>Defina os objetivos para Vendas, PA, Ticket Médio e Corridinhas.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
                 <div>
@@ -1019,6 +1021,40 @@ export function AdminTab({
                             </div>
                         ))}
                     </div>
+                </div>
+                <Separator/>
+                <div>
+                  <h3 className="font-semibold text-lg mb-4 text-card-foreground">Corridinhas</h3>
+                   <div className="p-4 border rounded-lg bg-card space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <FormField
+                            control={control}
+                            name="goals.corridinhaStartDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Data de Início</FormLabel>
+                                    <DatePicker date={field.value ? new Date(field.value) : undefined} onSelect={field.onChange} />
+                                </FormItem>
+                            )}
+                         />
+                         <FormField
+                            control={control}
+                            name="goals.corridinhaEndDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Data de Fim</FormLabel>
+                                    <DatePicker date={field.value ? new Date(field.value) : undefined} onSelect={field.onChange} />
+                                </FormItem>
+                            )}
+                         />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <FormField control={control} name="goals.corridinhaPrize1" render={({ field }) => (<FormItem><FormLabel>Prêmio 1 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                          <FormField control={control} name="goals.corridinhaPrize2" render={({ field }) => (<FormItem><FormLabel>Prêmio 2 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                          <FormField control={control} name="goals.corridinhaPrize3" render={({ field }) => (<FormItem><FormLabel>Prêmio 3 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                          <FormField control={control} name="goals.corridinhaPrize4" render={({ field }) => (<FormItem><FormLabel>Prêmio 4 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                      </div>
+                  </div>
                 </div>
             </CardContent>
             <CardFooter>

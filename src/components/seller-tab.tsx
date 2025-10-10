@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -13,6 +14,7 @@ import { TipsTab } from "./TipsTab";
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from "react";
 import { trackSellerView } from "@/lib/tracking";
+import { format } from "date-fns";
 
 const PrizeWheel = dynamic(() => import('./prize-wheel').then(mod => mod.PrizeWheel), {
   ssr: false,
@@ -98,6 +100,8 @@ export function SellerTab({
         minute: "2-digit",
       })
     : "N/A";
+
+  const isCorridinhaActive = goals.corridinhaStartDate && goals.corridinhaEndDate && new Date(goals.corridinhaStartDate) <= new Date() && new Date(goals.corridinhaEndDate) >= new Date();
 
   return (
     <TooltipProvider>
@@ -223,51 +227,73 @@ export function SellerTab({
         </TabsContent>
 
          <TabsContent value="metas" className="mt-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Quadro de Metas</CardTitle>
-                    <CardDescription>
-                        Consulte aqui todos os objetivos e prêmios do período.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-6 md:grid-cols-3">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Metas de Vendas</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <GoalItem label="Meta 1" value={`${formatCurrency(goals.metaMinha)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize)})`} />
-                            <GoalItem label="Meta 2" value={`${formatCurrency(goals.meta)} (Prêmio: ${formatCurrency(goals.metaPrize)})`} />
-                            <GoalItem label="Meta 3" value={`${formatCurrency(goals.metona)} (Prêmio: ${formatCurrency(goals.metonaPrize)})`} />
-                            {goals.performanceBonusEnabled && (
-                                <GoalItem label="Bônus Performance" value={`Acima de ${formatCurrency(goals.metaLendaria)}`} />
-                            )}
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Metas de PA</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                           <GoalItem label="Nível 1" value={`${(goals.paGoal1 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize1)})`} />
-                           <GoalItem label="Nível 2" value={`${(goals.paGoal2 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize2)})`} />
-                           <GoalItem label="Nível 3" value={`${(goals.paGoal3 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize3)})`} />
-                           <GoalItem label="Nível 4" value={`${(goals.paGoal4 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize4)})`} />
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Metas de Ticket Médio</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <GoalItem label="Nível 1" value={`${formatCurrency(goals.ticketMedioGoal1)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize1)})`} />
-                            <GoalItem label="Nível 2" value={`${formatCurrency(goals.ticketMedioGoal2)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize2)})`} />
-                            <GoalItem label="Nível 3" value={`${formatCurrency(goals.ticketMedioGoal3)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize3)})`} />
-                            <GoalItem label="Nível 4" value={`${formatCurrency(goals.ticketMedioGoal4)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize4)})`} />
-                        </CardContent>
-                    </Card>
-                </CardContent>
-            </Card>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="lg:col-span-3">
+                    <CardHeader>
+                        <CardTitle>Quadro de Metas</CardTitle>
+                        <CardDescription>
+                            Consulte aqui todos os objetivos e prêmios do período.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-6 md:grid-cols-3">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Metas de Vendas</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <GoalItem label="Meta 1" value={`${formatCurrency(goals.metaMinha)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize)})`} />
+                                <GoalItem label="Meta 2" value={`${formatCurrency(goals.meta)} (Prêmio: ${formatCurrency(goals.metaPrize)})`} />
+                                <GoalItem label="Meta 3" value={`${formatCurrency(goals.metona)} (Prêmio: ${formatCurrency(goals.metonaPrize)})`} />
+                                {goals.performanceBonusEnabled && (
+                                    <GoalItem label="Bônus Performance" value={`Acima de ${formatCurrency(goals.metaLendaria)}`} />
+                                )}
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Metas de PA</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                               <GoalItem label="Nível 1" value={`${(goals.paGoal1 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize1)})`} />
+                               <GoalItem label="Nível 2" value={`${(goals.paGoal2 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize2)})`} />
+                               <GoalItem label="Nível 3" value={`${(goals.paGoal3 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize3)})`} />
+                               <GoalItem label="Nível 4" value={`${(goals.paGoal4 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize4)})`} />
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Metas de Ticket Médio</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <GoalItem label="Nível 1" value={`${formatCurrency(goals.ticketMedioGoal1)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize1)})`} />
+                                <GoalItem label="Nível 2" value={`${formatCurrency(goals.ticketMedioGoal2)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize2)})`} />
+                                <GoalItem label="Nível 3" value={`${formatCurrency(goals.ticketMedioGoal3)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize3)})`} />
+                                <GoalItem label="Nível 4" value={`${formatCurrency(goals.ticketMedioGoal4)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize4)})`} />
+                            </CardContent>
+                        </Card>
+                    </CardContent>
+                </Card>
+                 {isCorridinhaActive && (
+                  <Card className="lg:col-span-3">
+                      <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-primary">
+                              <Rocket /> Corridinha Ativa!
+                          </CardTitle>
+                          <CardDescription>
+                              Um incentivo especial está ativo no período de {goals.corridinhaStartDate ? format(new Date(goals.corridinhaStartDate), 'dd/MM/yyyy') : ''} até {goals.corridinhaEndDate ? format(new Date(goals.corridinhaEndDate), 'dd/MM/yyyy') : ''}.
+                          </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                           <div className="grid gap-4 md:grid-cols-4">
+                              <GoalItem label="Prêmio 1" value={formatCurrency(goals.corridinhaPrize1 || 0)} />
+                              <GoalItem label="Prêmio 2" value={formatCurrency(goals.corridinhaPrize2 || 0)} />
+                              <GoalItem label="Prêmio 3" value={formatCurrency(goals.corridinhaPrize3 || 0)} />
+                              <GoalItem label="Prêmio 4" value={formatCurrency(goals.corridinhaPrize4 || 0)} />
+                           </div>
+                      </CardContent>
+                  </Card>
+                )}
+            </div>
         </TabsContent>
         
         <TabsContent value="roleta" className="mt-6">

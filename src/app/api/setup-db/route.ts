@@ -63,7 +63,13 @@ export async function GET() {
         "ticketMedioGoal3" INTEGER DEFAULT 0,
         "ticketMedioPrize3" INTEGER DEFAULT 0,
         "ticketMedioGoal4" INTEGER DEFAULT 0,
-        "ticketMedioPrize4" INTEGER DEFAULT 0
+        "ticketMedioPrize4" INTEGER DEFAULT 0,
+        "corridinhaStartDate" TIMESTAMPTZ,
+        "corridinhaEndDate" TIMESTAMPTZ,
+        "corridinhaPrize1" INTEGER DEFAULT 0,
+        "corridinhaPrize2" INTEGER DEFAULT 0,
+        "corridinhaPrize3" INTEGER DEFAULT 0,
+        "corridinhaPrize4" INTEGER DEFAULT 0
       );
     `);
     
@@ -238,6 +244,30 @@ export async function GET() {
             // Coluna já existe
         } else {
             throw e;
+        }
+    }
+    
+    // Adicionar colunas da Corridinha se elas não existirem
+    const corridinhaColumns = [
+        { name: "corridinhaStartDate", type: "TIMESTAMPTZ" },
+        { name: "corridinhaEndDate", type: "TIMESTAMPTZ" },
+        { name: "corridinhaPrize1", type: "INTEGER DEFAULT 0" },
+        { name: "corridinhaPrize2", type: "INTEGER DEFAULT 0" },
+        { name: "corridinhaPrize3", type: "INTEGER DEFAULT 0" },
+        { name: "corridinhaPrize4", type: "INTEGER DEFAULT 0" },
+    ];
+
+    for (const col of corridinhaColumns) {
+        try {
+            await prisma.$executeRawUnsafe(`
+                ALTER TABLE goals ADD COLUMN "${col.name}" ${col.type};
+            `);
+        } catch (e) {
+            if (e instanceof Error && e.message.includes(`column "${col.name}" of relation "goals" already exists`)) {
+                // Coluna já existe, ignora o erro
+            } else {
+                throw e;
+            }
         }
     }
 

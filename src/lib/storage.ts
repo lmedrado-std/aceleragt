@@ -42,6 +42,12 @@ export interface Goals {
   ticketMedioPrize2: number;
   ticketMedioPrize3: number;
   ticketMedioPrize4: number;
+  corridinhaStartDate?: string | null;
+  corridinhaEndDate?: string | null;
+  corridinhaPrize1?: number;
+  corridinhaPrize2?: number;
+  corridinhaPrize3?: number;
+  corridinhaPrize4?: number;
 }
 
 export type Incentives = Record<string, IncentiveProjectionOutput | null>;
