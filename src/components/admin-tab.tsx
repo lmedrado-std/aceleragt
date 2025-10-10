@@ -942,17 +942,17 @@ export function AdminTab({
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold border-b pb-2">Metas de Vendas e Prêmios</h3>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                        <div className="p-4 border rounded-lg bg-card space-y-2">
+                        <div className="p-4 border rounded-lg bg-card space-y-2 border-blue-200 dark:border-blue-800">
                             <h4 className="font-medium text-md text-card-foreground">Meta 1</h4>
                              <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                              <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
-                        <div className="p-4 border rounded-lg bg-card space-y-2">
+                        <div className="p-4 border rounded-lg bg-card space-y-2 border-purple-200 dark:border-purple-800">
                             <h4 className="font-medium text-md text-card-foreground">Meta 2</h4>
                             <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
-                        <div className="p-4 border rounded-lg bg-card space-y-2">
+                        <div className="p-4 border rounded-lg bg-card space-y-2 border-green-200 dark:border-green-800">
                             <h4 className="font-medium text-md text-card-foreground">Meta 3</h4>
                             <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
@@ -1120,5 +1120,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
