@@ -938,85 +938,79 @@ export function AdminTab({
                 <CardTitle>Configuração de Metas e Prêmios</CardTitle>
                 <CardDescription>Defina os objetivos para Vendas, PA, Ticket Médio e Corridinhas.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-                <Accordion type="single" collapsible className="w-full" defaultValue="vendas">
-                    <AccordionItem value="vendas">
-                        <AccordionTrigger className="text-lg font-semibold">Metas de Vendas e Prêmios</AccordionTrigger>
-                        <AccordionContent>
-                           <div className="space-y-4 pt-4">
-                                <div className="p-4 border rounded-lg bg-card space-y-2">
-                                    <h4 className="font-medium text-md text-card-foreground">Meta 1</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                        <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                    </div>
-                                </div>
-                                <div className="p-4 border rounded-lg bg-card space-y-2">
-                                    <h4 className="font-medium text-md text-card-foreground">Meta 2</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                        <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                    </div>
-                                </div>
-                                <div className="p-4 border rounded-lg bg-card space-y-2">
-                                    <h4 className="font-medium text-md text-card-foreground">Meta 3</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                        <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                    </div>
-                                </div>
+            <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Metas de Vendas e Prêmios</h3>
+                   <div className="space-y-4 pt-4">
+                        <div className="p-4 border rounded-lg bg-card space-y-2">
+                            <h4 className="font-medium text-md text-card-foreground">Meta 1</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                     <AccordionItem value="bonus">
-                        <AccordionTrigger className="text-lg font-semibold">Bônus Performance</AccordionTrigger>
-                        <AccordionContent>
-                             <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50 mt-4">
-                                <div className="pr-4">
-                                    <h4 className="font-medium text-md text-card-foreground">Ativar Bônus Performance</h4>
-                                    <p className="text-sm text-muted-foreground">Habilita um prêmio extra por vendas acima da Meta 3.</p>
-                                </div>
-                                <FormField control={control} name="goals.performanceBonusEnabled" render={({ field }) => (<FormItem><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                        </div>
+                        <div className="p-4 border rounded-lg bg-card space-y-2">
+                            <h4 className="font-medium text-md text-card-foreground">Meta 2</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
-                            {performanceBonusEnabled && (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 border rounded-lg">
-                                <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <p className="text-xs text-muted-foreground mt-2 md:col-span-3">
-                                    Você ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2).replace('.',',')}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2).replace('.',',')}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2).replace('.',',')}</strong>.
-                                </p>
-                                </div>
-                            )}
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="pa">
-                        <AccordionTrigger className="text-lg font-semibold">Metas de Produtos por Atendimento (PA)</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
-                                {goalTiers.map(tier => (
-                                    <div key={tier.id} className="space-y-2">
-                                        <FormField control={control} name={`goals.${tier.goal}`} render={({ field }) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="text" inputMode="decimal" step="0.01" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                        <FormField control={control} name={`goals.${tier.prize}`} render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                    </div>
-                                ))}
+                        </div>
+                        <div className="p-4 border rounded-lg bg-card space-y-2">
+                            <h4 className="font-medium text-md text-card-foreground">Meta 3</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="ticket">
-                         <AccordionTrigger className="text-lg font-semibold">Metas de Ticket Médio</AccordionTrigger>
-                         <AccordionContent>
-                             <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
-                                {ticketMedioTiers.map(tier => (
-                                    <div key={tier.id} className="space-y-2">
-                                        <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                        <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                    </div>
-                                ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-4 pt-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Bônus Performance</h3>
+                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50 mt-4">
+                        <div className="pr-4">
+                            <h4 className="font-medium text-md text-card-foreground">Ativar Bônus Performance</h4>
+                            <p className="text-sm text-muted-foreground">Habilita um prêmio extra por vendas acima da Meta 3.</p>
+                        </div>
+                        <FormField control={control} name="goals.performanceBonusEnabled" render={({ field }) => (<FormItem><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+                    </div>
+                    {performanceBonusEnabled && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 border rounded-lg">
+                        <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <p className="text-xs text-muted-foreground mt-2 md:col-span-3">
+                            Você ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2).replace('.',',')}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2).replace('.',',')}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2).replace('.',',')}</strong>.
+                        </p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="space-y-4 pt-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">Metas de Produtos por Atendimento (PA)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
+                      {goalTiers.map(tier => (
+                          <div key={tier.id} className="space-y-2">
+                              <FormField control={control} name={`goals.${tier.goal}`} render={({ field }) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="text" inputMode="decimal" step="0.01" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                              <FormField control={control} name={`goals.${tier.prize}`} render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                          </div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Metas de Ticket Médio</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
+                        {ticketMedioTiers.map(tier => (
+                            <div key={tier.id} className="space-y-2">
+                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                             </div>
-                         </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="mt-6 pt-6 border-t">
                     <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
                         <CardHeader>
@@ -1132,3 +1126,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
