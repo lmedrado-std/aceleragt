@@ -84,12 +84,8 @@ export function WheelManager({ storeId }: WheelManagerProps) {
         title: 'Sucesso!',
         description: data.message
       });
-
-      // Atualizar créditos localmente
-      setCreditsMap(prev => ({
-        ...prev,
-        [selectedSeller]: data.totalCredits
-      }));
+      
+      loadData(); // Recarrega todos os dados para refletir a mudança
 
       // Limpar seleção
       setSelectedSeller('');
@@ -271,7 +267,7 @@ export function WheelManager({ storeId }: WheelManagerProps) {
                   <TableCell>
                     {new Date(spin.createdAt).toLocaleDateString('pt-BR')}
                   </TableCell>
-                  <TableCell>{sellers.find(s => s.id === spin.sellerId)?.name || spin.sellerId}</TableCell>
+                  <TableCell>{sellers.find(s => s.id === spin.seller_id)?.name || spin.seller_id}</TableCell>
                   <TableCell>{spin.segment.label}</TableCell>
                   <TableCell>
                     <Badge variant={spin.status === 'paid' ? 'default' : 
@@ -301,5 +297,6 @@ export function WheelManager({ storeId }: WheelManagerProps) {
     
 
     
+
 
 

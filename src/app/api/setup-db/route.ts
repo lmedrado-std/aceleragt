@@ -1,4 +1,5 @@
 
+
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
@@ -104,16 +105,16 @@ export async function GET() {
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS "PrizeWheelSegment" (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          "settingsId" UUID NOT NULL,
+          "settings_id" UUID NOT NULL,
           label TEXT NOT NULL,
           type TEXT NOT NULL,
           value DECIMAL(10,2),
           description TEXT,
           weight INTEGER NOT NULL DEFAULT 10,
           color TEXT NOT NULL DEFAULT '#3B82F6',
-          "isActive" BOOLEAN NOT NULL DEFAULT true,
+          is_active BOOLEAN NOT NULL DEFAULT true,
           position INTEGER NOT NULL,
-          CONSTRAINT "PrizeWheelSegment_settingsId_fkey" FOREIGN KEY ("settingsId") REFERENCES "PrizeWheelSettings" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+          CONSTRAINT "PrizeWheelSegment_settings_id_fkey" FOREIGN KEY ("settings_id") REFERENCES "PrizeWheelSettings" ("id") ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
