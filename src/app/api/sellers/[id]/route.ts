@@ -3,8 +3,9 @@ import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET /api/sellers/[id]
-export async function GET(request: NextRequest, context: any) {
-  const { id: sellerId } = await context.params; // ✅ CORRIGIDO
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
+  const sellerId = params.id;
 
   try {
     const seller = await prisma.sellers.findUnique({
@@ -30,8 +31,9 @@ export async function GET(request: NextRequest, context: any) {
 }
 
 
-export async function PUT(request: NextRequest, context: any) {
-  const { id } = await context.params; // ✅ CORRIGIDO
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
+  const id = params.id;
   try {
     const body = await request.json();
     // Assuming body can contain any of these fields for update
@@ -69,8 +71,9 @@ export async function PUT(request: NextRequest, context: any) {
   }
 }
 
-export async function DELETE(request: NextRequest, context: any) {
-  const { id } = await context.params; // ✅ CORRIGIDO
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
+  const id = params.id;
   try {
     await prisma.sellers.delete({
       where: { id: id },

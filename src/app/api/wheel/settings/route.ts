@@ -5,7 +5,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 
 // Helper para criar uma resposta JSON segura, convertendo tipos de dados do Prisma
 const createSafeResponse = (settings: any) => {
-  const segments = (settings?.segments || []).map((s: any) => ({
+  const segments = (settings?.prize_wheel_segments || []).map((s: any) => ({
     id: s.id,
     label: s.label,
     type: s.type,
@@ -14,7 +14,7 @@ const createSafeResponse = (settings: any) => {
     color: s.color,
     weight: s.weight !== null ? Number(s.weight) : 10, // Garante que o peso tenha um valor padrão
     position: s.position,
-    isActive: s.isActive,
+    isActive: s.is_active, // Mapeia de is_active (BD) para isActive (frontend)
   }));
 
   return NextResponse.json({
@@ -34,11 +34,10 @@ export async function GET(req: NextRequest) {
 
     let settings = await prisma.prizeWheelSettings.findFirst({
       where: { store_id: storeId },
-      include: { segments: { orderBy: { position: 'asc' } } },
+      include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
     });
 
-    if (!settings || settings.segments.length === 0) {
-       // Se não existir, cria uma configuração padrão com os novos prêmios
+    if (!settings || settings.prize_wheel_segments.length === 0) {
       const defaultSettings = await prisma.$transaction(async (tx) => {
         let existingSettings = await tx.prizeWheelSettings.findFirst({
             where: { store_id: storeId },
@@ -50,22 +49,20 @@ export async function GET(req: NextRequest) {
             });
         }
 
-        // Deleta segmentos antigos para garantir um estado limpo
-        await tx.prizeWheelSegment.deleteMany({ where: { settingsId: existingSettings.id } });
+        await tx.prizeWheelSegment.deleteMany({ where: { settings_id: existingSettings.id } });
 
-        // Cria os novos segmentos padrão
         await tx.prizeWheelSegment.createMany({
             data: [
-              { settingsId: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: new Decimal(5.00), weight: 25, position: 0, color: "#10B981", isActive: true },
-              { settingsId: existingSettings.id, label: "não foi dessa vez", type: "retry", value: new Decimal(0.00), weight: 40, position: 1, color: "#6B7280", isActive: true },
-              { settingsId: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: new Decimal(10.00), weight: 15, position: 2, color: "#3B82F6", isActive: true },
-              { settingsId: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: new Decimal(15.00), weight: 5, position: 3, color: "#F59E0B", isActive: true }
+              { settings_id: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: new Decimal(5.00), weight: 25, position: 0, color: "#10B981", is_active: true },
+              { settings_id: existingSettings.id, label: "não foi dessa vez", type: "retry", value: new Decimal(0.00), weight: 40, position: 1, color: "#6B7280", is_active: true },
+              { settings_id: existingSettings.id, label: "Aceleeraaa !!! 10,00", type: "money", value: new Decimal(10.00), weight: 15, position: 2, color: "#3B82F6", is_active: true },
+              { settings_id: existingSettings.id, label: "Aceleeeraaaaaaaaa R$ 15,00", type: "money", value: new Decimal(15.00), weight: 5, position: 3, color: "#F59E0B", is_active: true }
             ],
         });
         
         return tx.prizeWheelSettings.findFirst({
             where: { id: existingSettings.id },
-            include: { segments: { orderBy: { position: 'asc' } } },
+            include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
         });
       });
       return createSafeResponse(defaultSettings);
@@ -90,21 +87,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Dados inválidos (storeId e segments são obrigatórios)" }, { status: 400 });
     }
 
-    // Garante que os dados do segmento estão no formato correto para o Prisma
     const segmentsToCreate = segments.map((s: any, index: number) => ({
-      // O ID será gerado pelo banco de dados, então o removemos dos dados de criação
       label: s.label,
       type: s.type,
       value: s.type === 'money' && s.value !== null ? new Decimal(s.value) : null,
       description: s.description,
       color: s.color,
       weight: s.weight !== null ? s.weight : 10,
-      position: index, // Usa o index do array para garantir a ordem
-      isActive: true,
+      position: index,
+      is_active: s.isActive, // Mapeia de isActive (frontend) para is_active (BD)
     }));
 
     const updatedSettings = await prisma.$transaction(async (tx) => {
-        // Encontra ou cria as configurações da loja
         let settings = await tx.prizeWheelSettings.findFirst({
             where: { store_id: storeId },
         });
@@ -115,20 +109,17 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // Deleta os segmentos antigos
         await tx.prizeWheelSegment.deleteMany({
-            where: { settingsId: settings.id },
+            where: { settings_id: settings.id },
         });
 
-        // Cria os novos segmentos
         await tx.prizeWheelSegment.createMany({
-            data: segmentsToCreate.map(s => ({ ...s, settingsId: settings!.id })),
+            data: segmentsToCreate.map(s => ({ ...s, settings_id: settings!.id })),
         });
         
-        // Retorna as configurações atualizadas com os novos segmentos
         return tx.prizeWheelSettings.findFirst({
             where: { id: settings.id },
-            include: { segments: { orderBy: { position: 'asc' } } },
+            include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
         });
     });
 

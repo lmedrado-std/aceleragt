@@ -2,8 +2,9 @@
 import { prisma } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET(request: NextRequest, context: any) {
-  const { id: storeId } = await context.params; // ✅ CORRIGIDO
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
+  const storeId = params.id;
   const includePassword = request.nextUrl.searchParams.get('includePassword') === 'true';
 
   try {
@@ -31,8 +32,9 @@ export async function GET(request: NextRequest, context: any) {
   }
 }
 
-export async function PUT(request: NextRequest, context: any) {
-  const { id: storeId } = await context.params; // ✅ CORRIGIDO
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
+  const storeId = params.id;
 
   try {
     const body = await request.json();
@@ -56,8 +58,9 @@ export async function PUT(request: NextRequest, context: any) {
   }
 }
 
-export async function DELETE(request: NextRequest, context: any) {
-  const { id: storeId } = await context.params; // ✅ CORRIGIDO
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+  const { params } = context;
+  const storeId = params.id;
 
   try {
     await prisma.stores.delete({

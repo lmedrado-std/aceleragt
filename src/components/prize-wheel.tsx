@@ -13,11 +13,14 @@ interface PrizeWheelProps {
 
 interface Segment {
   id: string;
-  label: string;
+  option: string;
+  style?: {
+    backgroundColor?: string;
+    textColor?: string;
+  };
   type: string;
   value?: number;
   description?: string;
-  color?: string;
 }
 
 export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps) {
@@ -44,7 +47,15 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           setSegments([]);
         } else {
           setConfigured(true);
-          setSegments(settingsData.segments || []);
+          const formattedSegments = settingsData.segments?.map((s: any) => ({
+            id: s.id,
+            option: s.label,
+            style: { backgroundColor: s.color || '#ffffff', textColor: '#000000' },
+            type: s.type,
+            value: s.value,
+            description: s.description,
+          })) || [];
+          setSegments(formattedSegments);
           
           if (sellerId) {
             const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
@@ -133,7 +144,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         <Wheel
             mustStartSpinning={mustSpin}
             prizeNumber={prizeNumber}
-            data={segments.map(s => ({ option: s.label, style: { backgroundColor: s.color || '#ffffff' }}))}
+            data={segments}
             onStopSpinning={() => {
                 setMustSpin(false);
             }}
@@ -155,7 +166,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                     </DialogDescription>
                 </DialogHeader>
                 <div className='py-4 text-center text-lg'>
-                    <p>{spinResult?.label}</p>
+                    <p>{spinResult?.option}</p>
                     {spinResult?.description && <p className='text-sm text-gray-500'>{spinResult.description}</p>}
                 </div>
                 <DialogFooter>

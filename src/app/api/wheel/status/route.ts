@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     const spins = await prisma.prizeWheelSpins.findMany({
       where: { store_id: storeId },
       include: { segment: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { created_at: 'desc' }, // Corrigido!
       take: limit,
     });
 
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         acc[credit.seller_id] = credit.credits;
         return acc;
       }, {} as Record<string, number>),
-      spins: spins || [],
+      spins: spins ? spins.map(spin => ({ ...spin, createdAt: spin.created_at })) : [], // Mapeando para o frontend
       stats: {
         totalSpins: totalSpins || 0,
         totalValue: Number(totalValue) || 0,
