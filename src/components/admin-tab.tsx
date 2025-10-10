@@ -698,7 +698,7 @@ export function AdminTab({
                    )}
                 >
                   <Target className="mr-2 h-4 w-4" />
-                  Metas & Prêmios
+                  Metas &amp; Prêmios
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent>
@@ -939,34 +939,28 @@ export function AdminTab({
                 <CardDescription>Defina os objetivos para Vendas, PA, Ticket Médio e Corridinhas.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <h3 className="text-lg font-semibold border-b pb-2">Metas de Vendas e Prêmios</h3>
-                   <div className="space-y-4 pt-4">
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                         <div className="p-4 border rounded-lg bg-card space-y-2">
                             <h4 className="font-medium text-md text-card-foreground">Meta 1</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                            </div>
+                             <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                             <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
                         <div className="p-4 border rounded-lg bg-card space-y-2">
                             <h4 className="font-medium text-md text-card-foreground">Meta 2</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                            </div>
+                            <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                            <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
                         <div className="p-4 border rounded-lg bg-card space-y-2">
                             <h4 className="font-medium text-md text-card-foreground">Meta 3</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                            </div>
+                            <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                            <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-4 pt-4">
+                <div className="space-y-2 pt-4">
                     <h3 className="text-lg font-semibold border-b pb-2">Bônus Performance</h3>
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50 mt-4">
                         <div className="pr-4">
@@ -987,7 +981,7 @@ export function AdminTab({
                     )}
                 </div>
 
-                <div className="space-y-4 pt-4">
+                <div className="space-y-2 pt-4">
                   <h3 className="text-lg font-semibold border-b pb-2">Metas de Produtos por Atendimento (PA)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
                       {goalTiers.map(tier => (
@@ -999,7 +993,7 @@ export function AdminTab({
                   </div>
                 </div>
 
-                <div className="space-y-4 pt-4">
+                <div className="space-y-2 pt-4">
                     <h3 className="text-lg font-semibold border-b pb-2">Metas de Ticket Médio</h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
                         {ticketMedioTiers.map(tier => (
