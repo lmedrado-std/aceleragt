@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
       const settings = await tx.prizeWheelSettings.findFirst({
         where: { store_id: storeId },
         include: {
-          prize_wheel_segments: { // Corrigido para o nome do relacionamento
-            where: { is_active: true }, // Corrigido para is_active
+          prize_wheel_segments: { 
+            where: { is_active: true },
             orderBy: { position: 'asc' }
           }
         }
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
           store_id: storeId,
           seller_id: sellerId,
           grantedBy: "system",
-          segmentId: segment.id, // Corrigido para segmentId
+          segmentId: segment.id,
           status: "pending"
         },
         include: { segment: true }
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
         success: true,
         segmentIndex: index,
         prize: {
-          id: segment.id, // Garantindo que o id do segmento seja retornado
+          id: segment.id,
           label: segment.label,
           type: segment.type,
           value: segment.value,

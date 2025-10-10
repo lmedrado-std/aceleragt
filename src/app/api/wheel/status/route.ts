@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -12,13 +13,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Cláusula de Guarda: Verificar se a roleta está configurada antes de prosseguir.
     const settings = await prisma.prizeWheelSettings.findFirst({
       where: { store_id: storeId },
     });
 
     if (!settings) {
-      // Se não houver configuração, retorne imediatamente uma resposta segura.
       return NextResponse.json({
         creditsMap: {},
         spins: [],
@@ -26,7 +25,6 @@ export async function GET(req: NextRequest) {
       }, { status: 200 });
     }
 
-    // A roleta existe, então prossiga com a busca dos dados.
     const credits = await prisma.prizeWheelCredits.findMany({
       where: { store_id: storeId },
     });
@@ -37,27 +35,13 @@ export async function GET(req: NextRequest) {
       orderBy: { created_at: 'desc' },
       take: limit,
     });
+    
+    const totalSpins = spins.length;
 
-    const totalSpins = await prisma.prizeWheelSpins.count({ where: { store_id: storeId } });
-
-    const totalValueAgg = await prisma.prizeWheelSpins.aggregate({
-      where: {
-        store_id: storeId,
-        segment: {
-          type: 'money'
-        }
-      },
-      _sum: {
-        segment: {
-          select: {
-            value: true
-          }
-        }
-      }
-    });
-
-    const totalValue = totalValueAgg._sum.segment?.value ?? 0;
-
+    const totalValue = spins
+      .filter(spin => spin.segment.type === 'money' && spin.segment.value)
+      .reduce((sum, spin) => sum + (spin.segment.value ? Number(spin.segment.value) : 0), 0);
+      
     const response = {
       creditsMap: credits.reduce((acc, credit) => {
         acc[credit.seller_id] = credit.credits;
@@ -65,8 +49,8 @@ export async function GET(req: NextRequest) {
       }, {} as Record<string, number>),
       spins: spins ? spins.map(spin => ({ ...spin, createdAt: spin.created_at })) : [],
       stats: {
-        totalSpins: totalSpins || 0,
-        totalValue: Number(totalValue) || 0,
+        totalSpins,
+        totalValue,
       },
     };
 
@@ -74,11 +58,9 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("[GET /api/wheel/status] Erro inesperado:", error);
-    // Fallback final e seguro para qualquer outra exceção.
     return NextResponse.json({
-      creditsMap: {},
-      spins: [],
-      stats: { totalSpins: 0, totalValue: 0 },
+        error: "Erro interno do servidor ao buscar status da roleta.",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
     }, { status: 500 });
   }
 }
