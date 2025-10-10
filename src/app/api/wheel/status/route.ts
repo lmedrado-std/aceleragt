@@ -1,7 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { Decimal } from "@prisma/client/runtime/library";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -13,10 +12,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // 1. Verificar se a loja tem configuração de roleta
     const settings = await prisma.prizeWheelSettings.findFirst({
       where: { store_id: storeId },
     });
 
+    // Se não houver configurações, retorne uma resposta vazia e bem-sucedida
     if (!settings) {
       return NextResponse.json({
         creditsMap: {},
@@ -25,29 +26,34 @@ export async function GET(req: NextRequest) {
       }, { status: 200 });
     }
 
-    const credits = await prisma.prizeWheelCredits.findMany({
-      where: { store_id: storeId },
-    });
-
-    const spins = await prisma.prizeWheelSpins.findMany({
-      where: { store_id: storeId },
-      include: { segment: true },
-      orderBy: { created_at: 'desc' },
-      take: limit,
-    });
+    // 2. Buscar créditos e giros
+    const [credits, spins] = await Promise.all([
+      prisma.prizeWheelCredits.findMany({
+        where: { store_id: storeId },
+      }),
+      prisma.prizeWheelSpins.findMany({
+        where: { store_id: storeId },
+        include: { segment: true },
+        orderBy: { created_at: 'desc' },
+        take: limit,
+      })
+    ]);
     
-    const totalSpins = spins.length;
+    // 3. Construir o mapa de créditos
+    const creditsMap = credits.reduce((acc, credit) => {
+      acc[credit.seller_id] = credit.credits;
+      return acc;
+    }, {} as Record<string, number>);
 
+    // 4. Calcular estatísticas de forma segura
+    const totalSpins = spins.length;
     const totalValue = spins
       .filter(spin => spin.segment.type === 'money' && spin.segment.value)
       .reduce((sum, spin) => sum + (spin.segment.value ? Number(spin.segment.value) : 0), 0);
       
     const response = {
-      creditsMap: credits.reduce((acc, credit) => {
-        acc[credit.seller_id] = credit.credits;
-        return acc;
-      }, {} as Record<string, number>),
-      spins: spins ? spins.map(spin => ({ ...spin, createdAt: spin.created_at })) : [],
+      creditsMap,
+      spins: spins.map(spin => ({ ...spin, createdAt: spin.created_at })),
       stats: {
         totalSpins,
         totalValue,
@@ -64,4 +70,3 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
