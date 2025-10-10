@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Wheel } from 'react-custom-roulette';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface PrizeWheelProps {
   storeId: string;
@@ -32,11 +33,28 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   const [credits, setCredits] = useState(0);
   const [spinResult, setSpinResult] = useState<Segment | null>(null);
   const { toast } = useToast();
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchCredits = async () => {
+    if (!storeId || !sellerId) return;
+    try {
+      const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
+      if (!statusRes.ok) return;
+      const statusData = await statusRes.json();
+      const newCredits = statusData.creditsMap[sellerId] || 0;
+      if (newCredits !== credits) {
+        setCredits(newCredits);
+      }
+    } catch (error) {
+       // Silently fail, don't show toast for polling
+      console.error("Credit poll failed:", error);
+    }
+  };
 
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
-      setConfigured(null); // Reset on every load
+      setConfigured(null);
       try {
         const settingsRes = await fetch(`/api/wheel/settings?storeId=${storeId}`);
         if (!settingsRes.ok) throw new Error('Falha ao verificar a configuração da roleta.');
@@ -49,7 +67,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           setConfigured(true);
           const formattedSegments = settingsData.segments?.map((s: any) => ({
             id: s.id,
-            option: s.label,
+            option: s.label.toUpperCase(),
             style: { backgroundColor: s.color || '#ffffff', textColor: '#ffffff' },
             type: s.type,
             value: s.value,
@@ -58,10 +76,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           setSegments(formattedSegments);
           
           if (sellerId) {
-            const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
-            if (!statusRes.ok) throw new Error('Falha ao carregar seus giros.');
-            const statusData = await statusRes.json();
-            setCredits(statusData.creditsMap[sellerId] || 0);
+            await fetchCredits();
           } else {
             setCredits(0);
           }
@@ -80,8 +95,19 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
     if (storeId) {
       loadInitialData();
+      
+      // Start polling for credits
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      pollingRef.current = setInterval(fetchCredits, 10000); // every 10 seconds
     }
-  }, [storeId, sellerId, toast]);
+    
+    // Cleanup on unmount
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, [storeId, sellerId]);
 
   const handleSpinClick = async () => {
     if (credits > 0 && sellerId) {
@@ -140,39 +166,65 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         <div className="text-center text-lg font-semibold bg-primary text-primary-foreground py-2 px-4 rounded-full shadow-md">
             <p>Você tem {credits} giro(s)</p>
         </div>
-      
-        <Wheel
-            mustStartSpinning={mustSpin}
-            prizeNumber={prizeNumber}
-            data={segments}
-            onStopSpinning={() => {
-                setMustSpin(false);
-            }}
-            radiusLineWidth={1}
-            outerBorderWidth={10}
-            fontSize={16}
-            textDistance={60}
-        />
+        
+        {/* Roulette structure with stand and pointer */}
+        <div className="relative flex flex-col items-center">
+            {/* Stand */}
+            <div className="w-48 h-40 bg-yellow-800/20 dark:bg-yellow-200/20 rounded-t-lg shadow-inner-lg" style={{ clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)' }}></div>
+            {/* Pointer */}
+            <div 
+              className="absolute -top-2 z-10 w-0 h-0"
+              style={{
+                borderLeft: '15px solid transparent',
+                borderRight: '15px solid transparent',
+                borderTop: '30px solid hsl(var(--primary))',
+              }}
+            ></div>
 
-        <Button onClick={handleSpinClick} disabled={credits <= 0 || mustSpin || segments.length === 0 || !sellerId} className="w-full max-w-xs py-6 text-xl font-bold">
-            {mustSpin ? 'GIRANDO...' : 'GIRAR'}
+            {/* Wheel */}
+            <div className="absolute top-12">
+              <Wheel
+                  mustStartSpinning={mustSpin}
+                  prizeNumber={prizeNumber}
+                  data={segments}
+                  onStopSpinning={() => {
+                      setMustSpin(false);
+                  }}
+                  radiusLineWidth={0}
+                  outerBorderWidth={12}
+                  outerBorderColor="hsl(var(--border))"
+                  innerBorderWidth={0}
+                  fontSize={14}
+                  textDistance={75}
+                  spinDuration={0.6}
+              />
+            </div>
+
+            {/* Base */}
+            <div className="w-64 h-12 bg-yellow-800/10 dark:bg-yellow-200/10 rounded-b-lg mt-[-1px]"></div>
+        </div>
+
+        <Button onClick={handleSpinClick} disabled={credits <= 0 || mustSpin || segments.length === 0 || !sellerId} 
+          className={cn("w-full max-w-xs py-6 text-xl font-bold rounded-full shadow-lg transition-transform transform hover:scale-105", 
+          (credits <= 0 || mustSpin) && "opacity-50 cursor-not-allowed"
+          )}>
+            {mustSpin ? 'GIRANDO...' : 'GIRAR A ROLETA!'}
         </Button>
 
         <Dialog open={!!spinResult} onOpenChange={(isOpen) => !isOpen && setSpinResult(null)}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Resultado do Giro</DialogTitle>
-                    <DialogDescription>
-                        {spinResult?.type === 'retry' ? 'Não foi desta vez!' : 'Parabéns!'}
-                    </DialogDescription>
+                    <DialogTitle className="text-2xl text-center">
+                        {spinResult?.type === 'retry' ? 'Não foi desta vez!' : 'Parabéns! Você ganhou:'}
+                    </DialogTitle>
                 </DialogHeader>
-                <div className='py-4 text-center text-lg'>
+                <div className='py-8 text-center text-4xl font-bold text-primary'>
                     <p>{spinResult?.option}</p>
-                    {spinResult?.description && <p className='text-sm text-gray-500'>{spinResult.description}</p>}
+                    {spinResult?.description && <p className='text-sm text-muted-foreground mt-2'>{spinResult.description}</p>}
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button">Fechar</Button>
+                        <Button type="button" className="w-full">Fechar</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>
