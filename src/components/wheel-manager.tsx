@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -32,12 +31,6 @@ export function WheelManager({ storeId }: WheelManagerProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (storeId) {
-      loadData();
-    }
-  }, [storeId]);
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -67,6 +60,13 @@ export function WheelManager({ storeId }: WheelManagerProps) {
         setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (storeId) {
+      loadData();
+    }
+  }, [storeId]);
+
 
   const grantCredits = async () => {
     if (!selectedSeller || grantAmount < 1) {
