@@ -85,7 +85,7 @@ export async function GET() {
           seller_id UUID NOT NULL,
           seller_name TEXT NOT NULL,
           store_id UUID NOT NULL,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+          "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -237,10 +237,10 @@ export async function GET() {
      // Adicionar a coluna created_at se ela não existir na SellerHistory
     try {
         await prisma.$executeRawUnsafe(`
-            ALTER TABLE "SellerHistory" ADD COLUMN "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
+            ALTER TABLE "SellerHistory" ADD COLUMN "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
         `);
     } catch (e) {
-        if (e instanceof Error && e.message.includes('column "created_at" of relation "SellerHistory" already exists')) {
+        if (e instanceof Error && e.message.includes('column "createdAt" of relation "SellerHistory" already exists')) {
             // Coluna já existe
         } else {
             throw e;
