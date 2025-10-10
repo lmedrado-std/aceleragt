@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
   try {
     // Cláusula de Guarda: Verificar se a roleta está configurada antes de prosseguir.
-    const settings = await prisma.prizeWheelSettings.findUnique({
+    const settings = await prisma.prizeWheelSettings.findFirst({
       where: { store_id: storeId },
     });
 
