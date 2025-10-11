@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
           store_id: storeId,
           seller_id: sellerId,
           grantedBy: "system",
-          segmentId: segment.id, // O Prisma espera o campo `segmentId` aqui
+          segment_id: segment.id, // Corrigido para snake_case
           status: "pending"
         },
         include: { segment: true }
@@ -94,5 +95,3 @@ export async function POST(req: NextRequest) {
     }, { status: 400 });
   }
 }
-
-    
