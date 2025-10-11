@@ -102,18 +102,18 @@ export async function GET() {
       );
     `);
     
-    // --- TABELAS DA ROLETA DE PRÊMIOS ---
+    // --- TABELAS DA ROLETA DE PRÊMIOS (PADRONIZADAS) ---
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "prize_wheel_settings" (
+      CREATE TABLE IF NOT EXISTS prize_wheel_settings (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         store_id TEXT NOT NULL UNIQUE,
-        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updated_at" TIMESTAMP(3) NOT NULL
+        created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "prize_wheel_segments" (
+      CREATE TABLE IF NOT EXISTS prize_wheel_segments (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           settings_id UUID NOT NULL,
           label TEXT NOT NULL,
@@ -124,25 +124,29 @@ export async function GET() {
           color TEXT NOT NULL DEFAULT '#3B82F6',
           is_active BOOLEAN NOT NULL DEFAULT true,
           position INTEGER NOT NULL,
-          CONSTRAINT "prize_wheel_segments_settings_id_fkey" FOREIGN KEY (settings_id) REFERENCES "prize_wheel_settings" (id) ON DELETE CASCADE ON UPDATE CASCADE
+          CONSTRAINT prize_wheel_segments_settings_id_fkey 
+            FOREIGN KEY (settings_id) REFERENCES prize_wheel_settings (id) 
+            ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "prize_wheel_credits" (
+      CREATE TABLE IF NOT EXISTS prize_wheel_credits (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           store_id TEXT NOT NULL,
           seller_id TEXT NOT NULL,
           credits INTEGER NOT NULL DEFAULT 0,
-          "updated_at" TIMESTAMP(3) NOT NULL
+          updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `);
-     await prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "prize_wheel_credits_store_id_seller_id_key" ON "prize_wheel_credits"(store_id, seller_id);
-     `);
+    
+    await prisma.$executeRawUnsafe(`
+        CREATE UNIQUE INDEX IF NOT EXISTS prize_wheel_credits_store_id_seller_id_key 
+        ON prize_wheel_credits(store_id, seller_id);
+    `);
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "prize_wheel_spins" (
+      CREATE TABLE IF NOT EXISTS prize_wheel_spins (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           store_id TEXT NOT NULL,
           seller_id TEXT NOT NULL,
@@ -150,8 +154,10 @@ export async function GET() {
           segment_id UUID NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
           created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "claimedAt" TIMESTAMP(3),
-          CONSTRAINT "prize_wheel_spins_segment_id_fkey" FOREIGN KEY (segment_id) REFERENCES "prize_wheel_segments" (id) ON DELETE RESTRICT ON UPDATE CASCADE
+          claimed_at TIMESTAMP(3),
+          CONSTRAINT prize_wheel_spins_segment_id_fkey 
+            FOREIGN KEY (segment_id) REFERENCES prize_wheel_segments (id) 
+            ON DELETE RESTRICT ON UPDATE CASCADE
       );
     `);
     
@@ -280,7 +286,7 @@ export async function GET() {
     }
 
 
-    return NextResponse.json({ message: 'Banco de dados configurado com sucesso! Tabelas da Roleta de Prêmios, Restrições de Login e outras foram verificadas/criadas.' }, { status: 200 });
+    return NextResponse.json({ message: 'Banco de dados configurado com sucesso! Todas as tabelas padronizadas.' }, { status: 200 });
 
   } catch (error) {
     console.error('[API /api/setup-db] ERRO:', error);

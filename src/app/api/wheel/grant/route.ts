@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -10,9 +11,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const record = await prisma.prize_wheel_credits.upsert({
-      where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } },
-      create: { store_id: storeId, seller_id: sellerId, credits: credits },
-      update: { credits: { increment: credits } }
+      where: { 
+        store_id_seller_id: { store_id: storeId, seller_id: sellerId } 
+      },
+      create: { 
+        store_id: storeId, 
+        seller_id: sellerId, 
+        credits: credits,
+        updated_at: new Date()
+      },
+      update: { 
+        credits: { increment: credits },
+        updated_at: new Date()
+      }
     });
 
     return NextResponse.json({ 

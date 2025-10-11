@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// Função para sortear segmento baseado no peso
 function pickSegment(segments: any[]) {
   const totalWeight = segments.reduce((sum, s) => sum + s.weight, 0);
   let random = Math.random() * totalWeight;
@@ -14,7 +13,6 @@ function pickSegment(segments: any[]) {
     random -= segments[i].weight;
   }
   
-  // Fallback para o primeiro segmento, caso algo dê errado
   return { segment: segments[0], index: 0 };
 }
 
@@ -27,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   try {
     return await prisma.$transaction(async (tx) => {
-      // Verificar créditos disponíveis
+      // Verificar créditos (snake_case)
       const credit = await tx.prize_wheel_credits.findUnique({
         where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } }
       });
@@ -36,7 +34,7 @@ export async function POST(req: NextRequest) {
         throw new Error("Sem giros disponíveis para este vendedor");
       }
 
-      // Buscar configurações da roleta
+      // Buscar configurações (snake_case)
       const settings = await tx.prize_wheel_settings.findFirst({
         where: { store_id: storeId },
         include: {
@@ -57,10 +55,13 @@ export async function POST(req: NextRequest) {
       // Decrementar crédito
       await tx.prize_wheel_credits.update({
         where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } },
-        data: { credits: { decrement: 1 } }
+        data: { 
+          credits: { decrement: 1 },
+          updated_at: new Date()
+        }
       });
 
-      // Registrar giro
+      // Registrar giro (snake_case)
       const spin = await tx.prize_wheel_spins.create({
         data: {
           store_id: storeId,
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
           segment_id: segment.id,
           status: "pending"
         },
-        include: { segment: true }
+        include: { prize_wheel_segments: true }
       });
 
       return NextResponse.json({
