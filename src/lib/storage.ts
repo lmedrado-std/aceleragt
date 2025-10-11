@@ -44,9 +44,13 @@ export interface Goals {
   ticketMedioPrize4: number;
   corridinhaStartDate?: string | null;
   corridinhaEndDate?: string | null;
+  corridinhaObjective1?: string;
   corridinhaPrize1?: number;
+  corridinhaObjective2?: string;
   corridinhaPrize2?: number;
+  corridinhaObjective3?: string;
   corridinhaPrize3?: number;
+  corridinhaObjective4?: string;
   corridinhaPrize4?: number;
 }
 

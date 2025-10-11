@@ -66,9 +66,13 @@ export async function GET() {
         "ticketMedioPrize4" INTEGER DEFAULT 0,
         "corridinhaStartDate" TIMESTAMPTZ,
         "corridinhaEndDate" TIMESTAMPTZ,
+        "corridinhaObjective1" TEXT,
         "corridinhaPrize1" INTEGER DEFAULT 0,
+        "corridinhaObjective2" TEXT,
         "corridinhaPrize2" INTEGER DEFAULT 0,
+        "corridinhaObjective3" TEXT,
         "corridinhaPrize3" INTEGER DEFAULT 0,
+        "corridinhaObjective4" TEXT,
         "corridinhaPrize4" INTEGER DEFAULT 0
       );
     `);
@@ -251,9 +255,13 @@ export async function GET() {
     const corridinhaColumns = [
         { name: "corridinhaStartDate", type: "TIMESTAMPTZ" },
         { name: "corridinhaEndDate", type: "TIMESTAMPTZ" },
+        { name: "corridinhaObjective1", type: "TEXT" },
         { name: "corridinhaPrize1", type: "INTEGER DEFAULT 0" },
+        { name: "corridinhaObjective2", type: "TEXT" },
         { name: "corridinhaPrize2", type: "INTEGER DEFAULT 0" },
+        { name: "corridinhaObjective3", type: "TEXT" },
         { name: "corridinhaPrize3", type: "INTEGER DEFAULT 0" },
+        { name: "corridinhaObjective4", type: "TEXT" },
         { name: "corridinhaPrize4", type: "INTEGER DEFAULT 0" },
     ];
 

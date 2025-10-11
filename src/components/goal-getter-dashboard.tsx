@@ -78,9 +78,13 @@ const goalsSchema = z.object({
   ticketMedioPrize4: z.coerce.number().default(0),
   corridinhaStartDate: z.string().optional().nullable(),
   corridinhaEndDate: z.string().optional().nullable(),
+  corridinhaObjective1: z.string().optional(),
   corridinhaPrize1: z.coerce.number().optional(),
+  corridinhaObjective2: z.string().optional(),
   corridinhaPrize2: z.coerce.number().optional(),
+  corridinhaObjective3: z.string().optional(),
   corridinhaPrize3: z.coerce.number().optional(),
+  corridinhaObjective4: z.string().optional(),
   corridinhaPrize4: z.coerce.number().optional(),
 });
 

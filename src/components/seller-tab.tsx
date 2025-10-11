@@ -284,11 +284,11 @@ export function SellerTab({
                           </CardDescription>
                       </CardHeader>
                       <CardContent>
-                           <div className="grid gap-4 md:grid-cols-4">
-                              <GoalItem label="Prêmio 1" value={formatCurrency(goals.corridinhaPrize1 || 0)} />
-                              <GoalItem label="Prêmio 2" value={formatCurrency(goals.corridinhaPrize2 || 0)} />
-                              <GoalItem label="Prêmio 3" value={formatCurrency(goals.corridinhaPrize3 || 0)} />
-                              <GoalItem label="Prêmio 4" value={formatCurrency(goals.corridinhaPrize4 || 0)} />
+                           <div className="grid gap-4 md:grid-cols-2">
+                              {goals.corridinhaObjective1 && <GoalItem label={goals.corridinhaObjective1} value={formatCurrency(goals.corridinhaPrize1 || 0)} />}
+                              {goals.corridinhaObjective2 && <GoalItem label={goals.corridinhaObjective2} value={formatCurrency(goals.corridinhaPrize2 || 0)} />}
+                              {goals.corridinhaObjective3 && <GoalItem label={goals.corridinhaObjective3} value={formatCurrency(goals.corridinhaPrize3 || 0)} />}
+                              {goals.corridinhaObjective4 && <GoalItem label={goals.corridinhaObjective4} value={formatCurrency(goals.corridinhaPrize4 || 0)} />}
                            </div>
                       </CardContent>
                   </Card>
