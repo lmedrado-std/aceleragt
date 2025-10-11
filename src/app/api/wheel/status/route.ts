@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       }, { status: 200 });
     }
 
-    // 2. Buscar créditos e giros
+    // 2. Buscar créditos e giros somente se a configuração existir
     const [credits, spins] = await Promise.all([
       prisma.prizeWheelCredits.findMany({
         where: { store_id: storeId },
@@ -40,18 +40,18 @@ export async function GET(req: NextRequest) {
     
     // 3. Construir o mapa de créditos de forma segura
     const creditsMap = Object.fromEntries(
-        credits.map(c => [c.seller_id, Number(c.credits || 0)])
+        (credits || []).map(c => [c.seller_id, Number(c.credits || 0)])
     );
 
     // 4. Calcular estatísticas de forma segura
-    const totalSpins = spins.length;
-    const totalValue = spins
+    const totalSpins = spins?.length || 0;
+    const totalValue = (spins || [])
       .filter(spin => spin.segment && spin.segment.type === 'money' && spin.segment.value)
       .reduce((sum, spin) => sum + (spin.segment.value ? Number(spin.segment.value) : 0), 0);
       
     const response = {
       creditsMap,
-      spins: spins.map(spin => ({ ...spin, createdAt: spin.created_at })),
+      spins: (spins || []).map(spin => ({ ...spin, createdAt: spin.created_at })),
       stats: {
         totalSpins,
         totalValue,
