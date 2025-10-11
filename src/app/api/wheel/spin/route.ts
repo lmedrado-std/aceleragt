@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
           store_id: storeId,
           seller_id: sellerId,
           grantedBy: "system",
-          segmentId: segment.id,
+          segmentId: segment.id, // O Prisma espera o campo `segmentId` aqui
           status: "pending"
         },
         include: { segment: true }
@@ -94,3 +94,5 @@ export async function POST(req: NextRequest) {
     }, { status: 400 });
   }
 }
+
+    
