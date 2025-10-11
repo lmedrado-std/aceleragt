@@ -31,6 +31,14 @@ const defaultGoals: Omit<Goals, 'store_id' | 'id'> = {
   ticketMedioPrize3: 15,
   ticketMedioGoal4: 200,
   ticketMedioPrize4: 20,
+  corridinhaObjective1: '',
+  corridinhaPrize1: 0,
+  corridinhaObjective2: '',
+  corridinhaPrize2: 0,
+  corridinhaObjective3: '',
+  corridinhaPrize3: 0,
+  corridinhaObjective4: '',
+  corridinhaPrize4: 0,
 };
 
 export async function GET(request: NextRequest) {
