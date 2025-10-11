@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   try {
     // 1. Verificar se a loja tem configuração de roleta
-    const settings = await prisma.prizeWheelSettings.findFirst({
+    const settings = await prisma.prize_wheel_settings.findFirst({
       where: { store_id: storeId },
     });
 
@@ -27,10 +27,10 @@ export async function GET(req: NextRequest) {
 
     // 2. Buscar créditos e giros somente se a configuração existir
     const [credits, spins] = await Promise.all([
-      prisma.prizeWheelCredits.findMany({
+      prisma.prize_wheel_credits.findMany({
         where: { store_id: storeId },
       }),
-      prisma.prizeWheelSpins.findMany({
+      prisma.prize_wheel_spins.findMany({
         where: { store_id: storeId },
         include: { segment: true },
         orderBy: { created_at: 'desc' },
@@ -72,5 +72,3 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
-    

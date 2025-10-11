@@ -32,26 +32,26 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "storeId é obrigatório" }, { status: 400 });
     }
 
-    let settings = await prisma.prizeWheelSettings.findFirst({
+    let settings = await prisma.prize_wheel_settings.findFirst({
       where: { store_id: storeId },
       include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
     });
 
     if (!settings || settings.prize_wheel_segments.length === 0) {
       const defaultSettings = await prisma.$transaction(async (tx) => {
-        let existingSettings = await tx.prizeWheelSettings.findFirst({
+        let existingSettings = await tx.prize_wheel_settings.findFirst({
             where: { store_id: storeId },
         });
 
         if (!existingSettings) {
-            existingSettings = await tx.prizeWheelSettings.create({
-                data: { store_id: storeId },
+            existingSettings = await tx.prize_wheel_settings.create({
+                data: { store_id: storeId, updated_at: new Date() },
             });
         }
 
-        await tx.prizeWheelSegment.deleteMany({ where: { settings_id: existingSettings.id } });
+        await tx.prize_wheel_segments.deleteMany({ where: { settings_id: existingSettings.id } });
 
-        await tx.prizeWheelSegment.createMany({
+        await tx.prize_wheel_segments.createMany({
             data: [
               { settings_id: existingSettings.id, label: "Acelera !!! 5,00", type: "money", value: new Decimal(5.00), weight: 25, position: 0, color: "#10B981", is_active: true },
               { settings_id: existingSettings.id, label: "não foi dessa vez", type: "retry", value: new Decimal(0.00), weight: 40, position: 1, color: "#6B7280", is_active: true },
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
             ],
         });
         
-        return tx.prizeWheelSettings.findFirst({
+        return tx.prize_wheel_settings.findFirst({
             where: { id: existingSettings.id },
             include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
         });
@@ -99,25 +99,30 @@ export async function POST(req: NextRequest) {
     }));
 
     const updatedSettings = await prisma.$transaction(async (tx) => {
-        let settings = await tx.prizeWheelSettings.findFirst({
+        let settings = await tx.prize_wheel_settings.findFirst({
             where: { store_id: storeId },
         });
 
         if (!settings) {
-            settings = await tx.prizeWheelSettings.create({
-                data: { store_id: storeId },
+            settings = await tx.prize_wheel_settings.create({
+                data: { store_id: storeId, updated_at: new Date() },
             });
+        } else {
+          await tx.prize_wheel_settings.update({
+            where: { id: settings.id },
+            data: { updated_at: new Date() }
+          })
         }
 
-        await tx.prizeWheelSegment.deleteMany({
+        await tx.prize_wheel_segments.deleteMany({
             where: { settings_id: settings.id },
         });
 
-        await tx.prizeWheelSegment.createMany({
+        await tx.prize_wheel_segments.createMany({
             data: segmentsToCreate.map(s => ({ ...s, settings_id: settings!.id })),
         });
         
-        return tx.prizeWheelSettings.findFirst({
+        return tx.prize_wheel_settings.findFirst({
             where: { id: settings.id },
             include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
         });

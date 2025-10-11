@@ -104,16 +104,16 @@ export async function GET() {
     
     // --- TABELAS DA ROLETA DE PRÊMIOS ---
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "PrizeWheelSettings" (
+      CREATE TABLE IF NOT EXISTS "prize_wheel_settings" (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         store_id TEXT NOT NULL UNIQUE,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP(3) NOT NULL
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP(3) NOT NULL
       );
     `);
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "PrizeWheelSegment" (
+      CREATE TABLE IF NOT EXISTS "prize_wheel_segments" (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           settings_id UUID NOT NULL,
           label TEXT NOT NULL,
@@ -124,34 +124,34 @@ export async function GET() {
           color TEXT NOT NULL DEFAULT '#3B82F6',
           is_active BOOLEAN NOT NULL DEFAULT true,
           position INTEGER NOT NULL,
-          CONSTRAINT "PrizeWheelSegment_settings_id_fkey" FOREIGN KEY (settings_id) REFERENCES "PrizeWheelSettings" (id) ON DELETE CASCADE ON UPDATE CASCADE
+          CONSTRAINT "prize_wheel_segments_settings_id_fkey" FOREIGN KEY (settings_id) REFERENCES "prize_wheel_settings" (id) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `);
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "PrizeWheelCredits" (
+      CREATE TABLE IF NOT EXISTS "prize_wheel_credits" (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           store_id TEXT NOT NULL,
           seller_id TEXT NOT NULL,
           credits INTEGER NOT NULL DEFAULT 0,
-          "updatedAt" TIMESTAMP(3) NOT NULL
+          "updated_at" TIMESTAMP(3) NOT NULL
       );
     `);
      await prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "PrizeWheelCredits_store_id_seller_id_key" ON "PrizeWheelCredits"(store_id, seller_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS "prize_wheel_credits_store_id_seller_id_key" ON "prize_wheel_credits"(store_id, seller_id);
      `);
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "PrizeWheelSpins" (
+      CREATE TABLE IF NOT EXISTS "prize_wheel_spins" (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           store_id TEXT NOT NULL,
           seller_id TEXT NOT NULL,
-          "grantedBy" TEXT NOT NULL,
+          granted_by TEXT NOT NULL,
           segment_id UUID NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
           "claimedAt" TIMESTAMP(3),
-          CONSTRAINT "PrizeWheelSpins_segment_id_fkey" FOREIGN KEY (segment_id) REFERENCES "PrizeWheelSegment" (id) ON DELETE RESTRICT ON UPDATE CASCADE
+          CONSTRAINT "prize_wheel_spins_segment_id_fkey" FOREIGN KEY (segment_id) REFERENCES "prize_wheel_segments" (id) ON DELETE RESTRICT ON UPDATE CASCADE
       );
     `);
     

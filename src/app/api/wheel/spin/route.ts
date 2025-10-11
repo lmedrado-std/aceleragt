@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   try {
     return await prisma.$transaction(async (tx) => {
       // Verificar créditos disponíveis
-      const credit = await tx.prizeWheelCredits.findUnique({
+      const credit = await tx.prize_wheel_credits.findUnique({
         where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } }
       });
       
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Buscar configurações da roleta
-      const settings = await tx.prizeWheelSettings.findFirst({
+      const settings = await tx.prize_wheel_settings.findFirst({
         where: { store_id: storeId },
         include: {
           prize_wheel_segments: { 
@@ -55,18 +55,18 @@ export async function POST(req: NextRequest) {
       const { segment, index } = pickSegment(settings.prize_wheel_segments);
 
       // Decrementar crédito
-      await tx.prizeWheelCredits.update({
+      await tx.prize_wheel_credits.update({
         where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } },
         data: { credits: { decrement: 1 } }
       });
 
       // Registrar giro
-      const spin = await tx.prizeWheelSpins.create({
+      const spin = await tx.prize_wheel_spins.create({
         data: {
           store_id: storeId,
           seller_id: sellerId,
-          grantedBy: "system",
-          segment_id: segment.id, // Corrigido para snake_case
+          granted_by: "system",
+          segment_id: segment.id,
           status: "pending"
         },
         include: { segment: true }
