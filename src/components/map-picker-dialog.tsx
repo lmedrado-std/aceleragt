@@ -110,21 +110,23 @@ export function MapPickerDialog({
             Clique no mapa para definir o centro da área permitida. O círculo representa o raio de alcance.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow rounded-md overflow-hidden">
-          <MapContainer
-            key={mapKey}
-            center={position || [-14.235, -51.9253]} // Centro do Brasil se não houver posição
-            zoom={position ? 15 : 4}
-            scrollWheelZoom={true}
-            style={{ height: "100%", width: "100%" }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <LocationMarker position={position} setPosition={setPosition} radius={radius} />
-          </MapContainer>
-        </div>
+        {isOpen && (
+            <div className="flex-grow rounded-md overflow-hidden">
+                <MapContainer
+                    key={mapKey}
+                    center={position || [-14.235, -51.9253]} // Centro do Brasil se não houver posição
+                    zoom={position ? 15 : 4}
+                    scrollWheelZoom={true}
+                    style={{ height: "100%", width: "100%" }}
+                >
+                    <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <LocationMarker position={position} setPosition={setPosition} radius={radius} />
+                </MapContainer>
+            </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancelar
