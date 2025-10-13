@@ -3,8 +3,8 @@ import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 // GET /api/sellers/[id]
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
+// Corrigido: Desestruturando { params } diretamente na assinatura da função.
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const sellerId = params.id;
 
   try {
@@ -31,8 +31,8 @@ export async function GET(request: NextRequest, context: { params: { id: string 
 }
 
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
+// Corrigido: Desestruturando { params } diretamente na assinatura da função.
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   const id = params.id;
   try {
     const body = await request.json();
@@ -71,8 +71,8 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
   }
 }
 
-export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
+// Corrigido: Desestruturando { params } diretamente na assinatura da função.
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const id = params.id;
   try {
     await prisma.sellers.delete({

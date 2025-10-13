@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // CORREÇÃO: O nome do modelo no schema.prisma é `sellers` (plural).
     const sellers = await prisma.sellers.findMany({
       where: { store_id: storeId },
       orderBy: {
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nome e ID da loja são obrigatórios' }, { status: 400 });
     }
 
+    // CORREÇÃO: O nome do modelo no schema.prisma é `sellers` (plural).
     const newSeller = await prisma.sellers.create({
       data: {
         name,

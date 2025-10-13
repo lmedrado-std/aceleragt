@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Gift, Users, TrendingUp, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -24,7 +22,6 @@ interface Seller {
 export function WheelManager({ storeId }: WheelManagerProps) {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [creditsMap, setCreditsMap] = useState<Record<string, number>>({});
-  const [recentSpins, setRecentSpins] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalSpins: 0, totalValue: 0 });
   const [selectedSeller, setSelectedSeller] = useState<string>('');
   const [grantAmount, setGrantAmount] = useState(1);
@@ -46,7 +43,6 @@ export function WheelManager({ storeId }: WheelManagerProps) {
       const statusData = await statusRes.json();
 
       setCreditsMap(statusData.creditsMap || {});
-      setRecentSpins(Array.isArray(statusData.spins) ? statusData.spins.slice(0, 10) : []);
       setStats(statusData.stats || { totalSpins: 0, totalValue: 0 });
 
     } catch (error) {
@@ -217,51 +213,6 @@ export function WheelManager({ storeId }: WheelManagerProps) {
               Conceder Giros
             </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Giros recentes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Giros Recentes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Vendedor</TableHead>
-                <TableHead>Prêmio</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentSpins.map((spin: any) => (
-                <TableRow key={spin.id}>
-                  <TableCell>
-                    {new Date(spin.createdAt).toLocaleDateString('pt-BR')}
-                  </TableCell>
-                  <TableCell>{sellers.find(s => s.id === spin.seller_id)?.name || spin.seller_id}</TableCell>
-                  <TableCell>{spin.segment.label}</TableCell>
-                  <TableCell>
-                    <Badge variant={spin.status === 'paid' ? 'default' : 
-                      spin.status === 'pending' ? 'secondary' : 'destructive'
-                    }>
-                      {spin.status === 'paid' ? 'Pago' : 
-                       spin.status === 'pending' ? 'Pendente' : 'Cancelado'}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {recentSpins.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    Nenhum giro realizado ainda
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
         </CardContent>
       </Card>
     </div>

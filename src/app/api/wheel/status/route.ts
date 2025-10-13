@@ -11,75 +11,54 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    console.log(`[Status] Buscando dados para store: ${storeId}`);
-
-    // 1. Verificar configurações
-    const settings = await prisma.prize_wheel_settings.findFirst({
-      where: { store_id: storeId },
-    });
-
-    if (!settings) {
-      console.log(`[Status] Nenhuma configuração encontrada para store: ${storeId}`);
-      return NextResponse.json({
-        creditsMap: {},
-        spins: [],
-        stats: { totalSpins: 0, totalValue: 0 },
-      }, { status: 200 });
-    }
-
-    // 2. Buscar créditos e spins em paralelo
-    const [credits, spins] = await Promise.all([
+    const [creditsData, spinsData, settingsData] = await Promise.all([
       prisma.prize_wheel_credits.findMany({
         where: { store_id: storeId },
       }),
       prisma.prize_wheel_spins.findMany({
         where: { store_id: storeId },
         include: { 
-          prize_wheel_segments: true
+          // CORREÇÃO: Usar o nome da relação snake_case do schema
+          prize_wheel_segments: true 
         },
         orderBy: { created_at: 'desc' },
         take: 50,
+      }),
+      prisma.prize_wheel_settings.findFirst({
+        where: { store_id: storeId },
+        include: { prize_wheel_segments: { orderBy: { position: 'asc' } } },
       })
     ]);
     
-    console.log(`[Status] Encontrados ${credits?.length || 0} registros de créditos e ${spins?.length || 0} giros`);
-
-    // 3. Construir mapa de créditos
     const creditsMap = Object.fromEntries(
-      (credits || []).map(c => [c.seller_id, Number(c.credits || 0)])
+      creditsData.map(c => [c.seller_id, c.credits])
     );
 
-    // 4. Calcular estatísticas
-    const totalSpins = spins?.length || 0;
-    const totalValue = (spins || [])
+    const totalSpins = spinsData.length;
+    const totalValue = spinsData
       .filter(spin => 
         spin.prize_wheel_segments && 
         spin.prize_wheel_segments.type === 'money' && 
-        spin.prize_wheel_segments.value
+        spin.prize_wheel_segments.value != null
       )
       .reduce((sum, spin) => 
-        sum + (spin.prize_wheel_segments?.value ? Number(spin.prize_wheel_segments.value) : 0), 0
+        sum + Number(spin.prize_wheel_segments.value), 0
       );
       
-    // 5. Preparar resposta
     const response = {
       creditsMap,
-      spins: (spins || []).map(spin => ({ 
+      segments: settingsData?.prize_wheel_segments.map(seg => ({ ...seg, value: Number(seg.value) })) || [],
+      spins: spinsData.map((spin: any) => ({ 
         ...spin, 
         createdAt: spin.created_at,
-        segment: spin.prize_wheel_segments ? {
+        // CORREÇÃO: Usar o nome da relação snake_case do schema
+        segment: spin.prize_wheel_segments ? { 
           id: spin.prize_wheel_segments.id,
           label: spin.prize_wheel_segments.label,
           type: spin.prize_wheel_segments.type,
-          value: spin.prize_wheel_segments.value ? Number(spin.prize_wheel_segments.value) : null,
+          value: spin.prize_wheel_segments.value != null ? Number(spin.prize_wheel_segments.value) : null,
           color: spin.prize_wheel_segments.color
-        } : { 
-          id: 'unknown',
-          label: 'Prêmio não encontrado', 
-          type: 'unknown',
-          value: null,
-          color: '#6B7280'
-        }
+        } : null
       })),
       stats: {
         totalSpins,
@@ -87,7 +66,6 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    console.log(`[Status] Retornando: ${totalSpins} spins, R$ ${totalValue.toFixed(2)}, ${Object.keys(creditsMap).length} vendedores com créditos`);
     return NextResponse.json(response);
 
   } catch (error: any) {
@@ -98,7 +76,7 @@ export async function GET(req: NextRequest) {
     });
     
     return NextResponse.json({
-      error: "Erro interno do servidor",
+      error: "Erro interno do servidor ao buscar status da roleta.",
       details: error.message,
     }, { status: 500 });
   }

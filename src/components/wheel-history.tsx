@@ -67,6 +67,24 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
     return <p>Carregando histórico...</p>;
   }
 
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+        case 'paid': return 'default';
+        case 'pending': return 'secondary';
+        case 'claimed': return 'default'; // Giros são 'claimed' ao girar
+        default: return 'destructive';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+      switch (status) {
+          case 'paid': return 'Pago';
+          case 'pending': return 'Pendente';
+          case 'claimed': return 'Resgatado';
+          default: return 'Cancelado';
+      }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -92,15 +110,11 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
               spins.map((spin) => (
                 <TableRow key={spin.id}>
                   <TableCell>{new Date(spin.createdAt).toLocaleString('pt-BR')}</TableCell>
-                  <TableCell>{sellers[spin.sellerId] || spin.sellerId}</TableCell> 
+                  <TableCell>{sellers[spin.seller_id] || spin.seller_id}</TableCell> 
                   <TableCell>{spin.segment.label}</TableCell>
                   <TableCell>
-                    <Badge variant={
-                      spin.status === 'paid' ? 'default' : 
-                      spin.status === 'pending' ? 'secondary' : 'destructive'
-                    }>
-                      {spin.status === 'paid' ? 'Pago' : 
-                       spin.status === 'pending' ? 'Pendente' : 'Cancelado'}
+                    <Badge variant={getStatusVariant(spin.status)}>
+                      {getStatusLabel(spin.status)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -108,7 +122,7 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
                       variant="outline" 
                       size="sm" 
                       onClick={() => handleUpdateStatus(spin.id, 'paid')}
-                      disabled={spin.status !== 'pending'}
+                      disabled={spin.status !== 'pending' && spin.status !== 'claimed'}
                     >
                       Marcar como Pago
                     </Button>

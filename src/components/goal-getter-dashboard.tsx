@@ -547,7 +547,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   </TabsContent>
                 )}
 
-                {sellers.map((seller) => (<TabsContent key={seller.id} value={seller.id!} className="mt-6"><SellerTab seller={seller} goals={getValues().goals as Goals} incentives={incentives[seller.id!] || null} rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null} lastUpdated={lastUpdated} /></TabsContent>))}
+                {sellers.map((seller) => (<TabsContent key={seller.id} value={seller.id!} className="mt-6"><SellerTab storeId={storeId} seller={seller} goals={getValues().goals as Goals} incentives={incentives[seller.id!] || null} rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null} lastUpdated={lastUpdated} /></TabsContent>))}
 
               </Tabs>
           </form>

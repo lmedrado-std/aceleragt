@@ -1,4 +1,3 @@
-// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,162 +8,178 @@ datasource db {
 }
 
 model stores {
-  id                           String                 @id @default(uuid())
-  name                         String
-  password                     String?
-  theme_color                  String?
-  last_incentive_calculation DateTime?              @db.Timestamptz
-  sellers                      sellers[]
-  goals                        goals[]
+  id                         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                       String
+  theme_color                String?
+  password                   String?
+  last_incentive_calculation DateTime?       @db.Timestamp(6)
+  SellerHistory              SellerHistory[]
+  goals                      goals?
+  sellers                    sellers[]
 }
 
 model sellers {
-  id                   String        @id @default(uuid())
-  name                 String        @db.VarChar(255)
-  password             String?       @db.VarChar(255)
-  avatar_id            String?       @db.VarChar(50)
-  vendas               Decimal?      @default(0) @db.Decimal(10, 2)
-  pa                   Decimal?      @default(0) @db.Decimal(5, 2)
-  ticket_medio         Decimal?      @default(0) @db.Decimal(10, 2)
-  corridinha_diaria    Decimal?      @default(0) @db.Decimal(10, 2)
-  store_id             String        @db.Uuid
-  last_viewed_at       DateTime?     @db.Timestamptz
-  view_count           Int?          @default(0)
-  stores               stores        @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  store_id          String    @db.Uuid
+  name              String    @db.VarChar(255)
+  password          String    @db.VarChar(255)
+  avatar_id         String    @db.VarChar(50)
+  vendas            Decimal?  @default(0) @db.Decimal(10, 2)
+  pa                Decimal?  @default(0) @db.Decimal(10, 2)
+  ticket_medio      Decimal?  @default(0) @db.Decimal(10, 2)
+  corridinha_diaria Decimal?  @default(0) @db.Decimal(10, 2)
+  last_viewed_at    DateTime? @db.Timestamptz(6)
+  view_count        Int?      @default(0)
+  stores            stores    @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model goals {
-  id                          String    @id @default(uuid())
-  store_id                    String    @unique @db.Uuid
-  metaMinha                   Int?      @default(0)
-  metaMinhaPrize              Int?      @default(0)
-  meta                        Int?      @default(0)
-  metaPrize                   Int?      @default(0)
-  metona                      Int?      @default(0)
-  metonaPrize                 Int?      @default(0)
-  metaLendaria                Int?      @default(0)
-  legendariaBonusValorVenda   Int?      @default(0)
-  legendariaBonusValorPremio  Int?      @default(0)
-  performanceBonusEnabled     Boolean?  @default(false)
-  paGoal1                     Float?    @default(0)
-  paPrize1                    Int?      @default(0)
-  paGoal2                     Float?    @default(0)
-  paPrize2                    Int?      @default(0)
-  paGoal3                     Float?    @default(0)
-  paPrize3                    Int?      @default(0)
-  paGoal4                     Float?    @default(0)
-  paPrize4                    Int?      @default(0)
-  ticketMedioGoal1            Int?      @default(0)
-  ticketMedioPrize1           Int?      @default(0)
-  ticketMedioGoal2            Int?      @default(0)
-  ticketMedioPrize2           Int?      @default(0)
-  ticketMedioGoal3            Int?      @default(0)
-  ticketMedioPrize3           Int?      @default(0)
-  ticketMedioGoal4            Int?      @default(0)
-  ticketMedioPrize4           Int?      @default(0)
-  corridinhaStartDate         DateTime? @db.Timestamptz
-  corridinhaEndDate           DateTime? @db.Timestamptz
-  corridinhaObjective1        String?
-  corridinhaPrize1            Int?      @default(0)
-  corridinhaObjective2        String?
-  corridinhaPrize2            Int?      @default(0)
-  corridinhaObjective3        String?
-  corridinhaPrize3            Int?      @default(0)
-  corridinhaObjective4        String?
-  corridinhaPrize4            Int?      @default(0)
-  store                       stores    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  id                         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  store_id                   String   @unique(map: "goals_store_id_unique") @db.Uuid
+  metaMinha                  Int?
+  metaMinhaPrize             Int?
+  meta                       Int?
+  metaPrize                  Int?
+  metona                     Int?
+  metonaPrize                Int?
+  metaLendaria               Int?
+  legendariaBonusValorVenda  Int?
+  legendariaBonusValorPremio Int?
+  paGoal1                    Float?   @db.Real
+  paPrize1                   Int?
+  paGoal2                    Float?   @db.Real
+  paPrize2                   Int?
+  paGoal3                    Float?   @db.Real
+  paPrize3                   Int?
+  paGoal4                    Float?   @db.Real
+  paPrize4                   Int?
+  ticketMedioGoal1           Int?
+  ticketMedioPrize1          Int?
+  ticketMedioGoal2           Int?
+  ticketMedioPrize2          Int?
+  ticketMedioGoal3           Int?
+  ticketMedioPrize3          Int?
+  ticketMedioGoal4           Int?
+  ticketMedioPrize4          Int?
+  performanceBonusEnabled    Boolean? @default(false)
+  corridinhaenabled          Boolean? @default(false)
+  corridinhaEnabled          Boolean? @default(false)
+  store                      stores   @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model SellerHistory {
-  id           String   @id @default(uuid())
-  period       String
-  vendas       Decimal  @db.Decimal(10, 2)
-  pa           Decimal  @db.Decimal(5, 2)
-  ticket_medio Decimal  @db.Decimal(10, 2)
-  total_prize  Decimal  @db.Decimal(10, 2)
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  period       String   @db.VarChar(100)
+  createdAt    DateTime @default(now())
+  vendas       Decimal  @default(0) @db.Decimal(10, 2)
+  pa           Decimal  @default(0) @db.Decimal(5, 2)
+  ticket_medio Decimal  @default(0) @db.Decimal(10, 2)
+  total_prize  Decimal  @default(0) @db.Decimal(10, 2)
   seller_id    String   @db.Uuid
-  seller_name  String
+  seller_name  String   @db.VarChar(255)
   store_id     String   @db.Uuid
-  createdAt    DateTime @default(now()) @db.Timestamptz
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  stores       stores   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([seller_id])
+  @@index([store_id, createdAt(sort: Desc)])
 }
 
 model app_config {
-  key   String @id @db.VarChar(255)
-  value String?
+  key   String @id
+  value String
 }
 
 model prize_wheel_settings {
-  id                   String                 @id @default(uuid())
-  store_id             String                 @unique
-  created_at           DateTime               @default(now()) @db.Timestamp(3)
-  updated_at           DateTime               @updatedAt @db.Timestamp(3)
-  
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar(36)
+  store_id             String                 @unique @db.VarChar(36)
+  is_active            Boolean?               @default(true)
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?              @default(now()) @updatedAt @db.Timestamp(6)
   prize_wheel_segments prize_wheel_segments[]
 }
 
 model prize_wheel_segments {
-  id                String                 @id @default(uuid())
-  settings_id       String                 @db.Uuid
-  label             String
-  type              String
-  value             Decimal?               @db.Decimal(10, 2)
-  description       String?
-  weight            Int                    @default(10)
-  color             String                 @default("#3B82F6")
-  is_active         Boolean                @default(true)
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar(36)
+  settings_id       String               @db.VarChar(36)
+  label             String               @db.VarChar(100)
+  type              String               @db.VarChar(32)
+  value             Decimal?             @db.Decimal(10, 2)
+  description       String?              @db.VarChar(255)
+  color             String?              @default("#3B82F6") @db.VarChar(32)
+  weight            Int?                 @default(10)
   position          Int
-  
-  settings          prize_wheel_settings   @relation(fields: [settings_id], references: [id], onDelete: Cascade)
+  is_active         Boolean?             @default(true)
+  settings          prize_wheel_settings @relation(fields: [settings_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   prize_wheel_spins prize_wheel_spins[]
 }
 
 model prize_wheel_credits {
-  id         String   @id @default(uuid())
-  store_id   String
-  seller_id  String
-  credits    Int      @default(0)
-  updated_at DateTime @updatedAt @db.Timestamp(3)
-  
-  @@unique([store_id, seller_id], name: "prize_wheel_credits_store_id_seller_id_key")
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar(36)
+  store_id   String    @db.VarChar(36)
+  seller_id  String    @db.VarChar(36)
+  credits    Int       @default(0)
+  updated_at DateTime? @default(now()) @updatedAt @db.Timestamp(6)
+
+  @@unique([store_id, seller_id], name: "store_id_seller_id")
 }
 
 model prize_wheel_spins {
-  id                   String               @id @default(uuid())
-  store_id             String
-  seller_id            String
-  granted_by           String
-  segment_id           String               @db.Uuid
-  status               String               @default("pending")
-  created_at           DateTime             @default(now()) @db.Timestamp(3)
-  claimed_at           DateTime?            @db.Timestamp(3)
-  
-  prize_wheel_segments prize_wheel_segments @relation(fields: [segment_id], references: [id])
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.VarChar(36)
+  store_id             String               @db.VarChar(36)
+  seller_id            String               @db.VarChar(36)
+  granted_by           String?              @db.VarChar(36)
+  segment_id           String               @db.VarChar(36)
+  status               String?              @default("pending") @db.VarChar(16)
+  notes                String?              @db.VarChar(255)
+  created_at           DateTime?            @default(now()) @db.Timestamp(6)
+  claimed_at           DateTime?            @db.Timestamp(6)
+  paid_at              DateTime?            @db.Timestamp(6)
+  prize_wheel_segments prize_wheel_segments @relation(fields: [segment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model loja_restricao {
-    id          Int      @id @default(autoincrement())
-    loja_id     String
-    modo        String   @default("OU") @db.VarChar(10)
-    criado_em   DateTime @default(now()) @db.Timestamptz
-    alterado_em DateTime @default(now()) @db.Timestamptz
+  id          Int       @id @default(autoincrement())
+  loja_id     String    @db.Uuid
+  modo        String    @default("OU") @db.VarChar(10)
+  criado_em   DateTime? @default(now()) @db.Timestamptz(6)
+  alterado_em DateTime? @default(now()) @db.Timestamptz(6)
 }
 
 model loja_area_permitida {
-    id          Int      @id @default(autoincrement())
-    loja_id     String
-    nome        String   @db.VarChar(128)
-    latitude    Float
-    longitude   Float
-    raio        Int
-    descricao   String?
-    ativo       Boolean  @default(true)
+  id        Int     @id @default(autoincrement())
+  loja_id   String  @db.Uuid
+  nome      String  @db.VarChar(128)
+  latitude  Float
+  longitude Float
+  raio      Int
+  descricao String?
+  ativo     Boolean @default(true)
 }
 
 model loja_wifi_permitido {
-    id          Int      @id @default(autoincrement())
-    loja_id     String
-    nome        String   @db.VarChar(128)
-    ssid        String   @db.VarChar(128)
-    descricao   String?
-    ativo       Boolean  @default(true)
+  id        Int     @id @default(autoincrement())
+  loja_id   String  @db.Uuid
+  nome      String  @db.VarChar(128)
+  ssid      String  @db.VarChar(128)
+  descricao String?
+  ativo     Boolean @default(true)
+}
+
+model admins {
+  id       String @id
+  password String
+}
+
+model incentives {
+  id          Int      @id @default(autoincrement())
+  store_id    Int?
+  description String
+  amount      Decimal? @db.Decimal
+}
+
+model playing_with_neon {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value Float? @db.Real
 }
