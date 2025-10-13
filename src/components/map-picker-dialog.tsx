@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import "leaflet/dist/leaflet.css";
-
-// Import images at the top level
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
@@ -47,9 +45,8 @@ export function MapPickerDialog({
 
   useEffect(() => {
     if (isOpen) {
-      setMapKey(Date.now()); // Gera uma nova chave a cada abertura
+      setMapKey(Date.now());
       import('leaflet').then(L => {
-        // Fix Leaflet's default icon issue with Webpack
         let DefaultIcon = L.icon({
             iconUrl: icon.src,
             shadowUrl: iconShadow.src,

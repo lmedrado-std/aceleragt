@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -251,18 +250,16 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
                 </CardFooter>
             </Card>
             
-            {isMapOpen && editingAreaIndex !== null && (
-                <MapPickerDialog
-                    isOpen={isMapOpen}
-                    onClose={() => setIsMapOpen(false)}
-                    onLocationSelect={handleMapSelect}
-                    initialPosition={{
-                        lat: Number(settings.areas[editingAreaIndex]?.latitude) || -14.235,
-                        lng: Number(settings.areas[editingAreaIndex]?.longitude) || -51.9253
-                    }}
-                    radius={Number(settings.areas[editingAreaIndex]?.raio) || 100}
-                />
-            )}
+            <MapPickerDialog
+                isOpen={isMapOpen}
+                onClose={() => setIsMapOpen(false)}
+                onLocationSelect={handleMapSelect}
+                initialPosition={{
+                    lat: Number(editingAreaIndex !== null ? settings.areas[editingAreaIndex]?.latitude : null) || -14.235,
+                    lng: Number(editingAreaIndex !== null ? settings.areas[editingAreaIndex]?.longitude : null) || -51.9253
+                }}
+                radius={Number(editingAreaIndex !== null ? settings.areas[editingAreaIndex]?.raio : 100) || 100}
+            />
         </>
     );
 }
