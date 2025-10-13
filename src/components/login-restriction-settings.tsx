@@ -8,10 +8,12 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Switch } from "./ui/switch";
-import { Trash2, Plus, Save, MapPin, Wifi, Loader2 } from "lucide-react";
+import { Trash2, Plus, Save, MapPin, Wifi, Loader2, LocateFixed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
 import { z } from "zod";
+import { MapPickerDialog } from "./map-picker-dialog";
+
 
 // --- Tipos e Schemas Zod ---
 interface Area {
@@ -69,6 +71,8 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
         areas: [],
         wifis: [],
     });
+    const [isMapOpen, setIsMapOpen] = useState(false);
+    const [editingAreaIndex, setEditingAreaIndex] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -151,6 +155,15 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
     };
     const removeWifi = (index: number) => setSettings(prev => ({ ...prev, wifis: prev.wifis.filter((_, i) => i !== index) }));
 
+    const handleMapSelect = (coords: { lat: number; lng: number }) => {
+        if (editingAreaIndex !== null) {
+            updateArea(editingAreaIndex, 'latitude', coords.lat);
+            updateArea(editingAreaIndex, 'longitude', coords.lng);
+        }
+        setIsMapOpen(false);
+        setEditingAreaIndex(null);
+    };
+
     if (loading) {
         return (
             <Card><CardHeader><CardTitle>Restrições de Login do Vendedor</CardTitle><CardDescription>Carregando configurações...</CardDescription></CardHeader>
@@ -159,76 +172,94 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Restrições de Login do Vendedor</CardTitle>
-                <CardDescription>Defina locais e redes Wi-Fi permitidas para que os vendedores possam acessar o painel. Requer autorização de localização no navegador do vendedor.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div>
-                    <Label>Modo de Verificação</Label>
-                     <Select value={settings.modo} onValueChange={(value: "E" | "OU") => setSettings(prev => ({...prev, modo: value}))}>
-                        <SelectTrigger className="w-[280px]"><SelectValue placeholder="Selecione o modo" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="OU">Uma das opções (Localização OU Wi-Fi)</SelectItem>
-                            <SelectItem value="E">Ambas as opções (Localização E Wi-Fi)</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground mt-1">"OU" permite o login se uma das condições for atendida. "E" exige ambas.</p>
-                </div>
-                <Separator />
-                
-                <div className="space-y-4">
-                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium flex items-center gap-2"><MapPin className="h-5 w-5" /> Áreas Geográficas</h3>
-                        <Button variant="outline" size="sm" onClick={addArea}><Plus className="mr-2 h-4 w-4"/> Adicionar Área</Button>
+        <>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Restrições de Login do Vendedor</CardTitle>
+                    <CardDescription>Defina locais e redes Wi-Fi permitidas para que os vendedores possam acessar o painel. Requer autorização de localização no navegador do vendedor.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div>
+                        <Label>Modo de Verificação</Label>
+                        <Select value={settings.modo} onValueChange={(value: "E" | "OU") => setSettings(prev => ({...prev, modo: value}))}>
+                            <SelectTrigger className="w-[280px]"><SelectValue placeholder="Selecione o modo" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="OU">Uma das opções (Localização OU Wi-Fi)</SelectItem>
+                                <SelectItem value="E">Ambas as opções (Localização E Wi-Fi)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-1">"OU" permite o login se uma das condições for atendida. "E" exige ambas.</p>
                     </div>
-                    <div className="space-y-2">
-                        {settings.areas.map((area, index) => (
-                            <div key={area.id || `new-area-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                <div className="md:col-span-3"><Label>Nome</Label><Input value={area.nome} onChange={e => updateArea(index, 'nome', e.target.value)} placeholder="Ex: Loja Centro"/></div>
-                                <div className="md:col-span-3"><Label>Latitude</Label><Input type="text" inputMode="decimal" value={area.latitude} onChange={e => updateArea(index, 'latitude', e.target.value)}/></div>
-                                <div className="md:col-span-3"><Label>Longitude</Label><Input type="text" inputMode="decimal" value={area.longitude} onChange={e => updateArea(index, 'longitude', e.target.value)}/></div>
-                                <div className="md:col-span-1"><Label>Raio (m)</Label><Input type="text" inputMode="decimal" value={area.raio} onChange={e => updateArea(index, 'raio', e.target.value)}/></div>
-                                <div className="flex items-center gap-2 md:col-span-2">
-                                     <div className="flex flex-col items-center"><Label>Ativo</Label><Switch checked={area.ativo} onCheckedChange={checked => updateArea(index, 'ativo', checked)}/></div>
-                                     <Button variant="ghost" size="icon" onClick={() => removeArea(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                    <Separator />
+                    
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-medium flex items-center gap-2"><MapPin className="h-5 w-5" /> Áreas Geográficas</h3>
+                            <Button variant="outline" size="sm" onClick={addArea}><Plus className="mr-2 h-4 w-4"/> Adicionar Área</Button>
+                        </div>
+                        <div className="space-y-2">
+                            {settings.areas.map((area, index) => (
+                                <div key={area.id || `new-area-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                    <div className="md:col-span-3"><Label>Nome</Label><Input value={area.nome} onChange={e => updateArea(index, 'nome', e.target.value)} placeholder="Ex: Loja Centro"/></div>
+                                    <div className="md:col-span-3"><Label>Latitude</Label><Input type="text" inputMode="decimal" value={area.latitude} onChange={e => updateArea(index, 'latitude', e.target.value)}/></div>
+                                    <div className="md:col-span-3"><Label>Longitude</Label><Input type="text" inputMode="decimal" value={area.longitude} onChange={e => updateArea(index, 'longitude', e.target.value)}/></div>
+                                    <div className="md:col-span-1"><Label>Raio (m)</Label><Input type="text" inputMode="decimal" value={area.raio} onChange={e => updateArea(index, 'raio', e.target.value)}/></div>
+                                    <div className="flex items-center gap-1 md:col-span-2">
+                                        <Button variant="outline" size="icon" onClick={() => { setEditingAreaIndex(index); setIsMapOpen(true); }}><LocateFixed className="h-4 w-4"/></Button>
+                                        <div className="flex flex-col items-center pl-2"><Label>Ativo</Label><Switch checked={area.ativo} onCheckedChange={checked => updateArea(index, 'ativo', checked)}/></div>
+                                        <Button variant="ghost" size="icon" onClick={() => removeArea(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                         {settings.areas.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Nenhuma área geográfica definida.</p>}
+                            ))}
+                            {settings.areas.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Nenhuma área geográfica definida.</p>}
+                        </div>
                     </div>
-                </div>
-                
-                <Separator />
+                    
+                    <Separator />
 
-                 <div className="space-y-4">
-                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium flex items-center gap-2"><Wifi className="h-5 w-5" /> Redes Wi-Fi Permitidas</h3>
-                        <Button variant="outline" size="sm" onClick={addWifi}><Plus className="mr-2 h-4 w-4"/> Adicionar Wi-Fi</Button>
-                    </div>
-                    <div className="space-y-2">
-                         {settings.wifis.map((wifi, index) => (
-                            <div key={wifi.id || `new-wifi-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                <div className="md:col-span-5"><Label>Nome Amigável</Label><Input value={wifi.nome} onChange={e => updateWifi(index, 'nome', e.target.value)} placeholder="Ex: Wi-Fi da Loja"/></div>
-                                <div className="md:col-span-5"><Label>SSID (Nome da Rede)</Label><Input value={wifi.ssid} onChange={e => updateWifi(index, 'ssid', e.target.value)} placeholder="O nome exato que aparece no celular"/></div>
-                                 <div className="flex items-center gap-2 md:col-span-2">
-                                     <div className="flex flex-col items-center"><Label>Ativo</Label><Switch checked={wifi.ativo} onCheckedChange={checked => updateWifi(index, 'ativo', checked)}/></div>
-                                     <Button variant="ghost" size="icon" onClick={() => removeWifi(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-medium flex items-center gap-2"><Wifi className="h-5 w-5" /> Redes Wi-Fi Permitidas</h3>
+                            <Button variant="outline" size="sm" onClick={addWifi}><Plus className="mr-2 h-4 w-4"/> Adicionar Wi-Fi</Button>
+                        </div>
+                        <div className="space-y-2">
+                            {settings.wifis.map((wifi, index) => (
+                                <div key={wifi.id || `new-wifi-${index}`} className="p-3 border rounded-lg grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                    <div className="md:col-span-5"><Label>Nome Amigável</Label><Input value={wifi.nome} onChange={e => updateWifi(index, 'nome', e.target.value)} placeholder="Ex: Wi-Fi da Loja"/></div>
+                                    <div className="md:col-span-5"><Label>SSID (Nome da Rede)</Label><Input value={wifi.ssid} onChange={e => updateWifi(index, 'ssid', e.target.value)} placeholder="O nome exato que aparece no celular"/></div>
+                                    <div className="flex items-center gap-2 md:col-span-2">
+                                        <div className="flex flex-col items-center"><Label>Ativo</Label><Switch checked={wifi.ativo} onCheckedChange={checked => updateWifi(index, 'ativo', checked)}/></div>
+                                        <Button variant="ghost" size="icon" onClick={() => removeWifi(index)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                                    </div>
                                 </div>
-                            </div>
-                         ))}
-                         {settings.wifis.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Nenhuma rede Wi-Fi definida.</p>}
+                            ))}
+                            {settings.wifis.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Nenhuma rede Wi-Fi definida.</p>}
+                        </div>
                     </div>
-                </div>
 
-            </CardContent>
-            <CardFooter>
-                <Button onClick={handleSave} disabled={saving || loading}>
-                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
-                    {saving ? "Salvando..." : "Salvar Restrições"}
-                </Button>
-            </CardFooter>
-        </Card>
+                </CardContent>
+                <CardFooter>
+                    <Button onClick={handleSave} disabled={saving || loading}>
+                        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
+                        {saving ? "Salvando..." : "Salvar Restrições"}
+                    </Button>
+                </CardFooter>
+            </Card>
+            
+            {isMapOpen && editingAreaIndex !== null && (
+                <MapPickerDialog
+                    isOpen={isMapOpen}
+                    onClose={() => setIsMapOpen(false)}
+                    onLocationSelect={handleMapSelect}
+                    initialPosition={{
+                        lat: Number(settings.areas[editingAreaIndex]?.latitude) || -14.235,
+                        lng: Number(settings.areas[editingAreaIndex]?.longitude) || -51.9253
+                    }}
+                    radius={Number(settings.areas[editingAreaIndex]?.raio) || 100}
+                />
+            )}
+        </>
     );
 }
+
+    
