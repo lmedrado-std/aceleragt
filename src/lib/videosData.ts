@@ -1308,9 +1308,11 @@ export const videosPorCategoria: Record<string, Video[]> = {
   ]
 };
 
-// Função para buscar vídeos por categoria
+// Função para buscar vídeos por categoria (agora embaralha a lista)
 export function getVideosPorCategoria(categoria: string): Video[] {
-  return videosPorCategoria[categoria] || videosPorCategoria["Objeções de Vendas"] || [];
+  const videos = videosPorCategoria[categoria] || videosPorCategoria["Objeções de Vendas"] || [];
+  // Embaralha o array para exibir uma ordem diferente a cada vez
+  return [...videos].sort(() => Math.random() - 0.5);
 }
 
 // Função para buscar vídeos aleatórios de uma categoria

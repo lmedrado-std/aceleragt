@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { getVideosPorCategoria, Video } from '@/lib/videosData';
 import styles from './styles.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
@@ -19,18 +18,31 @@ const categorias = [
   "Fechamento de Vendas"
 ];
 
+// Helper para extrair o ID do vídeo do YouTube
+const getYouTubeVideoId = (url: string): string | null => {
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'youtube.com') {
+      return urlObj.searchParams.get('v');
+    }
+    if (urlObj.hostname === 'youtu.be') {
+      return urlObj.pathname.slice(1);
+    }
+  } catch (e) {
+    console.error("URL de vídeo inválida:", url, e);
+  }
+  return null;
+};
+
+
 export function TipsTab() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [categoria, setCategoria] = useState(categorias[0]);
 
   useEffect(() => {
+    // A função getVideosPorCategoria agora retorna vídeos aleatórios
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
-
-  const handleOpenVideo = (url: string) => {
-    const videoUrl = url.startsWith('http') ? url : `https://${url}`;
-    window.open(videoUrl, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <div className={styles.tipsContainer}>
@@ -66,32 +78,37 @@ export function TipsTab() {
             }}
             style={{ padding: '4px 4px 32px 4px' }}
         >
-            {videos.map((video, index) => (
-            <SwiperSlide key={index} style={{ height: 'auto' }}>
-                <Card className="group flex flex-col hover:border-primary transition-all h-full">
-                    <CardHeader>
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors">{video.title}</CardTitle>
-                    <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                    <p className="text-sm text-muted-foreground">{video.description}</p>
-                    </CardContent>
-                    <div className="p-4 pt-0 mt-auto">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start text-primary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenVideo(video.url);
-                      }}
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" /> Assistir no YouTube
-                    </Button>
-                    </div>
-                </Card>
-            </SwiperSlide>
-            ))}
+            {videos.map((video, index) => {
+              const videoId = getYouTubeVideoId(video.url);
+              return (
+                <SwiperSlide key={index} style={{ height: 'auto' }}>
+                    <Card className="group flex flex-col hover:border-primary transition-all h-full">
+                        {videoId ? (
+                            <div className={styles.videoWrapper}>
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${videoId}`}
+                                    title={video.title}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                ></iframe>
+                            </div>
+                        ) : (
+                          <div className="aspect-video bg-muted flex items-center justify-center">
+                            <p className="text-sm text-muted-foreground">Vídeo indisponível</p>
+                          </div>
+                        )}
+                        <CardHeader>
+                            <CardTitle className="text-base group-hover:text-primary transition-colors">{video.title}</CardTitle>
+                            <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <p className="text-sm text-muted-foreground">{video.description}</p>
+                        </CardContent>
+                    </Card>
+                </SwiperSlide>
+              )
+            })}
         </Swiper>
     </div>
   );
