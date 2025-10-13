@@ -35,6 +35,7 @@ export function MapPickerDialog({
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
     initialPosition.lat && initialPosition.lng ? initialPosition : null
   );
+  const [mapKey, setMapKey] = useState(Date.now());
 
   const [MapComponents, setMapComponents] = useState<{
     MapContainer: React.ComponentType<MapContainerProps>;
@@ -46,6 +47,7 @@ export function MapPickerDialog({
 
   useEffect(() => {
     if (isOpen) {
+      setMapKey(Date.now()); // Gera uma nova chave a cada abertura
       import('leaflet').then(L => {
         // Fix Leaflet's default icon issue with Webpack
         let DefaultIcon = L.icon({
@@ -110,6 +112,7 @@ export function MapPickerDialog({
         </DialogHeader>
         <div className="flex-grow rounded-md overflow-hidden">
           <MapContainer
+            key={mapKey}
             center={position || [-14.235, -51.9253]} // Centro do Brasil se não houver posição
             zoom={position ? 15 : 4}
             scrollWheelZoom={true}
