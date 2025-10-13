@@ -371,7 +371,7 @@ export const videosPorCategoria: Record<string, Video[]> = {
     },
     {
       title: "Produtos sazonais: Aproveitando oportunidades",
-      url: "https://www.youtube.com/watch_v=A7K8L9M0N1O",
+      url: "https://www.youtube.com/watch?v=A7K8L9M0N1O",
       channel: "Seasonal Sales",
       publishedAt: "3 meses atrás",
       description: "Como usar sazonalidade para aumentar ticket médio."
