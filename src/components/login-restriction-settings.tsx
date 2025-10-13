@@ -12,7 +12,12 @@ import { Trash2, Plus, Save, MapPin, Wifi, Loader2, LocateFixed } from "lucide-r
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
 import { z } from "zod";
-import { MapPickerDialog } from "./map-picker-dialog";
+import dynamic from "next/dynamic";
+
+const MapPickerDialog = dynamic(
+    () => import("./map-picker-dialog").then((mod) => mod.MapPickerDialog),
+    { ssr: false, loading: () => <p>Carregando mapa...</p> }
+);
 
 
 // --- Tipos e Schemas Zod ---
