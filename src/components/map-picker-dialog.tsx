@@ -12,21 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 
-// Corrige o problema do ícone padrão do Leaflet com o Webpack
+// Import images at the top level
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon.src,
-    shadowUrl: iconShadow.src,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
-
 
 interface MapPickerDialogProps {
   isOpen: boolean;
@@ -57,13 +46,25 @@ export function MapPickerDialog({
 
   useEffect(() => {
     if (isOpen) {
-      import('react-leaflet').then(components => {
-        setMapComponents({
-          MapContainer: components.MapContainer,
-          TileLayer: components.TileLayer,
-          Marker: components.Marker,
-          useMapEvents: components.useMapEvents,
-          Circle: components.Circle,
+      import('leaflet').then(L => {
+        // Fix Leaflet's default icon issue with Webpack
+        let DefaultIcon = L.icon({
+            iconUrl: icon.src,
+            shadowUrl: iconShadow.src,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41]
+        });
+
+        L.Marker.prototype.options.icon = DefaultIcon;
+
+        import('react-leaflet').then(components => {
+          setMapComponents({
+            MapContainer: components.MapContainer,
+            TileLayer: components.TileLayer,
+            Marker: components.Marker,
+            useMapEvents: components.useMapEvents,
+            Circle: components.Circle,
+          });
         });
       });
     }
