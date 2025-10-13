@@ -1,7 +1,7 @@
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { MapContainerProps } from 'react-leaflet';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MapContainer, TileLayer, Marker, useMapEvents, Circle } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -37,22 +36,6 @@ interface MapPickerDialogProps {
   radius: number;
 }
 
-function LocationMarker({ position, setPosition, radius }: { position: any, setPosition: any, radius: number }) {
-  const map = useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-      map.flyTo(e.latlng, map.getZoom());
-    },
-  });
-
-  return position === null ? null : (
-    <>
-      <Marker position={position}></Marker>
-      <Circle center={position} radius={radius} />
-    </>
-  );
-}
-
 export function MapPickerDialog({
   isOpen,
   onClose,
@@ -64,11 +47,56 @@ export function MapPickerDialog({
     initialPosition.lat && initialPosition.lng ? initialPosition : null
   );
 
+  const [MapComponents, setMapComponents] = useState<{
+    MapContainer: React.ComponentType<MapContainerProps>;
+    TileLayer: React.ComponentType<any>;
+    Marker: React.ComponentType<any>;
+    useMapEvents: any;
+    Circle: React.ComponentType<any>;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      import('react-leaflet').then(components => {
+        setMapComponents({
+          MapContainer: components.MapContainer,
+          TileLayer: components.TileLayer,
+          Marker: components.Marker,
+          useMapEvents: components.useMapEvents,
+          Circle: components.Circle,
+        });
+      });
+    }
+  }, [isOpen]);
+
+
   const handleSave = () => {
     if (position) {
       onLocationSelect(position);
     }
   };
+  
+  if (!isOpen || !MapComponents) {
+    return null;
+  }
+
+  const { MapContainer, TileLayer, Marker, useMapEvents, Circle } = MapComponents;
+
+  function LocationMarker({ position, setPosition, radius }: { position: any, setPosition: any, radius: number }) {
+    const map = useMapEvents({
+      click(e: { latlng: any; }) {
+        setPosition(e.latlng);
+        map.flyTo(e.latlng, map.getZoom());
+      },
+    });
+  
+    return position === null ? null : (
+      <>
+        <Marker position={position}></Marker>
+        <Circle center={position} radius={radius} />
+      </>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -105,5 +133,3 @@ export function MapPickerDialog({
     </Dialog>
   );
 }
-
-    
