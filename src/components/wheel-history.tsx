@@ -1,11 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Trash2, Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface WheelHistoryProps {
   storeId: string;
@@ -20,12 +31,12 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
   const [spins, setSpins] = useState<any[]>([]);
   const [sellers, setSellers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   const loadData = async () => {
     setLoading(true);
     try {
-      // Fetch sellers
       const sellersRes = await fetch(`/api/sellers?storeId=${storeId}`);
       const sellersData = await sellersRes.json();
       const sellerMap = sellersData.reduce((acc: any, seller: Seller) => {
@@ -34,7 +45,6 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
       }, {});
       setSellers(sellerMap);
 
-      // Fetch history
       const historyRes = await fetch(`/api/wheel/status?storeId=${storeId}&limit=100`);
       if (!historyRes.ok) throw new Error("Failed to fetch history");
       const historyData = await historyRes.json();
@@ -56,39 +66,73 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
     loadData();
   }, [storeId]);
   
-  const handleUpdateStatus = async (spinId: string, status: string) => {
-    toast({
-        title: 'Funcionalidade em desenvolvimento',
-        description: 'Atualizar o status do prêmio ainda não foi implementado.'
-    });
-  }
-
-  if (loading) {
-    return <p>Carregando histórico...</p>;
-  }
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-        case 'paid': return 'default';
-        case 'pending': return 'secondary';
-        case 'claimed': return 'default'; // Giros são 'claimed' ao girar
-        default: return 'destructive';
+  const handleDeleteHistory = async () => {
+    setIsDeleting(true);
+    try {
+        const res = await fetch(`/api/wheel/history?storeId=${storeId}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || "Falha ao apagar o histórico.");
+        }
+        toast({
+            title: "Histórico Apagado",
+            description: "Todos os registros de giros foram removidos com sucesso."
+        });
+        loadData(); // Recarrega os dados para mostrar a tabela vazia
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Erro ao Apagar",
+            description: (error as Error).message,
+        });
+    } finally {
+        setIsDeleting(false);
     }
   };
 
-  const getStatusLabel = (status: string) => {
-      switch (status) {
-          case 'paid': return 'Pago';
-          case 'pending': return 'Pendente';
-          case 'claimed': return 'Resgatado';
-          default: return 'Cancelado';
-      }
-  };
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            Carregando histórico...
+        </div>
+    );
+  }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Histórico Completo de Giros</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <CardTitle>Histórico Completo de Giros</CardTitle>
+            <CardDescription>Visualize todos os prêmios sorteados pelos vendedores.</CardDescription>
+        </div>
+        {spins.length > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isDeleting}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Apagar Histórico
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Esta ação não pode ser desfeita. Isso irá remover permanentemente todos os registros de giros da roleta para esta loja.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteHistory} className="bg-destructive hover:bg-destructive/90">
+                         {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Confirmar e Apagar
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        )}
       </CardHeader>
       <CardContent>
         <Table>
@@ -96,37 +140,20 @@ export function WheelHistory({ storeId }: WheelHistoryProps) {
             <TableRow>
               <TableHead>Data</TableHead>
               <TableHead>Vendedor</TableHead>
-              <TableHead>Prêmio</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead className="text-right">Prêmio</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {spins.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">Nenhum giro encontrado.</TableCell>
+                <TableCell colSpan={3} className="text-center h-24">Nenhum giro encontrado.</TableCell>
               </TableRow>
             ) : (
               spins.map((spin) => (
                 <TableRow key={spin.id}>
                   <TableCell>{new Date(spin.createdAt).toLocaleString('pt-BR')}</TableCell>
                   <TableCell>{sellers[spin.seller_id] || spin.seller_id}</TableCell> 
-                  <TableCell>{spin.segment.label}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(spin.status)}>
-                      {getStatusLabel(spin.status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleUpdateStatus(spin.id, 'paid')}
-                      disabled={spin.status !== 'pending' && spin.status !== 'claimed'}
-                    >
-                      Marcar como Pago
-                    </Button>
-                  </TableCell>
+                  <TableCell className="text-right font-medium">{spin.segment?.label || 'Prêmio desconhecido'}</TableCell>
                 </TableRow>
               ))
             )}
