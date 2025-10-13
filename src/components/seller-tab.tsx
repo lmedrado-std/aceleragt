@@ -11,11 +11,13 @@ import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, L
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
-import { PrizeWheel } from "./prize-wheel"; // CORREÇÃO: Usando o componente correto da roleta
 import { useEffect } from "react";
 import { trackSellerView } from "@/lib/tracking";
 import { format } from "date-fns";
 import confetti from 'canvas-confetti';
+import dynamic from "next/dynamic";
+
+const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
 
 interface SellerTabProps {
   seller: Seller;
