@@ -8,7 +8,7 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Switch } from "./ui/switch";
 import { Trash2, Plus, Save, MapPin, Wifi, Loader2, LocateFixed } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "./ui/use-toast";
 import { Separator } from "./ui/separator";
 import { z } from "zod";
 import dynamic from "next/dynamic";
@@ -263,5 +263,3 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
         </>
     );
 }
-
-    

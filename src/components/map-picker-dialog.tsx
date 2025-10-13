@@ -30,9 +30,7 @@ export function MapPickerDialog({
   initialPosition,
   radius,
 }: MapPickerDialogProps) {
-  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
-    initialPosition.lat && initialPosition.lng ? initialPosition : null
-  );
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [mapKey, setMapKey] = useState(Date.now());
 
   const [MapComponents, setMapComponents] = useState<{
@@ -46,6 +44,8 @@ export function MapPickerDialog({
   useEffect(() => {
     if (isOpen) {
       setMapKey(Date.now());
+      setPosition(initialPosition.lat && initialPosition.lng ? initialPosition : null)
+
       import('leaflet').then(L => {
         let DefaultIcon = L.icon({
             iconUrl: icon.src,
@@ -67,7 +67,7 @@ export function MapPickerDialog({
         });
       });
     }
-  }, [isOpen]);
+  }, [isOpen, initialPosition]);
 
 
   const handleSave = () => {
