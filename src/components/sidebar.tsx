@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -12,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Store } from "@/lib/storage";
 import { Logo } from "./logo";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "./ui/tooltip";
+
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -64,68 +67,90 @@ export function Sidebar() {
       return <Skeleton className="h-10 w-10 rounded-full bg-black/20" />;
     }
     return (
-      <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-black/20 hover:text-white">
-          {theme === 'dark' ? <Sun /> : <Moon />}
-          <span className="sr-only">Toggle theme</span>
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+            <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-black/20 hover:text-white">
+                {theme === 'dark' ? <Sun /> : <Moon />}
+                <span className="sr-only">Toggle theme</span>
+            </Button>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+            <p>Alterar tema (claro/escuro)</p>
+        </TooltipContent>
+      </Tooltip>
     )
   }
 
   const isAdminPage = pathname.startsWith('/admin');
 
   return (
-    <aside className="flex h-full max-h-screen flex-col gap-2 bg-[#2B344D] text-white">
-      <div className="flex h-14 items-center border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
-        <Link href="/" className="flex items-center gap-3 text-white">
-            <Logo />
-        </Link>
-      </div>
+    <TooltipProvider>
+      <aside className="flex h-full max-h-screen flex-col gap-2 bg-[#2B344D] text-white">
+        <div className="flex h-14 items-center border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
+          <Link href="/" className="flex items-center gap-3 text-white">
+              <Logo />
+          </Link>
+        </div>
 
-      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        <div className="px-2 py-2">
-            <NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname === '/admin'}>Admin</NavLink>
-             {isAdminPage && (
+        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+          <div className="px-2 py-2">
+            <Tooltip>
+                <TooltipTrigger asChild><NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname === '/admin'}>Admin</NavLink></TooltipTrigger>
+                <TooltipContent side="right"><p>Acessar painel de controle global</p></TooltipContent>
+            </Tooltip>
+            {isAdminPage && (
               <div className="pl-4 mt-1 space-y-1">
-                 <NavLink href="/admin/dashboard" icon={<LineChart size={20} />} isActive={pathname === '/admin/dashboard'}>Dashboard</NavLink>
-                 <NavLink href="/admin/db-schema" icon={<Database size={20} />} isActive={pathname === '/admin/db-schema'}>DB Schema</NavLink>
+                 <Tooltip>
+                    <TooltipTrigger asChild><NavLink href="/admin/dashboard" icon={<LineChart size={20} />} isActive={pathname === '/admin/dashboard'}>Dashboard</NavLink></TooltipTrigger>
+                    <TooltipContent side="right"><p>Ver estatísticas consolidadas</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild><NavLink href="/admin/db-schema" icon={<Database size={20} />} isActive={pathname === '/admin/db-schema'}>DB Schema</NavLink></TooltipTrigger>
+                    <TooltipContent side="right"><p>Visualizar a estrutura do banco de dados</p></TooltipContent>
+                </Tooltip>
               </div>
             )}
-        </div>
-        <Separator className="my-2 bg-white/20" />
-        <h2 className="text-sm font-semibold tracking-wider text-white/80 uppercase px-3 mt-4 mb-2">
-          Lojas
-        </h2>
-        {loading ? (
-            <div className="space-y-2 px-2">
-                <Skeleton className="h-9 w-full bg-black/20" />
-                <Skeleton className="h-9 w-full bg-black/20" />
-            </div>
-        ) : stores.length > 0 ? (
-          stores.map((store) => (
-            <NavLink 
-                key={store.id} 
-                href={`/loja/${store.id}`} 
-                icon={<StoreIcon size={20} />} 
-                isActive={pathname.startsWith(`/loja/${store.id}`)}
-            >
-              {store.name}
-            </NavLink>
-          ))
-        ) : (
-          <p className="px-3 text-sm text-white/70">Nenhuma loja cadastrada.</p>
-        )}
-      </nav>
+          </div>
+          <Separator className="my-2 bg-white/20" />
+          <h2 className="text-sm font-semibold tracking-wider text-white/80 uppercase px-3 mt-4 mb-2">
+            Lojas
+          </h2>
+          {loading ? (
+              <div className="space-y-2 px-2">
+                  <Skeleton className="h-9 w-full bg-black/20" />
+                  <Skeleton className="h-9 w-full bg-black/20" />
+              </div>
+          ) : stores.length > 0 ? (
+            stores.map((store) => (
+              <Tooltip key={store.id}>
+                <TooltipTrigger asChild>
+                    <NavLink 
+                        href={`/loja/${store.id}`} 
+                        icon={<StoreIcon size={20} />} 
+                        isActive={pathname.startsWith(`/loja/${store.id}`)}
+                    >
+                    {store.name}
+                    </NavLink>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Acessar painel da loja {store.name}</p></TooltipContent>
+              </Tooltip>
+            ))
+          ) : (
+            <p className="px-3 text-sm text-white/70">Nenhuma loja cadastrada.</p>
+          )}
+        </nav>
 
-      <div className="mt-auto p-4 border-t border-white/20">
-        <div className="flex justify-center mb-2">
-            {renderThemeToggle()}
+        <div className="mt-auto p-4 border-t border-white/20">
+          <div className="flex justify-center mb-2">
+              {renderThemeToggle()}
+          </div>
+          <div className="px-3 py-2 text-xs text-center text-white/70 space-y-1">
+              <p>V1.0.1 Build Estavel</p>
+              <p>RyannBreston desenvolvedor</p>
+              <p>© {new Date().getFullYear()} Acelera GT.</p>
+          </div>
         </div>
-        <div className="px-3 py-2 text-xs text-center text-white/70 space-y-1">
-            <p>V1.0.1 Build Estavel</p>
-            <p>RyannBreston desenvolvedor</p>
-            <p>© {new Date().getFullYear()} Acelera GT.</p>
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </TooltipProvider>
   );
 }
