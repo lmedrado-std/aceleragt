@@ -12,11 +12,11 @@ export default function HomePage() {
           <Card className="w-full max-w-lg md:max-w-2xl shadow-lg">
               <CardContent className="p-8 md:p-12 flex flex-col items-center justify-center text-center">
                   <Rocket className="h-20 w-20 text-primary mb-6" />
-                  <h1 className="text-3xl md:text-4xl font-bold">
+                  <h1 className="text-4xl md:text-5xl font-bold">
                       <span className="text-destructive">Bem-vindo(a) ao </span> 
                       <span className="text-primary">Acelera GT</span>
                   </h1>
-                  <p className="text-muted-foreground mt-3 text-sm md:text-base">
+                  <p className="text-muted-foreground mt-4 text-base md:text-lg">
                       Selecione uma loja na barra lateral para começar.
                   </p>
               </CardContent>
