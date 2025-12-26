@@ -181,14 +181,12 @@ function StorePageContent() {
         <div className="w-full max-w-7xl">
             <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-sm">
               <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-6">
-                      {loading ? <Skeleton className="h-12 w-12 rounded-full" /> : <Logo />}
-                      <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-white">
-                          {loading ? <Skeleton className="h-8 w-48" /> : store?.name}
-                        </h1>
-                      </div>
-                  </div>
+                  {loading ? <Skeleton className="h-12 w-40" /> : <Logo />}
+                  
+                  <h1 className="text-3xl font-bold tracking-tight text-white order-first sm:order-none sm:absolute sm:left-1/2 sm:-translate-x-1/2">
+                    {loading ? <Skeleton className="h-8 w-48" /> : store?.name}
+                  </h1>
+
                   <div className="flex items-center gap-2">
                       {renderThemeToggle()}
                       <Tooltip>
