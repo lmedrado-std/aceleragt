@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,6 +9,21 @@ import AppLayout from "@/components/app-layout";
 import { Logo } from "@/components/logo";
 import { StoreCard } from "@/components/store-card";
 import { AdminButton } from "@/components/admin-button";
+import { cn } from "@/lib/utils";
+
+const storeCardColors = [
+    "border-blue-500",
+    "border-green-500",
+    "border-purple-500",
+    "border-orange-500",
+    "border-pink-500",
+    "border-yellow-500",
+    "border-teal-500",
+    "border-cyan-500",
+    "border-red-500",
+    "border-indigo-500",
+];
+
 
 export default function HomePage() {
   const [stores, setStores] = useState<Store[]>([]);
@@ -69,11 +83,12 @@ export default function HomePage() {
                     </Card>
                 ) : stores.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-                        {stores.map((store) => (
+                        {stores.map((store, index) => (
                            <StoreCard
                               key={store.id}
                               name={store.name}
                               onClick={() => router.push(`/loja/${store.id}`)}
+                              className={storeCardColors[index % storeCardColors.length]}
                             />
                         ))}
                     </div>

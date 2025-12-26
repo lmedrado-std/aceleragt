@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
 import AppLayout from "@/components/app-layout";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useRouter>) {
   const lojaDashboardUrl = `/loja/${storeId}/dashboard?tab=admin`;
@@ -39,6 +40,19 @@ function handleSellerAccess(storeId: string, sellerId: string, router: ReturnTyp
   
   router.push(sellerLoginUrl);
 }
+
+const sellerButtonColors = [
+    "border-blue-500 hover:bg-blue-50",
+    "border-green-500 hover:bg-green-50",
+    "border-purple-500 hover:bg-purple-50",
+    "border-orange-500 hover:bg-orange-50",
+    "border-pink-500 hover:bg-pink-50",
+    "border-yellow-500 hover:bg-yellow-50",
+    "border-teal-500 hover:bg-teal-50",
+    "border-cyan-500 hover:bg-cyan-50",
+    "border-red-500 hover:bg-red-50",
+    "border-indigo-500 hover:bg-indigo-50",
+];
 
 
 function StorePageContent() {
@@ -162,7 +176,7 @@ function StorePageContent() {
   return (
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto">
-          <div className="mb-6 p-4 rounded-xl bg-[#2B344D] shadow-lg text-white">
+          <div className="mb-6 p-4 rounded-xl bg-accent shadow-lg text-white">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
                   <div className="flex items-center gap-2">
@@ -227,12 +241,12 @@ function StorePageContent() {
                   <CardContent>
                       {sellers.length > 0 ? (
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                              {sellers.map((seller) => (
+                              {sellers.map((seller, index) => (
                                 <Tooltip key={seller.id}>
                                   <TooltipTrigger asChild>
                                     <button
                                         onClick={() => handleSellerAccess(storeId, seller.id, router)}
-                                        className="group flex flex-col items-center p-3 rounded-lg border hover:bg-muted hover:shadow-lg transition-all text-center"
+                                        className={cn("group flex flex-col items-center p-3 rounded-lg border-2 hover:shadow-lg transition-all text-center", sellerButtonColors[index % sellerButtonColors.length])}
                                     >
                                         <SellerAvatar avatarId={seller.avatar_id} className="h-24 w-24 mb-3 transition-transform group-hover:scale-105" />
                                         <span className="font-semibold text-foreground">{seller.name}</span>

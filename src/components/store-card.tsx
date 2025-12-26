@@ -1,19 +1,24 @@
-
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Store } from "lucide-react";
 
 type StoreCardProps = {
   name: string;
   subtitle?: string;
   onClick: () => void;
+  className?: string;
 };
 
-export function StoreCard({ name, subtitle, onClick }: StoreCardProps) {
+export function StoreCard({ name, subtitle, onClick, className }: StoreCardProps) {
   return (
     <div 
       onClick={onClick}
-      className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-md hover:shadow-xl transition p-6 cursor-pointer border-b-4 border-blue-500 hover:border-blue-400 hover:-translate-y-1"
+      className={cn(
+        "bg-white dark:bg-slate-800/50 rounded-2xl shadow-md hover:shadow-xl transition p-6 cursor-pointer border-b-4 hover:-translate-y-1",
+        "border-blue-500 hover:border-blue-400", // Default color
+        className
+      )}
     >
       <div className="flex items-center gap-4">
         <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 p-3 rounded-full">
