@@ -107,7 +107,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(vendas)}</p>
                     <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">Vendido até agora</p>
                 </div>
-                <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden pt-6 mb-4">
+                <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
                     <div
                         className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
                         style={{ width: `${progress}%` }}
@@ -128,11 +128,15 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                              <TooltipProvider key={index}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <div className="absolute top-1/2 -translate-y-1/2 z-10" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                                            {achieved ? 
-                                                <TrophyIconFilled className="h-6 w-6 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" /> :
-                                                <div className="h-6 w-[2px] bg-white/60 rounded-full" />
-                                            }
+                                        <div
+                                            className="absolute inset-y-0 flex items-center justify-center"
+                                            style={{ left: `${left}%`, transform: "translateX(-50%)", zIndex: 20 }}
+                                        >
+                                            {achieved ? (
+                                                <TrophyIconFilled className="h-6 w-6 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
+                                            ) : (
+                                                <div className="h-6 w-[2px] bg-white/70 rounded-full" />
+                                            )}
                                         </div>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -225,7 +229,7 @@ const MetricProgressBar = ({
             <p className="text-4xl font-extrabold tracking-tight">{valueFormatter(currentValue)}</p>
             <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">{valueSuffix}</p>
           </div>
-          <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden pt-6 mb-4">
+          <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
             <div 
               className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
               style={{ width: `${progress}%` }}
@@ -244,7 +248,7 @@ const MetricProgressBar = ({
                 <TooltipProvider key={index}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div
+                       <div
                         className="absolute top-0 h-full w-[1px] bg-white/30"
                         style={{ left: `${left}%` }}
                       />
