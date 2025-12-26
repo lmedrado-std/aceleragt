@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw, Moon, Sun, Users } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +16,7 @@ import AppLayout from "@/components/app-layout";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
+import { SellerCard } from "@/components/seller-card";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useRouter>) {
   const lojaDashboardUrl = `/loja/${storeId}/dashboard?tab=admin`;
@@ -42,17 +42,11 @@ function handleSellerAccess(storeId: string, sellerId: string, router: ReturnTyp
   router.push(sellerLoginUrl);
 }
 
-const sellerButtonColors = [
-    "border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20",
-    "border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20",
-    "border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20",
-    "border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20",
-    "border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20",
-    "border-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20",
-    "border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20",
-    "border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20",
-    "border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20",
-    "border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20",
+const sellerCardColors: ("pink" | "green" | "purple" | "orange")[] = [
+    "pink",
+    "green",
+    "purple",
+    "orange",
 ];
 
 
@@ -259,24 +253,12 @@ function StorePageContent() {
                         {sellers.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                                 {sellers.map((seller, index) => (
-                                <Tooltip key={seller.id}>
-                                  <TooltipTrigger asChild>
-                                    <button
-                                        onClick={() => handleSellerAccess(storeId, seller.id, router)}
-                                        className={cn(
-                                          "group flex flex-col items-center p-4 rounded-xl border-2 hover:shadow-lg transition-all text-center",
-                                          "bg-card hover:bg-muted/50 dark:bg-muted/20 dark:hover:bg-muted/40",
-                                          sellerButtonColors[index % sellerButtonColors.length]
-                                        )}
-                                    >
-                                        <SellerAvatar avatarId={seller.avatar_id} className="h-28 w-28 mb-4 border-4 border-background transition-transform group-hover:scale-105" />
-                                        <span className="font-semibold text-foreground text-lg">{seller.name}</span>
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Acessar painel de {seller.name}</p>
-                                  </TooltipContent>
-                                </Tooltip>
+                                <SellerCard
+                                    key={seller.id}
+                                    name={seller.name}
+                                    color={sellerCardColors[index % sellerCardColors.length]}
+                                    onClick={() => handleSellerAccess(storeId, seller.id, router)}
+                                />
                               ))}
                           </div>
                       ) : (

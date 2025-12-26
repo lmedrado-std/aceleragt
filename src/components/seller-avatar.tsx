@@ -98,12 +98,12 @@ const avatarComponents: { [key: string]: React.FC<React.SVGProps<SVGSVGElement>>
 };
 
 interface SellerAvatarProps {
-  avatarId: string;
+  avatarId?: string | null;
   className?: string;
 }
 
 export function SellerAvatar({ avatarId, className }: SellerAvatarProps) {
-  const AvatarComponent = avatarComponents[avatarId] || Avatar1; // Fallback to Avatar1
+  const AvatarComponent = (avatarId && avatarComponents[avatarId]) || Avatar1; // Fallback to Avatar1
 
   return (
     <div className={cn("rounded-full overflow-hidden", className)}>
