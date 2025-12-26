@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -79,58 +78,53 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     const congratsMessage = getCongratsMessage();
 
     return (
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 pt-12">
-            <h4 className="font-semibold text-white">Vendas até a Meta</h4>
-            <p className="text-sm text-white/80 mb-3">Progresso em relação às metas principais de vendas.</p>
-            <div className="relative h-8 w-full rounded-full bg-black/20 mt-8">
-                {metas.map((meta, index) => {
-                    const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
-                    const achieved = vendas >= meta.value;
-                    return (
-                        <TooltipProvider key={index}>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="absolute top-0 h-full flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                                        <div className={cn("h-full w-1", achieved ? "bg-green-400" : "bg-white/30")}></div>
-                                        <div className="absolute -top-8 text-xs font-medium text-white/80">{meta.label}</div>
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>{meta.label}: {formatCurrency(meta.value)}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    );
-                })}
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
+            <CardHeader className="p-0">
+                <CardTitle className="text-white">Vendas até a Meta</CardTitle>
+                <CardDescription className="text-white/80">Progresso em relação às metas principais de vendas.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 mt-8">
+                <div className="relative h-4 w-full rounded-full bg-black/20">
+                    <div className="absolute top-0 left-0 h-full rounded-full bg-white" style={{ width: `${progressPercentage}%` }}></div>
 
-                <div className="absolute top-0 left-0 h-full rounded-full bg-white" style={{ width: `${progressPercentage}%` }}></div>
+                    {metas.map((meta, index) => {
+                        const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
+                        if (left === 0 || left > 100) return null;
 
-                {metas.map((meta, index) => {
-                    const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
-                    if (vendas >= meta.value) {
-                         return (
-                            <div key={index} className="absolute top-0 flex items-center" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                                <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6" />
-                            </div>
+                        const achieved = vendas >= meta.value;
+
+                        return (
+                             <TooltipProvider key={index}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="absolute top-1/2 h-8 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
+                                            <div className={cn("h-full w-full", achieved ? "bg-green-300" : "bg-white/40")} />
+                                             {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{meta.label}: {formatCurrency(meta.value)}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         );
-                    }
-                    return null;
-                })}
-            </div>
-             <div className="mt-8 text-center text-sm">
-                {nextGoal ? (
-                    <p className="text-white/80">
-                        Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-white">{nextGoal.label}</span>!
-                    </p>
-                ) : (
-                    <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> {congratsMessage}</p>
-                )}
-            </div>
+                    })}
+                </div>
+                <div className="mt-8 text-center text-sm">
+                    {nextGoal ? (
+                        <p className="text-white/90">
+                            Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-white">{nextGoal.label}</span>!
+                        </p>
+                    ) : (
+                        <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> {congratsMessage}</p>
+                    )}
+                </div>
+            </CardContent>
         </Card>
     );
 };
 
-const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardClassName }: { label: string; currentValue: number; goals: {value: number, label: string}[]; unit: string; valueFormatter: (value: number) => string; cardClassName?: string }) => {
+const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassName }: { label: string; currentValue: number; goals: {value: number, label: string}[]; valueFormatter: (value: number) => string; cardClassName?: string }) => {
     
     let currentTier = -1;
     for (let i = goals.length - 1; i >= 0; i--) {
@@ -142,12 +136,19 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardC
 
     const nextGoalIndex = currentTier + 1;
     const nextGoal = goals[nextGoalIndex] && goals[nextGoalIndex].value > 0 ? goals[nextGoalIndex] : null;
-    const currentTierLabel = currentTier !== -1 ? goals[currentTier].label : '';
-
-    const progressPercentage = nextGoal ? Math.min((currentValue / nextGoal.value) * 100, 100) : (currentTier !== -1 ? 100 : 0);
     
-    const strokeWidth = 14;
-    const radius = 80;
+    const startValueForProgress = currentTier !== -1 ? goals[currentTier].value : 0;
+    const endValueForProgress = nextGoal ? nextGoal.value : (currentTier !== -1 ? goals[currentTier].value : (goals[0]?.value || 0));
+
+    let progressPercentage = 0;
+    if (endValueForProgress > startValueForProgress) {
+        progressPercentage = Math.min(((currentValue - startValueForProgress) / (endValueForProgress - startValueForProgress)) * 100, 100);
+    } else if (currentValue >= startValueForProgress && startValueForProgress > 0) {
+        progressPercentage = 100;
+    }
+
+    const strokeWidth = 12;
+    const radius = 60;
     const normalizedRadius = radius - strokeWidth / 2;
     const circumference = normalizedRadius * 2 * Math.PI;
     const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
@@ -158,17 +159,17 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardC
             return `Faltam ${valueFormatter(diff)} para ${nextGoal.label}`;
         }
         if (currentTier !== -1) {
-             return `${currentTierLabel} atingido!`;
+             return `${goals[currentTier].label} atingido!`;
         }
         if (goals.length > 0 && goals[0].value > 0) {
             return `Faltam ${valueFormatter(goals[0].value)} para ${goals[0].label}`;
         }
-        return `Nenhuma meta de ${label} definida.`
+        return `Nenhuma meta definida.`
     };
 
     return (
-        <Card className={cn("p-6 flex flex-col items-center", cardClassName)}>
-            <h4 className="font-semibold text-white mb-4">{label}</h4>
+        <Card className={cn("p-6 flex flex-col items-center justify-between h-full", cardClassName)}>
+            <h4 className="font-semibold text-white mb-4 text-center">{label}</h4>
             <div className="relative" style={{width: radius*2, height: radius*2}}>
                 <svg height={radius * 2} width={radius * 2} className="-rotate-90">
                     <circle
@@ -185,7 +186,7 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardC
                         stroke="currentColor"
                         fill="transparent"
                         strokeDasharray={circumference + ' ' + circumference}
-                        style={{ strokeDashoffset }}
+                        style={{ strokeDashoffset, transition: 'stroke-dashoffset 0.5s ease-out' }}
                         strokeWidth={strokeWidth}
                         strokeLinecap="round"
                         r={normalizedRadius}
@@ -194,13 +195,13 @@ const CircularGauge = ({ label, currentValue, goals, unit, valueFormatter, cardC
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
-                     <span className="text-2xl font-bold">
+                     <span className="text-3xl font-bold">
                         {valueFormatter(currentValue)}
                     </span>
-                    {currentTierLabel && <p className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">{currentTierLabel}!</p>}
+                    {currentTier !== -1 && <p className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full mt-1">{goals[currentTier].label}!</p>}
                 </div>
             </div>
-             <div className="mt-4 text-center text-xs text-white/80 h-4">
+             <div className="mt-4 text-center text-sm text-white/90 h-5">
                 <p>{nextGoalInfo()}</p>
             </div>
         </Card>
@@ -245,17 +246,17 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   }
 
   const paGoals = [
-    { value: goals.paGoal1, label: 'Nível 1' },
-    { value: goals.paGoal2, label: 'Nível 2' },
-    { value: goals.paGoal3, label: 'Nível 3' },
-    { value: goals.paGoal4, label: 'Nível 4' },
+    { value: goals.paGoal1 || 0, label: 'Nível 1' },
+    { value: goals.paGoal2 || 0, label: 'Nível 2' },
+    { value: goals.paGoal3 || 0, label: 'Nível 3' },
+    { value: goals.paGoal4 || 0, label: 'Nível 4' },
   ];
 
   const ticketGoals = [
-      { value: goals.ticketMedioGoal1, label: 'Nível 1' },
-      { value: goals.ticketMedioGoal2, label: 'Nível 2' },
-      { value: goals.ticketMedioGoal3, label: 'Nível 3' },
-      { value: goals.ticketMedioGoal4, label: 'Nível 4' },
+      { value: goals.ticketMedioGoal1 || 0, label: 'Nível 1' },
+      { value: goals.ticketMedioGoal2 || 0, label: 'Nível 2' },
+      { value: goals.ticketMedioGoal3 || 0, label: 'Nível 3' },
+      { value: goals.ticketMedioGoal4 || 0, label: 'Nível 4' },
   ];
 
 
@@ -287,7 +288,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         label="Produtos por Atendimento (PA)"
                         currentValue={Number(pa)}
                         goals={paGoals}
-                        unit="PA"
                         valueFormatter={(val) => formatNumber(val)}
                         cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
                     />
@@ -295,7 +295,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         label="Ticket Médio"
                         currentValue={Number(ticketMedio)}
                         goals={ticketGoals}
-                        unit="R$"
                         valueFormatter={(val) => formatCurrency(val)}
                         cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
                     />
