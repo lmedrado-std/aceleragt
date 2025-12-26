@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, LogOut, Store, Users, DollarSign, BarChart, ExternalLink } from "lucide-react";
-import AppLayout from "@/components/app-layout";
 import ClientOnly from "@/components/client-only";
 import { logoutAll } from "@/lib/auth";
 import Link from "next/link";
@@ -96,7 +95,7 @@ function GlobalDashboard() {
   return (
     <TooltipProvider>
         <div className="w-full max-w-7xl mx-auto flex flex-col gap-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
                     <h1 className="text-3xl font-bold">Dashboard Geral Consolidado</h1>
                     <p className="text-muted-foreground">Visão geral do desempenho de todas as lojas.</p>
@@ -205,9 +204,9 @@ function GlobalDashboard() {
 export default function GlobalDashboardPage() {
     return (
         <ClientOnly>
-            <AppLayout>
+            <div className="flex-1 flex flex-col p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
                 <GlobalDashboard />
-            </AppLayout>
+            </div>
         </ClientOnly>
     );
 }

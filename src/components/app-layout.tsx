@@ -14,9 +14,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const isRoot = pathname === '/';
     // Verifica se é a página da loja (ex: /loja/some-id), mas não sub-rotas (ex: /loja/some-id/dashboard)
     const isStorePage = /^\/loja\/[^/]+$/.test(pathname);
+    const isAdminDashboard = pathname === '/admin/dashboard';
     
-    // Oculta a sidebar na página inicial e na página de seleção de vendedores da loja
-    const hideSidebar = isRoot || isStorePage;
+    // Oculta a sidebar na página inicial, na página de seleção de vendedores da loja e no dashboard de admin
+    const hideSidebar = isRoot || isStorePage || isAdminDashboard;
 
     if (hideSidebar) {
         return <main className="flex-1 flex flex-col">{children}</main>;
