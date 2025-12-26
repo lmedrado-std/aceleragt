@@ -60,26 +60,24 @@ export default function HomePage() {
                 ) : stores.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                         {stores.map((store) => (
-                        <Link href={`/loja/${store.id}`} key={store.id} legacyBehavior>
-                            <a className="block group">
-                                <Card className="h-full transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary hover:-translate-y-1">
-                                    <CardHeader>
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-primary/10 rounded-lg">
-                                                <StoreIcon className="h-6 w-6 text-primary" />
-                                            </div>
-                                            <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                                                {store.name}
-                                            </CardTitle>
+                        <Link href={`/loja/${store.id}`} key={store.id} className="block group">
+                            <Card className="h-full transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary hover:-translate-y-1">
+                                <CardHeader>
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-primary/10 rounded-lg">
+                                            <StoreIcon className="h-6 w-6 text-primary" />
                                         </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-muted-foreground">
-                                            Clique para acessar o painel desta loja.
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            </a>
+                                        <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                                            {store.name}
+                                        </CardTitle>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">
+                                        Clique para acessar o painel desta loja.
+                                    </p>
+                                </CardContent>
+                            </Card>
                         </Link>
                         ))}
                     </div>
