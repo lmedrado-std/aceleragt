@@ -6,7 +6,7 @@ import { z } from "zod";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ShieldCheck, Home, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2, Trophy } from "lucide-react";
+import { ShieldCheck, Home, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2, Trophy, LogOut } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +29,7 @@ import { Goals, Store, Incentives, Seller } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
-import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/lib/auth";
+import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -462,16 +462,22 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   useEffect(() => {
     if (loading) return;
-    const tabFromUrl = searchParams.get("tab") || activeTab;
+    
+    const tabFromUrl = searchParams.get("tab");
     const isSellerTab = sellers.some(s => s.id === tabFromUrl);
-    if (tabFromUrl === 'admin') {
-      if (!isAdmin && !isStoreAdmin) router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=admin`)}`);
-    } else if (isSellerTab) {
-      if (!isAdmin && !isStoreAdmin && !isSellerAuthenticated(tabFromUrl)){
-        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${tabFromUrl}`)}`);
+    const effectiveTab = tabFromUrl || activeTab;
+
+    if (effectiveTab === 'admin') {
+      if (!isAdmin && !isStoreAdmin) {
+        router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=admin`)}`);
+      }
+    } else if (sellers.some(s => s.id === effectiveTab)) {
+      if (!isAdmin && !isStoreAdmin && !isSellerAuthenticated(effectiveTab)){
+        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${effectiveTab}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${effectiveTab}`)}`);
       }
     }
   }, [storeId, activeTab, searchParams, router, loading, sellers, isStoreAdmin, isAdmin]);
+
 
   const handleIncentivesCalculated = useCallback((newIncentives: Incentives, newLastUpdated: string) => {
       setIncentives(newIncentives);
@@ -493,8 +499,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     setActiveTab(newTab);
     router.push(`/loja/${storeId}/dashboard?tab=${newTab}`, { scroll: false });
   };
+
+  const handleLogout = () => {
+    logoutStore(storeId);
+    toast({ title: "Sessão encerrada", description: "Você saiu do modo de gestor." });
+    router.push(`/loja/${storeId}`);
+  };
   
   if (loading || activeTab === "loading" || !currentStore) return <DashboardSkeleton />;
+
+  const isManagerView = isAdmin || isStoreAdmin;
 
   return (
     <TooltipProvider>
@@ -502,7 +516,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline text-white">{currentStore?.name}</h1>
+                    <h1 className="text-3xl font-bold font-headline text-white">
+                      {currentStore?.name}
+                      {isManagerView && activeTab === 'admin' && (
+                        <span className="text-xl font-semibold opacity-80 ml-2">_Gestor_</span>
+                      )}
+                    </h1>
                     <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -516,13 +535,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         </TooltipTrigger>
                         <TooltipContent><p>Voltar para a seleção de vendedores</p></TooltipContent>
                     </Tooltip>
+                    {isManagerView && (
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                              <Button onClick={handleLogout} variant="destructive" className="shadow-sm">
+                                  <LogOut className="mr-2 h-4 w-4" />Sair
+                              </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><p>Encerrar sessão de gestor</p></TooltipContent>
+                      </Tooltip>
+                    )}
                 </div>
             </CardContent>
         </Card>
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                 {(isAdmin || isStoreAdmin) && (
+                 {isManagerView ? (
                     <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
                         <TabsList className="h-auto p-0 bg-transparent">
                             <Tooltip>
@@ -547,9 +576,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             </TabsList>
                         </div>
                     </div>
+                 ) : (
+                    <div className="hidden"></div>
                  )}
 
-                {(isAdmin || isStoreAdmin) && (
+                {isManagerView && (
                   <TabsContent value="admin" className="mt-6">
                     <AdminTab
                       form={form}
