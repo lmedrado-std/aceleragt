@@ -73,7 +73,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(vendas)}</p>
                     <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">Vendido até agora</p>
                 </div>
-                <div className="relative h-6 w-full rounded-full bg-white/25 overflow-hidden">
+                <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
                     <div
                         className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
                         style={{ width: `${progress}%` }}
@@ -81,7 +81,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     
                     <div
                       className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
-                      style={{ left: `${progress}%`, transform: 'translateX(-1.5px)' }}
+                      style={{ left: `calc(${progress}% - 1.5px)` }}
                     />
 
                     {metas.map((meta, index) => {
@@ -94,7 +94,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                              <TooltipProvider key={index}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <div className="absolute top-1/2 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
+                                        <div className="absolute top-1/2 -translate-y-1/2 z-10" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                             {achieved ? 
                                                 <Trophy className="h-6 w-6 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" /> :
                                                 <div className="h-6 w-[2px] bg-white/60 rounded-full" />
@@ -191,7 +191,7 @@ const MetricProgressBar = ({
             <p className="text-4xl font-extrabold tracking-tight">{valueFormatter(currentValue)}</p>
             <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">{valueSuffix}</p>
           </div>
-          <div className="relative h-6 w-full rounded-full bg-white/25 overflow-hidden">
+          <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
             <div 
               className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
               style={{ width: `${progress}%` }}
@@ -199,7 +199,7 @@ const MetricProgressBar = ({
             
             <div
               className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
-              style={{ left: `${progress}%`, transform: 'translateX(-1.5px)' }}
+              style={{ left: `calc(${progress}% - 1.5px)` }}
             />
 
             {goals.map((goal, index) => {
