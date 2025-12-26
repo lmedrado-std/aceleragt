@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -204,10 +203,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     return <div className="p-4">Carregando metas...</div>;
   }
   
-  const totalIncentives = incentives
-    ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
-    : 0;
-
   const paGoals = [
     { value: goals.paGoal1 || 0, label: 'Nível 1' },
     { value: goals.paGoal2 || 0, label: 'Nível 2' },
@@ -225,21 +220,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
 
   return (
     <div className="space-y-6">
-        <Card className="col-span-full bg-slate-900 text-white">
-          <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold text-white/70">Missão de hoje</p>
-              <p className="text-lg font-bold">
-                Vender {formatCurrency(goals.metaHoje || 0)} ou {formatNumber(goals.paMetaHoje || 0)} PA
-              </p>
-              <p className="text-xs text-white/60">
-                Se bater, você garante pelo menos {formatCurrency(incentives?.meta1Premio || goals.metaMinhaPrize || 0)}.
-              </p>
-            </div>
-            {/* Ganhos projetados movido para a outra aba */}
-          </CardContent>
-        </Card>
-        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-3 space-y-6">
                  <SalesProgressBar vendas={Number(vendas)} goals={goals} />

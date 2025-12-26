@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -209,9 +208,10 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           incentives={incentives}
       />
       <Tabs defaultValue="desempenho" className="w-full">
-        <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-5 w-full sm:w-max gap-2">
+        <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-6 w-full sm:w-max gap-2">
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="desempenho"><Trophy className="mr-2 h-4 w-4" />Meu Desempenho</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver desempenho e progresso das metas</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="lancamentos"><BarChart className="mr-2 h-4 w-4" />Meus Lançamentos</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver dados lançados pelo administrador</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild><TabsTrigger value="corridinhas"><Rocket className="mr-2 h-4 w-4" />Corridinhas</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver metas e bônus de curto prazo</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="metas"><Target className="mr-2 h-4 w-4" />Metas</TabsTrigger></TooltipTrigger><TooltipContent><p>Consultar os valores de todas as metas</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta" className={cn(prizeWheelCredits > 0 && "animate-subtle-pulse")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="dicas"><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
@@ -347,6 +347,26 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                 </div>
             )}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="corridinhas" className="mt-6">
+           <Card className="col-span-full bg-slate-900 text-white">
+            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                <p className="text-xs font-semibold text-white/70">Missão de hoje</p>
+                <p className="text-lg font-bold">
+                    Vender {formatCurrency(goals.metaHoje || 0)} ou {String(Number(goals.paMetaHoje || 0).toFixed(2))} PA
+                </p>
+                <p className="text-xs text-white/60">
+                    Se bater, você garante pelo menos {formatCurrency(incentives?.meta1Premio || goals.metaMinhaPrize || 0)}.
+                </p>
+                </div>
+            </CardContent>
+            </Card>
+
+             {isCorridinhaActive && (
+                <Card className="lg:col-span-3 mt-6"><CardHeader><CardTitle className="flex items-center gap-2 text-primary"><Rocket /> Corridinha Ativa!</CardTitle><CardDescription>Um incentivo especial está ativo no período de {goals.corridinhaStartDate ? format(new Date(goals.corridinhaStartDate), 'dd/MM/yyyy') : ''} até {goals.corridinhaEndDate ? format(new Date(goals.corridinhaEndDate), 'dd/MM/yyyy') : ''}.</CardDescription></CardHeader><CardContent><div className="grid gap-4 md:grid-cols-2">{goals.corridinhaObjective1 && <GoalItem label={goals.corridinhaObjective1} value={formatCurrency(goals.corridinhaPrize1 || 0)} />}{goals.corridinhaObjective2 && <GoalItem label={goals.corridinhaObjective2} value={formatCurrency(goals.corridinhaPrize2 || 0)} />}{goals.corridinhaObjective3 && <GoalItem label={goals.corridinhaObjective3} value={formatCurrency(goals.corridinhaPrize3 || 0)} />}{goals.corridinhaObjective4 && <GoalItem label={goals.corridinhaObjective4} value={formatCurrency(goals.corridinhaPrize4 || 0)} />}</div></CardContent></Card>
+            )}
         </TabsContent>
 
          <TabsContent value="metas" className="mt-6">
