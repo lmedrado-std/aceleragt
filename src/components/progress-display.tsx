@@ -128,31 +128,31 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
 
                         return (
                             <TooltipProvider key={index}>
-                            <Tooltip>
+                              <Tooltip>
                                 <TooltipTrigger asChild>
-                                <div
+                                  <div
                                     className="absolute inset-y-0 flex items-center justify-center"
                                     style={{ left: `${left}%`, transform: "translateX(-50%)", zIndex: 30 }}
-                                >
+                                  >
                                     {achieved ? (
-                                    <TrophyIconFilled className="h-6 w-6 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
+                                      <TrophyIconFilled className="h-6 w-6 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
                                     ) : (
-                                    <div
+                                      <div
                                         className={cn(
-                                        "h-4 w-[3px] rounded-full",
-                                        isNext ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]" : "bg-white/60"
+                                          "h-4 w-[3px] rounded-full",
+                                          isNext ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]" : "bg-white/60"
                                         )}
-                                    />
+                                      />
                                     )}
-                                </div>
+                                  </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                <p className="text-sm font-semibold">{meta.label}</p>
-                                <p className="text-xs text-muted-foreground">
+                                  <p className="text-sm font-semibold">{meta.label}</p>
+                                  <p className="text-xs text-muted-foreground">
                                     Atingir {formatCurrency(meta.value)} para garantir {formatCurrency(meta.prize)}.
-                                </p>
+                                  </p>
                                 </TooltipContent>
-                            </Tooltip>
+                              </Tooltip>
                             </TooltipProvider>
                         );
                     })}
