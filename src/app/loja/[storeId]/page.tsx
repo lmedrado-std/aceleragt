@@ -30,16 +30,7 @@ function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useRou
 
 function handleSellerAccess(storeId: string, sellerId: string, router: ReturnType<typeof useRouter>) {
   const sellerDashboardUrl = `/loja/${storeId}/dashboard?tab=${sellerId}`;
-
-  // Case 1: User has direct access to the seller's dashboard.
-  if (isAdminGlobal() || isStoreAuthenticated(storeId) || isSellerAuthenticated(sellerId)) {
-    router.push(sellerDashboardUrl);
-    return;
-  }
-
-  // Case 2: User is not authenticated. Redirect to the seller's login page.
   const sellerLoginUrl = `/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(sellerDashboardUrl)}`;
-  
   router.push(sellerLoginUrl);
 }
 
