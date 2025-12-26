@@ -1041,19 +1041,19 @@ export function AdminTab({
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                                 <div>
-                                    <FormField control={control} name="goals.corridinhaObjective1" render={({ field }) => (<FormItem><FormLabel>Objetivo 1</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} /></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaObjective1" render={({ field }) => (<FormItem><FormLabel>Objetivo 1</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
                                     <FormField control={control} name="goals.corridinhaPrize1" render={({ field }) => (<FormItem><FormLabel>Prêmio 1 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                                 </div>
                                 <div>
-                                    <FormField control={control} name="goals.corridinhaObjective2" render={({ field }) => (<FormItem><FormLabel>Objetivo 2</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} /></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaObjective2" render={({ field }) => (<FormItem><FormLabel>Objetivo 2</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
                                     <FormField control={control} name="goals.corridinhaPrize2" render={({ field }) => (<FormItem><FormLabel>Prêmio 2 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                                 </div>
                                 <div>
-                                    <FormField control={control} name="goals.corridinhaObjective3" render={({ field }) => (<FormItem><FormLabel>Objetivo 3</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} /></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaObjective3" render={({ field }) => (<FormItem><FormLabel>Objetivo 3</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
                                     <FormField control={control} name="goals.corridinhaPrize3" render={({ field }) => (<FormItem><FormLabel>Prêmio 3 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                                 </div>
                                 <div>
-                                    <FormField control={control} name="goals.corridinhaObjective4" render={({ field }) => (<FormItem><FormLabel>Objetivo 4</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} /></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaObjective4" render={({ field }) => (<FormItem><FormLabel>Objetivo 4</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
                                     <FormField control={control} name="goals.corridinhaPrize4" render={({ field }) => (<FormItem><FormLabel>Prêmio 4 (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                                 </div>
                             </div>

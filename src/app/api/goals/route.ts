@@ -1,4 +1,3 @@
-
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -43,8 +42,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
     }
 
-    // Remove properties that shouldn't be updated directly
+    // Remove properties that shouldn't be updated directly and sanitize data
     const { id, store_id: nested_store_id, ...goalData } = goals;
+    
+    // Sanitize dates: empty strings should be null
+    if (goalData.corridinhaStartDate === "") {
+        goalData.corridinhaStartDate = null;
+    }
+    if (goalData.corridinhaEndDate === "") {
+        goalData.corridinhaEndDate = null;
+    }
+    
+    // Sanitize objectives: empty strings should be null
+    if (goalData.corridinhaObjective1 === "") goalData.corridinhaObjective1 = null;
+    if (goalData.corridinhaObjective2 === "") goalData.corridinhaObjective2 = null;
+    if (goalData.corridinhaObjective3 === "") goalData.corridinhaObjective3 = null;
+    if (goalData.corridinhaObjective4 === "") goalData.corridinhaObjective4 = null;
+
+    // Sanitize prizes: ensure they are numbers or null
+    goalData.corridinhaPrize1 = goalData.corridinhaPrize1 ? Number(goalData.corridinhaPrize1) : 0;
+    goalData.corridinhaPrize2 = goalData.corridinhaPrize2 ? Number(goalData.corridinhaPrize2) : 0;
+    goalData.corridinhaPrize3 = goalData.corridinhaPrize3 ? Number(goalData.corridinhaPrize3) : 0;
+    goalData.corridinhaPrize4 = goalData.corridinhaPrize4 ? Number(goalData.corridinhaPrize4) : 0;
+
 
     const upsertedGoal = await prisma.goals.upsert({
       where: { store_id: store_id },
