@@ -41,6 +41,40 @@ const formatNumber = (value: number) => {
     }).format(value || 0);
 }
 
+const TrophyIconFilled = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" stroke="#fbbf24" fill="none" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" stroke="#fbbf24" fill="none" />
+        <path
+        d="M9 12v4.5A2.5 2.5 0 0 0 11.5 19h1A2.5 2.5 0 0 0 15 16.5V12"
+        stroke="#f59e0b"
+        fill="none"
+        />
+        <path d="M12 19v-5" stroke="#f59e0b" fill="none" />
+        <path
+        d="M8 21h8"
+        stroke="#f59e0b"
+        fill="none"
+        strokeWidth="2"
+        />
+        <path
+        d="M15 9.5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1 5 0z"
+        fill="#fcd34d"
+        stroke="#fbbf24"
+        />
+  </svg>
+);
+
+
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
         { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
@@ -73,7 +107,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(vendas)}</p>
                     <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">Vendido até agora</p>
                 </div>
-                <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
+                <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden pt-6 mb-4">
                     <div
                         className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
                         style={{ width: `${progress}%` }}
@@ -96,7 +130,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                     <TooltipTrigger asChild>
                                         <div className="absolute top-1/2 -translate-y-1/2 z-10" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                             {achieved ? 
-                                                <Trophy className="h-6 w-6 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" /> :
+                                                <TrophyIconFilled className="h-6 w-6 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" /> :
                                                 <div className="h-6 w-[2px] bg-white/60 rounded-full" />
                                             }
                                         </div>
@@ -191,7 +225,7 @@ const MetricProgressBar = ({
             <p className="text-4xl font-extrabold tracking-tight">{valueFormatter(currentValue)}</p>
             <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">{valueSuffix}</p>
           </div>
-          <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
+          <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden pt-6 mb-4">
             <div 
               className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
               style={{ width: `${progress}%` }}
@@ -204,7 +238,7 @@ const MetricProgressBar = ({
 
             {goals.map((goal, index) => {
               const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
-              if (left <= 0 || left > 100) return null;
+              if (left <= 0 || left >= 100) return null;
               
                return (
                 <TooltipProvider key={index}>
