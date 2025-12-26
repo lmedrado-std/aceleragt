@@ -305,19 +305,9 @@ export function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: stri
 
 // --- MAIN DASHBOARD COMPONENT ---
 const DashboardSkeleton = () => (
-  <div className="container mx-auto p-4 py-8 md:p-8">
-     <div className="w-full bg-[#2B344D] text-primary-foreground p-6 rounded-xl shadow-lg mb-8">
-       <header className="flex flex-wrap items-center justify-between gap-4">
-          <Skeleton className="h-8 w-48 mb-2" />
-          <Skeleton className="h-4 w-64" />
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-      </header>
-    </div>
-    <div className="border-b mb-4"><div className="flex items-center gap-2"><Skeleton className="h-10 w-24" /><Skeleton className="h-10 w-24" /><Skeleton className="h-10 w-24" /></div></div>
-    <Skeleton className="h-[500px] w-full" />
+  <div className="flex flex-col items-center justify-center h-screen">
+    <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
+    <p className="mt-4 text-muted-foreground">Carregando Dashboard...</p>
   </div>
 );
 
@@ -499,12 +489,31 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto p-0 md:p-8">
-        <div className="w-full bg-[#2B344D] text-primary-foreground p-6 rounded-xl shadow-lg mb-8"><header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"><div><h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1><p className="text-primary-foreground/80">Acompanhe as metas e os ganhos da equipe.</p></div><div className="flex items-center gap-2"><Tooltip><TooltipTrigger asChild><Button asChild variant="secondary" className="shadow bg-black/20 hover:bg-black/30 text-white"><Link href={`/loja/${storeId}`}><Home className="mr-2 h-4 w-4" />Página da Loja</Link></Button></TooltipTrigger><TooltipContent><p>Voltar para a seleção de vendedores</p></TooltipContent></Tooltip></div></header></div>
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
+        <Card className="mb-8 bg-card/80 backdrop-blur-sm border-border/20 shadow-lg">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
+                    <p className="text-muted-foreground">Acompanhe as metas e os ganhos da equipe.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button asChild variant="outline" className="shadow-sm">
+                                <Link href={`/loja/${storeId}`}>
+                                    <Home className="mr-2 h-4 w-4" />Página da Loja
+                                </Link>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Voltar para a seleção de vendedores</p></TooltipContent>
+                    </Tooltip>
+                </div>
+            </CardContent>
+        </Card>
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
+                 <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
                     {(isAdmin || isStoreAdmin) && (
                       <TabsList className="h-auto p-0 bg-transparent">
                           <Tooltip>
