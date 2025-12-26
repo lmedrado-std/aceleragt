@@ -162,7 +162,7 @@ const MetricProgressBar = ({
   };
 
   return (
-    <Card className={cn("p-4 flex flex-col justify-between", cardClassName)}>
+    <Card className={cn("p-4 flex flex-col justify-between text-white", cardClassName)}>
       <div>
         <CardHeader className="p-0">
           <CardTitle className="text-white text-base text-center">{label}</CardTitle>
