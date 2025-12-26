@@ -1,19 +1,21 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Store as StoreIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/app-layout";
 import { Logo } from "@/components/logo";
+import { StoreCard } from "@/components/store-card";
+import { AdminButton } from "@/components/admin-button";
 
 export default function HomePage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchStores() {
@@ -33,13 +35,13 @@ export default function HomePage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8">
-        <div className="w-full max-w-4xl text-center">
+      <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8 bg-[#F6F7FB] dark:bg-slate-900">
+        <div className="w-full max-w-5xl text-center">
             <Logo className="justify-center mb-4 h-16" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
                 Bem-vindo(a) ao Acelera GT
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
                 Selecione uma loja abaixo para acessar o painel de desempenho.
             </p>
             <div className="mt-10">
@@ -60,37 +62,19 @@ export default function HomePage() {
                 ) : stores.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                         {stores.map((store) => (
-                        <Link href={`/loja/${store.id}`} key={store.id} className="block group">
-                            <Card className="h-full transition-all duration-300 ease-in-out hover:shadow-xl hover:border-primary hover:-translate-y-1">
-                                <CardHeader>
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-primary/10 rounded-lg">
-                                            <StoreIcon className="h-6 w-6 text-primary" />
-                                        </div>
-                                        <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                                            {store.name}
-                                        </CardTitle>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground">
-                                        Clique para acessar o painel desta loja.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </Link>
+                           <StoreCard
+                              key={store.id}
+                              name={store.name}
+                              onClick={() => router.push(`/loja/${store.id}`)}
+                            />
                         ))}
                     </div>
                 ) : (
-                    <p className="text-muted-foreground">Nenhuma loja cadastrada no momento.</p>
+                    <p className="text-slate-500">Nenhuma loja cadastrada no momento.</p>
                 )}
             </div>
-            <div className="mt-12 border-t pt-6">
-                <Button variant="outline" asChild>
-                    <Link href="/admin">
-                       Acessar Painel de Administrador
-                    </Link>
-                </Button>
+            <div className="mt-12 pt-6">
+                <AdminButton onClick={() => router.push('/admin')}/>
             </div>
         </div>
       </div>
