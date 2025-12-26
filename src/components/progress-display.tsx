@@ -57,6 +57,19 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number; goals: Goals }) =
     
     const nextGoal = metas.find(m => vendas < m.value);
 
+    // Lógica de Nível e Cor
+    const levelColors = ["bg-sky-500", "bg-purple-500", "bg-orange-500", "bg-pink-500", "bg-rose-500"];
+    const levelHeights = ["h-4", "h-5", "h-5", "h-6", "h-6"];
+    let currentLevel = 0;
+    for (let i = metas.length - 1; i >= 0; i--) {
+        if (vendas >= metas[i].value) {
+            currentLevel = i + 1;
+            break;
+        }
+    }
+    const barColor = levelColors[currentLevel] || "bg-emerald-500";
+    const barHeight = levelHeights[currentLevel] || "h-4";
+
     return (
         <Card className="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white p-6">
             <CardHeader className="p-0">
@@ -68,9 +81,12 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number; goals: Goals }) =
                     <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(vendas)}</p>
                     <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">Vendido até agora</p>
                 </div>
-                <div className="relative h-6 w-full rounded-full bg-white/30">
+                <div className={cn("relative w-full rounded-full bg-white/30", barHeight)}>
                     <div
-                        className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                        className={cn(
+                          "absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.3)]",
+                          barColor
+                        )}
                         style={{ width: `${progress}%` }}
                     />
                     {metas.map((meta, index) => {
@@ -147,135 +163,90 @@ const MetricProgressBar = ({
   cardClassName?: string;
   description?: string;
 }) => {
-  const highestGoal = Math.max(...goals.map(g => g.value), 0) || 1;
-  const progress = Math.min((currentValue / highestGoal) * 100, 100);
+  const maxGoal = Math.max(...goals.map(g => g.value), 1);
+  const progress = Math.min((currentValue / maxGoal) * 100, 100);
 
-  // nível atual
-  let currentTier = -1;
+  // Lógica de Nível e Cor
+  const levelColors = ["bg-sky-500", "bg-purple-500", "bg-orange-500", "bg-pink-500"];
+  const levelHeights = ["h-4", "h-5", "h-5", "h-6"];
+  let currentLevel = -1;
   for (let i = goals.length - 1; i >= 0; i--) {
-    if (goals[i].value > 0 && currentValue >= goals[i].value) {
-      currentTier = i;
-      break;
-    }
+      if (goals[i].value > 0 && currentValue >= goals[i].value) {
+          currentLevel = i;
+          break;
+      }
   }
-  const currentTierGoal = currentTier !== -1 ? goals[currentTier] : null;
 
-  // próxima meta
-  const nextGoalIndex = currentTier + 1;
-  const nextGoal =
-    goals[nextGoalIndex] && goals[nextGoalIndex].value > 0
-      ? goals[nextGoalIndex]
-      : null;
+  const barColor = levelColors[currentLevel] || "bg-emerald-500";
+  const barHeight = levelHeights[currentLevel] || "h-4";
 
-  const nextGoalInfo = () => {
-    if (nextGoal) {
-      const diff = nextGoal.value - currentValue;
-      const unidade = label.includes("PA") ? "ponto(s) de PA" : "no Ticket";
-      return (
-        <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-          <Trophy className="h-4 w-4 text-yellow-300" />
-          <span>
-            Falta(m) <strong>{valueFormatter(diff)}</strong> {unidade} para chegar ao{" "}
-            <strong>{nextGoal.label}</strong> e ganhar{" "}
-            <strong>{formatCurrency(nextGoal.prize)}</strong>.
-          </span>
-        </div>
-      );
-    }
-    if (currentTier !== -1) {
-      return (
-        <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-          <p>
-            Você está no <strong>{currentTierGoal?.label}</strong>, mantendo seu bônus no máximo.
-          </p>
-        </div>
-      );
-    }
-    return (
-      <p className="text-xs">
-        Aumente seu {label.includes("PA") ? "PA" : "Ticket Médio"} para liberar o primeiro bônus.
-      </p>
-    );
-  };
-
+  const currentTierData = currentLevel !== -1 ? goals[currentLevel] : null;
+  const nextTier = currentLevel < goals.length -1 ? goals[currentLevel + 1] : null;
 
   return (
-    <Card className={cn("p-6 flex flex-col justify-between text-white", cardClassName)}>
+    <Card className={cn("p-6 text-white flex flex-col", cardClassName)}>
       <CardHeader className="p-0">
-        <CardTitle className="text-white text-lg text-center">{label}</CardTitle>
+        <CardTitle className="text-lg text-center">{label}</CardTitle>
         {description && (
-          <CardDescription className="text-center text-white/80 text-sm">
-            {description}
-          </CardDescription>
+          <CardDescription className="text-center text-white/80 text-sm">{description}</CardDescription>
         )}
       </CardHeader>
 
-      <CardContent className="p-0 mt-6">
-        {/* valor atual + nível */}
-        <div className="text-center mb-2">
-          <p className="text-4xl font-extrabold tracking-tight">
-            {valueFormatter(currentValue)}
-          </p>
-          {currentTierGoal && (
-            <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
-              {currentTierGoal.label} atual
-            </p>
+      <CardContent className="p-0 mt-6 flex-grow flex flex-col justify-center">
+        <div className="text-center mb-3">
+          <p className="text-4xl font-extrabold">{valueFormatter(currentValue)}</p>
+          {currentTierData?.label && (
+            <p className="text-[11px] opacity-80 tracking-widest mt-1">{currentTierData.label} atual</p>
           )}
         </div>
 
-        {/* barra */}
-        <div className="relative h-6 w-full rounded-full bg-white/30">
-          {/* progresso */}
+        <div className={cn("relative w-full rounded-full bg-white/25", barHeight)}>
           <div
-            className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+            className={cn(
+              "absolute left-0 top-0 h-full transition-all duration-700 rounded-full",
+              barColor
+            )}
             style={{ width: `${progress}%` }}
           />
 
-          {/* marcadores dos níveis */}
-          {goals.map((goal, index) => {
-            const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
-            if (left <= 0 || left >= 100) return null;
+          {goals.map((g, i) => {
+            const pos = (g.value / maxGoal) * 100;
+            if (pos >= 100 || pos <= 0) return null;
 
-            const isCurrent = currentTierGoal?.label === goal.label;
-            const isNext = nextGoal?.label === goal.label;
+            const isNext = nextTier?.label === g.label;
+            const isCurrent = currentTierData?.label === g.label;
 
             return (
-              <TooltipProvider key={index}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="absolute inset-y-0 flex items-center justify-center"
-                      style={{ left: `${left}%`, transform: "translateX(-50%)" }}
-                    >
-                      <div
-                        className={cn(
-                          "h-4 w-[3px] rounded-full",
-                          isCurrent
-                            ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)]"
-                            : isNext
-                            ? "bg-yellow-300 shadow-[0_0_10px_rgba(253,224,71,0.9)] animate-pulse"
-                            : "bg-white/40"
-                        )}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm font-semibold">{goal.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Atingir {valueFormatter(goal.value)} para garantir{" "}
-                      {formatCurrency(goal.prize)}.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div
+                key={i}
+                className={cn(
+                  "absolute top-1/2 -translate-y-1/2 w-[2px] h-3 rounded-full",
+                  isCurrent ? "bg-white shadow-[0_0_6px_white]" :
+                  isNext ? "bg-yellow-300 shadow-[0_0_8px_gold] animate-pulse" :
+                  "bg-white/40"
+                )}
+                style={{ left: `${pos}%` }}
+              />
             );
           })}
         </div>
-      </CardContent>
 
-      <div className="mt-4 text-center text-sm text-white/90 min-h-[40px] flex items-center justify-center">
-        {nextGoalInfo()}
-      </div>
+        <div className="mt-3 text-center min-h-[40px] flex items-center justify-center">
+          {nextTier ? (
+            <div className="bg-white/15 px-4 py-2 rounded-full text-sm flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-yellow-300" />
+              Falta <strong>{valueFormatter(nextTier.value - currentValue)}</strong> para o{" "}
+              <strong>{nextTier.label}</strong>
+            </div>
+          ) : (
+            currentTierData && (
+                 <div className="bg-white/15 px-4 py-2 rounded-full text-sm">
+                    Bônus máximo atingido
+                </div>
+            )
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };
