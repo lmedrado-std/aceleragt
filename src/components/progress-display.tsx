@@ -43,12 +43,11 @@ const formatNumber = (value: number) => {
 
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
-        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0, color: "bg-blue-300" },
-        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0, color: "bg-purple-300" },
-        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0, color: "bg-green-300" },
+        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0, color: "bg-blue-400" },
+        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0, color: "bg-purple-400" },
+        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0, color: "bg-green-400" },
     ];
-    const totalMeta = goals.metona || 0;
-    const progressPercentage = totalMeta > 0 ? Math.min((vendas / totalMeta) * 100, 100) : 0;
+    const totalMeta = goals.metona || 1; // Avoid division by zero
 
     const findNextGoal = () => {
         if (vendas < (goals.metaMinha || 0)) return { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 };
@@ -71,8 +70,16 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <p className="text-xs opacity-80">Vendido até agora</p>
                 </div>
                 <div className="relative h-4 w-full rounded-full bg-black/20">
-                    <div className="absolute top-0 left-0 h-full rounded-full bg-white" style={{ width: `${progressPercentage}%` }}></div>
-
+                    {/* Segmented progress bar */}
+                    <div className="absolute top-0 left-0 h-full rounded-full bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
+                    {vendas > goals.metaMinha && (
+                        <div className="absolute top-0 left-0 h-full rounded-full bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
+                    )}
+                    {vendas > goals.meta && (
+                        <div className="absolute top-0 left-0 h-full rounded-full bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
+                    )}
+                    
+                    {/* Goal markers */}
                     {metas.map((meta, index) => {
                         const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
                         if (left === 0 || left > 100) return null;
@@ -251,4 +258,3 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
-
