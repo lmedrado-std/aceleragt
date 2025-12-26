@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -343,25 +344,6 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         </TabsContent>
         
         <TabsContent value="corridinhas" className="mt-6">
-           <Card className="col-span-full bg-slate-900 text-white">
-              <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-white/70">Missão de hoje</p>
-                  <p className="text-lg font-bold">
-                    Vender {formatCurrency(goals.metaHoje || 0)} ou {String(Number(goals.paMetaHoje || 0).toFixed(2))} PA
-                  </p>
-                  <p className="text-xs text-white/60">
-                    Se bater, você garante pelo menos {formatCurrency(incentives?.meta1Premio || goals.metaMinhaPrize || 0)}.
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-xs font-semibold text-white/70">Ganhos projetados no mês</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totalIncentives)}</p>
-                </div>
-              </CardContent>
-            </Card>
-
              {isCorridinhaActive && (
                 <Card className="lg:col-span-3 mt-6"><CardHeader><CardTitle className="flex items-center gap-2 text-primary"><Rocket /> Corridinha Ativa!</CardTitle><CardDescription>Um incentivo especial está ativo no período de {goals.corridinhaStartDate ? format(new Date(goals.corridinhaStartDate), 'dd/MM/yyyy') : ''} até {goals.corridinhaEndDate ? format(new Date(goals.corridinhaEndDate), 'dd/MM/yyyy') : ''}.</CardDescription></CardHeader><CardContent><div className="grid gap-4 md:grid-cols-2">{goals.corridinhaObjective1 && <GoalItem label={goals.corridinhaObjective1} value={formatCurrency(goals.corridinhaPrize1 || 0)} />}{goals.corridinhaObjective2 && <GoalItem label={goals.corridinhaObjective2} value={formatCurrency(goals.corridinhaPrize2 || 0)} />}{goals.corridinhaObjective3 && <GoalItem label={goals.corridinhaObjective3} value={formatCurrency(goals.corridinhaPrize3 || 0)} />}{goals.corridinhaObjective4 && <GoalItem label={goals.corridinhaObjective4} value={formatCurrency(goals.corridinhaPrize4 || 0)} />}</div></CardContent></Card>
             )}
