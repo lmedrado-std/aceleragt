@@ -20,21 +20,25 @@ export function isSellerAuthenticated(sellerId: string): boolean {
  */
 export function logoutAll() {
   if (typeof window === 'undefined') return;
-  sessionStorage.removeItem('adminAuthenticated');
   
-  // Remove todos os tokens de loja
-  Object.keys(sessionStorage)
-    .filter(key => key.startsWith('storeAuthenticated-'))
-    .forEach(key => sessionStorage.removeItem(key));
-    
-  // Remove todos os tokens de vendedor
-  Object.keys(sessionStorage)
-    .filter(key => key.startsWith('sellerAuthenticated-'))
-    .forEach(key => sessionStorage.removeItem(key));
+  // Lista de chaves para remover
+  const keysToRemove: string[] = [];
+
+  // Encontra todas as chaves relevantes
+  for (let i = 0; i < sessionStorage.length; i++) {
+    const key = sessionStorage.key(i);
+    if (key && (key === 'adminAuthenticated' || key.startsWith('storeAuthenticated-') || key.startsWith('sellerAuthenticated-'))) {
+      keysToRemove.push(key);
+    }
+  }
+
+  // Remove as chaves encontradas
+  keysToRemove.forEach(key => sessionStorage.removeItem(key));
 }
 
+
 /**
- * Realiza o logout de uma loja específica, limpando a sessão da loja e de todos os vendedores.
+ * Realiza o logout de uma loja específica, limpando a sessão da loja.
  */
 export function logoutStore(storeId: string) {
   if (typeof window === 'undefined') return;

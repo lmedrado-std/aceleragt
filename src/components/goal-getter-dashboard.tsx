@@ -29,7 +29,7 @@ import { Goals, Store, Incentives, Seller } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
-import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore } from "@/lib/auth";
+import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore, logoutAll } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -434,14 +434,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         const effectiveIsAdmin = isAdminGlobal() || isStoreAuthenticated(storeId);
         
         let tabToActivate: string;
-        if (effectiveIsAdmin) {
-            tabToActivate = tabFromUrl || 'admin';
+        
+        if (effectiveIsAdmin && (tabFromUrl === 'admin' || !sellersData.some((s: Seller) => s.id === tabFromUrl))) {
+            tabToActivate = 'admin';
         } else {
              const sellerId = tabFromUrl;
              if (sellerId && sellersData.some((s: Seller) => s.id === sellerId)) {
-                tabToActivate = sellerId;
+                if (isSellerAuthenticated(sellerId) || effectiveIsAdmin) {
+                    tabToActivate = sellerId;
+                } else {
+                    router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${sellerId}`)}`);
+                    return;
+                }
             } else {
-                 toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado." });
+                 toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado ou aba inválida." });
                  router.push(`/loja/${storeId}`);
                  return;
             }
@@ -463,19 +469,20 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     if (loading) return;
     
     const tabFromUrl = searchParams.get("tab");
-    const isSellerTab = sellers.some(s => s.id === tabFromUrl);
     const effectiveTab = tabFromUrl || activeTab;
 
+    const isManagerView = isAdminGlobal() || isStoreAuthenticated(storeId);
+
     if (effectiveTab === 'admin') {
-      if (!isAdmin && !isStoreAdmin) {
+      if (!isManagerView) {
         router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=admin`)}`);
       }
     } else if (sellers.some(s => s.id === effectiveTab)) {
-      if (!isAdmin && !isStoreAdmin && !isSellerAuthenticated(effectiveTab)){
+      if (!isManagerView && !isSellerAuthenticated(effectiveTab)){
         router.push(`/login/vendedor?storeId=${storeId}&sellerId=${effectiveTab}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${effectiveTab}`)}`);
       }
     }
-  }, [storeId, activeTab, searchParams, router, loading, sellers, isStoreAdmin, isAdmin]);
+  }, [storeId, activeTab, searchParams, router, loading, sellers]);
 
 
   const handleIncentivesCalculated = useCallback((newIncentives: Incentives, newLastUpdated: string) => {
@@ -500,7 +507,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   };
 
   const handleLogout = () => {
-    logoutStore(storeId);
+    logoutAll(); // Clears both admin and store-specific sessions
     toast({ title: "Sessão encerrada", description: "Você saiu do modo de gestor." });
     router.push(`/loja/${storeId}`);
   };
