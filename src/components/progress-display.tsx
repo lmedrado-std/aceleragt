@@ -54,15 +54,15 @@ const CleanProgressBar = ({
   const progress = Math.min((current / max) * 100, 100);
 
   return (
-    <div className="w-full space-y-3">
-      <div className="relative h-3 w-full bg-white/40 rounded-full overflow-hidden">
+    <div className="relative w-full mt-4">
+      <div className="h-3 w-full bg-white/40 rounded-full overflow-hidden">
         <div
-          className="absolute top-0 left-0 h-full bg-emerald-400 rounded-full transition-all duration-700"
+          className="h-full bg-emerald-400 rounded-full transition-all duration-700"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      <div className="relative w-full h-8">
+      <div className="relative mt-4 flex justify-between w-full px-2">
         {goals.map((g, i) => {
           if (!g) return null;
           const left = (g.value / max) * 100;
@@ -71,18 +71,18 @@ const CleanProgressBar = ({
           return (
             <div
               key={i}
-              className="absolute -bottom-1 flex flex-col items-center"
+              className="absolute -bottom-6 flex flex-col items-center"
               style={{ left: `${left}%`, transform: "translateX(-50%)" }}
             >
               <div
                 className={
                   achieved
-                    ? "h-4 w-4 rounded-full bg-emerald-400 border-2 border-white shadow-lg"
-                    : "h-4 w-4 rounded-full bg-white/70 border border-white"
+                    ? "h-3 w-3 rounded-full bg-emerald-400 border-2 border-white shadow-md"
+                    : "h-3 w-3 rounded-full bg-white/70 border border-white"
                 }
               />
-              <p className="text-[10px] mt-1 text-white font-semibold whitespace-nowrap">
-                {g.label} • {formatter(g.value)}
+              <p className="text-[10px] mt-1 font-semibold text-white whitespace-nowrap">
+                {g.label}: {formatter(g.value)}
               </p>
             </div>
           );
@@ -140,7 +140,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                     goals.performanceBonusEnabled
                       ? { value: goals.metaLendaria, label: "Lendário" }
                       : null,
-                  ].filter(Boolean) as { value: number; label: string; }[]}
+                  ].filter((g): g is { value: number; label: string } => g !== null)}
                   formatter={(v) => formatCurrency(v)}
                 />
             </CardContent>
