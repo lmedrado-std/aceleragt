@@ -11,12 +11,13 @@ import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, L
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { trackSellerView } from "@/lib/tracking";
 import { format } from "date-fns";
 import confetti from 'canvas-confetti';
 import dynamic from "next/dynamic";
 import { Separator } from "./ui/separator";
+import { WelcomeModal } from "./welcome-modal";
 
 const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
 
@@ -57,10 +58,19 @@ const GoalItem = ({ label, value }: { label: string, value: string }) => (
 
 export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, storeId }: SellerTabProps) {
   const salesData = { ...seller, goals };
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
 
   useEffect(() => {
     if (seller.id) {
       trackSellerView(seller.id);
+      const welcomeShownKey = `welcomeModalShown-${seller.id}`;
+      const hasBeenShown = sessionStorage.getItem(welcomeShownKey);
+
+      if (!hasBeenShown) {
+        setShowWelcomeModal(true);
+        sessionStorage.setItem(welcomeShownKey, 'true');
+      }
     }
   }, [seller.id]);
 
@@ -82,6 +92,13 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
 
   return (
     <TooltipProvider>
+      <WelcomeModal
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          seller={seller}
+          goals={goals}
+          incentives={incentives}
+      />
       <Tabs defaultValue="desempenho" className="w-full">
         <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-5 w-full sm:w-max gap-2">
           {/* Abas de navegação (Desempenho, Lançamentos, etc.) */}
