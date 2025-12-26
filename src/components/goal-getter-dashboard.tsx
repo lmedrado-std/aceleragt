@@ -29,7 +29,7 @@ import { Goals, Store, Incentives, Seller } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
-import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore, logoutAll } from "@/lib/auth";
+import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore, logoutSeller } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -431,29 +431,32 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         if (storeData.last_incentive_calculation) setLastUpdated(storeData.last_incentive_calculation);
 
         const tabFromUrl = searchParams.get("tab");
-        const effectiveIsAdmin = isAdminGlobal() || isStoreAuthenticated(storeId);
+        const isManagerView = isAdminGlobal() || isStoreAuthenticated(storeId);
         
         let tabToActivate: string;
-        
-        if (effectiveIsAdmin && (tabFromUrl === 'admin' || !sellersData.some((s: Seller) => s.id === tabFromUrl))) {
+
+        if (tabFromUrl && sellersData.some((s: Seller) => s.id === tabFromUrl)) {
+            const sellerId = tabFromUrl;
+            if (isSellerAuthenticated(sellerId) || isManagerView) {
+                tabToActivate = sellerId;
+            } else {
+                router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${sellerId}`)}`);
+                return;
+            }
+        } else if (isManagerView) {
             tabToActivate = 'admin';
         } else {
-             const sellerId = tabFromUrl;
-             if (sellerId && sellersData.some((s: Seller) => s.id === sellerId)) {
-                if (isSellerAuthenticated(sellerId) || effectiveIsAdmin) {
-                    tabToActivate = sellerId;
-                } else {
-                    router.push(`/login/vendedor?storeId=${storeId}&sellerId=${sellerId}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${sellerId}`)}`);
-                    return;
-                }
-            } else {
-                 toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado ou aba inválida." });
-                 router.push(`/loja/${storeId}`);
-                 return;
-            }
+            // Se não for gestor e a aba for inválida, volta para a página da loja
+            toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado ou aba inválida." });
+            router.push(`/loja/${storeId}`);
+            return;
         }
         
         setActiveTab(tabToActivate);
+        // Garante que a URL reflete a aba ativa
+        if (tabToActivate !== tabFromUrl) {
+            router.replace(`/loja/${storeId}/dashboard?tab=${tabToActivate}`, { scroll: false });
+        }
 
     } catch (error) {
         toast({ variant: "destructive", title: "Erro ao carregar dados", description: (error as Error).message });
@@ -506,10 +509,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     router.push(`/loja/${storeId}/dashboard?tab=${newTab}`, { scroll: false });
   };
 
-  const handleLogout = () => {
-    logoutAll(); // Clears both admin and store-specific sessions
+  const handleManagerLogout = () => {
+    logoutStore(storeId);
     toast({ title: "Sessão encerrada", description: "Você saiu do modo de gestor." });
     router.push(`/loja/${storeId}`);
+  };
+
+  const handleSellerLogout = () => {
+    if (activeTab !== 'admin' && activeTab !== 'loading') {
+        logoutSeller(activeTab);
+        toast({ title: "Sessão encerrada", description: "Sua sessão foi encerrada com sucesso." });
+        router.push(`/loja/${storeId}`);
+    }
   };
   
   if (loading || activeTab === "loading" || !currentStore) return <DashboardSkeleton />;
@@ -545,14 +556,23 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                         </TooltipTrigger>
                         <TooltipContent><p>Voltar para a seleção de vendedores</p></TooltipContent>
                     </Tooltip>
-                    {isManagerView && (
+                    {isManagerView ? (
                       <Tooltip>
                           <TooltipTrigger asChild>
-                              <Button onClick={handleLogout} variant="destructive" className="shadow-sm">
+                              <Button onClick={handleManagerLogout} variant="destructive" className="shadow-sm">
                                   <LogOut className="mr-2 h-4 w-4" />Sair
                               </Button>
                           </TooltipTrigger>
                           <TooltipContent><p>Encerrar sessão de gestor</p></TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                              <Button onClick={handleSellerLogout} variant="destructive" className="shadow-sm">
+                                  <LogOut className="mr-2 h-4 w-4" />Sair
+                              </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><p>Encerrar sua sessão</p></TooltipContent>
                       </Tooltip>
                     )}
                 </div>
@@ -561,7 +581,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                 {isManagerView ? (
+                 {(isAdmin || isStoreAdmin) && (
                     <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
                         <TabsList className="h-auto p-0 bg-transparent">
                             <Tooltip>
@@ -586,7 +606,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             </TabsList>
                         </div>
                     </div>
-                 ) : null}
+                 )}
 
                 {isManagerView && (
                   <TabsContent value="admin" className="mt-6">

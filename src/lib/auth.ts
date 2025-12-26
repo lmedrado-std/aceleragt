@@ -43,6 +43,8 @@ export function logoutAll() {
 export function logoutStore(storeId: string) {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem(`storeAuthenticated-${storeId}`);
+  // Adicionalmente, remove a autenticação global de admin se ela existir
+  sessionStorage.removeItem('adminAuthenticated');
 }
 
 /**
