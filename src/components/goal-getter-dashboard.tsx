@@ -61,7 +61,6 @@ const goalsSchema = z.object({
   legendariaBonusValorVenda: z.coerce.number().default(0),
   legendariaBonusValorPremio: z.coerce.number().default(0),
   performanceBonusEnabled: z.boolean().default(false),
-  corridinhaEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
   paPrize1: z.coerce.number().default(0),
   paGoal2: z.coerce.number().default(0),
@@ -535,12 +534,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
-             <CardContent className="p-4 relative grid grid-cols-3 items-center gap-4">
+             <CardContent className="p-4 grid grid-cols-3 items-center gap-4">
                 <div className="text-left">
                     <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
                 
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                <div className="text-center">
                   <h1 className="text-3xl font-bold font-headline text-white truncate">
                     {currentStore?.name}
                     {isManagerView && activeTab === 'admin' && (
