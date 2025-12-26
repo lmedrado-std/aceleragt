@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/app-layout";
 import { Logo } from "@/components/logo";
 import { StoreCard } from "@/components/store-card";
@@ -37,13 +37,21 @@ export default function HomePage() {
     <AppLayout>
       <div className="flex flex-1 flex-col items-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
         <div className="w-full max-w-5xl text-center">
-            <Logo className="justify-center mb-6 h-16" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                Bem-vindo(a) ao Acelera GT
-            </h1>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-                Selecione uma loja abaixo para acessar o painel de desempenho.
-            </p>
+            
+            <Card className="mb-8 bg-card/80 backdrop-blur-sm border-border/20 shadow-sm">
+              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Logo className="h-12" />
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                      Bem-vindo(a) ao Acelera GT
+                  </h1>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Selecione uma loja abaixo para acessar o painel de desempenho.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="mt-10">
                 {loading ? (
                     <div className="flex justify-center items-center h-40">
