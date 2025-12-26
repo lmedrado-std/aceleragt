@@ -130,12 +130,12 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
   useEffect(() => {
     if (seller.id) {
       trackSellerView(seller.id);
-      const welcomeShownKey = `welcomeModalShown-${seller.id}`;
-      const hasBeenShown = sessionStorage.getItem(welcomeShownKey);
+      const justLoggedInKey = `justLoggedIn-${seller.id}`;
+      const hasJustLoggedIn = sessionStorage.getItem(justLoggedInKey);
 
-      if (!hasBeenShown) {
+      if (hasJustLoggedIn) {
         setShowWelcomeModal(true);
-        sessionStorage.setItem(welcomeShownKey, 'true');
+        sessionStorage.removeItem(justLoggedInKey); // Remove a chave para não mostrar novamente
       }
     }
   }, [seller.id]);

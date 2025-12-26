@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
@@ -75,6 +76,7 @@ function SellerLoginComponent() {
     
     if (password === seller?.password) {
       sessionStorage.setItem(`sellerAuthenticated-${sellerId}`, 'true');
+      sessionStorage.setItem(`justLoggedIn-${sellerId}`, 'true'); // Sinalizador para o modal
       toast({
         title: 'Acesso concedido!',
         description: `Bem-vindo(a), ${seller.name}.`,
