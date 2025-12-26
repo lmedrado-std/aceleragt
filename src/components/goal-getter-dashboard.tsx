@@ -493,8 +493,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
-                    <p className="text-muted-foreground">Acompanhe as metas e os ganhos da equipe.</p>
+                    <h1 className="text-3xl font-bold font-headline text-white">{currentStore?.name}</h1>
+                    <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Tooltip>
