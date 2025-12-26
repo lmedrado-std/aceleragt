@@ -53,13 +53,13 @@ export default function HomePage() {
         <div className="w-full max-w-5xl text-center">
             
             <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-sm">
-              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-start gap-4">
                 <Logo className="h-12" />
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight text-white">
+                  <h1 className="text-xl font-bold tracking-tight text-white text-left">
                       Bem-vindo(a) ao Acelera GT
                   </h1>
-                  <p className="text-sm text-white/80">
+                  <p className="text-sm text-white/80 text-left">
                       Selecione uma loja abaixo para acessar o painel de desempenho.
                   </p>
                 </div>
