@@ -504,8 +504,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-2 gap-4">
-                  {(isAdmin || isStoreAdmin) && (
+                <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
+                    {(isAdmin || isStoreAdmin) && (
                       <TabsList className="h-auto p-0 bg-transparent">
                           <Tooltip>
                               <TooltipTrigger asChild>
