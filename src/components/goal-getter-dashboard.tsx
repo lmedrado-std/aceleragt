@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,6 +98,7 @@ export const formSchema = z.object({
 export type FormValues = z.infer<typeof formSchema>;
 export type RankingMetric = "vendas" | "pa" | "ticketMedio";
 export type Rankings = Record<string, Record<RankingMetric, number>>;
+export type GoalsFormValues = z.infer<typeof goalsSchema>;
 
 // --- HISTORY FEATURE COMPONENTS & TYPES (MOVED FROM ADMIN) ---
 interface ArchivedPeriod { period: string; storeId: string; sellerCount: number; }
@@ -499,8 +499,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   const handleSaveGoals = async () => {
     try {
         const goals = getValues().goals;
-        const res = await fetch(`/api/goals`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ store_id: storeId, goals }) });
-        if (!res.ok) throw new Error((await res.json()).details || 'Falha ao salvar metas');
+        const payload = { store_id: storeId, goals };
+        console.log("Enviando para /api/goals:", payload);
+
+        const res = await fetch(`/api/goals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({})); // Catch if response is not valid JSON
+            console.error("Erro ao salvar metas:", res.status, errorData);
+            throw new Error(errorData.details || errorData.error || 'Falha ao salvar metas');
+        }
     } catch(error) {
         toast({ variant: 'destructive', title: 'Erro ao Salvar Metas', description: (error as Error).message });
     }
@@ -513,7 +524,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const handleManagerLogout = () => {
     logoutStore(storeId);
-    logoutAll();
+    logoutAll(); // Ensure global admin is logged out too
     toast({ title: "Sessão encerrada", description: "Você saiu do modo de gestor." });
     router.push(`/loja/${storeId}`);
   };
@@ -536,7 +547,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
              <CardContent className="p-4 grid grid-cols-3 items-center gap-4">
                 <div className="text-left">
-                    <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
+                  <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
                 
                 <div className="text-center">

@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   try {
     const { store_id, goals } = await request.json();
+    console.log("BODY /api/goals:", { store_id, goals });
 
     if (!store_id || !goals) {
       return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
