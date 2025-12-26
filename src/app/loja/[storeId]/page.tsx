@@ -187,7 +187,7 @@ function StorePageContent() {
             <Card className="mb-8 bg-card/80 backdrop-blur-sm border-border/20 shadow-sm">
               <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                      {loading ? <Skeleton className="h-12 w-12 rounded-full" /> : <Logo className="h-12" />}
+                      {loading ? <Skeleton className="h-12 w-12 rounded-full" /> : <Logo />}
                       <div>
                         <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
                           {loading ? <Skeleton className="h-6 w-48" /> : store?.name}
