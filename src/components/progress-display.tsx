@@ -123,48 +123,55 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                         if (left <= 0 || left >= 100) return null;
 
                         const achieved = vendas >= meta.value;
+                        const isNext =
+                            nextGoal && nextGoal.label === meta.label && !achieved;
 
                         return (
-                             <TooltipProvider key={index}>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div
-                                            className="absolute inset-y-0 flex items-center justify-center"
-                                            style={{ left: `${left}%`, transform: "translateX(-50%)", zIndex: 20 }}
-                                        >
-                                            {achieved ? (
-                                                <TrophyIconFilled className="h-6 w-6 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
-                                            ) : (
-                                                <div className="h-6 w-[2px] bg-white/70 rounded-full" />
-                                            )}
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p className="text-sm font-semibold">{meta.label}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            Atingir {formatCurrency(meta.value)} para garantir {formatCurrency(meta.prize)}.
-                                        </p>
-                                    </TooltipContent>
-                                </Tooltip>
+                            <TooltipProvider key={index}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <div
+                                    className="absolute inset-y-0 flex items-center justify-center"
+                                    style={{ left: `${left}%`, transform: "translateX(-50%)", zIndex: 30 }}
+                                >
+                                    {achieved ? (
+                                    <TrophyIconFilled className="h-6 w-6 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
+                                    ) : (
+                                    <div
+                                        className={cn(
+                                        "h-4 w-[3px] rounded-full",
+                                        isNext ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]" : "bg-white/60"
+                                        )}
+                                    />
+                                    )}
+                                </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                <p className="text-sm font-semibold">{meta.label}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Atingir {formatCurrency(meta.value)} para garantir {formatCurrency(meta.prize)}.
+                                </p>
+                                </TooltipContent>
+                            </Tooltip>
                             </TooltipProvider>
                         );
                     })}
                 </div>
                  <div className="mt-4 text-center text-sm min-h-[40px] flex items-center justify-center">
-                    {nextGoal ? (
-                       <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-                          <Trophy className="h-4 w-4 text-yellow-300" />
-                          <span>
-                            Faltam <strong>{formatCurrency(nextGoal.value - vendas)}</strong> para o
-                            <strong> {nextGoal.label}</strong>
-                          </span>
-                        </div>
-                    ) : (
-                         <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-                           <Trophy className="h-4 w-4 text-yellow-300" />
-                           <p className="font-bold">Todos os prêmios liberados!</p>
-                        </div>
-                    )}
+                  {nextGoal ? (
+                    <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+                      <Trophy className="h-4 w-4 text-yellow-300" />
+                      <span>
+                        Faltam <strong>{formatCurrency(nextGoal.value - vendas)}</strong> para liberar{" "}
+                        <strong>{formatCurrency(nextGoal.prize)}</strong> ({nextGoal.label}).
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+                      <Trophy className="h-4 w-4 text-yellow-300" />
+                      <p className="font-bold">Todos os prêmios liberados. Agora é só aumentar o bônus!</p>
+                    </div>
+                  )}
                 </div>
             </CardContent>
         </Card>
@@ -198,6 +205,7 @@ const MetricProgressBar = ({
       break;
     }
   }
+  const currentTierGoal = currentTier !== -1 ? goals[currentTier] : null;
 
   const nextGoalIndex = currentTier + 1;
   const nextGoal = goals[nextGoalIndex] && goals[nextGoalIndex].value > 0 ? goals[nextGoalIndex] : null;
@@ -227,7 +235,11 @@ const MetricProgressBar = ({
         <CardContent className="p-0 mt-6">
           <div className="text-center mb-2">
             <p className="text-4xl font-extrabold tracking-tight">{valueFormatter(currentValue)}</p>
-            <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">{valueSuffix}</p>
+            {currentTierGoal && (
+              <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
+                {currentTierGoal.label} atual
+              </p>
+            )}
           </div>
           <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
             <div 
