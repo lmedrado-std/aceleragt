@@ -235,14 +235,16 @@ function StorePageContent() {
       <div className="flex flex-1 flex-col items-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
         <div className="w-full max-w-7xl">
             <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-sm">
-              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  {loading ? <Skeleton className="h-12 w-40" /> : <Logo />}
+              <CardContent className="p-4 grid items-center grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="flex justify-center sm:justify-start">
+                    {loading ? <Skeleton className="h-12 w-40" /> : <Logo />}
+                  </div>
                   
-                  <h1 className="text-3xl font-bold tracking-tight text-white order-first sm:order-none sm:absolute sm:left-1/2 sm:-translate-x-1/2">
-                    {loading ? <Skeleton className="h-8 w-48" /> : store?.name}
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white text-center truncate">
+                    {loading ? <Skeleton className="h-8 w-48 mx-auto" /> : store?.name}
                   </h1>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center sm:justify-end gap-2">
                       {renderThemeToggle()}
                       <Tooltip>
                         <TooltipTrigger asChild>
