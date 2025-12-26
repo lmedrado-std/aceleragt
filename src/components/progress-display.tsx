@@ -69,14 +69,15 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <span className="text-2xl font-bold">{formatCurrency(vendas)}</span>
                     <p className="text-xs opacity-80">Vendido até agora</p>
                 </div>
-                <div className="relative h-4 w-full rounded-full bg-black/20 pt-10 mb-12">
+                <div className="relative h-4 w-full rounded-full bg-black/20 mb-12">
+                    <div className="pt-6" />
                     {/* Segmented progress bar */}
-                    <div className="absolute top-10 left-0 h-4 bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
+                    <div className="absolute top-6 left-0 h-4 bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
                     {vendas > (goals.metaMinha || 0) && (
-                        <div className="absolute top-10 left-0 h-4 bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
+                        <div className="absolute top-6 left-0 h-4 bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
                     )}
                     {vendas > (goals.meta || 0) && (
-                        <div className="absolute top-10 left-0 h-4 bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
+                        <div className="absolute top-6 left-0 h-4 bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
                     )}
                     
                     
@@ -93,7 +94,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                     <TooltipTrigger asChild>
                                         <div className="absolute top-1/2 h-8 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                             <div className={cn("h-full w-full", achieved ? meta.color : "bg-white/40")} />
-                                            <span className="absolute -top-5 text-xs text-white/80 whitespace-nowrap">{meta.label}</span>
+                                            <span className="absolute -top-4 text-xs text-white/80 whitespace-nowrap">{meta.label}</span>
                                             {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
                                         </div>
                                     </TooltipTrigger>
@@ -175,9 +176,10 @@ const MetricProgressBar = ({
             <span className="text-2xl font-bold">{valueFormatter(currentValue)}</span>
             <p className="text-xs opacity-80">{label.includes("PA") ? "PA atual" : "Ticket médio atual"}</p>
           </div>
-          <div className="relative h-3 w-full rounded-full bg-black/20 pt-10 mb-12">
+          <div className="relative h-3 w-full rounded-full bg-black/20 mb-12">
+            <div className="pt-6" />
             {/* Base progress */}
-            <div className="absolute top-10 left-0 h-3 rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
+            <div className="absolute top-6 left-0 h-3 rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
 
             {/* Goal markers */}
             {goals.map((goal, index) => {
