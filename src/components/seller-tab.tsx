@@ -265,15 +265,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                 </CardContent>
               </Card>
             </div>
-            <AnimatePresence>
             {allCardsRevealed && (
-                <motion.div
-                    className="lg:col-span-1"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                >
+                <div className="lg:col-span-1">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
@@ -313,9 +306,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                             </div>
                         </CardContent>
                     </Card>
-                </motion.div>
+                </div>
             )}
-            </AnimatePresence>
           </div>
         </TabsContent>
 
