@@ -71,13 +71,14 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                 </div>
                 <div className="relative h-4 w-full rounded-full bg-black/20">
                     {/* Segmented progress bar */}
-                    <div className="absolute top-0 left-0 h-full rounded-full bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
+                     <div className="absolute top-0 left-0 h-full bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
                     {vendas > (goals.metaMinha || 0) && (
-                        <div className="absolute top-0 left-0 h-full rounded-full bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
+                        <div className="absolute top-0 left-0 h-full bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
                     )}
                     {vendas > (goals.meta || 0) && (
-                        <div className="absolute top-0 left-0 h-full rounded-full bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
+                        <div className="absolute top-0 left-0 h-full bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
                     )}
+                    
                     
                     {/* Goal markers */}
                     {metas.map((meta, index) => {
@@ -161,7 +162,7 @@ const MetricProgressBar = ({
   };
 
   return (
-    <Card className={cn("p-6 flex flex-col justify-between h-full", cardClassName)}>
+    <Card className={cn("p-4 flex flex-col justify-between", cardClassName)}>
       <div>
         <CardHeader className="p-0">
           <CardTitle className="text-white text-base text-center">{label}</CardTitle>
@@ -169,12 +170,12 @@ const MetricProgressBar = ({
             {description}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 mt-8">
+        <CardContent className="p-0 mt-6">
           <div className="text-center mb-2">
-            <span className="text-2xl font-bold">{valueFormatter(currentValue)}</span>
+            <span className="text-xl font-bold">{valueFormatter(currentValue)}</span>
             <p className="text-xs opacity-80">{label.includes("PA") ? "PA atual" : "Ticket médio atual"}</p>
           </div>
-          <div className="relative h-4 w-full rounded-full bg-black/20">
+          <div className="relative h-3 w-full rounded-full bg-black/20">
             {/* Base progress */}
             <div className="absolute top-0 left-0 h-full rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
 
@@ -187,10 +188,10 @@ const MetricProgressBar = ({
                 <TooltipProvider key={index}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="absolute top-1/2 h-8 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
+                      <div className="absolute top-1/2 h-6 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                         <div className={cn("h-full w-full", achieved ? goal.color : "bg-white/40")} />
-                        <span className="absolute -top-5 text-xs text-white/80 whitespace-nowrap">{goal.label}</span>
-                        {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
+                        <span className="absolute -top-4 text-xs text-white/80 whitespace-nowrap">{goal.label}</span>
+                        {achieved && <Trophy className="h-4 w-4 text-yellow-300 absolute -bottom-5 left-1/2 -translate-x-1/2" />}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -206,7 +207,7 @@ const MetricProgressBar = ({
           </div>
         </CardContent>
       </div>
-      <div className="mt-8 text-center text-xs text-white/90 min-h-[36px]">
+      <div className="mt-6 text-center text-xs text-white/90 min-h-[24px]">
         <p>{nextGoalInfo()}</p>
       </div>
     </Card>
@@ -243,12 +244,12 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
 
 
   return (
-    <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-6">
-             <SalesProgressBar vendas={Number(vendas)} goals={goals} />
+    <div className="space-y-4">
+        <SalesProgressBar vendas={Number(vendas)} goals={goals} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <MetricProgressBar
                 label="Produtos por Atendimento (PA)"
-                description="Esse medidor mostra quantas peças em média você vende por atendimento. Quanto maior, mais bônus."
+                description="Quantas peças você vende em média por atendimento."
                 currentValue={Number(pa)}
                 goals={paGoals}
                 valueFormatter={(val) => formatNumber(val)}
@@ -256,7 +257,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
             />
             <MetricProgressBar
                 label="Ticket Médio"
-                description="Esse medidor mostra quanto seu cliente gasta em média por compra."
+                description="Quanto seu cliente gasta em média por compra."
                 currentValue={Number(ticketMedio)}
                 goals={ticketGoals}
                 valueFormatter={(val) => formatCurrency(val)}
