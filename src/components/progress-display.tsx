@@ -76,8 +76,8 @@ const SegmentedProgressBar = ({
             <TooltipProvider key={i}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="relative flex-1 h-full bg-white/20 rounded-md overflow-hidden">
-                     <div className="absolute flex flex-col items-center left-1/2 -translate-x-1/2 top-[-24px]">
+                  <div className="relative flex-1 h-full bg-white/20 rounded-md">
+                     <div className="absolute flex flex-col items-center left-1/2 -translate-x-1/2 top-[-24px] z-10">
                         <p className="text-white/80 text-[10px] font-bold">{formatter(g.value)}</p>
                         <p className="text-white/60 text-[9px] font-medium">{g.label}</p>
                      </div>
