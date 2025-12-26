@@ -7,11 +7,12 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Switch } from "./ui/switch";
-import { Trash2, Plus, Save, MapPin, Wifi, Loader2, LocateFixed } from "lucide-react";
+import { Trash2, Plus, Save, MapPin, Wifi, Loader2, LocateFixed, Construction } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import { Separator } from "./ui/separator";
 import { z } from "zod";
 import dynamic from "next/dynamic";
+import { Badge } from "./ui/badge";
 
 const MapPickerDialog = dynamic(
     () => import("./map-picker-dialog").then((mod) => mod.MapPickerDialog),
@@ -177,10 +178,16 @@ export default function LoginRestrictionSettings({ storeId }: { storeId: string 
 
     return (
         <>
-            <Card>
+            <Card className="bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800">
                 <CardHeader>
-                    <CardTitle>Restrições de Login do Vendedor</CardTitle>
-                    <CardDescription>Defina locais e redes Wi-Fi permitidas para que os vendedores possam acessar o painel. Requer autorização de localização no navegador do vendedor.</CardDescription>
+                    <div className="flex items-center justify-between">
+                         <CardTitle>Restrições de Login do Vendedor</CardTitle>
+                         <Badge variant="destructive" className="bg-yellow-500 text-yellow-900 hover:bg-yellow-600">
+                            <Construction className="mr-2 h-4 w-4" />
+                            Em Desenvolvimento
+                         </Badge>
+                    </div>
+                    <CardDescription className="text-yellow-800 dark:text-yellow-300">Defina locais e redes Wi-Fi permitidas para que os vendedores possam acessar o painel. Requer autorização de localização no navegador do vendedor.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div>
