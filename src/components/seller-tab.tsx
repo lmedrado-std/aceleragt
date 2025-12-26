@@ -224,7 +224,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="lancamentos"><BarChart className="mr-2 h-4 w-4" />Meus Lançamentos</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver dados lançados pelo administrador</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="corridinhas"><Rocket className="mr-2 h-4 w-4" />Corridinhas</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver metas e bônus de curto prazo</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="metas"><Target className="mr-2 h-4 w-4" />Metas</TabsTrigger></TooltipTrigger><TooltipContent><p>Consultar os valores de todas as metas</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta" className={cn(prizeWheelCredits > 0 && "animate-subtle-pulse")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta" className={cn(prizeWheelCredits > 0 && "animate-red-pulse")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="dicas"><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
         </TabsList>
 
