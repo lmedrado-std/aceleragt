@@ -7,7 +7,7 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift, ArrowRight, Eye } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift, ArrowRight, Eye, Smile } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
@@ -18,7 +18,8 @@ import confetti from 'canvas-confetti';
 import dynamic from "next/dynamic";
 import { Separator } from "./ui/separator";
 import { WelcomeModal } from "./welcome-modal";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "./ui/dialog";
+import { Button } from "./ui/button";
 
 
 const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
@@ -76,6 +77,13 @@ const MetricCard = ({ title, value, icon, description, className, children, isRe
             <div className="py-4">
                 {children}
             </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button>
+                  <Smile className="mr-2 h-4 w-4" /> Entendi
+                </Button>
+              </DialogClose>
+            </DialogFooter>
         </DialogContent>
     </Dialog>
 );
@@ -219,7 +227,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                         )}
                         <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm space-y-2">
                             <p className="font-semibold text-amber-800 dark:text-amber-200">Dicas para Fechar Mais Vendas:</p>
-                            <ul className="list-disc list-inside text-amber-700 dark:text-amber-300">
+                             <ul className="list-disc list-inside text-amber-700 dark:text-amber-300">
                                 <li>Aborde rápido e com pergunta aberta: “O que você procura hoje pra te ajudar?”.</li>
                                 <li>Mostre no mínimo duas opções antes de deixar o cliente decidir.</li>
                                 <li>Facilite o “sim”: fale de parcelamento, troca fácil e vantagens da loja.</li>
