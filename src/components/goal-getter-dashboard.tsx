@@ -490,7 +490,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   return (
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
-        <Card className="mb-8 bg-card/80 backdrop-blur-sm border-border/20 shadow-lg">
+        <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">{currentStore?.name}</h1>
