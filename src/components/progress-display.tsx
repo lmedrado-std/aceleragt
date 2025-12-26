@@ -215,13 +215,13 @@ const MetricProgressBar = ({
   const nextGoalInfo = () => {
     if (nextGoal) {
       const diff = nextGoal.value - currentValue;
+      const unidade = label.includes("PA") ? "ponto(s) de PA" : "no Ticket";
       return (
         <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
           <Trophy className="h-4 w-4 text-yellow-300" />
           <span>
-            Faltam{" "}
-            <strong>{valueFormatter(diff)}</strong>{" "}
-            para chegar ao <strong>{nextGoal.label}</strong> e ganhar{" "}
+            Falta(m) <strong>{valueFormatter(diff)}</strong> {unidade} para chegar ao{" "}
+            <strong>{nextGoal.label}</strong> e ganhar{" "}
             <strong>{formatCurrency(nextGoal.prize)}</strong>.
           </span>
         </div>
@@ -300,11 +300,11 @@ const MetricProgressBar = ({
                       <div
                         className={cn(
                           "h-4 w-[3px] rounded-full",
-                          isCurrent
-                            ? "bg-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                           isCurrent
+                            ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)]"
                             : isNext
-                            ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]"
-                            : "bg-white/50"
+                            ? "bg-yellow-300 shadow-[0_0_10px_rgba(253,224,71,0.9)] animate-pulse"
+                            : "bg-white/40"
                         )}
                       />
                     </div>
