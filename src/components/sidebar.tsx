@@ -95,7 +95,7 @@ export function Sidebar() {
           </div>
           <Separator className="my-2 bg-white/20" />
           <p className="px-3 pt-2 text-sm text-muted-foreground">Você está em:</p>
-          <p className="px-3 font-semibold text-lg">{pathname.split('/')[2] || 'Navegação'}</p>
+          <p className="px-3 font-semibold text-lg">{pathname.split('/')[2]?.replace(/-/g, ' ') || 'Navegação'}</p>
         </nav>
 
         <div className="mt-auto p-4 border-t border-white/20">
