@@ -109,6 +109,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
   const salesData = { ...seller, goals };
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [revealedCards, setRevealedCards] = useState(new Set<RevealedCardType>());
+  const [prizeWheelCredits, setPrizeWheelCredits] = useState(0);
 
   const handleReveal = (card: RevealedCardType) => {
     setRevealedCards(prev => new Set(prev).add(card));
@@ -128,6 +129,22 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     }
   }, [seller.id]);
 
+  useEffect(() => {
+    const fetchCredits = async () => {
+      if (!storeId || !seller.id) return;
+      try {
+        const res = await fetch(`/api/wheel/status?storeId=${storeId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setPrizeWheelCredits(data.creditsMap[seller.id] || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch wheel credits", error);
+      }
+    };
+    fetchCredits();
+  }, [storeId, seller.id]);
+
   const formattedLastUpdated = lastUpdated
     ? new Date(lastUpdated).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
     : "N/A";
@@ -140,6 +157,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
       spread: 70,
       origin: { y: 0.6 },
     });
+    // Ao girar, o crédito diminui, então atualizamos
+    setPrizeWheelCredits(prev => (prev > 0 ? prev - 1 : 0));
   };
   
   const totalIncentives = incentives
@@ -194,7 +213,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="desempenho"><Trophy className="mr-2 h-4 w-4" />Meu Desempenho</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver desempenho e progresso das metas</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="lancamentos"><BarChart className="mr-2 h-4 w-4" />Meus Lançamentos</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver dados lançados pelo administrador</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="metas"><Target className="mr-2 h-4 w-4" />Metas</TabsTrigger></TooltipTrigger><TooltipContent><p>Consultar os valores de todas as metas</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta"><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta" className={cn(prizeWheelCredits > 0 && "animate-subtle-pulse")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="dicas"><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
         </TabsList>
         <Separator className="my-4" />

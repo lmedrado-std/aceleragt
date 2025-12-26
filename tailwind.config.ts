@@ -75,7 +75,7 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-         "subtle-pulse": {
+        "subtle-pulse": {
           "0%, 100%": {
             transform: "scale(1)",
             boxShadow: "0 0 0 0 hsl(var(--accent) / 0.7)",
