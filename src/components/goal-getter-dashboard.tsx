@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -498,24 +499,32 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   
   const handleSaveGoals = async () => {
     try {
-        const goals = getValues().goals;
-        const payload = { store_id: storeId, goals };
-        console.log("Enviando para /api/goals:", payload);
+      const goals = getValues().goals;
+      const payload = { store_id: storeId, goals };
+      console.log("Enviando para /api/goals:", payload);
 
-        const res = await fetch(`/api/goals`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({})); // Catch if response is not valid JSON
-            console.error("Erro ao salvar metas:", res.status, errorData);
-            throw new Error(errorData.details || errorData.error || 'Falha ao salvar metas');
+      const res = await fetch(`/api/goals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        let errorData: any = {};
+        try {
+          errorData = await res.json();
+        } catch {
+          const text = await res.text();
+          errorData = { raw: text };
         }
+        console.error("Erro ao salvar metas:", res.status, errorData);
+        throw new Error(errorData.details || errorData.error || errorData.raw || 'Falha ao salvar metas');
+      }
     } catch(error) {
-        toast({ variant: 'destructive', title: 'Erro ao Salvar Metas', description: (error as Error).message });
+      toast({ variant: 'destructive', title: 'Erro ao Salvar Metas', description: (error as Error).message });
     }
   };
+
 
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
