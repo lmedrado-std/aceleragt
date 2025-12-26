@@ -10,7 +10,7 @@ import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, L
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { trackSellerView } from "@/lib/tracking";
 import { format } from "date-fns";
 import confetti from 'canvas-confetti';
@@ -19,6 +19,7 @@ import { Separator } from "./ui/separator";
 import { WelcomeModal } from "./welcome-modal";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "./ui/dialog";
 import { Button } from "./ui/button";
+import { getRandomTip } from "@/lib/tipsData";
 
 
 const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
@@ -112,6 +113,13 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [revealedCards, setRevealedCards] = useState(new Set<RevealedCardType>());
   const [prizeWheelCredits, setPrizeWheelCredits] = useState(0);
+
+  const tips = useMemo(() => ({
+    vendas: getRandomTip('vendas'),
+    pa: getRandomTip('pa'),
+    ticket: getRandomTip('ticket'),
+  }), []);
+
 
   const handleReveal = (card: RevealedCardType) => {
     setRevealedCards(prev => new Set(prev).add(card));
@@ -247,12 +255,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                             <p className="text-muted-foreground mt-2">Você atingiu a meta principal de vendas!</p>
                         )}
                         <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm space-y-2">
-                            <p className="font-semibold text-amber-800 dark:text-amber-200">Dicas para Fechar Mais Vendas:</p>
-                             <ul className="list-disc list-inside text-amber-700 dark:text-amber-300">
-                                <li>Aborde rápido e com pergunta aberta: “O que você procura hoje pra te ajudar?”.</li>
-                                <li>Mostre no mínimo duas opções antes de deixar o cliente decidir.</li>
-                                <li>Facilite o “sim”: fale de parcelamento, troca fácil e vantagens da loja.</li>
-                            </ul>
+                            <p className="font-semibold text-amber-800 dark:text-amber-200">Dica Rápida:</p>
+                             <p className="text-amber-700 dark:text-amber-300">{tips.vendas}</p>
                         </div>
                     </MetricCard>
 
@@ -273,12 +277,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                             <p className="text-muted-foreground mt-2">Você atingiu o nível máximo de bônus de PA!</p>
                         )}
                         <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm space-y-2">
-                             <p className="font-semibold text-amber-800 dark:text-amber-200">Dicas para Aumentar seu PA:</p>
-                             <ul className="list-disc list-inside text-amber-700 dark:text-amber-300">
-                                <li>Nunca deixe o cliente sair com apenas 1 peça; mostre pelo menos mais 2 opções.</li>
-                                <li>Monte combos inteligentes (2 blusas + 1 calça, 3 meias etc.).</li>
-                                <li>Aproveite o provador para sugerir “mais uma peça que combine com esse look”.</li>
-                             </ul>
+                             <p className="font-semibold text-amber-800 dark:text-amber-200">Dica para Aumentar seu PA:</p>
+                             <p className="text-amber-700 dark:text-amber-300">{tips.pa}</p>
                         </div>
                     </MetricCard>
 
@@ -290,12 +290,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                             <p className="text-muted-foreground mt-2">Você atingiu o nível máximo de bônus de Ticket Médio!</p>
                         )}
                         <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm space-y-2">
-                            <p className="font-semibold text-amber-800 dark:text-amber-200">Dicas para Aumentar seu Ticket Médio:</p>
-                             <ul className="list-disc list-inside text-amber-700 dark:text-amber-300">
-                                <li>Ofereça sempre uma opção mais completa (kit, look pronto, versão “premium”).</li>
-                                <li>Sugira produto complementar na hora de fechar (cinto, meia, acessório).</li>
-                                <li>Use a frase: “Com mais R$ X você leva este aqui que vale mais a pena.”</li>
-                             </ul>
+                            <p className="font-semibold text-amber-800 dark:text-amber-200">Dica para Aumentar seu Ticket Médio:</p>
+                             <p className="text-amber-700 dark:text-amber-300">{tips.ticket}</p>
                         </div>
                     </MetricCard>
                   </div>
