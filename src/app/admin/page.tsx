@@ -25,7 +25,6 @@ import {
 import Link from "next/link";
 import ClientOnly from "@/components/client-only";
 import { logoutAll } from "@/lib/auth";
-import AppLayout from "@/components/app-layout";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 
@@ -454,9 +453,9 @@ function AdminPageComponent() {
 export default function AdminDashboardPage() {
     return (
         <ClientOnly>
-            <AppLayout>
+             <main className="flex-1 flex flex-col p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
                 <AdminPageComponent />
-            </AppLayout>
+            </main>
         </ClientOnly>
     )
 }
