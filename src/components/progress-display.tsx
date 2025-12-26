@@ -42,17 +42,17 @@ const formatNumber = (value: number) => {
 
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
-        { label: "Meta mínima", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
-        { label: "Meta cheia", value: goals.meta || 0, prize: goals.metaPrize || 0 },
-        { label: "Meta turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
+        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
+        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0 },
+        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
     ];
     const totalMeta = goals.metona || 0;
     const progressPercentage = totalMeta > 0 ? Math.min((vendas / totalMeta) * 100, 100) : 0;
 
     const findNextGoal = () => {
-        if (vendas < (goals.metaMinha || 0)) return { label: "Meta mínima", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 };
-        if (vendas < (goals.meta || 0)) return { label: "Meta cheia", value: goals.meta || 0, prize: goals.metaPrize || 0 };
-        if (vendas < (goals.metona || 0)) return { label: "Meta turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 };
+        if (vendas < (goals.metaMinha || 0)) return { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 };
+        if (vendas < (goals.meta || 0)) return { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0 };
+        if (vendas < (goals.metona || 0)) return { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 };
         if (goals.performanceBonusEnabled && vendas < (goals.metaLendaria || 0)) return { label: "Bônus Performance", value: goals.metaLendaria || 0, prize: goals.legendariaBonusValorPremio || 0 };
         return null;
     };
@@ -61,10 +61,14 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     return (
         <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
             <CardHeader className="p-0">
-                <CardTitle className="text-white">Progresso de Vendas</CardTitle>
+                <CardTitle className="text-white">Quanto falta para o próximo prêmio</CardTitle>
                 <CardDescription className="text-white/80">Olhe sempre aqui primeiro para saber o que falta para ganhar o próximo prêmio.</CardDescription>
             </CardHeader>
             <CardContent className="p-0 mt-8">
+                 <div className="text-center mb-2">
+                    <span className="text-2xl font-bold">{formatCurrency(vendas)}</span>
+                    <p className="text-xs opacity-80">Vendido até agora</p>
+                </div>
                 <div className="relative h-4 w-full rounded-full bg-black/20">
                     <div className="absolute top-0 left-0 h-full rounded-full bg-white" style={{ width: `${progressPercentage}%` }}></div>
 
@@ -97,10 +101,10 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                  <div className="mt-8 text-center text-sm">
                     {nextGoal ? (
                         <p className="text-white/90">
-                           Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para liberar <span className="font-bold text-white">{formatCurrency(nextGoal.prize)}</span> ({nextGoal.label}).
+                           Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para liberar o {nextGoal.label} ({formatCurrency(nextGoal.prize)}).
                         </p>
                     ) : (
-                        <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> Todas as metas batidas! Agora é só aumentar o bônus.</p>
+                        <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> Todos os prêmios liberados. Agora cada venda aumenta seu bônus!</p>
                     )}
                 </div>
             </CardContent>
@@ -108,7 +112,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     );
 };
 
-const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassName }: { label: string; currentValue: number; goals: {value: number, label: string}[]; valueFormatter: (value: number) => string; cardClassName?: string }) => {
+const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassName }: { label: string; currentValue: number; goals: {value: number, prize: number, label: string}[]; valueFormatter: (value: number) => string; cardClassName?: string }) => {
     
     let currentTier = -1;
     for (let i = goals.length - 1; i >= 0; i--) {
@@ -139,10 +143,10 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
 
     const nextGoalInfo = () => {
         if (nextGoal) {
-            return `Se chegar em ${nextGoal.label}, você aumenta seu bônus de ${label.includes("PA") ? "PA" : "Ticket Médio"}.`;
+             return `Faltam ${label.includes("PA") ? (nextGoal.value - currentValue).toFixed(2) : formatCurrency(nextGoal.value - currentValue)} PA para liberar ${formatCurrency(nextGoal.prize)} de bônus.`;
         }
         if (currentTier !== -1) {
-             return `${goals[currentTier].label} atingido! Continue assim para manter o resultado!`;
+             return `Você está no ${goals[currentTier].label}, mantendo seu bônus no máximo. Não deixe cair.`;
         }
         return `Aumente seu ${label.includes("PA") ? "PA" : "Ticket Médio"} para liberar mais bônus.`;
     };
@@ -150,7 +154,9 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
     return (
         <Card className={cn("p-6 flex flex-col items-center justify-between h-full", cardClassName)}>
             <CardTitle className="text-white text-base text-center">{label}</CardTitle>
-            <CardDescription className="text-center text-white/80 text-xs">Esses dois círculos mostram se você está vendendo bem (ticket) e certo (PA).</CardDescription>
+            <CardDescription className="text-center text-white/80 text-xs">
+                {label.includes("PA") ? "Esse círculo mostra quantas peças em média por atendimento. Quanto maior, mais bônus." : "Esse círculo mostra quanto o cliente gasta em média."}
+            </CardDescription>
             <div className="relative my-4" style={{width: radius*2, height: radius*2}}>
                 <svg height={radius * 2} width={radius * 2} className="-rotate-90">
                     <circle
@@ -204,17 +210,17 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   }
   
   const paGoals = [
-    { value: goals.paGoal1 || 0, label: 'Nível 1' },
-    { value: goals.paGoal2 || 0, label: 'Nível 2' },
-    { value: goals.paGoal3 || 0, label: 'Nível 3' },
-    { value: goals.paGoal4 || 0, label: 'Nível 4' },
+    { value: goals.paGoal1 || 0, prize: goals.paPrize1 || 0, label: 'Nível 1' },
+    { value: goals.paGoal2 || 0, prize: goals.paPrize2 || 0, label: 'Nível 2' },
+    { value: goals.paGoal3 || 0, prize: goals.paPrize3 || 0, label: 'Nível 3' },
+    { value: goals.paGoal4 || 0, prize: goals.paPrize4 || 0, label: 'Nível 4' },
   ];
 
   const ticketGoals = [
-      { value: goals.ticketMedioGoal1 || 0, label: 'Nível 1' },
-      { value: goals.ticketMedioGoal2 || 0, label: 'Nível 2' },
-      { value: goals.ticketMedioGoal3 || 0, label: 'Nível 3' },
-      { value: goals.ticketMedioGoal4 || 0, label: 'Nível 4' },
+      { value: goals.ticketMedioGoal1 || 0, prize: goals.ticketMedioPrize1 || 0, label: 'Nível 1' },
+      { value: goals.ticketMedioGoal2 || 0, prize: goals.ticketMedioPrize2 || 0, label: 'Nível 2' },
+      { value: goals.ticketMedioGoal3 || 0, prize: goals.ticketMedioPrize3 || 0, label: 'Nível 3' },
+      { value: goals.ticketMedioGoal4 || 0, prize: goals.ticketMedioPrize4 || 0, label: 'Nível 4' },
   ];
 
 

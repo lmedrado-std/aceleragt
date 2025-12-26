@@ -88,9 +88,12 @@ const MetricCard = ({ title, value, icon, description, className, children, isRe
 );
 
 
-const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
+const GoalDetail = ({ label, prize, goal, achieved }: { label: string, prize: number, goal: number, achieved: boolean }) => (
      <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
-        <p className="font-medium">{label}</p>
+        <div>
+            <p className="font-medium">{label}</p>
+            <p className="text-xs text-muted-foreground">(quando vender {formatCurrency(goal)})</p>
+        </div>
         <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(prize)}</p>
     </div>
 )
@@ -216,7 +219,6 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta" className={cn(prizeWheelCredits > 0 && "animate-subtle-pulse")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="dicas"><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
         </TabsList>
-        <Separator className="my-4" />
 
         <div className="my-6">
             <h2 className="text-2xl font-bold text-foreground flex items-center gap-2"><User className="h-6 w-6 text-primary" />Painel de {seller.name}</h2>
@@ -313,34 +315,29 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                         <CardContent className="space-y-3">
                             <div>
                                 <p className="text-xs font-semibold text-muted-foreground uppercase">Por vendas</p>
-                                <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
-                                <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
-                                <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
-                                {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
+                                <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} goal={goals.metaMinha || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
+                                <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} goal={goals.meta || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
+                                <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} goal={goals.metona || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
+                                {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} goal={goals.metaLendaria || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
                             </div>
                             <Separator />
                             <div>
                                 <p className="text-xs font-semibold text-muted-foreground uppercase">Por PA e Ticket</p>
-                                <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
-                                <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
+                                <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} goal={goals.paGoal1 || 0} achieved={(incentives?.paBonus || 0) > 0} />
+                                <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} goal={goals.ticketMedioGoal1 || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
                             </div>
                             <Separator />
                             <div>
                                 <p className="text-xs font-semibold text-muted-foreground uppercase">Outros Bônus</p>
-                                <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
+                                <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} goal={0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
                             </div>
                             <Separator />
                             <div className="text-right pt-2">
                             <p className="text-xs font-semibold text-muted-foreground">Ganhos projetados no mês</p>
                             <p className="text-2xl font-bold text-primary">{formatCurrency(totalIncentives)}</p>
-                            </div>
-                            <div className="flex justify-between items-center pt-2">
-                                <span className="text-sm font-semibold text-muted-foreground">
-                                Se bater todas as metas:
-                                </span>
-                                <span className="font-bold text-lg text-primary">
-                                {formatCurrency(totalPotentialPrizes)}
-                                </span>
+                             <p className="text-xs text-muted-foreground mt-2">
+                                Se você mantiver PA e Ticket no nível atual até o fim do mês, seu ganho total será {formatCurrency(totalPotentialPrizes)}.
+                            </p>
                             </div>
                         </CardContent>
                     </Card>
@@ -351,17 +348,22 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         
         <TabsContent value="corridinhas" className="mt-6">
            <Card className="col-span-full bg-slate-900 text-white">
-            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
+              <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                <p className="text-xs font-semibold text-white/70">Missão de hoje</p>
-                <p className="text-lg font-bold">
+                  <p className="text-xs font-semibold text-white/70">Missão de hoje</p>
+                  <p className="text-lg font-bold">
                     Vender {formatCurrency(goals.metaHoje || 0)} ou {String(Number(goals.paMetaHoje || 0).toFixed(2))} PA
-                </p>
-                <p className="text-xs text-white/60">
+                  </p>
+                  <p className="text-xs text-white/60">
                     Se bater, você garante pelo menos {formatCurrency(incentives?.meta1Premio || goals.metaMinhaPrize || 0)}.
-                </p>
+                  </p>
                 </div>
-            </CardContent>
+
+                <div className="text-right">
+                  <p className="text-xs font-semibold text-white/70">Ganhos projetados no mês</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalIncentives)}</p>
+                </div>
+              </CardContent>
             </Card>
 
              {isCorridinhaActive && (
