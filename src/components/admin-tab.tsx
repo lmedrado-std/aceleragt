@@ -939,7 +939,18 @@ export function AdminTab({
                 <CardDescription>Defina os objetivos para Vendas, PA, Ticket Médio e Corridinhas.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-2">
+                <Card className="bg-sky-50 dark:bg-sky-950/50 border-sky-200 dark:border-sky-800">
+                    <CardHeader>
+                        <CardTitle className="text-lg">Missão do Dia</CardTitle>
+                        <CardDescription>Defina uma meta diária para manter a equipe focada e motivada.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField control={control} name="goals.metaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de Vendas do Dia (R$)</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.paMetaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de PA do Dia</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                    </CardContent>
+                </Card>
+
+                <div className="space-y-2 pt-4">
                   <h3 className="text-lg font-semibold border-b pb-2">Metas de Vendas e Prêmios</h3>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                         <div className="p-4 border rounded-lg bg-card space-y-2 border-blue-200 dark:border-blue-800">
