@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -184,8 +184,8 @@ function StorePageContent() {
                   <div className="flex items-center gap-6">
                       {loading ? <Skeleton className="h-12 w-12 rounded-full" /> : <Logo />}
                       <div>
-                        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                          {loading ? <Skeleton className="h-6 w-48" /> : store?.name}
+                        <h1 className="text-3xl font-bold tracking-tight text-white">
+                          {loading ? <Skeleton className="h-8 w-48" /> : store?.name}
                         </h1>
                       </div>
                   </div>
