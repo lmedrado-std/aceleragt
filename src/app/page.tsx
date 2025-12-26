@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,7 +36,7 @@ export default function HomePage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8 bg-[#F6F7FB] dark:bg-slate-900">
+      <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
         <div className="w-full max-w-5xl text-center">
             <Logo className="justify-center mb-4 h-16" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
@@ -70,7 +71,7 @@ export default function HomePage() {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-slate-500">Nenhuma loja cadastrada no momento.</p>
+                    <p className="text-slate-500 dark:text-slate-400">Nenhuma loja cadastrada no momento.</p>
                 )}
             </div>
             <div className="mt-12 pt-6">
