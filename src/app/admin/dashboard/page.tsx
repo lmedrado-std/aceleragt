@@ -77,7 +77,7 @@ function GlobalDashboard() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full min-h-screen">
         <Loader2 className="mr-2 h-16 w-16 animate-spin text-primary" />
         <p className="mt-4 text-muted-foreground">Carregando dashboard global...</p>
       </div>
@@ -86,7 +86,7 @@ function GlobalDashboard() {
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full min-h-screen">
         <p className="text-muted-foreground">Não foi possível carregar os dados.</p>
       </div>
     );
@@ -204,9 +204,9 @@ function GlobalDashboard() {
 export default function GlobalDashboardPage() {
     return (
         <ClientOnly>
-            <div className="flex-1 flex flex-col p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
+            <main className="flex-1 flex flex-col p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
                 <GlobalDashboard />
-            </div>
+            </main>
         </ClientOnly>
     );
 }
