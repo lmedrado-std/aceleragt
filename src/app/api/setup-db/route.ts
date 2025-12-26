@@ -38,6 +38,8 @@ export async function GET() {
       CREATE TABLE IF NOT EXISTS goals (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE UNIQUE,
+        "metaHoje" INTEGER DEFAULT 0,
+        "paMetaHoje" REAL DEFAULT 0,
         "metaMinha" INTEGER DEFAULT 0,
         "metaMinhaPrize" INTEGER DEFAULT 0,
         meta INTEGER DEFAULT 0,
@@ -269,6 +271,8 @@ export async function GET() {
         { name: "corridinhaPrize3", type: "INTEGER DEFAULT 0" },
         { name: "corridinhaObjective4", type: "TEXT" },
         { name: "corridinhaPrize4", type: "INTEGER DEFAULT 0" },
+        { name: "metaHoje", type: "INTEGER DEFAULT 0" },
+        { name: "paMetaHoje", type: "REAL DEFAULT 0" },
     ];
 
     for (const col of corridinhaColumns) {
