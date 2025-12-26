@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   try {
     const { store_id, goals } = await request.json();
-    console.log("BODY /api/goals:", { store_id, goals });
+    console.log("Body recebido em /api/goals:", { store_id, goals });
 
     if (!store_id || !goals) {
       return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
@@ -46,13 +46,13 @@ export async function POST(request: Request) {
     // Remove properties that shouldn't be updated directly and sanitize data
     const { id, store_id: nested_store_id, ...goalData } = goals;
     
-    // Sanitize dates: empty strings should be null
-    if (goalData.corridinhaStartDate === "") {
-        goalData.corridinhaStartDate = null;
-    }
-    if (goalData.corridinhaEndDate === "") {
-        goalData.corridinhaEndDate = null;
-    }
+    // Sanitize dates: empty strings or invalid dates should be null
+    goalData.corridinhaStartDate = goalData.corridinhaStartDate && !isNaN(new Date(goalData.corridinhaStartDate).getTime()) 
+        ? new Date(goalData.corridinhaStartDate) 
+        : null;
+    goalData.corridinhaEndDate = goalData.corridinhaEndDate && !isNaN(new Date(goalData.corridinhaEndDate).getTime())
+        ? new Date(goalData.corridinhaEndDate)
+        : null;
     
     // Sanitize objectives: empty strings should be null
     if (goalData.corridinhaObjective1 === "") goalData.corridinhaObjective1 = null;
