@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -186,9 +187,6 @@ function StorePageContent() {
                         <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
                           {loading ? <Skeleton className="h-6 w-48" /> : store?.name}
                         </h1>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Selecione seu usuário para começar.
-                        </p>
                       </div>
                   </div>
                   <div className="flex items-center gap-2">
