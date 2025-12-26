@@ -69,7 +69,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <span className="text-2xl font-bold">{formatCurrency(vendas)}</span>
                     <p className="text-xs opacity-80">Vendido até agora</p>
                 </div>
-                <div className="relative h-4 w-full rounded-full bg-black/20 pt-10 mb-8">
+                <div className="relative h-4 w-full rounded-full bg-black/20 pt-10 mb-12">
                     {/* Segmented progress bar */}
                     <div className="absolute top-10 left-0 h-4 bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
                     {vendas > (goals.metaMinha || 0) && (
@@ -162,20 +162,20 @@ const MetricProgressBar = ({
   };
 
   return (
-    <Card className={cn("p-4 flex flex-col justify-between text-white", cardClassName)}>
+    <Card className={cn("p-6 flex flex-col justify-between text-white", cardClassName)}>
       <div>
         <CardHeader className="p-0">
-          <CardTitle className="text-white text-base text-center">{label}</CardTitle>
-          <CardDescription className="text-center text-white/80 text-xs">
+          <CardTitle className="text-white text-lg text-center">{label}</CardTitle>
+          <CardDescription className="text-center text-white/80 text-sm">
             {description}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 mt-6">
           <div className="text-center mb-2">
-            <span className="text-xl font-bold">{valueFormatter(currentValue)}</span>
+            <span className="text-2xl font-bold">{valueFormatter(currentValue)}</span>
             <p className="text-xs opacity-80">{label.includes("PA") ? "PA atual" : "Ticket médio atual"}</p>
           </div>
-          <div className="relative h-3 w-full rounded-full bg-black/20 pt-10 mb-8">
+          <div className="relative h-3 w-full rounded-full bg-black/20 pt-10 mb-12">
             {/* Base progress */}
             <div className="absolute top-10 left-0 h-3 rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
 
@@ -207,7 +207,7 @@ const MetricProgressBar = ({
           </div>
         </CardContent>
       </div>
-      <div className="mt-6 text-center text-xs text-white/90 min-h-[24px]">
+      <div className="mt-auto text-center text-sm text-white/90 min-h-[40px]">
         <p>{nextGoalInfo()}</p>
       </div>
     </Card>
