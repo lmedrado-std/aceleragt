@@ -43,11 +43,15 @@ const formatNumber = (value: number) => {
 
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
-        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0, color: "bg-blue-400" },
-        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0, color: "bg-purple-400" },
-        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0, color: "bg-green-400" },
+        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
+        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0 },
+        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
     ];
+    if (goals.performanceBonusEnabled) {
+        metas.push({ label: "Bônus Performance", value: goals.metaLendaria || 0, prize: goals.legendariaBonusValorPremio || 0 });
+    }
     const totalMeta = Math.max(...metas.map(m => m.value), 0) || 1;
+    const progress = Math.min((vendas / totalMeta) * 100, 100);
 
     const findNextGoal = () => {
         if (vendas < (goals.metaMinha || 0)) return { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 };
@@ -62,24 +66,24 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
         <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
             <CardHeader className="p-0">
                 <CardTitle className="text-white">Quanto falta para o próximo prêmio</CardTitle>
-                <CardDescription className="text-white/80">Olhe sempre aqui primeiro para saber o que falta para ganhar o próximo prêmio.</CardDescription>
+                <CardDescription className="text-white/80">Acompanhe seu progresso para as metas de vendas.</CardDescription>
             </CardHeader>
             <CardContent className="p-0 mt-6">
-                <div className="text-center mb-2">
-                    <p className="text-3xl font-bold">{formatCurrency(vendas)}</p>
-                    <p className="text-xs opacity-80 -mt-1">Vendido até agora</p>
+                 <div className="text-center mb-2">
+                    <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(vendas)}</p>
+                    <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">Vendido até agora</p>
                 </div>
-                <div className="relative h-4 w-full rounded-full bg-black/20">
-                    {/* Segmented progress bar */}
-                    <div className="absolute top-0 left-0 h-full bg-blue-400 rounded-full" style={{ width: `${Math.min((vendas / totalMeta) * 100, (metas[0].value / totalMeta) * 100)}%` }}></div>
-                    {vendas > metas[0].value && (
-                        <div className="absolute top-0 left-0 h-full bg-purple-400 rounded-full" style={{ width: `${Math.min((vendas / totalMeta) * 100, (metas[1].value / totalMeta) * 100)}%` }}></div>
-                    )}
-                    {vendas > metas[1].value && (
-                        <div className="absolute top-0 left-0 h-full bg-green-400 rounded-full" style={{ width: `${Math.min((vendas / totalMeta) * 100, 100)}%` }}></div>
-                    )}
+                <div className="relative h-6 w-full rounded-full bg-white/25 overflow-hidden">
+                    <div
+                        className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                        style={{ width: `${progress}%` }}
+                    />
                     
-                    {/* Goal markers */}
+                    <div
+                      className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+                      style={{ left: `${progress}%`, transform: 'translateX(-1.5px)' }}
+                    />
+
                     {metas.map((meta, index) => {
                         const left = totalMeta > 0 ? (meta.value / totalMeta) * 100 : 0;
                         if (left <= 0 || left >= 100) return null;
@@ -92,8 +96,8 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                     <TooltipTrigger asChild>
                                         <div className="absolute top-1/2 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                             {achieved ? 
-                                                <Trophy className="h-5 w-5 text-yellow-300 drop-shadow-lg" /> :
-                                                <div className="h-4 w-1 bg-white/40" />
+                                                <Trophy className="h-6 w-6 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" /> :
+                                                <div className="h-6 w-[2px] bg-white/60 rounded-full" />
                                             }
                                         </div>
                                     </TooltipTrigger>
@@ -108,13 +112,20 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                         );
                     })}
                 </div>
-                 <div className="mt-4 text-center text-sm min-h-[20px]">
+                 <div className="mt-4 text-center text-sm min-h-[40px] flex items-center justify-center">
                     {nextGoal ? (
-                        <p className="text-white/90">
-                           Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para liberar o <span className="font-semibold">{nextGoal.label}</span> ({formatCurrency(nextGoal.prize)}).
-                        </p>
+                       <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+                          <Trophy className="h-4 w-4 text-yellow-300" />
+                          <span>
+                            Faltam <strong>{formatCurrency(nextGoal.value - vendas)}</strong> para o
+                            <strong> {nextGoal.label}</strong>
+                          </span>
+                        </div>
                     ) : (
-                        <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> Todos os prêmios liberados. Agora cada venda aumenta seu bônus!</p>
+                         <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+                           <Trophy className="h-4 w-4 text-yellow-300" />
+                           <p className="font-bold">Todos os prêmios liberados!</p>
+                        </div>
                     )}
                 </div>
             </CardContent>
@@ -140,6 +151,7 @@ const MetricProgressBar = ({
   valueSuffix?: string;
 }) => {
   const highestGoal = Math.max(...goals.map(g => g.value), 0) || 1;
+  const progress = Math.min((currentValue / highestGoal) * 100, 100);
 
   let currentTier = -1;
   for (let i = goals.length - 1; i >= 0; i--) {
@@ -155,12 +167,17 @@ const MetricProgressBar = ({
   const nextGoalInfo = () => {
     if (nextGoal) {
       const diff = nextGoal.value - currentValue;
-      return `Faltam ${valueFormatter(diff)} para liberar ${formatCurrency(nextGoal.prize)} de bônus.`;
+      return (
+        <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+          <Trophy className="h-4 w-4 text-yellow-300" />
+          <span>Faltam <strong>{valueFormatter(diff)}</strong> para liberar <strong>{formatCurrency(nextGoal.prize)}</strong></span>
+        </div>
+      );
     }
     if (currentTier !== -1) {
-      return `Você está no ${goals[currentTier].label}, mantendo seu bônus no máximo. Não deixe cair.`;
+      return <p>Você está no <strong>{goals[currentTier].label}</strong>, mantendo seu bônus no máximo!</p>;
     }
-    return `Aumente seu ${label.includes("PA") ? "PA" : "Ticket Médio"} para liberar mais bônus.`;
+    return <p>Aumente para liberar mais bônus.</p>;
   };
 
   return (
@@ -171,28 +188,32 @@ const MetricProgressBar = ({
         </CardHeader>
         <CardContent className="p-0 mt-6">
           <div className="text-center mb-2">
-            <p className="text-3xl font-bold">{valueFormatter(currentValue)}</p>
-            <p className="text-xs opacity-80 -mt-1">{valueSuffix}</p>
+            <p className="text-4xl font-extrabold tracking-tight">{valueFormatter(currentValue)}</p>
+            <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">{valueSuffix}</p>
           </div>
-          <div className="relative h-4 w-full rounded-full bg-black/20">
-            {/* Base progress */}
-            <div className="absolute top-0 left-0 h-full rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%`, transition: 'width 0.8s ease-in-out' }}></div>
+          <div className="relative h-6 w-full rounded-full bg-white/25 overflow-hidden">
+            <div 
+              className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+              style={{ width: `${progress}%` }}
+            />
+            
+            <div
+              className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+              style={{ left: `${progress}%`, transform: 'translateX(-1.5px)' }}
+            />
 
-            {/* Goal markers */}
             {goals.map((goal, index) => {
               const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
               if (left <= 0 || left > 100) return null;
-              const achieved = currentValue >= goal.value;
-              return (
+              
+               return (
                 <TooltipProvider key={index}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="absolute top-1/2 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                          {achieved ? 
-                              <Trophy className="h-5 w-5 text-yellow-300 drop-shadow-lg" /> :
-                              <div className="h-4 w-1 bg-white/40" />
-                          }
-                      </div>
+                      <div
+                        className="absolute top-0 h-full w-[1px] bg-white/30"
+                        style={{ left: `${left}%` }}
+                      />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-sm font-semibold">{goal.label}</p>
@@ -206,8 +227,8 @@ const MetricProgressBar = ({
             })}
           </div>
         </CardContent>
-      <div className="mt-4 text-center text-sm text-white/90 min-h-[40px]">
-        <p>{nextGoalInfo()}</p>
+      <div className="mt-4 text-center text-sm text-white/90 min-h-[40px] flex items-center justify-center">
+        {nextGoalInfo()}
       </div>
     </Card>
   );
