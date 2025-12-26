@@ -105,7 +105,7 @@ export function Sidebar() {
           <div className="px-3 py-2 text-xs text-center text-white/70 space-y-1">
               <p>V2.0.0 Build Estavel</p>
               <p>RyannBreston desenvolvedor</p>
-              <p>© {new Date().getFullYear()} Acelera GT.</p>
+              <p>© 2025 Acelera GT.</p>
           </div>
         </div>
       </aside>
