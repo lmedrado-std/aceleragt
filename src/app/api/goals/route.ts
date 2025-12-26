@@ -1,5 +1,4 @@
 
-
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -36,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { store_id, goals } = await request.json();
     console.log("Body recebido em /api/goals:", { store_id, goals });
@@ -45,42 +44,48 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
     }
 
-    // Remove properties that shouldn't be updated directly and sanitize data
+    // tira id/store_id internos
     const { id, store_id: nested_store_id, ...goalData } = goals;
     
-    // Sanitize dates: empty strings or invalid dates should be null
-    goalData.corridinhaStartDate = goalData.corridinhaStartDate && !isNaN(new Date(goalData.corridinhaStartDate).getTime()) 
-        ? new Date(goalData.corridinhaStartDate) 
-        : null;
-    goalData.corridinhaEndDate = goalData.corridinhaEndDate && !isNaN(new Date(goalData.corridinhaEndDate).getTime())
-        ? new Date(goalData.corridinhaEndDate)
-        : null;
+    // Whitelist de campos que existem no schema do Prisma
+    const prismaGoalFields = [
+      "metaMinha", "metaMinhaPrize", "meta", "metaPrize", "metona", "metonaPrize",
+      "metaLendaria", "legendariaBonusValorVenda", "legendariaBonusValorPremio",
+      "performanceBonusEnabled", "paGoal1", "paPrize1", "paGoal2", "paPrize2",
+      "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1",
+      "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3",
+      "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4",
+      "corridinhaStartDate", "corridinhaEndDate", "corridinhaObjective1", "corridinhaPrize1",
+      "corridinhaObjective2", "corridinhaPrize2", "corridinhaObjective3", "corridinhaPrize3",
+      "corridinhaObjective4", "corridinhaPrize4", "metaHoje", "paMetaHoje",
+    ] as const;
+
+    const prismaGoalData: any = {};
+    for (const key of prismaGoalFields) {
+      if (key in goalData && goalData[key] !== undefined) {
+        // Sanitização especial para datas
+        if (key === 'corridinhaStartDate' || key === 'corridinhaEndDate') {
+            prismaGoalData[key] = goalData[key] && !isNaN(new Date(goalData[key]).getTime()) 
+                ? new Date(goalData[key]) 
+                : null;
+        } else {
+            prismaGoalData[key] = goalData[key];
+        }
+      }
+    }
     
-    // Sanitize objectives: empty strings should be null
-    if (goalData.corridinhaObjective1 === "") goalData.corridinhaObjective1 = null;
-    if (goalData.corridinhaObjective2 === "") goalData.corridinhaObjective2 = null;
-    if (goalData.corridinhaObjective3 === "") goalData.corridinhaObjective3 = null;
-    if (goalData.corridinhaObjective4 === "") goalData.corridinhaObjective4 = null;
-
-    // Sanitize prizes: ensure they are numbers or null
-    goalData.corridinhaPrize1 = goalData.corridinhaPrize1 ? Number(goalData.corridinhaPrize1) : 0;
-    goalData.corridinhaPrize2 = goalData.corridinhaPrize2 ? Number(goalData.corridinhaPrize2) : 0;
-    goalData.corridinhaPrize3 = goalData.corridinhaPrize3 ? Number(goalData.corridinhaPrize3) : 0;
-    goalData.corridinhaPrize4 = goalData.corridinhaPrize4 ? Number(goalData.corridinhaPrize4) : 0;
-
-
     const upsertedGoal = await prisma.goals.upsert({
       where: { store_id: store_id },
-      update: goalData,
+      update: prismaGoalData,
       create: {
         store_id: store_id,
-        ...goalData,
+        ...prismaGoalData,
       },
     });
 
     return NextResponse.json(upsertedGoal);
   } catch (error) {
-    console.error('[API POST /api/goals] ERRO:', error);
+    console.error("[API POST /api/goals] ERRO:", error);
     const typedError = error as any;
     return NextResponse.json(
       {
