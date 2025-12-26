@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -42,9 +43,9 @@ const formatNumber = (value: number) => {
 
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
-        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
-        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0 },
-        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
+        { label: "Prêmio 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0, color: "bg-blue-300" },
+        { label: "Prêmio 2", value: goals.meta || 0, prize: goals.metaPrize || 0, color: "bg-purple-300" },
+        { label: "Prêmio Turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0, color: "bg-green-300" },
     ];
     const totalMeta = goals.metona || 0;
     const progressPercentage = totalMeta > 0 ? Math.min((vendas / totalMeta) * 100, 100) : 0;
@@ -83,7 +84,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div className="absolute top-1/2 h-8 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
-                                            <div className={cn("h-full w-full", achieved ? "bg-green-300" : "bg-white/40")} />
+                                            <div className={cn("h-full w-full", achieved ? meta.color : "bg-white/40")} />
                                              {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
                                         </div>
                                     </TooltipTrigger>
@@ -143,7 +144,7 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
 
     const nextGoalInfo = () => {
         if (nextGoal) {
-             return `Faltam ${label.includes("PA") ? (nextGoal.value - currentValue).toFixed(2) : formatCurrency(nextGoal.value - currentValue)} PA para liberar ${formatCurrency(nextGoal.prize)} de bônus.`;
+             return `Faltam ${label.includes("PA") ? (nextGoal.value - currentValue).toFixed(2) : formatCurrency(nextGoal.value - currentValue)} para liberar ${formatCurrency(nextGoal.prize)} de bônus.`;
         }
         if (currentTier !== -1) {
              return `Você está no ${goals[currentTier].label}, mantendo seu bônus no máximo. Não deixe cair.`;
@@ -250,3 +251,4 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
     </div>
   );
 }
+
