@@ -14,6 +14,7 @@ import { RankingMetric } from "./goal-getter-dashboard";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 import { Trophy } from "lucide-react";
 
+
 type ProgressDisplaySalesData = Partial<Seller> & {
   goals: Goals;
 };
@@ -36,7 +37,7 @@ const formatNumber = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value || 0);
 
-const CleanProgressBar = ({
+const SegmentedProgressBar = ({
   current,
   goals,
   formatter,
@@ -48,42 +49,38 @@ const CleanProgressBar = ({
   const max = Math.max(...goals.map((g) => g.value), 1);
   const progress = Math.min((current / max) * 100, 100);
 
+  const segmentColors = [
+    "bg-teal-500",
+    "bg-cyan-500",
+    "bg-lime-500",
+    "bg-yellow-500",
+    "bg-orange-500",
+    "bg-red-500",
+  ];
+
   return (
-    <div className="relative w-full mt-8 mb-4">
-      <div className="h-2 w-full bg-white/30 rounded-full">
-        <div
-          className="h-full bg-emerald-400 rounded-full transition-all duration-700"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      <div className="relative mt-2 flex justify-between w-full px-1">
+    <div className="w-full space-y-3 mt-8 mb-4">
+      <div className="relative h-10 w-full bg-white/20 rounded-xl p-1 flex items-center gap-1">
         {goals.map((g, i) => {
-          if (g.value <= 0) return null;
-          const left = (g.value / max) * 100;
-          const achieved = current >= g.value;
-
+          const segmentEnd = (g.value / max) * 100;
+          const segmentStart = i > 0 ? (goals[i - 1].value / max) * 100 : 0;
+          
+          let fillPercentage = 0;
+          if (progress >= segmentEnd) {
+            fillPercentage = 100;
+          } else if (progress > segmentStart) {
+            fillPercentage = ((progress - segmentStart) / (segmentEnd - segmentStart)) * 100;
+          }
+          
           return (
             <TooltipProvider key={i}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div
-                    className="absolute flex flex-col items-center"
-                    style={{
-                      left: `${left}%`,
-                      transform: "translateX(-50%)",
-                    }}
-                  >
-                    <div
-                      className={cn(
-                        "h-5 w-5 rounded-full flex items-center justify-center transition-all duration-300",
-                        achieved
-                          ? "bg-emerald-400 border-2 border-white shadow-lg"
-                          : "bg-white/50 border border-white"
-                      )}
-                    >
-                      {achieved && <Trophy className="h-3 w-3 text-white" />}
-                    </div>
+                  <div className="relative flex-1 h-full bg-white/20 rounded-md overflow-hidden">
+                     <div
+                        className={cn("h-full rounded-md", segmentColors[i % segmentColors.length])}
+                        style={{ width: `${fillPercentage}%` }}
+                      />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -94,6 +91,15 @@ const CleanProgressBar = ({
             </TooltipProvider>
           );
         })}
+         <div
+          className="absolute -top-6 -translate-x-1/2 flex flex-col items-center"
+          style={{ left: `${progress}%` }}
+        >
+          <div className="bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded-md">
+            {progress.toFixed(0)}%
+          </div>
+          <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-slate-800" />
+        </div>
       </div>
     </div>
   );
@@ -143,7 +149,7 @@ export function ProgressDisplay({
             </p>
           </div>
 
-          <CleanProgressBar
+          <SegmentedProgressBar
             current={vendas}
             goals={[
               { value: goals.metaMinha, label: "Meta 1", prize: goals.metaMinhaPrize },
@@ -179,7 +185,7 @@ export function ProgressDisplay({
               </p>
             </div>
 
-            <CleanProgressBar
+            <SegmentedProgressBar
               current={pa}
               goals={paGoals}
               formatter={formatNumber}
@@ -207,7 +213,7 @@ export function ProgressDisplay({
               </p>
             </div>
 
-            <CleanProgressBar
+            <SegmentedProgressBar
               current={ticketMedio}
               goals={ticketGoals}
               formatter={formatCurrency}
