@@ -69,14 +69,14 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                     <span className="text-2xl font-bold">{formatCurrency(vendas)}</span>
                     <p className="text-xs opacity-80">Vendido até agora</p>
                 </div>
-                <div className="relative h-4 w-full rounded-full bg-black/20">
+                <div className="relative h-4 w-full rounded-full bg-black/20 pt-8 mb-8">
                     {/* Segmented progress bar */}
-                     <div className="absolute top-0 left-0 h-full bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
+                    <div className="absolute top-8 left-0 h-4 bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
                     {vendas > (goals.metaMinha || 0) && (
-                        <div className="absolute top-0 left-0 h-full bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
+                        <div className="absolute top-8 left-0 h-4 bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
                     )}
                     {vendas > (goals.meta || 0) && (
-                        <div className="absolute top-0 left-0 h-full bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
+                        <div className="absolute top-8 left-0 h-4 bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
                     )}
                     
                     
@@ -175,9 +175,9 @@ const MetricProgressBar = ({
             <span className="text-xl font-bold">{valueFormatter(currentValue)}</span>
             <p className="text-xs opacity-80">{label.includes("PA") ? "PA atual" : "Ticket médio atual"}</p>
           </div>
-          <div className="relative h-3 w-full rounded-full bg-black/20">
+          <div className="relative h-3 w-full rounded-full bg-black/20 pt-8 mb-8">
             {/* Base progress */}
-            <div className="absolute top-0 left-0 h-full rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
+            <div className="absolute top-8 left-0 h-3 rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
 
             {/* Goal markers */}
             {goals.map((goal, index) => {
