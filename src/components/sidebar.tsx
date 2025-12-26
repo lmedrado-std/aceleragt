@@ -69,8 +69,8 @@ export function Sidebar() {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-            <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-black/20 hover:text-white">
-                {theme === 'dark' ? <Sun /> : <Moon />}
+            <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="lg" className="rounded-full text-white/80 hover:bg-black/20 hover:text-white">
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 <span className="sr-only">Toggle theme</span>
             </Button>
         </TooltipTrigger>
@@ -141,7 +141,7 @@ export function Sidebar() {
         </nav>
 
         <div className="mt-auto p-4 border-t border-white/20">
-          <div className="flex justify-center mb-2">
+          <div className="flex justify-center mb-4">
               {renderThemeToggle()}
           </div>
           <div className="px-3 py-2 text-xs text-center text-white/70 space-y-1">
