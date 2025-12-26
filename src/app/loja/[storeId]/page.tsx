@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw, Moon, Sun } from "lucide-react";
+import { Loader2, ArrowRight, Home, Shield, Clock, RefreshCw, Moon, Sun, Users } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
@@ -16,6 +16,7 @@ import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated } from "@/li
 import AppLayout from "@/components/app-layout";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useRouter>) {
   const lojaDashboardUrl = `/loja/${storeId}/dashboard?tab=admin`;
@@ -42,16 +43,16 @@ function handleSellerAccess(storeId: string, sellerId: string, router: ReturnTyp
 }
 
 const sellerButtonColors = [
-    "border-blue-500 hover:bg-blue-50",
-    "border-green-500 hover:bg-green-50",
-    "border-purple-500 hover:bg-purple-50",
-    "border-orange-500 hover:bg-orange-50",
-    "border-pink-500 hover:bg-pink-50",
-    "border-yellow-500 hover:bg-yellow-50",
-    "border-teal-500 hover:bg-teal-50",
-    "border-cyan-500 hover:bg-cyan-50",
-    "border-red-500 hover:bg-red-50",
-    "border-indigo-500 hover:bg-indigo-50",
+    "border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20",
+    "border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20",
+    "border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20",
+    "border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20",
+    "border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20",
+    "border-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20",
+    "border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20",
+    "border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20",
+    "border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20",
+    "border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20",
 ];
 
 
@@ -142,27 +143,33 @@ function StorePageContent() {
 
   if (error) {
      return (
-        <div className="bg-card rounded-lg flex flex-col items-center justify-center p-8 text-center h-full max-w-lg mx-auto">
-             <h1 className="text-2xl font-bold text-destructive mb-4">Erro ao Carregar Loja</h1>
-             <p className="text-destructive/80 mb-6">{error}</p>
-             <Button asChild>
-                <Link href="/">
-                    <Home className="mr-2 h-4 w-4" />
-                    Voltar para o Início
-                </Link>
-             </Button>
+        <div className="flex flex-1 items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
+            <Card className="max-w-lg w-full">
+                <CardHeader>
+                    <CardTitle className="text-destructive">Erro ao Carregar Loja</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                    <p className="text-destructive/80 mb-6">{error}</p>
+                    <Button asChild>
+                        <Link href="/">
+                            <Home className="mr-2 h-4 w-4" />
+                            Voltar para o Início
+                        </Link>
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
      )
   }
 
   const renderThemeToggle = () => {
     if (!mounted) {
-      return <Skeleton className="h-10 w-10 rounded-full bg-white/20" />;
+      return <Skeleton className="h-10 w-10 rounded-full" />;
     }
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="ghost" size="icon" className="rounded-full text-white/80 hover:bg-white/20 hover:text-white">
+          <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="outline" size="icon" className="rounded-full">
               {theme === 'light' ? <Moon /> : <Sun />}
           </Button>
         </TooltipTrigger>
@@ -175,15 +182,26 @@ function StorePageContent() {
 
   return (
     <TooltipProvider>
-      <div className="w-full max-w-7xl mx-auto">
-          <div className="mb-6 p-4 rounded-xl bg-accent shadow-lg text-white">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <h1 className="text-3xl font-bold">{loading ? "Carregando..." : store?.name}</h1>
+      <div className="flex flex-1 flex-col items-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
+        <div className="w-full max-w-7xl">
+            <Card className="mb-8 bg-card/80 backdrop-blur-sm border-border/20 shadow-sm">
+              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                      {loading ? <Skeleton className="h-12 w-12 rounded-full" /> : <Logo className="h-12" />}
+                      <div>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                          {loading ? <Skeleton className="h-6 w-48" /> : store?.name}
+                        </h1>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Selecione seu usuário para começar.
+                        </p>
+                      </div>
+                  </div>
                   <div className="flex items-center gap-2">
                       {renderThemeToggle()}
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="secondary" onClick={() => handleAccessAdminLoja(storeId, router)} className="bg-white/90 text-primary hover:bg-white">
+                          <Button variant="outline" onClick={() => handleAccessAdminLoja(storeId, router)}>
                               <Shield className="mr-2 h-4 w-4" />
                               <span className="hidden sm:inline">Painel do Gestor</span>
                           </Button>
@@ -194,10 +212,10 @@ function StorePageContent() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="secondary" asChild className="bg-white/90 text-primary hover:bg-white">
+                          <Button variant="outline" asChild>
                               <Link href="/">
                                   <Home className="mr-2 h-4 w-4" />
-                                  <span className="hidden sm:inline">Página Inicial</span>
+                                  <span className="hidden sm:inline">Início</span>
                               </Link>
                           </Button>
                         </TooltipTrigger>
@@ -207,7 +225,7 @@ function StorePageContent() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading} className="bg-transparent text-white hover:bg-white/20 hover:text-white border-white/50">
+                          <Button variant="outline" onClick={() => loadStoreData(true)} disabled={loading}>
                               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                               <span className="hidden sm:inline">Atualizar</span>
                           </Button>
@@ -217,39 +235,42 @@ function StorePageContent() {
                         </TooltipContent>
                       </Tooltip>
                   </div>
-              </div>
-              <p className="text-white/80 mt-2">Selecione seu usuário para começar.</p>
-          </div>
+              </CardContent>
+            </Card>
           
-          {formattedLastUpdated && (
-              <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium">
-                  <Clock className="h-4 w-4" />
-                  <span>Última atualização de dados: {formattedLastUpdated}</span>
-              </div>
-          )}
+            {formattedLastUpdated && (
+                <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium">
+                    <Clock className="h-4 w-4" />
+                    <span>Última atualização de dados: {formattedLastUpdated}</span>
+                </div>
+            )}
           
-          {loading ? (
-              <div className="flex items-center justify-center h-64">
-                  <Loader2 className="mr-2 h-12 w-12 animate-spin text-primary" />
-              </div>
-          ) : (
-              <Card>
-                  <CardHeader>
-                      <CardTitle>Vendedores</CardTitle>
-                      <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
-                  </CardHeader>
-                  <CardContent>
-                      {sellers.length > 0 ? (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                              {sellers.map((seller, index) => (
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="mr-2 h-12 w-12 animate-spin text-primary" />
+                </div>
+            ) : (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Users /> Vendedores</CardTitle>
+                        <CardDescription>Selecione seu usuário para ver seu desempenho.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {sellers.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                {sellers.map((seller, index) => (
                                 <Tooltip key={seller.id}>
                                   <TooltipTrigger asChild>
                                     <button
                                         onClick={() => handleSellerAccess(storeId, seller.id, router)}
-                                        className={cn("group flex flex-col items-center p-3 rounded-lg border-2 hover:shadow-lg transition-all text-center", sellerButtonColors[index % sellerButtonColors.length])}
+                                        className={cn(
+                                          "group flex flex-col items-center p-4 rounded-xl border-2 hover:shadow-lg transition-all text-center",
+                                          "bg-card hover:bg-muted/50 dark:bg-muted/20 dark:hover:bg-muted/40",
+                                          sellerButtonColors[index % sellerButtonColors.length]
+                                        )}
                                     >
-                                        <SellerAvatar avatarId={seller.avatar_id} className="h-24 w-24 mb-3 transition-transform group-hover:scale-105" />
-                                        <span className="font-semibold text-foreground">{seller.name}</span>
+                                        <SellerAvatar avatarId={seller.avatar_id} className="h-28 w-28 mb-4 border-4 border-background transition-transform group-hover:scale-105" />
+                                        <span className="font-semibold text-foreground text-lg">{seller.name}</span>
                                     </button>
                                   </TooltipTrigger>
                                   <TooltipContent>
@@ -264,8 +285,9 @@ function StorePageContent() {
                           </p>
                       )}
                   </CardContent>
-              </Card>
-          )}
+                </Card>
+            )}
+        </div>
       </div>
     </TooltipProvider>
   );
