@@ -39,12 +39,6 @@ export function logoutAll() {
 export function logoutStore(storeId: string) {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem(`storeAuthenticated-${storeId}`);
-  
-  // Opcional: decidir se deve limpar os vendedores desta loja também.
-  // Por segurança, é uma boa prática.
-  Object.keys(sessionStorage)
-    .filter(key => key.startsWith('sellerAuthenticated-'))
-    .forEach(key => sessionStorage.removeItem(key));
 }
 
 /**
