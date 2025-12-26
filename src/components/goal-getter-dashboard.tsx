@@ -59,7 +59,7 @@ const goalsSchema = z.object({
   metonaPrize: z.coerce.number().default(0),
   metaLendaria: z.coerce.number().default(0),
   legendariaBonusValorVenda: z.coerce.number().default(0),
-  legendariaBonusValorPremio: zcoerce.number().default(0),
+  legendariaBonusValorPremio: z.coerce.number().default(0),
   performanceBonusEnabled: z.boolean().default(false),
   corridinhaEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
@@ -514,7 +514,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const handleManagerLogout = () => {
     logoutStore(storeId);
-    logoutAll(); // Also clears admin global
+    logoutAll();
     toast({ title: "Sessão encerrada", description: "Você saiu do modo de gestor." });
     router.push(`/loja/${storeId}`);
   };
@@ -535,12 +535,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
-             <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-3 items-center gap-4">
-                <div className="text-center sm:text-left">
+             <CardContent className="p-4 relative grid grid-cols-3 items-center gap-4">
+                <div className="text-left">
                     <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
                 
-                <div className="text-center">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                   <h1 className="text-3xl font-bold font-headline text-white truncate">
                     {currentStore?.name}
                     {isManagerView && activeTab === 'admin' && (
@@ -549,7 +549,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   </h1>
                 </div>
 
-                <div className="flex items-center justify-center sm:justify-end gap-2">
+                <div className="flex items-center justify-end gap-2 col-start-3">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button asChild variant="outline" className="shadow-sm">
