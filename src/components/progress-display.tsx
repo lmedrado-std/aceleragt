@@ -13,7 +13,6 @@ import {
   Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { Goals, Seller } from "@/lib/storage";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
@@ -42,13 +41,6 @@ const formatNumber = (value: number) => {
     }).format(value || 0);
 }
 
-const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
-     <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
-        <p className="font-medium">{label}</p>
-        <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(prize)}</p>
-    </div>
-)
-
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
         { label: "Meta mínima", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
@@ -67,17 +59,6 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     };
     const nextGoal = findNextGoal();
     
-    const getCongratsMessage = () => {
-        if (goals.performanceBonusEnabled && vendas >= (goals.metaLendaria || 0)) {
-            return "Você está na zona de Bônus Performance! Parabéns!";
-        }
-        if (vendas >= (goals.metona || 0)) {
-            return "Todas as metas principais foram atingidas! Parabéns!";
-        }
-        return null;
-    }
-    const congratsMessage = getCongratsMessage();
-
     return (
         <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
             <CardHeader className="p-0">
@@ -159,7 +140,6 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
 
     const nextGoalInfo = () => {
         if (nextGoal) {
-            const diff = nextGoal.value - currentValue;
             return `Se chegar em ${nextGoal.label}, você aumenta seu bônus de ${label.includes("PA") ? "PA" : "Ticket Médio"}.`;
         }
         if (currentTier !== -1) {
@@ -214,7 +194,6 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
-    name = "Vendedor",
     vendas = 0,
     pa = 0,
     ticket_medio: ticketMedio = 0,
@@ -228,25 +207,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   const totalIncentives = incentives
     ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
-    
-  const totalPotentialPrizes = 
-    (goals.metaMinhaPrize || 0) +
-    (goals.metaPrize || 0) +
-    (goals.metonaPrize || 0) +
-    (goals.legendariaBonusValorPremio || 0) + 
-    (goals.paPrize1 || 0) + (goals.paPrize2 || 0) + (goals.paPrize3 || 0) + (goals.paPrize4 || 0) +
-    (goals.ticketMedioPrize1 || 0) + (goals.ticketMedioPrize2 || 0) + (goals.ticketMedioPrize3 || 0) + (goals.ticketMedioPrize4 || 0) +
-    (incentives?.corridinhaDiariaBonus || 0);
-
-
-  const salesRank = vendas > 0 ? rankings?.vendas : undefined;
-  
-  let rankMedal = "";
-  if (salesRank && salesRank > 0) {
-      if (salesRank === 1) rankMedal = "🥇";
-      else if (salesRank === 2) rankMedal = "🥈";
-      else if (salesRank === 3) rankMedal = "🥉";
-  }
 
   const paGoals = [
     { value: goals.paGoal1 || 0, label: 'Nível 1' },
@@ -276,16 +236,12 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 Se bater, você garante pelo menos {formatCurrency(incentives?.meta1Premio || goals.metaMinhaPrize || 0)}.
               </p>
             </div>
-
-            <div className="text-right">
-              <p className="text-xs font-semibold text-white/70">Ganhos projetados no mês</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalIncentives)}</p>
-            </div>
+            {/* Ganhos projetados movido para a outra aba */}
           </CardContent>
         </Card>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-3 space-y-6">
                  <SalesProgressBar vendas={Number(vendas)} goals={goals} />
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <CircularGauge 
@@ -303,44 +259,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
                     />
                 </div>
-            </div>
-
-            <div className="lg:col-span-1">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
-                        <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                         <div>
-                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por vendas</p>
-                            <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
-                            <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
-                            <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
-                            {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
-                        </div>
-                        <Separator />
-                        <div>
-                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por PA e Ticket</p>
-                            <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
-                            <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
-                        </div>
-                         <Separator />
-                         <div>
-                             <p className="text-xs font-semibold text-muted-foreground uppercase">Outros Bônus</p>
-                            <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
-                        </div>
-                        <Separator />
-                         <div className="flex justify-between items-center pt-2">
-                            <span className="text-sm font-semibold text-muted-foreground">
-                              Se bater todas as metas:
-                            </span>
-                            <span className="font-bold text-lg text-primary">
-                              {formatCurrency(totalPotentialPrizes)}
-                            </span>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </div>
     </div>

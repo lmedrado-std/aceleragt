@@ -49,6 +49,13 @@ const MetricCard = ({ title, value, icon, description, className }: { title: str
   </Card>
 );
 
+const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
+     <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
+        <p className="font-medium">{label}</p>
+        <p className={cn("font-bold text-lg", achieved ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>{formatCurrency(prize)}</p>
+    </div>
+)
+
 const GoalItem = ({ label, value }: { label: string, value: string }) => (
     <div className="flex justify-between items-center py-2 border-b last:border-0">
         <p className="text-sm text-muted-foreground">{label}</p>
@@ -59,7 +66,6 @@ const GoalItem = ({ label, value }: { label: string, value: string }) => (
 export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, storeId }: SellerTabProps) {
   const salesData = { ...seller, goals };
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-
 
   useEffect(() => {
     if (seller.id) {
@@ -89,6 +95,19 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
       origin: { y: 0.6 },
     });
   };
+  
+    const totalIncentives = incentives
+    ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
+    : 0;
+
+  const totalPotentialPrizes =
+    (incentives?.meta1Premio || 0) +
+    (incentives?.meta2Premio || 0) +
+    (incentives?.meta3Premio || 0) +
+    (incentives?.legendariaBonus || 0) +
+    (incentives?.paBonus || 0) +
+    (incentives?.ticketMedioBonus || 0) +
+    (incentives?.corridinhaDiariaBonus || 0);
 
   return (
     <TooltipProvider>
@@ -120,24 +139,68 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         </TabsContent>
         
         <TabsContent value="lancamentos" className="mt-6">
-          {/* Conteúdo da aba Lançamentos */}
-          <Card>
-            <CardHeader>
-                <CardTitle>Meus Lançamentos</CardTitle>
-                <CardDescription>Estes foram os dados de desempenho que o administrador lançou para você. Olhe sempre aqui primeiro para saber o que falta para ganhar o próximo prêmio.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white" />
-                <MetricCard title="Produtos por Atendimento (PA)" value={String(Number(seller.pa || 0).toFixed(2))} icon={<Package className="h-4 w-4" />} description="Média de itens por venda" className="bg-gradient-to-br from-purple-500 to-purple-700 text-white" />
-                <MetricCard title="Ticket Médio" value={formatCurrency(seller.ticket_medio)} icon={<Ticket className="h-4 w-4" />} description="Valor médio por venda" className="bg-gradient-to-br from-orange-500 to-orange-700 text-white" />
-                <MetricCard title="Bônus Corridinha" value={formatCurrency(seller.corridinha_diaria)} icon={<Rocket className="h-4 w-4" />} description="Bônus diário direto" className="bg-gradient-to-br from-green-500 to-green-700 text-white" />
-              </div>
-              {lastUpdated && (
-                <div className="mt-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium"><Clock className="h-4 w-4" /><span>Última atualização de dados: {formattedLastUpdated}</span></div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                    <CardTitle>Meus Lançamentos</CardTitle>
+                    <CardDescription>Estes foram os dados de desempenho que o administrador lançou para você.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                    <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white" />
+                    <MetricCard title="Bônus Corridinha" value={formatCurrency(seller.corridinha_diaria)} icon={<Rocket className="h-4 w-4" />} description="Bônus diário direto" className="bg-gradient-to-br from-green-500 to-green-700 text-white" />
+                    <MetricCard title="Produtos por Atendimento (PA)" value={String(Number(seller.pa || 0).toFixed(2))} icon={<Package className="h-4 w-4" />} description="Média de itens por venda" className="bg-gradient-to-br from-purple-500 to-purple-700 text-white" />
+                    <MetricCard title="Ticket Médio" value={formatCurrency(seller.ticket_medio)} icon={<Ticket className="h-4 w-4" />} description="Valor médio por venda" className="bg-gradient-to-br from-orange-500 to-orange-700 text-white" />
+                  </div>
+                  {lastUpdated && (
+                    <div className="mt-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium"><Clock className="h-4 w-4" /><span>Última atualização de dados: {formattedLastUpdated}</span></div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            <div className="lg:col-span-1">
+               <Card>
+                    <CardHeader>
+                        <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
+                        <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                         <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por vendas</p>
+                            <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
+                            <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
+                            <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
+                            {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
+                        </div>
+                        <Separator />
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por PA e Ticket</p>
+                            <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
+                            <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
+                        </div>
+                         <Separator />
+                         <div>
+                             <p className="text-xs font-semibold text-muted-foreground uppercase">Outros Bônus</p>
+                            <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
+                        </div>
+                        <Separator />
+                        <div className="text-right pt-2">
+                          <p className="text-xs font-semibold text-muted-foreground">Ganhos projetados no mês</p>
+                          <p className="text-2xl font-bold text-primary">{formatCurrency(totalIncentives)}</p>
+                        </div>
+                         <div className="flex justify-between items-center pt-2">
+                            <span className="text-sm font-semibold text-muted-foreground">
+                              Se bater todas as metas:
+                            </span>
+                            <span className="font-bold text-lg text-primary">
+                              {formatCurrency(totalPotentialPrizes)}
+                            </span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+          </div>
         </TabsContent>
 
          <TabsContent value="metas" className="mt-6">
