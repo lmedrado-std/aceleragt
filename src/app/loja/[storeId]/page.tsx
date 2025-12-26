@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -50,6 +50,59 @@ const sellerCardColors: ("pink" | "green" | "purple" | "orange")[] = [
     "orange",
 ];
 
+type LastUpdateProps = {
+  updatedAt: string;
+  isToday: boolean;
+};
+
+function LastUpdateBanner({ updatedAt, isToday }: LastUpdateProps) {
+  return (
+    <div
+      className="
+        my-6 flex items-center justify-center rounded-2xl
+        border border-amber-200 bg-amber-50/70
+        px-4 py-2.5 text-sm
+        shadow-[0_4px_12px_rgba(245,158,11,0.15)]
+        dark:bg-amber-900/30 dark:border-amber-800
+      "
+    >
+      <div className="relative mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-amber-950 text-amber-500 shadow-sm">
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 6v6l3 2m4-2a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+
+        {isToday && (
+          <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-baseline gap-x-2">
+        <span className="text-xs font-medium uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">
+          Última atualização
+        </span>
+        <span className="text-sm font-semibold text-slate-900 dark:text-slate-200">
+          {updatedAt}
+        </span>
+        {isToday && (
+          <span className="rounded-full bg-emerald-100 dark:bg-emerald-900 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-200">
+            Atualizado hoje
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function StorePageContent() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -59,6 +112,7 @@ function StorePageContent() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [formattedLastUpdated, setFormattedLastUpdated] = useState<string | null>(null);
+  const [updateIsToday, setUpdateIsToday] = useState(false);
   
   const params = useParams();
   const router = useRouter();
@@ -105,9 +159,11 @@ function StorePageContent() {
         }
 
         if (storeData?.last_incentive_calculation) {
-          const date = new Date(storeData.last_incentive_calculation);
+          const updateDate = new Date(storeData.last_incentive_calculation);
+          const today = new Date();
+
           setFormattedLastUpdated(
-            date.toLocaleString("pt-BR", {
+            updateDate.toLocaleString("pt-BR", {
               day: "2-digit",
               month: "2-digit",
               year: "numeric",
@@ -115,8 +171,16 @@ function StorePageContent() {
               minute: "2-digit",
             })
           );
+
+          setUpdateIsToday(
+            updateDate.getFullYear() === today.getFullYear() &&
+            updateDate.getMonth() === today.getMonth() &&
+            updateDate.getDate() === today.getDate()
+          );
+
         } else {
           setFormattedLastUpdated(null);
+          setUpdateIsToday(false);
         }
 
     } catch (e) {
@@ -229,10 +293,7 @@ function StorePageContent() {
             </Card>
           
             {formattedLastUpdated && (
-                <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium animate-subtle-pulse">
-                    <Clock className="h-4 w-4" />
-                    <span>Última atualização de dados: {formattedLastUpdated}</span>
-                </div>
+                <LastUpdateBanner updatedAt={formattedLastUpdated} isToday={updateIsToday} />
             )}
           
             {loading ? (
@@ -243,7 +304,7 @@ function StorePageContent() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Users /> Vendedores</CardTitle>
-                        <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
+                        <CardDescription>Selecione seu usuário para ver seu desempenho.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {sellers.length > 0 ? (
@@ -280,3 +341,5 @@ export default function StoreHomePage() {
     </ClientOnly>
   )
 }
+
+    
