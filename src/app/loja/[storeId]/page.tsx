@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
 import Link from "next/link";
 import { useTheme } from "next-themes";
@@ -245,7 +245,7 @@ function StorePageContent() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Users /> Vendedores</CardTitle>
-                        <CardDescription>Selecione seu usuário para ver seu desempenho.</CardDescription>
+                        <p className="text-sm text-muted-foreground">Selecione seu usuário para ver seu desempenho.</p>
                     </CardHeader>
                     <CardContent>
                         {sellers.length > 0 ? (
