@@ -89,12 +89,12 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number; goals: Goals }) =
                                             style={{ left: `${left}%`, transform: "translateX(-50%)", zIndex: 30 }}
                                         >
                                             {achieved ? (
-                                                <TrophyIconFilled className="h-6 w-6 text-yellow-400 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
+                                                <TrophyIconFilled className="h-6 w-6 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
                                             ) : (
                                                 <div
                                                     className={cn(
                                                         "h-4 w-[3px] rounded-full",
-                                                        isNext ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)] animate-pulse" : "bg-white/40"
+                                                        isNext ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)] animate-pulse" : "bg-white/60"
                                                     )}
                                                 />
                                             )}
@@ -147,136 +147,73 @@ const MetricProgressBar = ({
   cardClassName?: string;
   description?: string;
 }) => {
-  const highestGoal = Math.max(...goals.map(g => g.value), 0) || 1;
-  const progress = Math.min((currentValue / highestGoal) * 100, 100);
+  const maxGoal = Math.max(...goals.map(g => g.value), 1);
+  const progress = Math.min((currentValue / maxGoal) * 100, 100);
 
-  let currentTier = -1;
-  for (let i = goals.length - 1; i >= 0; i--) {
-    if (goals[i].value > 0 && currentValue >= goals[i].value) {
-      currentTier = i;
-      break;
-    }
-  }
-  const currentTierGoal = currentTier !== -1 ? goals[currentTier] : null;
-
-  const nextGoalIndex = currentTier + 1;
-  const nextGoal =
-    goals[nextGoalIndex] && goals[nextGoalIndex].value > 0
-      ? goals[nextGoalIndex]
-      : null;
-
-  const nextGoalInfo = () => {
-    if (nextGoal) {
-      const diff = nextGoal.value - currentValue;
-      const unidade = label.includes("PA") ? "ponto(s) de PA" : "no Ticket";
-      return (
-        <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-          <Trophy className="h-4 w-4 text-yellow-300" />
-          <span>
-            Falta(m) <strong>{valueFormatter(diff)}</strong> {unidade} para chegar ao{" "}
-            <strong>{nextGoal.label}</strong> e ganhar{" "}
-            <strong>{formatCurrency(nextGoal.prize)}</strong>.
-          </span>
-        </div>
-      );
-    }
-    if (currentTier !== -1) {
-      return (
-        <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
-          <p>
-            Você está no <strong>{currentTierGoal?.label}</strong>, mantendo seu bônus no máximo.
-          </p>
-        </div>
-      );
-    }
-    return (
-      <p className="text-xs">
-        Aumente seu {label.includes("PA") ? "PA" : "Ticket Médio"} para liberar o primeiro bônus.
-      </p>
-    );
-  };
+  const tierIndex = goals.findIndex((g, i) => currentValue < g.value && i === goals.indexOf(g));
+  const currentTier = tierIndex <= 0 ? 0 : tierIndex - 1;
+  const nextTier = goals[tierIndex];
+  const currentTierData = goals[currentTier];
 
   return (
-    <Card className={cn("p-6 flex flex-col justify-between text-white", cardClassName)}>
+    <Card className={cn("p-6 text-white flex flex-col", cardClassName)}>
       <CardHeader className="p-0">
-        <CardTitle className="text-white text-lg text-center">{label}</CardTitle>
+        <CardTitle className="text-lg text-center">{label}</CardTitle>
         {description && (
-          <CardDescription className="text-center text-white/80 text-sm">
-            {description}
-          </CardDescription>
+          <CardDescription className="text-center text-white/80 text-sm">{description}</CardDescription>
         )}
       </CardHeader>
 
       <CardContent className="p-0 mt-6">
-        <div className="text-center mb-2">
-          <p className="text-4xl font-extrabold tracking-tight">
-            {valueFormatter(currentValue)}
-          </p>
-          {currentTierGoal && (
-            <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
-              {currentTierGoal.label} atual
-            </p>
+        <div className="text-center mb-3">
+          <p className="text-4xl font-extrabold">{valueFormatter(currentValue)}</p>
+          {currentTierData?.label && (
+            <p className="text-[11px] opacity-80 tracking-widest mt-1">{currentTierData.label} atual</p>
           )}
         </div>
 
-        <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
+        <div className="relative w-full h-4 rounded-full bg-white/25 overflow-hidden">
           <div
-            className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+            className="absolute left-0 top-0 h-full bg-emerald-400 transition-all duration-700"
             style={{ width: `${progress}%` }}
           />
 
-          <div
-            className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
-            style={{ left: `calc(${progress}% - 1.5px)` }}
-          />
+          {goals.map((g, i) => {
+            const pos = (g.value / maxGoal) * 100;
+            if (pos >= 100 || pos <= 0) return null;
 
-          {goals.map((goal, index) => {
-            const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
-            if (left <= 0 || left >= 100) return null;
-
-            const isCurrent = currentTierGoal?.label === goal.label;
-            const isNext = nextGoal?.label === goal.label;
+            const isNext = nextTier?.label === g.label;
+            const isCurrent = currentTierData?.label === g.label;
 
             return (
-              <TooltipProvider key={index}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="absolute inset-y-0 flex items-center justify-center"
-                      style={{ left: `${left}%`, transform: "translateX(-50%)" }}
-                    >
-                      <div
-                        className={cn(
-                          "h-4 w-[3px] rounded-full",
-                          isCurrent
-                            ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)]"
-                            : isNext
-                            ? "bg-yellow-300 shadow-[0_0_10px_rgba(253,224,71,0.9)] animate-pulse"
-                            : "bg-white/40"
-                        )}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm font-semibold">{goal.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Atingir {valueFormatter(goal.value)} para garantir{" "}
-                      {formatCurrency(goal.prize)}.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div
+                key={i}
+                className={cn(
+                  "absolute top-1/2 -translate-y-1/2 w-[2px] h-3 rounded-full",
+                  isCurrent ? "bg-white shadow-[0_0_6px_white]" :
+                  isNext ? "bg-yellow-300 shadow-[0_0_8px_gold] animate-pulse" :
+                  "bg-white/40"
+                )}
+                style={{ left: `${pos}%` }}
+              />
             );
           })}
         </div>
-        <CardDescription className="text-center text-white/80 text-xs mt-3">
-          Barra: branco = seu resultado • amarelo = próximo nível
-        </CardDescription>
-      </CardContent>
 
-      <div className="mt-4 text-center text-sm text-white/90 min-h-[40px] flex items-center justify-center">
-        {nextGoalInfo()}
-      </div>
+        <div className="mt-3 text-center min-h-[40px] flex items-center justify-center">
+          {nextTier ? (
+            <div className="bg-white/15 px-4 py-2 rounded-full text-sm flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-yellow-300" />
+              Falta <strong>{valueFormatter(nextTier.value - currentValue)}</strong> para o{" "}
+              <strong>{nextTier.label}</strong>
+            </div>
+          ) : (
+            <div className="bg-white/15 px-4 py-2 rounded-full text-sm">
+              Bônus máximo atingido
+            </div>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };
