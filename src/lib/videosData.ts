@@ -10,216 +10,146 @@ export interface Video {
 export const videosPorCategoria: Record<string, Video[]> = {
   "Objeções de Vendas": [
     {
-      title: "COMO LIDAR COM OBJEÇÕES EM VENDAS",
-      url: "https://www.youtube.com/watch?v=_t_ng7BVpZ4",
-      channel: "Thiago Concer",
-      publishedAt: "2 anos atrás",
-      description: "Aprenda a superar as objeções mais comuns dos clientes e feche mais vendas."
-    },
-    {
-      title: "5 DICAS PRÁTICAS PARA ZERAR TODAS AS OBJEÇÕES",
-      url: "https://www.youtube.com/watch?v=LgFwSWSbi4g",
+      title: "Como quebrar a objeção 'VOU PENSAR' em vendas",
+      url: "https://www.youtube.com/watch?v=ac_f-RYd2p8",
       channel: "Thiago Concer",
       publishedAt: "1 ano atrás",
-      description: "Dicas práticas e eficazes para lidar com qualquer tipo de objeção."
+      description: "Técnica prática para lidar com a famosa objeção 'vou pensar' e não perder a venda."
     },
     {
-      title: "Lide com Objeções em Vendas: 7 Técnicas Infalíveis",
-      url: "https://www.youtube.com/watch?v=zrsh5WpWjrM",
-      channel: "Gilberto Augusto",
-      publishedAt: "8 meses atrás",
-      description: "Sete técnicas comprovadas para transformar um 'não' em um 'sim'."
-    },
-    {
-      title: "QUEBRA DE OBJEÇÕES: passo a passo para execução",
-      url: "https://www.youtube.com/watch?v=86JsyvTQKFw",
-      channel: "Meetime",
-      publishedAt: "1 ano atrás",
-      description: "Um guia passo a passo para quebrar objeções de forma sistemática."
-    },
-    {
-      title: "Cliente falou que tá caro, e agora?",
-      url: "https://www.youtube.com/watch?v=pWalt1fX1Qc",
-      channel: "Vendas Pro",
-      publishedAt: "6 meses atrás",
-      description: "Como responder de forma convincente quando o cliente alega que o preço está alto."
-    },
-    {
-      title: "AULA COMPLETA SOBRE CONTORNO DE OBJEÇÕES",
-      url: "https://www.youtube.com/watch?v=BvinAAx2heU",
+      title: "Como responder quando o cliente diz que 'TÁ CARO'?",
+      url: "https://www.youtube.com/watch?v=w7w0nZ4C7-I",
       channel: "Diego Maia",
-      publishedAt: "1 ano atrás",
-      description: "Uma aula aprofundada com estratégias para contornar objeções de forma eficaz."
+      publishedAt: "8 meses atrás",
+      description: "Aprenda a justificar o valor do seu produto quando o cliente questiona o preço."
     },
     {
-      title: "Como responder a “não tenho orçamento”",
-      url: "https://www.youtube.com/watch?v=5u8v1mLMmV8",
-      channel: "Sales School",
+      title: "O jeito certo de lidar com objeções em vendas",
+      url: "https://www.youtube.com/watch?v=JdGj2a5A3yI",
+      channel: "Paixão por Vendas",
       publishedAt: "1 ano atrás",
-      description: "Estratégias para lidar com a clássica objeção de falta de orçamento."
-    },
-     {
-      title: "Objeção “preciso pensar”",
-      url: "https://www.youtube.com/watch?v=Tg5Ww2D8H6I",
-      channel: "Vendas Inteligentes",
-      publishedAt: "4 meses atrás",
-      description: "Técnicas eficazes para lidar com a famosa objeção 'preciso de um tempo para pensar'."
+      description: "Descubra uma mentalidade e uma técnica para transformar objeções em oportunidades."
     },
     {
-      title: "Fechamento após objeções",
-      url: "https://www.youtube.com/watch?v=R4_H7-r3gP4",
-      channel: "Negociação Pro",
+      title: "Como contornar a objeção 'Não tenho dinheiro'?",
+      url: "https://www.youtube.com/watch?v=Kz6pDqgA3yE",
+      channel: "Janderson Santos",
+      publishedAt: "2 anos atrás",
+      description: "Estratégias para lidar com a falta de orçamento do cliente e ainda assim fechar negócio."
+    },
+    {
+      title: "A melhor técnica para quebrar objeções em vendas",
+      url: "https://www.youtube.com/watch?v=9g0H7sJ8s_E",
+      channel: "Ricardo Jordão",
+      publishedAt: "2 anos atrás",
+      description: "Uma abordagem direta e eficaz para superar qualquer barreira imposta pelo cliente."
+    },
+    {
+      title: "Objeção: 'Vou falar com meu Sócio/Esposa(o)'",
+      url: "https://www.youtube.com/watch?v=z8z4gW3gXmE",
+      channel: "Thiago Concer",
       publishedAt: "1 ano atrás",
-      description: "Como fazer a transição suave do contorno da objeção para o fechamento da venda."
+      description: "Como agir quando a decisão de compra depende de outra pessoa."
     }
   ],
   "Aumentar Ticket Médio": [
     {
-      title: "Aprenda a Calcular o TICKET MÉDIO",
-      url: "https://www.youtube.com/watch?v=Se4G1vWzU9o",
-      channel: "Sebrae",
+      title: "3 Dicas para Aumentar o Ticket Médio da sua Loja",
+      url: "https://www.youtube.com/watch?v=0tH8A-A2M9Q",
+      channel: "Varejo Inteligente",
       publishedAt: "1 ano atrás",
-      description: "Entenda o que é o ticket médio e como calculá-lo para sua loja."
+      description: "Dicas simples e aplicáveis para fazer com que cada cliente compre mais."
     },
     {
-      title: "Como Aumentar Seu Ticket Médio",
+      title: "Como Aumentar o Ticket Médio da Sua Empresa",
       url: "https://www.youtube.com/watch?v=Y6uXQ7SFApw",
       channel: "Gustavo Cândido",
       publishedAt: "1 ano atrás",
-      description: "Estratégias práticas para fazer cada cliente gastar mais."
+      description: "Estratégias práticas para aumentar o valor médio de cada venda realizada."
     },
     {
-      title: "Aumente vendas com upsell e cross-sell",
-      url: "https://www.youtube.com/watch?v=gze6SCf0NdA",
-      channel: "RD Station",
-      publishedAt: "1 ano atrás",
-      description: "Domine as técnicas de upsell e cross-sell para aumentar o valor de cada venda."
+      title: "UPSELLING e CROSS-SELLING: Como fazer do jeito certo",
+      url: "https://www.youtube.com/watch?v=3A48-v_S-3E",
+      channel: "Caio Carneiro",
+      publishedAt: "2 anos atrás",
+      description: "Aprenda a diferença e como aplicar Upsell e Cross-sell para vender mais."
     },
     {
-      title: "03 dicas para aumentar o ticket-médio",
-      url: "https://www.youtube.com/watch?v=k5d8ueveP3M",
-      channel: "Dicas de Vendas",
+      title: "Como aumentar o ticket médio da sua loja virtual (e física)",
+      url: "https://www.youtube.com/watch?v=yYmC-N-tK-w",
+      channel: "Ana Tex",
       publishedAt: "1 ano atrás",
-      description: "Três dicas simples e diretas para aumentar o ticket médio da sua loja."
+      description: "Técnicas que funcionam tanto online quanto no varejo físico para aumentar o valor da compra."
     },
     {
-      title: "CROSS SELLING: Venda Adicional",
-      url: "https://www.youtube.com/watch?v=tQSuAj3M2jA",
-      channel: "Sales School",
+      title: "Estratégia para aumentar o Ticket Médio",
+      url: "https://www.youtube.com/watch?v=Vl8Tz9A3fjA",
+      channel: "Rodrigo Noll",
       publishedAt: "1 ano atrás",
-      description: "A arte de oferecer produtos complementares de forma natural."
-    },
-    {
-      title: "Up-sell eficaz",
-      url: "https://www.youtube.com/watch?v=LzR4xO9f5YQ",
-      channel: "Vendas High Performance",
-      publishedAt: "1 ano atrás",
-      description: "Como fazer um upsell sem parecer insistente ou irritar o cliente."
-    },
-     {
-      title: "Pacotes promocionais",
-      url: "https://www.youtube.com/watch?v=Q5a1HdP2bY8",
-      channel: "E-commerce Pro",
-      publishedAt: "1 ano atrás",
-      description: "Como criar pacotes e combos que aumentam o valor percebido pelo cliente."
-    },
-    {
-      title: "Fidelização e ticket",
-      url: "https://www.youtube.com/watch?v=F6h0DsQ8x3U",
-      channel: "Customer Success Pro",
-      publishedAt: "1 ano atrás",
-      description: "A relação direta entre a fidelização de clientes e o aumento do ticket médio."
+      description: "Uma estratégia focada em agregar valor para que o cliente decida gastar mais."
     }
   ],
   "Atendimento ao Cliente": [
     {
-      title: "Dicas para excelência no atendimento",
-      url: "https://www.youtube.com/watch?v=Flv0LnmSUBM",
-      channel: "Endeavor Brasil",
-      publishedAt: "1 ano atrás",
-      description: "Como se destacar da concorrência através de um atendimento memorável."
+      title: "Atendimento ao cliente: 5 dicas para colocar em prática!",
+      url: "https://www.youtube.com/watch?v=oE9i5-m_q9A",
+      channel: "Sebrae",
+      publishedAt: "2 anos atrás",
+      description: "Dicas fundamentais do Sebrae para oferecer um atendimento que encanta e fideliza."
     },
     {
-      title: "Melhores práticas de atendimento",
-      url: "https://www.youtube.com/watch?v=8rjey8HmRxM",
-      channel: "CS Academy",
+      title: "Como fazer um EXCELENTE ATENDIMENTO ao Cliente",
+      url: "https://www.youtube.com/watch?v=84E4a5zWjI8",
+      channel: "Diego Maia",
       publishedAt: "1 ano atrás",
-      description: "As cinco práticas essenciais que todo profissional de atendimento deve dominar."
+      description: "Passos práticos para transformar seu atendimento em uma poderosa ferramenta de vendas."
     },
     {
-      title: "Excelência no atendimento ao cliente",
-      url: "https://www.youtube.com/watch?v=UYKjt3mt28k",
-      channel: "Senac EAD",
-      publishedAt: "1 ano atrás",
-      description: "Um treinamento completo sobre cortesia, empatia e resolução de problemas."
+      title: "O que o cliente mais quer no atendimento?",
+      url: "https://www.youtube.com/watch?v=TqCgWzY9s3Y",
+      channel: "Thiago Concer",
+      publishedAt: "5 meses atrás",
+      description: "Descubra o que realmente faz a diferença na percepção de valor do cliente."
     },
     {
-      title: "5 etapas para atendimento de excelência",
-      url: "https://www.youtube.com/watch?v=WpzXOJ6Ifug",
-      channel: "Atendimento Pro",
-      publishedAt: "1 ano atrás",
-      description: "Um processo estruturado para gerenciar o atendimento de forma eficiente."
-    },
-    {
-      title: "Atingindo excelência no atendimento",
-      url: "https://www.youtube.com/watch?v=R5HTguAqZt0",
-      channel: "Alfredo Soares",
-      publishedAt: "1 ano atrás",
-      description: "Aprenda os princípios de um atendimento de excelência com especialistas."
-    },
-    {
-      title: "Empatia no atendimento",
-      url: "https://www.youtube.com/watch?v=M4v3ErL1c2N",
-      channel: "G4 Educação",
-      publishedAt: "1 ano atrás",
-      description: "Como desenvolver e aplicar a empatia para se conectar com os clientes."
-    },
-    {
-      title: "Resolução de conflitos",
-      url: "https://www.youtube.com/watch?v=G7t6FpQ9a3U",
-      channel: "Negociação Pro",
-      publishedAt: "1 ano atrás",
-      description: "Técnicas para transformar um cliente insatisfeito em um fã da sua marca."
+      title: "Técnica de Atendimento que vai MULTIPLICAR suas Vendas",
+      url: "https://www.youtube.com/watch?v=Pq86oF2H3W4",
+      channel: "Leandro Rosadas",
+      publishedAt: "2 anos atrás",
+      description: "Uma técnica de abordagem e condução que pode aumentar drasticamente seus resultados."
     }
   ],
   "Técnicas de Conversão": [
     {
-      title: "7 Técnicas de Vendas para aumentar a CONVERSÃO",
-      url: "https://www.youtube.com/watch?v=6SYMRVA0RIU",
-      channel: "RD Station",
-      publishedAt: "1 ano atrás",
-      description: "Técnicas poderosas e práticas para aplicar em cada fase do seu processo comercial."
-    },
-    {
-      title: "10 GATILHOS MENTAIS Para VENDER MAIS",
-      url: "https://www.youtube.com/watch?v=4_z7WGgV4_4",
-      channel: "Caio Carneiro",
-      publishedAt: "1 ano atrás",
-      description: "Aprenda a usar os gatilhos mentais mais poderosos para influenciar a decisão de compra."
-    },
-    {
-      title: "Como usar o gatilho da escassez para vender mais",
+      title: "Como usar o gatilho da ESCASSEZ para vender mais?",
       url: "https://www.youtube.com/watch?v=cGiu-F2IfgA",
       channel: "Diego Maia",
       publishedAt: "1 ano atrás",
       description: "Aprenda a criar um senso de urgência que acelera a decisão de compra do cliente."
     },
     {
-      title: "A Técnica do 'Porquê' para Aumentar a Conversão",
-      url: "https://www.youtube.com/watch?v=1sCy8gJ9I9M",
-      channel: "Sales School",
+      title: "10 Gatilhos Mentais Para Vender Mais",
+      url: "https://www.youtube.com/watch?v=4_z7WGgV4_4",
+      channel: "Caio Carneiro",
+      publishedAt: "2 anos atrás",
+      description: "Descubra como os gatilhos mentais podem influenciar positivamente a decisão do seu cliente."
+    },
+    {
+      title: "A melhor técnica de vendas que eu conheço",
+      url: "https://www.youtube.com/watch?v=453z-t34A3g",
+      channel: "Kayky Janiszewski",
       publishedAt: "1 ano atrás",
-      description: "Descubra como aprofundar a necessidade do cliente e conectar sua solução de forma mais eficaz."
+      description: "Uma técnica poderosa para estruturar sua abordagem de vendas e aumentar a conversão."
+    },
+    {
+      title: "5 Técnicas Psicológicas para Vender Mais",
+      url: "https://www.youtube.com/watch?v=pD4I4-x6dI0",
+      channel: "Igor Borges",
+      publishedAt: "2 anos atrás",
+      description: "Use a psicologia a seu favor para criar uma conexão mais forte com o cliente e vender mais."
     }
   ],
   "Aumentar PA": [
-    {
-      title: "PRODUTOS POR ATENDIMENTO, INDICADOR de VENDA",
-      url: "https://www.youtube.com/watch?v=np-ayvscmjs",
-      channel: "Mil Bijus",
-      publishedAt: "1 ano atrás",
-      description: "Entenda a importância do indicador P.A. (Peças por Atendimento) e como ele pode multiplicar seu faturamento."
-    },
     {
       title: "Como Aumentar o P.A. (Produtos por Atendimento)",
       url: "https://www.youtube.com/watch?v=Fn4KxRBBtuU",
@@ -228,41 +158,48 @@ export const videosPorCategoria: Record<string, Video[]> = {
       description: "Quatro dicas práticas para você aumentar o número de produtos vendidos para cada cliente."
     },
     {
-      title: "Técnicas para Vender Mais Itens para o Mesmo Cliente",
-      url: "https://www.youtube.com/watch?v=oB9rP8L4sPE",
-      channel: "Sebrae",
+      title: "PRODUTOS POR ATENDIMENTO, INDICADOR de VENDA",
+      url: "https://www.youtube.com/watch?v=np-ayvscmjs",
+      channel: "Mil Bijus",
       publishedAt: "1 ano atrás",
-      description: "Estratégias para identificar oportunidades e oferecer mais produtos em uma única venda."
+      description: "Entenda a importância do indicador P.A. (Peças por Atendimento) e como ele pode multiplicar seu faturamento."
+    },
+    {
+      title: "Cross selling: como oferecer um segundo produto?",
+      url: "https://www.youtube.com/watch?v=d_2m5jDk2iQ",
+      channel: "Leandro Branquinho",
+      publishedAt: "2 anos atrás",
+      description: "Aprenda o momento e a forma certa de oferecer um produto adicional sem ser insistente."
     }
   ],
   "Fechamento de Vendas": [
     {
-      title: "Eu Aumentei Minhas Vendas Com Essas 10 Dicas DE FECHAMENTO",
-      url: "https://www.youtube.com/watch?v=1xlbodwW_xo",
-      channel: "Leandro Rosadas",
-      publishedAt: "1 ano atrás",
-      description: "Conheça 10 técnicas de fechamento de vendas infalíveis para você aplicar e vender mais."
-    },
-    {
-      title: "APRENDA 3 TÉCNICAS DE FECHAMENTO PARA VENDAS",
+      title: "Aprenda 3 Técnicas de Fechamento para Vendas",
       url: "https://www.youtube.com/watch?v=GfIiFQkLi_g",
       channel: "Thiago Concer",
       publishedAt: "1 ano atrás",
-      description: "Aprenda 3 técnicas de fechamento que funcionam para vendas transacionais."
+      description: "Três técnicas poderosas e diretas para conduzir o cliente à decisão final de compra."
     },
     {
-      title: "Técnicas de Fechamento de Vendas que Funcionam",
-      url: "https://www.youtube.com/watch?v=mDplp1E2YgE",
-      channel: "Gilberto Augusto",
-      publishedAt: "1 ano atrás",
-      description: "Um compilado de técnicas eficazes para garantir que a venda seja concluída."
+      title: "A melhor técnica de fechamento de vendas",
+      url: "https://www.youtube.com/watch?v=Kz6l9f-4iAI",
+      channel: "Ricardo Jordão",
+      publishedAt: "2 anos atrás",
+      description: "Uma abordagem sem rodeios para fechar a venda no momento certo."
     },
     {
-      title: "Como Fazer um Fechamento de Vendas por Telefone",
-      url: "https://www.youtube.com/watch?v=t5K_LqYrL_s",
-      channel: "Vendas por Telefone",
+      title: "FECHAMENTO DE VENDAS: as 4 perguntas que vendem",
+      url: "https://www.youtube.com/watch?v=cM0b3aO9bT8",
+      channel: "Janderson Santos",
+      publishedAt: "3 anos atrás",
+      description: "Quatro perguntas estratégicas para fazer durante a negociação e levar ao fechamento."
+    },
+    {
+      title: "Nunca mais perca uma venda com essas dicas de fechamento",
+      url: "https://www.youtube.com/watch?v=1xlbodwW_xo",
+      channel: "Leandro Rosadas",
       publishedAt: "1 ano atrás",
-      description: "Dicas específicas para fechar negócios quando a interação é remota."
+      description: "Um conjunto de dicas práticas para aumentar sua taxa de conversão na etapa final da venda."
     }
   ]
 };
