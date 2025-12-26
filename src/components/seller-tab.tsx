@@ -7,7 +7,7 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift, ArrowRight } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift, ArrowRight, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
@@ -19,6 +19,8 @@ import dynamic from "next/dynamic";
 import { Separator } from "./ui/separator";
 import { WelcomeModal } from "./welcome-modal";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { AnimatePresence, motion } from "framer-motion";
+
 
 const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
 
@@ -43,8 +45,8 @@ const findNextGoal = (currentValue: number, goalTiers: { goal: number; prize: nu
 }
 
 
-const MetricCard = ({ title, value, icon, description, className, children }: { title: string; value: string; icon: React.ReactNode; description: string; className?: string, children: React.ReactNode }) => (
-    <Dialog>
+const MetricCard = ({ title, value, icon, description, className, children, isRevealed, onReveal }: { title: string; value: string; icon: React.ReactNode; description: string; className?: string, children: React.ReactNode, isRevealed: boolean, onReveal: () => void }) => (
+    <Dialog onOpenChange={(open) => { if(open) onReveal()}}>
         <DialogTrigger asChild>
             <Card className={cn("text-card-foreground cursor-pointer hover:scale-105 hover:shadow-lg transition-transform", className)}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -52,7 +54,13 @@ const MetricCard = ({ title, value, icon, description, className, children }: { 
                 {icon}
                 </CardHeader>
                 <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
+                 {isRevealed ? (
+                    <div className="text-2xl font-bold">{value}</div>
+                ) : (
+                    <div className="text-lg font-semibold flex items-center gap-2 opacity-80">
+                        <Eye className="h-4 w-4"/> Clique para ver
+                    </div>
+                )}
                 <p className="text-xs opacity-80">{description}</p>
                 </CardContent>
             </Card>
@@ -88,9 +96,17 @@ const GoalItem = ({ label, value }: { label: string, value: string }) => (
     </div>
 );
 
+type RevealedCardType = "vendas" | "corridinha" | "pa" | "ticket";
+
 export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, storeId }: SellerTabProps) {
   const salesData = { ...seller, goals };
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [revealedCards, setRevealedCards] = useState(new Set<RevealedCardType>());
+
+  const handleReveal = (card: RevealedCardType) => {
+    setRevealedCards(prev => new Set(prev).add(card));
+  };
+  const allCardsRevealed = revealedCards.size === 4;
 
   useEffect(() => {
     if (seller.id) {
@@ -191,11 +207,11 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
               <Card>
                 <CardHeader>
                     <CardTitle>Meus Lançamentos</CardTitle>
-                    <CardDescription>Clique em um card para ver seu progresso e dicas para melhorar.</CardDescription>
+                    <CardDescription>Clique em cada card para revelar seu desempenho e receber dicas para melhorar.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                    <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                    <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white" isRevealed={revealedCards.has('vendas')} onReveal={() => handleReveal('vendas')}>
                         <p className="text-4xl font-bold">{formatCurrency(seller.vendas)}</p>
                         {nextSalesGoal ? (
                             <p className="text-muted-foreground mt-2">Faltam <span className="font-bold text-foreground">{formatCurrency(nextSalesGoal.goal - seller.vendas)}</span> para o próximo prêmio de <span className="font-bold text-foreground">{formatCurrency(nextSalesGoal.prize)}</span>.</p>
@@ -208,7 +224,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                         </div>
                     </MetricCard>
 
-                    <MetricCard title="Bônus Corridinha" value={formatCurrency(seller.corridinha_diaria)} icon={<Rocket className="h-4 w-4" />} description="Bônus diário direto" className="bg-gradient-to-br from-green-500 to-green-700 text-white">
+                    <MetricCard title="Bônus Corridinha" value={formatCurrency(seller.corridinha_diaria)} icon={<Rocket className="h-4 w-4" />} description="Bônus diário direto" className="bg-gradient-to-br from-green-500 to-green-700 text-white" isRevealed={revealedCards.has('corridinha')} onReveal={() => handleReveal('corridinha')}>
                         <p className="text-4xl font-bold">{formatCurrency(seller.corridinha_diaria)}</p>
                         <p className="text-muted-foreground mt-2">Este é um bônus direto concedido pelo seu gestor.</p>
                         <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm">
@@ -217,7 +233,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                         </div>
                     </MetricCard>
 
-                    <MetricCard title="Produtos por Atendimento (PA)" value={String(Number(seller.pa || 0).toFixed(2))} icon={<Package className="h-4 w-4" />} description="Média de itens por venda" className="bg-gradient-to-br from-purple-500 to-purple-700 text-white">
+                    <MetricCard title="Produtos por Atendimento (PA)" value={String(Number(seller.pa || 0).toFixed(2))} icon={<Package className="h-4 w-4" />} description="Média de itens por venda" className="bg-gradient-to-br from-purple-500 to-purple-700 text-white" isRevealed={revealedCards.has('pa')} onReveal={() => handleReveal('pa')}>
                         <p className="text-4xl font-bold">{String(Number(seller.pa || 0).toFixed(2))}</p>
                         {nextPaGoal ? (
                             <p className="text-muted-foreground mt-2">Sua próxima meta de PA é <span className="font-bold text-foreground">{nextPaGoal.goal.toFixed(2)}</span> para um bônus de <span className="font-bold text-foreground">{formatCurrency(nextPaGoal.prize)}</span>.</p>
@@ -230,7 +246,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                         </div>
                     </MetricCard>
 
-                    <MetricCard title="Ticket Médio" value={formatCurrency(seller.ticket_medio)} icon={<Ticket className="h-4 w-4" />} description="Valor médio por venda" className="bg-gradient-to-br from-orange-500 to-orange-700 text-white">
+                    <MetricCard title="Ticket Médio" value={formatCurrency(seller.ticket_medio)} icon={<Ticket className="h-4 w-4" />} description="Valor médio por venda" className="bg-gradient-to-br from-orange-500 to-orange-700 text-white" isRevealed={revealedCards.has('ticket')} onReveal={() => handleReveal('ticket')}>
                         <p className="text-4xl font-bold">{formatCurrency(seller.ticket_medio)}</p>
                         {nextTicketMedioGoal ? (
                             <p className="text-muted-foreground mt-2">Sua próxima meta de Ticket Médio é <span className="font-bold text-foreground">{formatCurrency(nextTicketMedioGoal.goal)}</span> para um bônus de <span className="font-bold text-foreground">{formatCurrency(nextTicketMedioGoal.prize)}</span>.</p>
@@ -249,47 +265,57 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                 </CardContent>
               </Card>
             </div>
-            <div className="lg:col-span-1">
-               <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
-                        <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                         <div>
-                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por vendas</p>
-                            <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
-                            <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
-                            <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
-                            {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
-                        </div>
-                        <Separator />
-                        <div>
-                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por PA e Ticket</p>
-                            <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
-                            <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
-                        </div>
-                         <Separator />
-                         <div>
-                             <p className="text-xs font-semibold text-muted-foreground uppercase">Outros Bônus</p>
-                            <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
-                        </div>
-                        <Separator />
-                        <div className="text-right pt-2">
-                          <p className="text-xs font-semibold text-muted-foreground">Ganhos projetados no mês</p>
-                          <p className="text-2xl font-bold text-primary">{formatCurrency(totalIncentives)}</p>
-                        </div>
-                         <div className="flex justify-between items-center pt-2">
-                            <span className="text-sm font-semibold text-muted-foreground">
-                              Se bater todas as metas:
-                            </span>
-                            <span className="font-bold text-lg text-primary">
-                              {formatCurrency(totalPotentialPrizes)}
-                            </span>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <AnimatePresence>
+            {allCardsRevealed && (
+                <motion.div
+                    className="lg:col-span-1"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
+                            <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <div>
+                                <p className="text-xs font-semibold text-muted-foreground uppercase">Por vendas</p>
+                                <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
+                                <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
+                                <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
+                                {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
+                            </div>
+                            <Separator />
+                            <div>
+                                <p className="text-xs font-semibold text-muted-foreground uppercase">Por PA e Ticket</p>
+                                <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
+                                <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
+                            </div>
+                            <Separator />
+                            <div>
+                                <p className="text-xs font-semibold text-muted-foreground uppercase">Outros Bônus</p>
+                                <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
+                            </div>
+                            <Separator />
+                            <div className="text-right pt-2">
+                            <p className="text-xs font-semibold text-muted-foreground">Ganhos projetados no mês</p>
+                            <p className="text-2xl font-bold text-primary">{formatCurrency(totalIncentives)}</p>
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                                <span className="text-sm font-semibold text-muted-foreground">
+                                Se bater todas as metas:
+                                </span>
+                                <span className="font-bold text-lg text-primary">
+                                {formatCurrency(totalPotentialPrizes)}
+                                </span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+            </AnimatePresence>
           </div>
         </TabsContent>
 
@@ -320,5 +346,3 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     </TooltipProvider>
   );
 }
-
-    
