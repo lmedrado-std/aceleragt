@@ -16,6 +16,7 @@ import { trackSellerView } from "@/lib/tracking";
 import { format } from "date-fns";
 import confetti from 'canvas-confetti';
 import dynamic from "next/dynamic";
+import { Separator } from "./ui/separator";
 
 const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
 
@@ -90,6 +91,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta"><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="dicas"><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
         </TabsList>
+        <Separator className="my-4" />
 
         <div className="my-6">
             <h2 className="text-2xl font-bold text-foreground flex items-center gap-2"><User className="h-6 w-6 text-primary" />Painel de {seller.name}</h2>
