@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +30,7 @@ import { Goals, Store, Incentives, Seller } from "@/lib/storage";
 import { AdminTab } from "@/components/admin-tab";
 import { SellerTab } from "@/components/seller-tab";
 import { Skeleton } from "./ui/skeleton";
-import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore, logoutSeller } from "@/lib/auth";
+import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore, logoutSeller, logoutAll } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -58,7 +59,7 @@ const goalsSchema = z.object({
   metonaPrize: z.coerce.number().default(0),
   metaLendaria: z.coerce.number().default(0),
   legendariaBonusValorVenda: z.coerce.number().default(0),
-  legendariaBonusValorPremio: z.coerce.number().default(0),
+  legendariaBonusValorPremio: zcoerce.number().default(0),
   performanceBonusEnabled: z.boolean().default(false),
   corridinhaEnabled: z.boolean().default(false),
   paGoal1: z.coerce.number().default(0),
@@ -435,7 +436,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         
         let tabToActivate: string;
 
-        if (tabFromUrl && sellersData.some((s: Seller) => s.id === tabFromUrl)) {
+        if (tabFromUrl === 'admin' && isManagerView) {
+            tabToActivate = 'admin';
+        } else if (tabFromUrl && sellersData.some((s: Seller) => s.id === tabFromUrl)) {
             const sellerId = tabFromUrl;
             if (isSellerAuthenticated(sellerId) || isManagerView) {
                 tabToActivate = sellerId;
@@ -446,14 +449,16 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         } else if (isManagerView) {
             tabToActivate = 'admin';
         } else {
-            // Se não for gestor e a aba for inválida, volta para a página da loja
-            toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado ou aba inválida." });
-            router.push(`/loja/${storeId}`);
-            return;
+             const firstSellerId = sellersData[0]?.id;
+             if (firstSellerId && isSellerAuthenticated(firstSellerId)) {
+                tabToActivate = firstSellerId;
+             } else {
+                router.push(`/loja/${storeId}`);
+                return;
+             }
         }
         
         setActiveTab(tabToActivate);
-        // Garante que a URL reflete a aba ativa
         if (tabToActivate !== tabFromUrl) {
             router.replace(`/loja/${storeId}/dashboard?tab=${tabToActivate}`, { scroll: false });
         }
@@ -472,17 +477,15 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     if (loading) return;
     
     const tabFromUrl = searchParams.get("tab");
-    const effectiveTab = tabFromUrl || activeTab;
-
     const isManagerView = isAdminGlobal() || isStoreAuthenticated(storeId);
 
-    if (effectiveTab === 'admin') {
+    if (tabFromUrl === 'admin') {
       if (!isManagerView) {
         router.push(`/loja/${storeId}/login?redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=admin`)}`);
       }
-    } else if (sellers.some(s => s.id === effectiveTab)) {
-      if (!isManagerView && !isSellerAuthenticated(effectiveTab)){
-        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${effectiveTab}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${effectiveTab}`)}`);
+    } else if (tabFromUrl && sellers.some(s => s.id === tabFromUrl)) {
+      if (!isManagerView && !isSellerAuthenticated(tabFromUrl)){
+        router.push(`/login/vendedor?storeId=${storeId}&sellerId=${tabFromUrl}&redirect=${encodeURIComponent(`/loja/${storeId}/dashboard?tab=${tabFromUrl}`)}`);
       }
     }
   }, [storeId, activeTab, searchParams, router, loading, sellers]);
@@ -582,7 +585,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                 {(isAdmin || isStoreAdmin) && (
+                 {(isManagerView) && (
                     <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
                         <TabsList className="h-auto p-0 bg-transparent">
                             <Tooltip>
