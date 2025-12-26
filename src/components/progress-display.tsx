@@ -72,10 +72,10 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                 <div className="relative h-4 w-full rounded-full bg-black/20">
                     {/* Segmented progress bar */}
                     <div className="absolute top-0 left-0 h-full rounded-full bg-blue-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metaMinha / totalMeta) * 100)}%` }}></div>
-                    {vendas > goals.metaMinha && (
+                    {vendas > (goals.metaMinha || 0) && (
                         <div className="absolute top-0 left-0 h-full rounded-full bg-purple-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.meta / totalMeta) * 100)}%` }}></div>
                     )}
-                    {vendas > goals.meta && (
+                    {vendas > (goals.meta || 0) && (
                         <div className="absolute top-0 left-0 h-full rounded-full bg-green-400" style={{ width: `${Math.min((vendas / totalMeta) * 100, (goals.metona / totalMeta) * 100)}%` }}></div>
                     )}
                     
@@ -92,7 +92,8 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                     <TooltipTrigger asChild>
                                         <div className="absolute top-1/2 h-8 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
                                             <div className={cn("h-full w-full", achieved ? meta.color : "bg-white/40")} />
-                                             {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
+                                            <span className="absolute -top-5 text-xs text-white/80 whitespace-nowrap">{meta.label}</span>
+                                            {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
                                         </div>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -120,90 +121,99 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     );
 };
 
-const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassName }: { label: string; currentValue: number; goals: {value: number, prize: number, label: string}[]; valueFormatter: (value: number) => string; cardClassName?: string }) => {
-    
-    let currentTier = -1;
-    for (let i = goals.length - 1; i >= 0; i--) {
-        if (currentValue >= goals[i].value && goals[i].value > 0) {
-            currentTier = i;
-            break;
-        }
+const MetricProgressBar = ({
+  label,
+  currentValue,
+  goals,
+  valueFormatter,
+  cardClassName,
+  description,
+}: {
+  label: string;
+  currentValue: number;
+  goals: { value: number; prize: number; label: string; color: string }[];
+  valueFormatter: (value: number) => string;
+  cardClassName?: string;
+  description?: string;
+}) => {
+  const highestGoal = Math.max(...goals.map(g => g.value), 0) || 1;
+
+  let currentTier = -1;
+  for (let i = goals.length - 1; i >= 0; i--) {
+    if (currentValue >= goals[i].value && goals[i].value > 0) {
+      currentTier = i;
+      break;
     }
+  }
 
-    const nextGoalIndex = currentTier + 1;
-    const nextGoal = goals[nextGoalIndex] && goals[nextGoalIndex].value > 0 ? goals[nextGoalIndex] : null;
-    
-    const startValueForProgress = currentTier !== -1 ? goals[currentTier].value : 0;
-    const endValueForProgress = nextGoal ? nextGoal.value : (currentTier !== -1 ? goals[currentTier].value : (goals[0]?.value || 0));
+  const nextGoalIndex = currentTier + 1;
+  const nextGoal = goals[nextGoalIndex] && goals[nextGoalIndex].value > 0 ? goals[nextGoalIndex] : null;
 
-    let progressPercentage = 0;
-    if (endValueForProgress > startValueForProgress) {
-        progressPercentage = Math.min(((currentValue - startValueForProgress) / (endValueForProgress - startValueForProgress)) * 100, 100);
-    } else if (currentValue >= startValueForProgress && startValueForProgress > 0) {
-        progressPercentage = 100;
+  const nextGoalInfo = () => {
+    if (nextGoal) {
+      const diff = nextGoal.value - currentValue;
+      return `Faltam ${label.includes("PA") ? diff.toFixed(2) : formatCurrency(diff)} para liberar ${formatCurrency(nextGoal.prize)} de bônus.`;
     }
+    if (currentTier !== -1) {
+      return `Você está no ${goals[currentTier].label}, mantendo seu bônus no máximo. Não deixe cair.`;
+    }
+    return `Aumente seu ${label.includes("PA") ? "PA" : "Ticket Médio"} para liberar mais bônus.`;
+  };
 
-    const strokeWidth = 12;
-    const radius = 60;
-    const normalizedRadius = radius - strokeWidth / 2;
-    const circumference = normalizedRadius * 2 * Math.PI;
-    const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
+  return (
+    <Card className={cn("p-6 flex flex-col justify-between h-full", cardClassName)}>
+      <div>
+        <CardHeader className="p-0">
+          <CardTitle className="text-white text-base text-center">{label}</CardTitle>
+          <CardDescription className="text-center text-white/80 text-xs">
+            {description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 mt-8">
+          <div className="text-center mb-2">
+            <span className="text-2xl font-bold">{valueFormatter(currentValue)}</span>
+            <p className="text-xs opacity-80">{label.includes("PA") ? "PA atual" : "Ticket médio atual"}</p>
+          </div>
+          <div className="relative h-4 w-full rounded-full bg-black/20">
+            {/* Base progress */}
+            <div className="absolute top-0 left-0 h-full rounded-full bg-white/80" style={{ width: `${Math.min((currentValue / highestGoal) * 100, 100)}%` }}></div>
 
-    const nextGoalInfo = () => {
-        if (nextGoal) {
-             return `Faltam ${label.includes("PA") ? (nextGoal.value - currentValue).toFixed(2) : formatCurrency(nextGoal.value - currentValue)} para liberar ${formatCurrency(nextGoal.prize)} de bônus.`;
-        }
-        if (currentTier !== -1) {
-             return `Você está no ${goals[currentTier].label}, mantendo seu bônus no máximo. Não deixe cair.`;
-        }
-        return `Aumente seu ${label.includes("PA") ? "PA" : "Ticket Médio"} para liberar mais bônus.`;
-    };
+            {/* Goal markers */}
+            {goals.map((goal, index) => {
+              const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
+              if (left === 0 || left > 100) return null;
+              const achieved = currentValue >= goal.value;
+              return (
+                <TooltipProvider key={index}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="absolute top-1/2 h-8 w-1 -translate-y-1/2" style={{ left: `${left}%`, transform: 'translateX(-50%)' }}>
+                        <div className={cn("h-full w-full", achieved ? goal.color : "bg-white/40")} />
+                        <span className="absolute -top-5 text-xs text-white/80 whitespace-nowrap">{goal.label}</span>
+                        {achieved && <Trophy className="h-5 w-5 text-yellow-300 absolute -bottom-6 left-1/2 -translate-x-1/2" />}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm font-semibold">{goal.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Atingir {valueFormatter(goal.value)} para garantir {formatCurrency(goal.prize)}.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              );
+            })}
+          </div>
+        </CardContent>
+      </div>
+      <div className="mt-8 text-center text-xs text-white/90 min-h-[36px]">
+        <p>{nextGoalInfo()}</p>
+      </div>
+    </Card>
+  );
+};
 
-    return (
-        <Card className={cn("p-6 flex flex-col items-center justify-between h-full", cardClassName)}>
-            <CardTitle className="text-white text-base text-center">{label}</CardTitle>
-            <CardDescription className="text-center text-white/80 text-xs">
-                {label.includes("PA") ? "Esse círculo mostra quantas peças em média por atendimento. Quanto maior, mais bônus." : "Esse círculo mostra quanto o cliente gasta em média."}
-            </CardDescription>
-            <div className="relative my-4" style={{width: radius*2, height: radius*2}}>
-                <svg height={radius * 2} width={radius * 2} className="-rotate-90">
-                    <circle
-                        className="text-black/20"
-                        stroke="currentColor"
-                        fill="transparent"
-                        strokeWidth={strokeWidth}
-                        r={normalizedRadius}
-                        cx={radius}
-                        cy={radius}
-                    />
-                    <circle
-                        className="text-white"
-                        stroke="currentColor"
-                        fill="transparent"
-                        strokeDasharray={circumference + ' ' + circumference}
-                        style={{ strokeDashoffset, transition: 'stroke-dashoffset 0.5s ease-out' }}
-                        strokeWidth={strokeWidth}
-                        strokeLinecap="round"
-                        r={normalizedRadius}
-                        cx={radius}
-                        cy={radius}
-                    />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
-                     <span className="text-3xl font-bold">
-                        {label.includes("Ticket") ? formatCurrency(currentValue) : formatNumber(currentValue)}
-                    </span>
-                    <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
-                      {label.includes("Ticket") ? "Ticket médio atual" : "PA atual"}
-                    </p>
-                </div>
-            </div>
-             <div className="mt-2 text-center text-xs text-white/90 min-h-[36px]">
-                <p>{nextGoalInfo()}</p>
-            </div>
-        </Card>
-    );
-}
+
 
 export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDisplayProps) {
   const {
@@ -218,42 +228,40 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   }
   
   const paGoals = [
-    { value: goals.paGoal1 || 0, prize: goals.paPrize1 || 0, label: 'Nível 1' },
-    { value: goals.paGoal2 || 0, prize: goals.paPrize2 || 0, label: 'Nível 2' },
-    { value: goals.paGoal3 || 0, prize: goals.paPrize3 || 0, label: 'Nível 3' },
-    { value: goals.paGoal4 || 0, prize: goals.paPrize4 || 0, label: 'Nível 4' },
+    { value: goals.paGoal1 || 0, prize: goals.paPrize1 || 0, label: 'Nível 1', color: 'bg-teal-400' },
+    { value: goals.paGoal2 || 0, prize: goals.paPrize2 || 0, label: 'Nível 2', color: 'bg-cyan-400' },
+    { value: goals.paGoal3 || 0, prize: goals.paPrize3 || 0, label: 'Nível 3', color: 'bg-sky-400' },
+    { value: goals.paGoal4 || 0, prize: goals.paPrize4 || 0, label: 'Nível 4', color: 'bg-indigo-400' },
   ];
 
   const ticketGoals = [
-      { value: goals.ticketMedioGoal1 || 0, prize: goals.ticketMedioPrize1 || 0, label: 'Nível 1' },
-      { value: goals.ticketMedioGoal2 || 0, prize: goals.ticketMedioPrize2 || 0, label: 'Nível 2' },
-      { value: goals.ticketMedioGoal3 || 0, prize: goals.ticketMedioPrize3 || 0, label: 'Nível 3' },
-      { value: goals.ticketMedioGoal4 || 0, prize: goals.ticketMedioPrize4 || 0, label: 'Nível 4' },
+      { value: goals.ticketMedioGoal1 || 0, prize: goals.ticketMedioPrize1 || 0, label: 'Nível 1', color: 'bg-amber-400' },
+      { value: goals.ticketMedioGoal2 || 0, prize: goals.ticketMedioPrize2 || 0, label: 'Nível 2', color: 'bg-orange-400' },
+      { value: goals.ticketMedioGoal3 || 0, prize: goals.ticketMedioPrize3 || 0, label: 'Nível 3', color: 'bg-red-400' },
+      { value: goals.ticketMedioGoal4 || 0, prize: goals.ticketMedioPrize4 || 0, label: 'Nível 4', color: 'bg-rose-400' },
   ];
 
 
   return (
     <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3 space-y-6">
-                 <SalesProgressBar vendas={Number(vendas)} goals={goals} />
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <CircularGauge 
-                        label="Produtos por Atendimento (PA)"
-                        currentValue={Number(pa)}
-                        goals={paGoals}
-                        valueFormatter={(val) => formatNumber(val)}
-                        cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
-                    />
-                    <CircularGauge 
-                        label="Ticket Médio"
-                        currentValue={Number(ticketMedio)}
-                        goals={ticketGoals}
-                        valueFormatter={(val) => formatCurrency(val)}
-                        cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
-                    />
-                </div>
-            </div>
+        <div className="grid grid-cols-1 gap-6">
+             <SalesProgressBar vendas={Number(vendas)} goals={goals} />
+            <MetricProgressBar
+                label="Produtos por Atendimento (PA)"
+                description="Esse medidor mostra quantas peças em média você vende por atendimento. Quanto maior, mais bônus."
+                currentValue={Number(pa)}
+                goals={paGoals}
+                valueFormatter={(val) => formatNumber(val)}
+                cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
+            />
+            <MetricProgressBar
+                label="Ticket Médio"
+                description="Esse medidor mostra quanto seu cliente gasta em média por compra."
+                currentValue={Number(ticketMedio)}
+                goals={ticketGoals}
+                valueFormatter={(val) => formatCurrency(val)}
+                cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
+            />
         </div>
     </div>
   );
