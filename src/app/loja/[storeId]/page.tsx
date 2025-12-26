@@ -7,7 +7,7 @@ import { SellerAvatar } from "@/components/seller-avatar";
 import { useParams, useRouter } from 'next/navigation';
 import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
 import Link from "next/link";
 import { useTheme } from "next-themes";
