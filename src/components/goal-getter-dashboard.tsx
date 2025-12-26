@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,7 +6,7 @@ import { z } from "zod";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ShieldCheck, Home, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2 } from "lucide-react";
+import { ShieldCheck, Home, Loader2, History, ArrowUpRight, ArrowDownRight, Minus, Trash2, Trophy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -397,8 +396,6 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
             corridinhaDiaria: parseForAI(seller.corridinha_diaria),
         };
         
-        console.log("input IA:", { seller: sellerForAI, goals });
-
         const result: IncentiveProjectionOutput = await incentiveProjection({ seller: sellerForAI, goals });
         allIncentives[seller.id!] = result;
     }
@@ -434,22 +431,32 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         if (storeData.last_incentive_calculation) setLastUpdated(storeData.last_incentive_calculation);
 
         const tabFromUrl = searchParams.get("tab");
-        let tabToActivate = tabFromUrl || (sellersData[0]?.id || "admin");
-
-        if (isStoreAdmin || isAdmin) {
-          tabToActivate = tabFromUrl || 'admin';
-        } else if (tabToActivate !== "admin" && !sellersData.some((s: Seller) => s.id === tabToActivate)) {
-            tabToActivate = sellersData[0]?.id || "admin";
+        const effectiveIsAdmin = isAdminGlobal() || isStoreAuthenticated(storeId);
+        
+        let tabToActivate: string;
+        if (effectiveIsAdmin) {
+            tabToActivate = tabFromUrl || 'admin';
+        } else {
+            // Se não for admin, a única aba válida é a do próprio vendedor (que está na URL)
+            tabToActivate = tabFromUrl || (sellersData[0]?.id || 'admin');
+             // Double-check que o vendedor existe
+            if (!sellersData.some((s: Seller) => s.id === tabToActivate)) {
+                // Se o ID na URL for inválido, redirecionar ou mostrar erro
+                 toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado." });
+                 router.push(`/loja/${storeId}`);
+                 return;
+            }
         }
         
         setActiveTab(tabToActivate);
+
     } catch (error) {
         toast({ variant: "destructive", title: "Erro ao carregar dados", description: (error as Error).message });
         router.push('/');
     } finally {
         setLoading(false);
     }
-  }, [storeId, form, loadSellers, router, searchParams, toast, calculateAllIncentives, isStoreAdmin, isAdmin]);
+  }, [storeId, form, loadSellers, router, searchParams, toast, calculateAllIncentives]);
 
   useEffect(() => { loadInitialData(); }, [loadInitialData]);
 
