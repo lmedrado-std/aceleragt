@@ -178,9 +178,9 @@ function StorePageContent() {
     <TooltipProvider>
       <div className="flex flex-1 flex-col items-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
         <div className="w-full max-w-7xl">
-            <Card className="mb-8 bg-card/80 backdrop-blur-sm border-border/20 shadow-sm">
+            <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-sm">
               <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-6">
                       {loading ? <Skeleton className="h-12 w-12 rounded-full" /> : <Logo />}
                       <div>
                         <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
