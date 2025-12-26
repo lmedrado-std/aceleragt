@@ -231,7 +231,7 @@ function StorePageContent() {
             </Card>
           
             {formattedLastUpdated && (
-                <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium">
+                <div className="mb-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium animate-subtle-pulse">
                     <Clock className="h-4 w-4" />
                     <span>Última atualização de dados: {formattedLastUpdated}</span>
                 </div>
