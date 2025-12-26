@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -50,18 +51,18 @@ const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, 
 
 const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) => {
     const metas = [
-        { label: "Meta 1", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
-        { label: "Meta 2", value: goals.meta || 0, prize: goals.metaPrize || 0 },
-        { label: "Meta 3", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
+        { label: "Meta mínima", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
+        { label: "Meta cheia", value: goals.meta || 0, prize: goals.metaPrize || 0 },
+        { label: "Meta turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 },
     ];
     const totalMeta = goals.metona || 0;
     const progressPercentage = totalMeta > 0 ? Math.min((vendas / totalMeta) * 100, 100) : 0;
 
     const findNextGoal = () => {
-        if (vendas < (goals.metaMinha || 0)) return { label: "Meta 1", value: goals.metaMinha || 0 };
-        if (vendas < (goals.meta || 0)) return { label: "Meta 2", value: goals.meta || 0 };
-        if (vendas < (goals.metona || 0)) return { label: "Meta 3", value: goals.metona || 0 };
-        if (goals.performanceBonusEnabled && vendas < (goals.metaLendaria || 0)) return { label: "Bônus Performance", value: goals.metaLendaria || 0 };
+        if (vendas < (goals.metaMinha || 0)) return { label: "Meta mínima", value: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 };
+        if (vendas < (goals.meta || 0)) return { label: "Meta cheia", value: goals.meta || 0, prize: goals.metaPrize || 0 };
+        if (vendas < (goals.metona || 0)) return { label: "Meta turbo", value: goals.metona || 0, prize: goals.metonaPrize || 0 };
+        if (goals.performanceBonusEnabled && vendas < (goals.metaLendaria || 0)) return { label: "Bônus Performance", value: goals.metaLendaria || 0, prize: goals.legendariaBonusValorPremio || 0 };
         return null;
     };
     const nextGoal = findNextGoal();
@@ -80,8 +81,8 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     return (
         <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
             <CardHeader className="p-0">
-                <CardTitle className="text-white">Vendas até a Meta</CardTitle>
-                <CardDescription className="text-white/80">Progresso em relação às metas principais de vendas.</CardDescription>
+                <CardTitle className="text-white">Progresso de Vendas</CardTitle>
+                <CardDescription className="text-white/80">Olhe sempre aqui primeiro para saber o que falta para ganhar o próximo prêmio.</CardDescription>
             </CardHeader>
             <CardContent className="p-0 mt-8">
                 <div className="relative h-4 w-full rounded-full bg-black/20">
@@ -103,20 +104,23 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                                         </div>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>{meta.label}: {formatCurrency(meta.value)}</p>
+                                        <p className="text-sm font-semibold">{meta.label}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Quando vender {formatCurrency(meta.value)}, você garante {formatCurrency(meta.prize)}.
+                                        </p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
                         );
                     })}
                 </div>
-                <div className="mt-8 text-center text-sm">
+                 <div className="mt-8 text-center text-sm">
                     {nextGoal ? (
                         <p className="text-white/90">
-                            Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para a <span className="font-bold text-white">{nextGoal.label}</span>!
+                           Faltam <span className="font-bold text-white">{formatCurrency(nextGoal.value - vendas)}</span> para liberar <span className="font-bold text-white">{formatCurrency(nextGoal.prize)}</span> ({nextGoal.label}).
                         </p>
                     ) : (
-                        <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> {congratsMessage}</p>
+                        <p className="font-bold text-white flex items-center justify-center gap-2"><Trophy/> Todas as metas batidas! Agora é só aumentar o bônus.</p>
                     )}
                 </div>
             </CardContent>
@@ -156,21 +160,19 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
     const nextGoalInfo = () => {
         if (nextGoal) {
             const diff = nextGoal.value - currentValue;
-            return `Faltam ${valueFormatter(diff)} para ${nextGoal.label}`;
+            return `Se chegar em ${nextGoal.label}, você aumenta seu bônus de ${label.includes("PA") ? "PA" : "Ticket Médio"}.`;
         }
         if (currentTier !== -1) {
-             return `${goals[currentTier].label} atingido!`;
+             return `${goals[currentTier].label} atingido! Continue assim para manter o resultado!`;
         }
-        if (goals.length > 0 && goals[0].value > 0) {
-            return `Faltam ${valueFormatter(goals[0].value)} para ${goals[0].label}`;
-        }
-        return `Nenhuma meta definida.`
+        return `Aumente seu ${label.includes("PA") ? "PA" : "Ticket Médio"} para liberar mais bônus.`;
     };
 
     return (
         <Card className={cn("p-6 flex flex-col items-center justify-between h-full", cardClassName)}>
-            <h4 className="font-semibold text-white mb-4 text-center">{label}</h4>
-            <div className="relative" style={{width: radius*2, height: radius*2}}>
+            <CardTitle className="text-white text-base text-center">{label}</CardTitle>
+            <CardDescription className="text-center text-white/80 text-xs">Esses dois círculos mostram se você está vendendo bem (ticket) e certo (PA).</CardDescription>
+            <div className="relative my-4" style={{width: radius*2, height: radius*2}}>
                 <svg height={radius * 2} width={radius * 2} className="-rotate-90">
                     <circle
                         className="text-black/20"
@@ -196,12 +198,14 @@ const CircularGauge = ({ label, currentValue, goals, valueFormatter, cardClassNa
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
                      <span className="text-3xl font-bold">
-                        {valueFormatter(currentValue)}
+                        {label.includes("Ticket") ? formatCurrency(currentValue) : formatNumber(currentValue)}
                     </span>
-                    {currentTier !== -1 && <p className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full mt-1">{goals[currentTier].label}!</p>}
+                    <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
+                      {label.includes("Ticket") ? "Ticket médio atual" : "PA atual"}
+                    </p>
                 </div>
             </div>
-             <div className="mt-4 text-center text-sm text-white/90 h-5">
+             <div className="mt-2 text-center text-xs text-white/90 min-h-[36px]">
                 <p>{nextGoalInfo()}</p>
             </div>
         </Card>
@@ -224,25 +228,24 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
   const totalIncentives = incentives
     ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
+    
+  const totalPotentialPrizes = 
+    (goals.metaMinhaPrize || 0) +
+    (goals.metaPrize || 0) +
+    (goals.metonaPrize || 0) +
+    (goals.legendariaBonusValorPremio || 0) + 
+    (goals.paPrize1 || 0) + (goals.paPrize2 || 0) + (goals.paPrize3 || 0) + (goals.paPrize4 || 0) +
+    (goals.ticketMedioPrize1 || 0) + (goals.ticketMedioPrize2 || 0) + (goals.ticketMedioPrize3 || 0) + (goals.ticketMedioPrize4 || 0) +
+    (incentives?.corridinhaDiariaBonus || 0);
+
 
   const salesRank = vendas > 0 ? rankings?.vendas : undefined;
   
   let rankMedal = "";
-  let rankMessage = "";
-
   if (salesRank && salesRank > 0) {
-      if (salesRank === 1) {
-          rankMedal = "🥇";
-          rankMessage = `Parabéns, ${name}! Você está em 1º lugar, liderando com excelência!`;
-      } else if (salesRank === 2) {
-          rankMedal = "🥈";
-          rankMessage = `Mandou bem, ${name}! Você está no 2º lugar, continue assim!`;
-      } else if (salesRank === 3) {
-          rankMedal = "🥉";
-          rankMessage = `Muito bom, ${name}! Você conquistou o 3º lugar, bora buscar o topo!`;
-      } else {
-          rankMessage = `Bora subir, ${name}! Você está em ${salesRank}º lugar. Continue se esforçando, o pódio te espera!`;
-      }
+      if (salesRank === 1) rankMedal = "🥇";
+      else if (salesRank === 2) rankMedal = "🥈";
+      else if (salesRank === 3) rankMedal = "🥉";
   }
 
   const paGoals = [
@@ -262,22 +265,23 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
 
   return (
     <div className="space-y-6">
-        <Card className="col-span-full bg-primary text-primary-foreground">
-            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p className="text-sm font-semibold text-primary-foreground/80">Ganho Total Projetado</p>
-                    <p className="text-3xl font-bold">{formatCurrency(totalIncentives)}</p>
-                </div>
-                 {vendas > 0 && salesRank && salesRank > 0 && (
-                     <div className="text-right flex-grow">
-                        <div className="flex items-center justify-end gap-2 font-bold">
-                            <Trophy className="h-5 w-5" />
-                            <span>{salesRank}º Lugar em Vendas</span>
-                        </div>
-                        {rankMessage && <p className="text-sm text-primary-foreground/80 mt-1">{rankMedal} {rankMessage}</p>}
-                    </div>
-                )}
-            </CardContent>
+        <Card className="col-span-full bg-slate-900 text-white">
+          <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold text-white/70">Missão de hoje</p>
+              <p className="text-lg font-bold">
+                Vender {formatCurrency(goals.metaHoje || 0)} ou {formatNumber(goals.paMetaHoje || 0)} PA
+              </p>
+              <p className="text-xs text-white/60">
+                Se bater, você garante pelo menos {formatCurrency(incentives?.meta1Premio || goals.metaMinhaPrize || 0)}.
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-xs font-semibold text-white/70">Ganhos projetados no mês</p>
+              <p className="text-2xl font-bold">{formatCurrency(totalIncentives)}</p>
+            </div>
+          </CardContent>
         </Card>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -307,15 +311,34 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                         <CardTitle className="text-xl">Resumo de Ganhos</CardTitle>
                         <CardDescription>Seus prêmios e bônus por performance detalhados.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        <GoalDetail label="Prêmio Meta 1" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
-                        <GoalDetail label="Prêmio Meta 2" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
-                        <GoalDetail label="Prêmio Meta 3" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
-                        {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
-                        <Separator/>
-                        <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
-                        <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
-                        <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
+                    <CardContent className="space-y-3">
+                         <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por vendas</p>
+                            <GoalDetail label="Prêmio Meta Mínima" prize={incentives?.meta1Premio || 0} achieved={(incentives?.meta1Premio || 0) > 0} />
+                            <GoalDetail label="Prêmio Meta Cheia" prize={incentives?.meta2Premio || 0} achieved={(incentives?.meta2Premio || 0) > 0} />
+                            <GoalDetail label="Prêmio Meta Turbo" prize={incentives?.meta3Premio || 0} achieved={(incentives?.meta3Premio || 0) > 0} />
+                            {goals.performanceBonusEnabled && <GoalDetail label="Bônus Performance" prize={incentives?.legendariaBonus || 0} achieved={(incentives?.legendariaBonus || 0) > 0} />}
+                        </div>
+                        <Separator />
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase">Por PA e Ticket</p>
+                            <GoalDetail label="Bônus PA" prize={incentives?.paBonus || 0} achieved={(incentives?.paBonus || 0) > 0} />
+                            <GoalDetail label="Bônus Ticket Médio" prize={incentives?.ticketMedioBonus || 0} achieved={(incentives?.ticketMedioBonus || 0) > 0} />
+                        </div>
+                         <Separator />
+                         <div>
+                             <p className="text-xs font-semibold text-muted-foreground uppercase">Outros Bônus</p>
+                            <GoalDetail label="Bônus Corridinha" prize={incentives?.corridinhaDiariaBonus || 0} achieved={(incentives?.corridinhaDiariaBonus || 0) > 0} />
+                        </div>
+                        <Separator />
+                         <div className="flex justify-between items-center pt-2">
+                            <span className="text-sm font-semibold text-muted-foreground">
+                              Se bater todas as metas:
+                            </span>
+                            <span className="font-bold text-lg text-primary">
+                              {formatCurrency(totalPotentialPrizes)}
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

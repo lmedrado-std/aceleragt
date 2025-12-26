@@ -16,6 +16,8 @@ export interface Seller {
 }
 
 export interface Goals {
+  metaHoje?: number;
+  paMetaHoje?: number;
   metaMinha: number;
   meta: number;
   metona: number;

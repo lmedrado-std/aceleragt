@@ -49,6 +49,8 @@ const sellerSchema = z.object({
 });
 
 const goalsSchema = z.object({
+  metaHoje: z.coerce.number().default(0),
+  paMetaHoje: z.coerce.number().default(0),
   metaMinha: z.coerce.number().default(0),
   metaMinhaPrize: z.coerce.number().default(0),
   meta: z.coerce.number().default(0),

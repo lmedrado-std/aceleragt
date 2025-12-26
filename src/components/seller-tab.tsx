@@ -122,7 +122,10 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         <TabsContent value="lancamentos" className="mt-6">
           {/* Conteúdo da aba Lançamentos */}
           <Card>
-            <CardHeader><CardTitle>Meus Lançamentos</CardTitle><CardDescription>Estes foram os dados de desempenho que o administrador lançou para você.</CardDescription></CardHeader>
+            <CardHeader>
+                <CardTitle>Meus Lançamentos</CardTitle>
+                <CardDescription>Estes foram os dados de desempenho que o administrador lançou para você. Olhe sempre aqui primeiro para saber o que falta para ganhar o próximo prêmio.</CardDescription>
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white" />
@@ -143,7 +146,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                 <Card className="lg:col-span-3">
                     <CardHeader><CardTitle>Quadro de Metas</CardTitle><CardDescription>Consulte aqui todos os objetivos e prêmios do período.</CardDescription></CardHeader>
                     <CardContent className="grid gap-6 md:grid-cols-3">
-                        <Card><CardHeader><CardTitle className="text-lg">Metas de Vendas</CardTitle></CardHeader><CardContent><GoalItem label="Meta 1" value={`${formatCurrency(goals.metaMinha)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize)})`} /><GoalItem label="Meta 2" value={`${formatCurrency(goals.meta)} (Prêmio: ${formatCurrency(goals.metaPrize)})`} /><GoalItem label="Meta 3" value={`${formatCurrency(goals.metona)} (Prêmio: ${formatCurrency(goals.metonaPrize)})`} />{goals.performanceBonusEnabled && (<GoalItem label="Bônus Performance" value={`Acima de ${formatCurrency(goals.metaLendaria)}`} />)}</CardContent></Card>
+                        <Card><CardHeader><CardTitle className="text-lg">Metas de Vendas</CardTitle></CardHeader><CardContent><GoalItem label="Meta Mínima" value={`${formatCurrency(goals.metaMinha)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize)})`} /><GoalItem label="Meta Cheia" value={`${formatCurrency(goals.meta)} (Prêmio: ${formatCurrency(goals.metaPrize)})`} /><GoalItem label="Meta Turbo" value={`${formatCurrency(goals.metona)} (Prêmio: ${formatCurrency(goals.metonaPrize)})`} />{goals.performanceBonusEnabled && (<GoalItem label="Bônus Performance" value={`Acima de ${formatCurrency(goals.metaLendaria)}`} />)}</CardContent></Card>
                          <Card><CardHeader><CardTitle className="text-lg">Metas de PA</CardTitle></CardHeader><CardContent><GoalItem label="Nível 1" value={`${(goals.paGoal1 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize1)})`} /><GoalItem label="Nível 2" value={`${(goals.paGoal2 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize2)})`} /><GoalItem label="Nível 3" value={`${(goals.paGoal3 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize3)})`} /><GoalItem label="Nível 4" value={`${(goals.paGoal4 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize4)})`} /></CardContent></Card>
                          <Card><CardHeader><CardTitle className="text-lg">Metas de Ticket Médio</CardTitle></CardHeader><CardContent><GoalItem label="Nível 1" value={`${formatCurrency(goals.ticketMedioGoal1)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize1)})`} /><GoalItem label="Nível 2" value={`${formatCurrency(goals.ticketMedioGoal2)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize2)})`} /><GoalItem label="Nível 3" value={`${formatCurrency(goals.ticketMedioGoal3)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize3)})`} /><GoalItem label="Nível 4" value={`${formatCurrency(goals.ticketMedioGoal4)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize4)})`} /></CardContent></Card>
                     </CardContent>
