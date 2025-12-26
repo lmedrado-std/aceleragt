@@ -160,7 +160,12 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     ? new Date(lastUpdated).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
     : "N/A";
 
-  const isCorridinhaActive = goals.corridinhaStartDate && goals.corridinhaEndDate && new Date(goals.corridinhaStartDate) <= new Date() && new Date(goals.corridinhaEndDate) >= new Date();
+  const isCorridinhaActive = 
+    goals.corridinhaStartDate && 
+    goals.corridinhaEndDate && 
+    new Date(goals.corridinhaStartDate) <= new Date() && 
+    new Date(goals.corridinhaEndDate) >= new Date() &&
+    (goals.corridinhaObjective1 || goals.corridinhaObjective2 || goals.corridinhaObjective3 || goals.corridinhaObjective4);
 
   const handleSpinWin = (result: any) => {
     confetti({
@@ -344,8 +349,32 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         </TabsContent>
         
         <TabsContent value="corridinhas" className="mt-6">
-             {isCorridinhaActive && (
-                <Card className="lg:col-span-3 mt-6"><CardHeader><CardTitle className="flex items-center gap-2 text-primary"><Rocket /> Corridinha Ativa!</CardTitle><CardDescription>Um incentivo especial está ativo no período de {goals.corridinhaStartDate ? format(new Date(goals.corridinhaStartDate), 'dd/MM/yyyy') : ''} até {goals.corridinhaEndDate ? format(new Date(goals.corridinhaEndDate), 'dd/MM/yyyy') : ''}.</CardDescription></CardHeader><CardContent><div className="grid gap-4 md:grid-cols-2">{goals.corridinhaObjective1 && <GoalItem label={goals.corridinhaObjective1} value={formatCurrency(goals.corridinhaPrize1 || 0)} />}{goals.corridinhaObjective2 && <GoalItem label={goals.corridinhaObjective2} value={formatCurrency(goals.corridinhaPrize2 || 0)} />}{goals.corridinhaObjective3 && <GoalItem label={goals.corridinhaObjective3} value={formatCurrency(goals.corridinhaPrize3 || 0)} />}{goals.corridinhaObjective4 && <GoalItem label={goals.corridinhaObjective4} value={formatCurrency(goals.corridinhaPrize4 || 0)} />}</div></CardContent></Card>
+             {isCorridinhaActive ? (
+                <Card className="lg:col-span-3 mt-6">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-primary"><Rocket /> Corridinha Ativa!</CardTitle>
+                        <CardDescription>
+                            Um incentivo especial está ativo no período de {goals.corridinhaStartDate ? format(new Date(goals.corridinhaStartDate), 'dd/MM/yyyy') : ''} até {goals.corridinhaEndDate ? format(new Date(goals.corridinhaEndDate), 'dd/MM/yyyy') : ''}.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            {goals.corridinhaObjective1 && <GoalItem label={goals.corridinhaObjective1} value={formatCurrency(goals.corridinhaPrize1 || 0)} />}
+                            {goals.corridinhaObjective2 && <GoalItem label={goals.corridinhaObjective2} value={formatCurrency(goals.corridinhaPrize2 || 0)} />}
+                            {goals.corridinhaObjective3 && <GoalItem label={goals.corridinhaObjective3} value={formatCurrency(goals.corridinhaPrize3 || 0)} />}
+                            {goals.corridinhaObjective4 && <GoalItem label={goals.corridinhaObjective4} value={formatCurrency(goals.corridinhaPrize4 || 0)} />}
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Rocket /> Corridinhas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-center py-8">Não há corridinhas especiais ativas no momento.</p>
+                    </CardContent>
+                </Card>
             )}
         </TabsContent>
 
