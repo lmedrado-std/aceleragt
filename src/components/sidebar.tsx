@@ -4,47 +4,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Shield, Store as StoreIcon, Rocket, Moon, Sun, Database, LineChart } from "lucide-react";
+import { Shield, Home, Moon, Sun, Database, LineChart } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Store } from "@/lib/storage";
 import { Logo } from "./logo";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [stores, setStores] = useState<Store[]>([]);
-  const [loading, setLoading] = useState(true);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    async function fetchStores() {
-      try {
-        const res = await fetch("/api/stores");
-        if (!res.ok) throw new Error("Failed to fetch stores");
-        const data = await res.json();
-        setStores(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (mounted) {
-      fetchStores();
-    }
-  }, [mounted]);
 
   const NavLink = ({ href, children, icon, isActive }: { href: string, children: React.ReactNode, icon: React.ReactNode, isActive?: boolean }) => (
     <Button
@@ -95,7 +73,11 @@ export function Sidebar() {
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
           <div className="px-2 py-2">
             <Tooltip>
-                <TooltipTrigger asChild><NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname === '/admin'}>Admin</NavLink></TooltipTrigger>
+                <TooltipTrigger asChild><NavLink href="/" icon={<Home size={20} />} isActive={pathname === '/'}>Início</NavLink></TooltipTrigger>
+                <TooltipContent side="right"><p>Voltar para a seleção de lojas</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild><NavLink href="/admin" icon={<Shield size={20} />} isActive={pathname.startsWith('/admin')}>Admin</NavLink></TooltipTrigger>
                 <TooltipContent side="right"><p>Acessar painel de controle global</p></TooltipContent>
             </Tooltip>
             {isAdminPage && (
@@ -112,32 +94,8 @@ export function Sidebar() {
             )}
           </div>
           <Separator className="my-2 bg-white/20" />
-          <h2 className="text-sm font-semibold tracking-wider text-white/80 uppercase px-3 mt-4 mb-2">
-            Lojas
-          </h2>
-          {loading ? (
-              <div className="space-y-2 px-2">
-                  <Skeleton className="h-9 w-full bg-black/20" />
-                  <Skeleton className="h-9 w-full bg-black/20" />
-              </div>
-          ) : stores.length > 0 ? (
-            stores.map((store) => (
-              <Tooltip key={store.id}>
-                <TooltipTrigger asChild>
-                    <NavLink 
-                        href={`/loja/${store.id}`} 
-                        icon={<StoreIcon size={20} />} 
-                        isActive={pathname.startsWith(`/loja/${store.id}`)}
-                    >
-                    {store.name}
-                    </NavLink>
-                </TooltipTrigger>
-                <TooltipContent side="right"><p>Acessar painel da loja {store.name}</p></TooltipContent>
-              </Tooltip>
-            ))
-          ) : (
-            <p className="px-3 text-sm text-white/70">Nenhuma loja cadastrada.</p>
-          )}
+          <p className="px-3 pt-2 text-sm text-muted-foreground">Você está em:</p>
+          <p className="px-3 font-semibold text-lg">{pathname.split('/')[2] || 'Navegação'}</p>
         </nav>
 
         <div className="mt-auto p-4 border-t border-white/20">
@@ -145,7 +103,7 @@ export function Sidebar() {
               {renderThemeToggle()}
           </div>
           <div className="px-3 py-2 text-xs text-center text-white/70 space-y-1">
-              <p>V1.0.1 Build Estavel</p>
+              <p>V2.0.0 Build Estavel</p>
               <p>RyannBreston desenvolvedor</p>
               <p>© {new Date().getFullYear()} Acelera GT.</p>
           </div>

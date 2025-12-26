@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
@@ -8,11 +9,11 @@ import { usePathname } from "next/navigation";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isLoginPage = pathname.includes('/login');
-    const isDashboardPage = pathname.includes('/dashboard');
+    // A página inicial (/) não terá a sidebar principal
+    const showSidebar = pathname !== '/';
 
-    if (isLoginPage || isDashboardPage) {
-        return <main className="flex-1 flex flex-col p-4 lg:p-6">{children}</main>;
+    if (!showSidebar) {
+        return <main className="flex-1 flex flex-col">{children}</main>;
     }
 
     return (
