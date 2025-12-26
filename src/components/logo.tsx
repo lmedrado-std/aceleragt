@@ -7,6 +7,6 @@ export const Logo = ({ className }: { className?: string }) => (
     <div className="rounded-lg bg-primary p-2 shadow-inner">
       <Rocket className="h-6 w-6 text-primary-foreground" />
     </div>
-    <span className="text-2xl font-bold tracking-tighter">Acelera GT</span>
+    <span className="text-2xl font-bold tracking-tighter text-white">Acelera GT</span>
   </div>
 );
