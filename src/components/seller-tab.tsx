@@ -7,7 +7,7 @@ import { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
 import { RankingMetric } from "./goal-getter-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift } from "lucide-react";
+import { DollarSign, Package, Ticket, Rocket, Clock, BarChart, Trophy, Target, Lightbulb, User, Gift, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TipsTab } from "./TipsTab";
@@ -18,6 +18,7 @@ import confetti from 'canvas-confetti';
 import dynamic from "next/dynamic";
 import { Separator } from "./ui/separator";
 import { WelcomeModal } from "./welcome-modal";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 const PrizeWheel = dynamic(() => import("@/components/prize-wheel").then(mod => mod.PrizeWheel), { ssr: false });
 
@@ -36,18 +37,42 @@ const formatCurrency = (value: number) =>
     currency: "BRL",
   }).format(value || 0);
 
-const MetricCard = ({ title, value, icon, description, className }: { title: string; value: string; icon: React.ReactNode; description: string; className?: string; }) => (
-  <Card className={cn("text-card-foreground", className)}>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      {icon}
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      <p className="text-xs opacity-80">{description}</p>
-    </CardContent>
-  </Card>
+const findNextGoal = (currentValue: number, goalTiers: { goal: number; prize: number }[]) => {
+  // Find the first goal that is greater than the current value
+  return goalTiers.find(tier => currentValue < tier.goal) || null;
+}
+
+
+const MetricCard = ({ title, value, icon, description, className, children }: { title: string; value: string; icon: React.ReactNode; description: string; className?: string, children: React.ReactNode }) => (
+    <Dialog>
+        <DialogTrigger asChild>
+            <Card className={cn("text-card-foreground cursor-pointer hover:scale-105 hover:shadow-lg transition-transform", className)}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                {icon}
+                </CardHeader>
+                <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+                <p className="text-xs opacity-80">{description}</p>
+                </CardContent>
+            </Card>
+        </DialogTrigger>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-2xl">
+                    {icon} {title}
+                </DialogTitle>
+                <DialogDescription>
+                    Seu desempenho atual e uma dica para você ir além.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+                {children}
+            </div>
+        </DialogContent>
+    </Dialog>
 );
+
 
 const GoalDetail = ({ label, prize, achieved }: { label: string, prize: number, achieved: boolean }) => (
      <div className={cn("flex justify-between items-center p-3 rounded-lg", achieved ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300" : "bg-muted/50")}>
@@ -86,9 +111,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
 
   const isCorridinhaActive = goals.corridinhaStartDate && goals.corridinhaEndDate && new Date(goals.corridinhaStartDate) <= new Date() && new Date(goals.corridinhaEndDate) >= new Date();
 
-  // A função é chamada quando o PrizeWheel tem um resultado
   const handleSpinWin = (result: any) => {
-    // O PrizeWheel já mostra um popup, mas podemos adicionar um efeito extra aqui
     confetti({
       particleCount: 150,
       spread: 70,
@@ -96,7 +119,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     });
   };
   
-    const totalIncentives = incentives
+  const totalIncentives = incentives
     ? Object.values(incentives).reduce((sum, val) => sum + (val || 0), 0)
     : 0;
 
@@ -109,6 +132,31 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     (incentives?.ticketMedioBonus || 0) +
     (incentives?.corridinhaDiariaBonus || 0);
 
+  const salesGoalTiers = [
+    { goal: goals.metaMinha || 0, prize: goals.metaMinhaPrize || 0 },
+    { goal: goals.meta || 0, prize: goals.metaPrize || 0 },
+    { goal: goals.metona || 0, prize: goals.metonaPrize || 0 },
+    { goal: goals.metaLendaria || 0, prize: goals.legendariaBonusValorPremio || 0 },
+  ];
+  const nextSalesGoal = findNextGoal(seller.vendas, salesGoalTiers);
+
+  const paGoalTiers = [
+      { goal: goals.paGoal1 || 0, prize: goals.paPrize1 || 0 },
+      { goal: goals.paGoal2 || 0, prize: goals.paPrize2 || 0 },
+      { goal: goals.paGoal3 || 0, prize: goals.paPrize3 || 0 },
+      { goal: goals.paGoal4 || 0, prize: goals.paPrize4 || 0 },
+  ];
+  const nextPaGoal = findNextGoal(seller.pa, paGoalTiers);
+
+  const ticketMedioGoalTiers = [
+      { goal: goals.ticketMedioGoal1 || 0, prize: goals.ticketMedioPrize1 || 0 },
+      { goal: goals.ticketMedioGoal2 || 0, prize: goals.ticketMedioPrize2 || 0 },
+      { goal: goals.ticketMedioGoal3 || 0, prize: goals.ticketMedioPrize3 || 0 },
+      { goal: goals.ticketMedioGoal4 || 0, prize: goals.ticketMedioPrize4 || 0 },
+  ];
+  const nextTicketMedioGoal = findNextGoal(seller.ticket_medio, ticketMedioGoalTiers);
+
+
   return (
     <TooltipProvider>
       <WelcomeModal
@@ -120,7 +168,6 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
       />
       <Tabs defaultValue="desempenho" className="w-full">
         <TabsList className="h-auto p-0 bg-transparent grid grid-cols-2 sm:grid-cols-5 w-full sm:w-max gap-2">
-          {/* Abas de navegação (Desempenho, Lançamentos, etc.) */}
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="desempenho"><Trophy className="mr-2 h-4 w-4" />Meu Desempenho</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver desempenho e progresso das metas</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="lancamentos"><BarChart className="mr-2 h-4 w-4" />Meus Lançamentos</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver dados lançados pelo administrador</p></TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild><TabsTrigger value="metas"><Target className="mr-2 h-4 w-4" />Metas</TabsTrigger></TooltipTrigger><TooltipContent><p>Consultar os valores de todas as metas</p></TooltipContent></Tooltip>
@@ -144,14 +191,57 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
               <Card>
                 <CardHeader>
                     <CardTitle>Meus Lançamentos</CardTitle>
-                    <CardDescription>Estes foram os dados de desempenho que o administrador lançou para você.</CardDescription>
+                    <CardDescription>Clique em um card para ver seu progresso e dicas para melhorar.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                    <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white" />
-                    <MetricCard title="Bônus Corridinha" value={formatCurrency(seller.corridinha_diaria)} icon={<Rocket className="h-4 w-4" />} description="Bônus diário direto" className="bg-gradient-to-br from-green-500 to-green-700 text-white" />
-                    <MetricCard title="Produtos por Atendimento (PA)" value={String(Number(seller.pa || 0).toFixed(2))} icon={<Package className="h-4 w-4" />} description="Média de itens por venda" className="bg-gradient-to-br from-purple-500 to-purple-700 text-white" />
-                    <MetricCard title="Ticket Médio" value={formatCurrency(seller.ticket_medio)} icon={<Ticket className="h-4 w-4" />} description="Valor médio por venda" className="bg-gradient-to-br from-orange-500 to-orange-700 text-white" />
+                    <MetricCard title="Vendas Realizadas" value={formatCurrency(seller.vendas)} icon={<DollarSign className="h-4 w-4" />} description="Total vendido no período" className="bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                        <p className="text-4xl font-bold">{formatCurrency(seller.vendas)}</p>
+                        {nextSalesGoal ? (
+                            <p className="text-muted-foreground mt-2">Faltam <span className="font-bold text-foreground">{formatCurrency(nextSalesGoal.goal - seller.vendas)}</span> para o próximo prêmio de <span className="font-bold text-foreground">{formatCurrency(nextSalesGoal.prize)}</span>.</p>
+                        ) : (
+                            <p className="text-muted-foreground mt-2">Você atingiu a meta principal de vendas!</p>
+                        )}
+                        <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm">
+                            <p className="font-semibold text-amber-800 dark:text-amber-200">Dica Rápida:</p>
+                            <p className="text-amber-700 dark:text-amber-300">Reveja os vídeos sobre <span className="font-bold">objeções de vendas</span> na aba 'Dicas' para fechar mais negócios.</p>
+                        </div>
+                    </MetricCard>
+
+                    <MetricCard title="Bônus Corridinha" value={formatCurrency(seller.corridinha_diaria)} icon={<Rocket className="h-4 w-4" />} description="Bônus diário direto" className="bg-gradient-to-br from-green-500 to-green-700 text-white">
+                        <p className="text-4xl font-bold">{formatCurrency(seller.corridinha_diaria)}</p>
+                        <p className="text-muted-foreground mt-2">Este é um bônus direto concedido pelo seu gestor.</p>
+                        <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm">
+                             <p className="font-semibold text-amber-800 dark:text-amber-200">Dica Rápida:</p>
+                            <p className="text-amber-700 dark:text-amber-300">Continue focado nas metas do dia para ganhar mais bônus como este!</p>
+                        </div>
+                    </MetricCard>
+
+                    <MetricCard title="Produtos por Atendimento (PA)" value={String(Number(seller.pa || 0).toFixed(2))} icon={<Package className="h-4 w-4" />} description="Média de itens por venda" className="bg-gradient-to-br from-purple-500 to-purple-700 text-white">
+                        <p className="text-4xl font-bold">{String(Number(seller.pa || 0).toFixed(2))}</p>
+                        {nextPaGoal ? (
+                            <p className="text-muted-foreground mt-2">Sua próxima meta de PA é <span className="font-bold text-foreground">{nextPaGoal.goal.toFixed(2)}</span> para um bônus de <span className="font-bold text-foreground">{formatCurrency(nextPaGoal.prize)}</span>.</p>
+                        ) : (
+                            <p className="text-muted-foreground mt-2">Você atingiu o nível máximo de bônus de PA!</p>
+                        )}
+                        <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm">
+                             <p className="font-semibold text-amber-800 dark:text-amber-200">Dica Rápida:</p>
+                            <p className="text-amber-700 dark:text-amber-300">Ofereça um produto complementar (cross-sell) em toda venda. Vá na aba 'Dicas' e procure por "Aumentar PA".</p>
+                        </div>
+                    </MetricCard>
+
+                    <MetricCard title="Ticket Médio" value={formatCurrency(seller.ticket_medio)} icon={<Ticket className="h-4 w-4" />} description="Valor médio por venda" className="bg-gradient-to-br from-orange-500 to-orange-700 text-white">
+                        <p className="text-4xl font-bold">{formatCurrency(seller.ticket_medio)}</p>
+                        {nextTicketMedioGoal ? (
+                            <p className="text-muted-foreground mt-2">Sua próxima meta de Ticket Médio é <span className="font-bold text-foreground">{formatCurrency(nextTicketMedioGoal.goal)}</span> para um bônus de <span className="font-bold text-foreground">{formatCurrency(nextTicketMedioGoal.prize)}</span>.</p>
+                        ) : (
+                            <p className="text-muted-foreground mt-2">Você atingiu o nível máximo de bônus de Ticket Médio!</p>
+                        )}
+                        <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-900/50 rounded-lg text-sm">
+                            <p className="font-semibold text-amber-800 dark:text-amber-200">Dica Rápida:</p>
+                            <p className="text-amber-700 dark:text-amber-300">Sugira um produto de maior valor (upsell) ou um combo para aumentar o valor da compra. Veja mais na aba 'Dicas'.</p>
+                        </div>
+                    </MetricCard>
                   </div>
                   {lastUpdated && (
                     <div className="mt-6 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-center flex items-center justify-center gap-2 text-sm font-medium"><Clock className="h-4 w-4" /><span>Última atualização de dados: {formattedLastUpdated}</span></div>
@@ -204,7 +294,6 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         </TabsContent>
 
          <TabsContent value="metas" className="mt-6">
-            {/* Conteúdo da aba Metas */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="lg:col-span-3">
                     <CardHeader><CardTitle>Quadro de Metas</CardTitle><CardDescription>Consulte aqui todos os objetivos e prêmios do período.</CardDescription></CardHeader>
@@ -221,7 +310,6 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         </TabsContent>
         
         <TabsContent value="roleta" className="mt-6">
-          {/* CORREÇÃO: Renderiza o componente da roleta visual, passando as propriedades necessárias. */}
           <PrizeWheel storeId={storeId} sellerId={seller.id} onSpinResult={handleSpinWin} />
         </TabsContent>
 
@@ -232,3 +320,5 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     </TooltipProvider>
   );
 }
+
+    
