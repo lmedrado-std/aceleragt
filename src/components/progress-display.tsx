@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -96,7 +97,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
     const nextGoal = findNextGoal();
     
     return (
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6">
+        <Card className="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white p-6">
             <CardHeader className="p-0">
                 <CardTitle className="text-white">Quanto falta para o próximo prêmio</CardTitle>
                 <CardDescription className="text-white/80">Acompanhe seu progresso para as metas de vendas.</CardDescription>
@@ -369,7 +370,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 currentValue={Number(pa)}
                 goals={paGoals}
                 valueFormatter={(val) => formatNumber(val)}
-                cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
+                cardClassName="bg-gradient-to-br from-violet-500 to-violet-700"
             />
             <MetricProgressBar
                 label="Ticket Médio"
@@ -377,7 +378,7 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 currentValue={Number(ticketMedio)}
                 goals={ticketGoals}
                 valueFormatter={(val) => formatCurrency(val)}
-                cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
+                cardClassName="bg-gradient-to-br from-amber-500 to-amber-700"
             />
         </div>
     </div>
