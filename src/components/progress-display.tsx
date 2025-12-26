@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -185,7 +184,6 @@ const MetricProgressBar = ({
   valueFormatter,
   cardClassName,
   description,
-  valueSuffix = "",
 }: {
   label: string;
   currentValue: number;
@@ -193,11 +191,11 @@ const MetricProgressBar = ({
   valueFormatter: (value: number) => string;
   cardClassName?: string;
   description?: string;
-  valueSuffix?: string;
 }) => {
   const highestGoal = Math.max(...goals.map(g => g.value), 0) || 1;
   const progress = Math.min((currentValue / highestGoal) * 100, 100);
 
+  // nível atual
   let currentTier = -1;
   for (let i = goals.length - 1; i >= 0; i--) {
     if (goals[i].value > 0 && currentValue >= goals[i].value) {
@@ -207,8 +205,12 @@ const MetricProgressBar = ({
   }
   const currentTierGoal = currentTier !== -1 ? goals[currentTier] : null;
 
+  // próxima meta
   const nextGoalIndex = currentTier + 1;
-  const nextGoal = goals[nextGoalIndex] && goals[nextGoalIndex].value > 0 ? goals[nextGoalIndex] : null;
+  const nextGoal =
+    goals[nextGoalIndex] && goals[nextGoalIndex].value > 0
+      ? goals[nextGoalIndex]
+      : null;
 
   const nextGoalInfo = () => {
     if (nextGoal) {
@@ -216,67 +218,111 @@ const MetricProgressBar = ({
       return (
         <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
           <Trophy className="h-4 w-4 text-yellow-300" />
-          <span>Faltam <strong>{valueFormatter(diff)}</strong> para liberar <strong>{formatCurrency(nextGoal.prize)}</strong></span>
+          <span>
+            Faltam{" "}
+            <strong>{valueFormatter(diff)}</strong>{" "}
+            para chegar ao <strong>{nextGoal.label}</strong> e ganhar{" "}
+            <strong>{formatCurrency(nextGoal.prize)}</strong>.
+          </span>
         </div>
       );
     }
     if (currentTier !== -1) {
-      return <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full"><p>Você está no <strong>{goals[currentTier].label}</strong>, mantendo seu bônus no máximo!</p></div>;
+      return (
+        <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full">
+          <p>
+            Você está no <strong>{currentTierGoal?.label}</strong>, mantendo seu bônus no máximo.
+          </p>
+        </div>
+      );
     }
-    return <p>Aumente para liberar mais bônus.</p>;
+    return (
+      <p className="text-xs">
+        Aumente seu {label.includes("PA") ? "PA" : "Ticket Médio"} para liberar o primeiro bônus.
+      </p>
+    );
   };
 
   return (
     <Card className={cn("p-6 flex flex-col justify-between text-white", cardClassName)}>
-        <CardHeader className="p-0">
-          <CardTitle className="text-white text-lg text-center">{label}</CardTitle>
-          {description && <CardDescription className="text-center text-white/80 text-sm">{description}</CardDescription>}
-        </CardHeader>
-        <CardContent className="p-0 mt-6">
-          <div className="text-center mb-2">
-            <p className="text-4xl font-extrabold tracking-tight">{valueFormatter(currentValue)}</p>
-            {currentTierGoal && (
-              <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
-                {currentTierGoal.label} atual
-              </p>
-            )}
-          </div>
-          <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
-            <div 
-              className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
-              style={{ width: `${progress}%` }}
-            />
-            
-            <div
-              className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
-              style={{ left: `calc(${progress}% - 1.5px)` }}
-            />
+      <CardHeader className="p-0">
+        <CardTitle className="text-white text-lg text-center">{label}</CardTitle>
+        {description && (
+          <CardDescription className="text-center text-white/80 text-sm">
+            {description}
+          </CardDescription>
+        )}
+      </CardHeader>
 
-            {goals.map((goal, index) => {
-              const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
-              if (left <= 0 || left >= 100) return null;
-              
-               return (
-                <TooltipProvider key={index}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                       <div
-                        className="absolute top-0 h-full w-[1px] bg-white/30"
-                        style={{ left: `${left}%` }}
+      <CardContent className="p-0 mt-6">
+        {/* valor atual + nível */}
+        <div className="text-center mb-2">
+          <p className="text-4xl font-extrabold tracking-tight">
+            {valueFormatter(currentValue)}
+          </p>
+          {currentTierGoal && (
+            <p className="text-[11px] uppercase tracking-[0.18em] mt-1">
+              {currentTierGoal.label} atual
+            </p>
+          )}
+        </div>
+
+        {/* barra */}
+        <div className="relative h-6 w-full rounded-full bg-white/30 overflow-hidden">
+          {/* progresso */}
+          <div
+            className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+            style={{ width: `${progress}%` }}
+          />
+
+          {/* marcador do valor atual (traço branco) */}
+          <div
+            className="absolute top-0 h-full w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+            style={{ left: `calc(${progress}% - 1.5px)` }}
+          />
+
+          {/* marcadores dos níveis */}
+          {goals.map((goal, index) => {
+            const left = highestGoal > 0 ? (goal.value / highestGoal) * 100 : 0;
+            if (left <= 0 || left >= 100) return null;
+
+            const isCurrent = currentTierGoal?.label === goal.label;
+            const isNext = nextGoal?.label === goal.label;
+
+            return (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="absolute inset-y-0 flex items-center justify-center"
+                      style={{ left: `${left}%`, transform: "translateX(-50%)" }}
+                    >
+                      <div
+                        className={cn(
+                          "h-4 w-[3px] rounded-full",
+                          isCurrent
+                            ? "bg-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
+                            : isNext
+                            ? "bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]"
+                            : "bg-white/50"
+                        )}
                       />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm font-semibold">{goal.label}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Atingir {valueFormatter(goal.value)} para garantir {formatCurrency(goal.prize)}.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              );
-            })}
-          </div>
-        </CardContent>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm font-semibold">{goal.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Atingir {valueFormatter(goal.value)} para garantir{" "}
+                      {formatCurrency(goal.prize)}.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          })}
+        </div>
+      </CardContent>
+
       <div className="mt-4 text-center text-sm text-white/90 min-h-[40px] flex items-center justify-center">
         {nextGoalInfo()}
       </div>
@@ -324,7 +370,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 goals={paGoals}
                 valueFormatter={(val) => formatNumber(val)}
                 cardClassName="bg-gradient-to-br from-purple-500 to-purple-700"
-                valueSuffix="PA atual"
             />
             <MetricProgressBar
                 label="Ticket Médio"
@@ -333,7 +378,6 @@ export function ProgressDisplay({ salesData, incentives, rankings }: ProgressDis
                 goals={ticketGoals}
                 valueFormatter={(val) => formatCurrency(val)}
                 cardClassName="bg-gradient-to-br from-orange-500 to-orange-700"
-                valueSuffix="Ticket médio atual"
             />
         </div>
     </div>
