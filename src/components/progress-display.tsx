@@ -68,7 +68,7 @@ const SalesProgressBar = ({ vendas, goals }: { vendas: number, goals: Goals }) =
                 <CardTitle className="text-white">Quanto falta para o próximo prêmio</CardTitle>
                 <CardDescription className="text-white/80">Acompanhe seu progresso para as metas de vendas.</CardDescription>
             </CardHeader>
-            <CardContent className="p-0 mt-6">
+            <CardContent className="p-0 mt-8">
                  <div className="text-center mb-2">
                     <p className="text-4xl font-extrabold tracking-tight">{formatCurrency(vendas)}</p>
                     <p className="text-xs uppercase tracking-wide opacity-80 -mt-1">Vendido até agora</p>
@@ -175,7 +175,7 @@ const MetricProgressBar = ({
       );
     }
     if (currentTier !== -1) {
-      return <p>Você está no <strong>{goals[currentTier].label}</strong>, mantendo seu bônus no máximo!</p>;
+      return <div className="inline-flex items-center gap-2 bg-white/15 px-4 py-2 rounded-full"><p>Você está no <strong>{goals[currentTier].label}</strong>, mantendo seu bônus no máximo!</p></div>;
     }
     return <p>Aumente para liberar mais bônus.</p>;
   };
