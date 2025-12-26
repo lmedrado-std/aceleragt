@@ -437,11 +437,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
         if (effectiveIsAdmin) {
             tabToActivate = tabFromUrl || 'admin';
         } else {
-            // Se não for admin, a única aba válida é a do próprio vendedor (que está na URL)
-            tabToActivate = tabFromUrl || (sellersData[0]?.id || 'admin');
-             // Double-check que o vendedor existe
-            if (!sellersData.some((s: Seller) => s.id === tabToActivate)) {
-                // Se o ID na URL for inválido, redirecionar ou mostrar erro
+             const sellerId = tabFromUrl;
+             if (sellerId && sellersData.some((s: Seller) => s.id === sellerId)) {
+                tabToActivate = sellerId;
+            } else {
                  toast({ variant: "destructive", title: "Acesso Inválido", description: "Vendedor não encontrado." });
                  router.push(`/loja/${storeId}`);
                  return;
@@ -513,17 +512,21 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   return (
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
-        <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
+        <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg relative">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline text-white">
-                      {currentStore?.name}
-                      {isManagerView && activeTab === 'admin' && (
-                        <span className="text-xl font-semibold opacity-80 ml-2">_Gestor_</span>
-                      )}
-                    </h1>
+                <div className="text-center sm:text-left">
                     <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
+
+                <div className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 text-center">
+                  <h1 className="text-3xl font-bold font-headline text-white">
+                    {currentStore?.name}
+                    {isManagerView && activeTab === 'admin' && (
+                      <span className="text-xl font-semibold opacity-80 ml-2">_Gestor_</span>
+                    )}
+                  </h1>
+                </div>
+
                 <div className="flex items-center gap-2">
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -576,9 +579,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             </TabsList>
                         </div>
                     </div>
-                 ) : (
-                    <div className="hidden"></div>
-                 )}
+                 ) : null}
 
                 {isManagerView && (
                   <TabsContent value="admin" className="mt-6">
