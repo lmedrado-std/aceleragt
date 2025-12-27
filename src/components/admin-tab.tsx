@@ -701,7 +701,7 @@ export function AdminTab({
                    )}
                 >
                   <Target className="mr-2 h-4 w-4" />
-                  Metas &amp; Prêmios
+                  Metas & Prêmios
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent>
@@ -921,7 +921,7 @@ export function AdminTab({
                         <TooltipContent side="top" align="end" className="max-w-xs">
                           <p className="font-bold">Como Gerar o Relatório:</p>
                           <p>No sistema Seta, acesse:</p>
-                          <p>Relatórios &gt; Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar.</p>
+                          <p>Relatórios > Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar.</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1146,5 +1146,7 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
