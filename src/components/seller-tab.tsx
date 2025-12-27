@@ -348,8 +348,9 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         </TabsContent>
         
         <TabsContent value="corridinhas" className="mt-6">
-             {isCorridinhaActive ? (
-                <Card className="lg:col-span-3 mt-6 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800">
+          <div className="space-y-6">
+            {isCorridinhaActive ? (
+                <Card className="bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200"><Rocket /> Corridinha Ativa!</CardTitle>
                         <CardDescription className="text-blue-700 dark:text-blue-300">
@@ -389,6 +390,36 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                     </CardContent>
                 </Card>
             )}
+
+            {(goals.metaHoje > 0 || goals.paMetaHoje > 0) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Trophy className="text-amber-500" /> Objetivos do Dia</CardTitle>
+                  <CardDescription>Foque nestas metas hoje para acelerar seus resultados!</CardDescription>
+                </CardHeader>
+                <CardContent>
+                   <div className="grid gap-4 md:grid-cols-2">
+                      {goals.metaHoje > 0 && (
+                          <Card className="bg-amber-50 dark:bg-amber-900/20">
+                            <CardContent className="pt-6">
+                              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Meta de Vendas do Dia</p>
+                              <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">{formatCurrency(goals.metaHoje)}</p>
+                            </CardContent>
+                          </Card>
+                      )}
+                      {goals.paMetaHoje > 0 && (
+                          <Card className="bg-amber-50 dark:bg-amber-900/20">
+                            <CardContent className="pt-6">
+                              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Meta de PA do Dia</p>
+                              <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">{(goals.paMetaHoje).toFixed(2)}</p>
+                            </CardContent>
+                          </Card>
+                      )}
+                    </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
          <TabsContent value="metas" className="mt-6">
