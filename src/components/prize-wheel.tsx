@@ -147,7 +147,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                     setShowResult(true);
                 }}
                 spinDuration={0.8}
-                textDistance={75}
+                textDistance={65}
                 fontSize={12}
                 radiusLineWidth={2}
                 radiusLineColor="rgba(255,255,255,0.2)"
@@ -155,7 +155,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 outerBorderColor="#E2E8F0"
                 innerBorderWidth={0}
                 innerRadius={20}
-                perpendicularText={true}
+                perpendicularText={false}
             />
         </div>
 
