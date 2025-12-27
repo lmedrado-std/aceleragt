@@ -141,7 +141,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             <Wheel
                 mustStartSpinning={mustSpin}
                 prizeNumber={prizeNumber}
-                data={segments}
+                data={segments.map(s => ({ ...s, option: s.option.substring(0, 18) }))}
                 onStopSpinning={() => {
                     setMustSpin(false);
                     setShowResult(true);
