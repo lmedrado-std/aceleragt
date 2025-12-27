@@ -102,7 +102,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       setMustSpin(true);
       if (onSpinResult) onSpinResult(result);
     } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Erro', description: err.message });
+      toast({ variant: 'destructive', title: 'Erro no Giro', description: err.message });
     }
   };
 
@@ -135,7 +135,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 className="absolute top-[-15px] z-10 w-0 h-0 
                 border-l-[15px] border-l-transparent
                 border-r-[15px] border-r-transparent
-                border-t-[30px] border-t-red-600
+                border-t-[30px] border-t-primary
                 drop-shadow-md"
             />
             <Wheel
