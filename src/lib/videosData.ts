@@ -10,55 +10,62 @@ export interface Video {
 export const videosPorCategoria: Record<string, Video[]> = {
   "Objeções de Vendas": [
     {
-      title: "Como quebrar a objeção 'VOU PENSAR' em vendas",
+      title: "Como Quebrar a Objeção 'VOU PENSAR' em Vendas",
       url: "https://www.youtube.com/watch?v=ac_f-RYd2p8",
       channel: "Thiago Concer",
       publishedAt: "1 ano atrás",
       description: "Técnica prática para lidar com a famosa objeção 'vou pensar' e não perder a venda."
     },
     {
-      title: "Como responder quando o cliente diz que 'TÁ CARO'?",
+      title: "Como Responder Quando o Cliente Diz que 'TÁ CARO'?",
       url: "https://www.youtube.com/watch?v=w7w0nZ4C7-I",
       channel: "Diego Maia",
       publishedAt: "8 meses atrás",
       description: "Aprenda a justificar o valor do seu produto quando o cliente questiona o preço."
     },
+     {
+      title: "Objeção: 'Vou falar com meu Sócio/Esposa(o)'",
+      url: "https://www.youtube.com/watch?v=z8z4gW3gXmE",
+      channel: "Thiago Concer",
+      publishedAt: "1 ano atrás",
+      description: "Como agir quando a decisão de compra depende de outra pessoa."
+    },
     {
-      title: "O jeito certo de lidar com objeções em vendas",
+      title: "A Melhor Técnica Para Quebrar Objeções em Vendas",
+      url: "https://www.youtube.com/watch?v=9g0H7sJ8s_E",
+      channel: "Ricardo Jordão",
+      publishedAt: "2 anos atrás",
+      description: "Uma abordagem direta e eficaz para superar qualquer barreira imposta pelo cliente."
+    },
+     {
+      title: "O Jeito Certo de Lidar com Objeções em Vendas",
       url: "https://www.youtube.com/watch?v=JdGj2a5A3yI",
       channel: "Paixão por Vendas",
       publishedAt: "1 ano atrás",
       description: "Descubra uma mentalidade e uma técnica para transformar objeções em oportunidades."
     },
     {
-      title: "Como contornar a objeção 'Não tenho dinheiro'?",
+      title: "Como Contornar a Objeção 'Não Tenho Dinheiro'?",
       url: "https://www.youtube.com/watch?v=Kz6pDqgA3yE",
       channel: "Janderson Santos",
       publishedAt: "2 anos atrás",
       description: "Estratégias para lidar com a falta de orçamento do cliente e ainda assim fechar negócio."
-    },
-    {
-      title: "A melhor técnica para quebrar objeções em vendas",
-      url: "https://www.youtube.com/watch?v=9g0H7sJ8s_E",
-      channel: "Ricardo Jordão",
-      publishedAt: "2 anos atrás",
-      description: "Uma abordagem direta e eficaz para superar qualquer barreira imposta pelo cliente."
-    },
-    {
-      title: "Objeção: 'Vou falar com meu Sócio/Esposa(o)'",
-      url: "https://www.youtube.com/watch?v=z8z4gW3gXmE",
-      channel: "Thiago Concer",
-      publishedAt: "1 ano atrás",
-      description: "Como agir quando a decisão de compra depende de outra pessoa."
     }
   ],
   "Aumentar Ticket Médio": [
     {
-      title: "3 Dicas para Aumentar o Ticket Médio da sua Loja",
+      title: "3 Dicas Para Aumentar o Ticket Médio da Sua Loja",
       url: "https://www.youtube.com/watch?v=0tH8A-A2M9Q",
       channel: "Varejo Inteligente",
       publishedAt: "1 ano atrás",
       description: "Dicas simples e aplicáveis para fazer com que cada cliente compre mais."
+    },
+    {
+      title: "UPSELLING e CROSS-SELLING: Como Fazer do Jeito Certo",
+      url: "https://www.youtube.com/watch?v=3A48-v_S-3E",
+      channel: "Caio Carneiro",
+      publishedAt: "2 anos atrás",
+      description: "Aprenda a diferença e como aplicar Upsell e Cross-sell para vender mais."
     },
     {
       title: "Como Aumentar o Ticket Médio da Sua Empresa",
@@ -68,21 +75,7 @@ export const videosPorCategoria: Record<string, Video[]> = {
       description: "Estratégias práticas para aumentar o valor médio de cada venda realizada."
     },
     {
-      title: "UPSELLING e CROSS-SELLING: Como fazer do jeito certo",
-      url: "https://www.youtube.com/watch?v=3A48-v_S-3E",
-      channel: "Caio Carneiro",
-      publishedAt: "2 anos atrás",
-      description: "Aprenda a diferença e como aplicar Upsell e Cross-sell para vender mais."
-    },
-    {
-      title: "Como aumentar o ticket médio da sua loja virtual (e física)",
-      url: "https://www.youtube.com/watch?v=yYmC-N-tK-w",
-      channel: "Ana Tex",
-      publishedAt: "1 ano atrás",
-      description: "Técnicas que funcionam tanto online quanto no varejo físico para aumentar o valor da compra."
-    },
-    {
-      title: "Estratégia para aumentar o Ticket Médio",
+      title: "Estratégia Para Aumentar o Ticket Médio",
       url: "https://www.youtube.com/watch?v=Vl8Tz9A3fjA",
       channel: "Rodrigo Noll",
       publishedAt: "1 ano atrás",
@@ -91,21 +84,21 @@ export const videosPorCategoria: Record<string, Video[]> = {
   ],
   "Atendimento ao Cliente": [
     {
-      title: "Atendimento ao cliente: 5 dicas para colocar em prática!",
+      title: "Atendimento ao Cliente: 5 Dicas Para Colocar em Prática!",
       url: "https://www.youtube.com/watch?v=oE9i5-m_q9A",
       channel: "Sebrae",
       publishedAt: "2 anos atrás",
       description: "Dicas fundamentais do Sebrae para oferecer um atendimento que encanta e fideliza."
     },
     {
-      title: "Como fazer um EXCELENTE ATENDIMENTO ao Cliente",
+      title: "Como Fazer um EXCELENTE ATENDIMENTO ao Cliente",
       url: "https://www.youtube.com/watch?v=84E4a5zWjI8",
       channel: "Diego Maia",
       publishedAt: "1 ano atrás",
       description: "Passos práticos para transformar seu atendimento em uma poderosa ferramenta de vendas."
     },
     {
-      title: "O que o cliente mais quer no atendimento?",
+      title: "O Que o Cliente Mais Quer no Atendimento?",
       url: "https://www.youtube.com/watch?v=TqCgWzY9s3Y",
       channel: "Thiago Concer",
       publishedAt: "5 meses atrás",
@@ -121,13 +114,6 @@ export const videosPorCategoria: Record<string, Video[]> = {
   ],
   "Técnicas de Conversão": [
     {
-      title: "Como usar o gatilho da ESCASSEZ para vender mais?",
-      url: "https://www.youtube.com/watch?v=cGiu-F2IfgA",
-      channel: "Diego Maia",
-      publishedAt: "1 ano atrás",
-      description: "Aprenda a criar um senso de urgência que acelera a decisão de compra do cliente."
-    },
-    {
       title: "10 Gatilhos Mentais Para Vender Mais",
       url: "https://www.youtube.com/watch?v=4_z7WGgV4_4",
       channel: "Caio Carneiro",
@@ -135,18 +121,25 @@ export const videosPorCategoria: Record<string, Video[]> = {
       description: "Descubra como os gatilhos mentais podem influenciar positivamente a decisão do seu cliente."
     },
     {
-      title: "A melhor técnica de vendas que eu conheço",
-      url: "https://www.youtube.com/watch?v=453z-t34A3g",
-      channel: "Kayky Janiszewski",
-      publishedAt: "1 ano atrás",
-      description: "Uma técnica poderosa para estruturar sua abordagem de vendas e aumentar a conversão."
-    },
-    {
-      title: "5 Técnicas Psicológicas para Vender Mais",
+      title: "5 Técnicas Psicológicas Para Vender Mais",
       url: "https://www.youtube.com/watch?v=pD4I4-x6dI0",
       channel: "Igor Borges",
       publishedAt: "2 anos atrás",
       description: "Use a psicologia a seu favor para criar uma conexão mais forte com o cliente e vender mais."
+    },
+     {
+      title: "Como Usar o Gatilho da ESCASSEZ Para Vender Mais?",
+      url: "https://www.youtube.com/watch?v=cGiu-F2IfgA",
+      channel: "Diego Maia",
+      publishedAt: "1 ano atrás",
+      description: "Aprenda a criar um senso de urgência que acelera a decisão de compra do cliente."
+    },
+    {
+      title: "A Melhor Técnica de Vendas que eu Conheço",
+      url: "https://www.youtube.com/watch?v=453z-t34A3g",
+      channel: "Kayky Janiszewski",
+      publishedAt: "1 ano atrás",
+      description: "Uma técnica poderosa para estruturar sua abordagem de vendas e aumentar a conversão."
     }
   ],
   "Aumentar PA": [
@@ -158,30 +151,30 @@ export const videosPorCategoria: Record<string, Video[]> = {
       description: "Quatro dicas práticas para você aumentar o número de produtos vendidos para cada cliente."
     },
     {
-      title: "PRODUTOS POR ATENDIMENTO, INDICADOR de VENDA",
-      url: "https://www.youtube.com/watch?v=np-ayvscmjs",
-      channel: "Mil Bijus",
-      publishedAt: "1 ano atrás",
-      description: "Entenda a importância do indicador P.A. (Peças por Atendimento) e como ele pode multiplicar seu faturamento."
-    },
-    {
-      title: "Cross selling: como oferecer um segundo produto?",
+      title: "CROSS SELLING: como oferecer um segundo produto?",
       url: "https://www.youtube.com/watch?v=d_2m5jDk2iQ",
       channel: "Leandro Branquinho",
       publishedAt: "2 anos atrás",
       description: "Aprenda o momento e a forma certa de oferecer um produto adicional sem ser insistente."
+    },
+    {
+      title: "PA (PEÇAS POR ATENDIMENTO), INDICADOR DE VENDA",
+      url: "https://www.youtube.com/watch?v=np-ayvscmjs",
+      channel: "Mil Bijus",
+      publishedAt: "1 ano atrás",
+      description: "Entenda a importância do indicador P.A. e como ele pode multiplicar seu faturamento."
     }
   ],
   "Fechamento de Vendas": [
     {
-      title: "Aprenda 3 Técnicas de Fechamento para Vendas",
+      title: "Aprenda 3 Técnicas de Fechamento Para Vendas",
       url: "https://www.youtube.com/watch?v=GfIiFQkLi_g",
       channel: "Thiago Concer",
       publishedAt: "1 ano atrás",
       description: "Três técnicas poderosas e diretas para conduzir o cliente à decisão final de compra."
     },
     {
-      title: "A melhor técnica de fechamento de vendas",
+      title: "A Melhor Técnica de Fechamento de Vendas",
       url: "https://www.youtube.com/watch?v=Kz6l9f-4iAI",
       channel: "Ricardo Jordão",
       publishedAt: "2 anos atrás",
@@ -195,7 +188,7 @@ export const videosPorCategoria: Record<string, Video[]> = {
       description: "Quatro perguntas estratégicas para fazer durante a negociação e levar ao fechamento."
     },
     {
-      title: "Nunca mais perca uma venda com essas dicas de fechamento",
+      title: "Nunca Mais Perca uma Venda com Essas Dicas de Fechamento",
       url: "https://www.youtube.com/watch?v=1xlbodwW_xo",
       channel: "Leandro Rosadas",
       publishedAt: "1 ano atrás",

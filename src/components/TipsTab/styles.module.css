@@ -36,33 +36,6 @@
   justify-content: center;
 }
 
-.tipsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-}
-
-.loading, .noResults {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 16px;
-  color: var(--muted-foreground);
-  text-align: center;
-  background-color: var(--muted);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
-
-.noResults h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--foreground);
-  margin-bottom: 8px;
-}
-
 .videoWrapper {
   position: relative;
   width: 100%;

@@ -4,10 +4,14 @@ import { getVideosPorCategoria, Video } from '@/lib/videosData';
 import styles from './styles.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+
 
 const categorias = [
   "Objeções de Vendas",
@@ -66,50 +70,51 @@ export function TipsTab() {
         </div>
       </div>
       
-        <Swiper
-            modules={[Navigation]}
-            slidesPerView={1}
-            spaceBetween={24}
-            navigation
-            breakpoints={{
-            640: { slidesPerView: 1 },
-            900: { slidesPerView: 2 },
-            1200: { slidesPerView: 3 }
+        <Carousel
+            opts={{
+                align: "start",
+                loop: true,
             }}
-            style={{ padding: '4px 4px 32px 4px' }}
+            className="w-full"
         >
-            {videos.map((video, index) => {
-              const videoId = getYouTubeVideoId(video.url);
-              return (
-                <SwiperSlide key={index} style={{ height: 'auto' }}>
-                    <Card className="group flex flex-col hover:border-primary transition-all h-full">
-                        {videoId ? (
-                            <div className={styles.videoWrapper}>
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${videoId}`}
-                                    title={video.title}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                ></iframe>
+            <CarouselContent>
+                 {videos.map((video, index) => {
+                    const videoId = getYouTubeVideoId(video.url);
+                    return (
+                        <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                            <div className="p-1 h-full">
+                                <Card className="group flex flex-col hover:border-primary transition-all h-full">
+                                    {videoId ? (
+                                        <div className={styles.videoWrapper}>
+                                            <iframe
+                                                src={`https://www.youtube.com/embed/${videoId}`}
+                                                title={video.title}
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        </div>
+                                    ) : (
+                                    <div className="aspect-video bg-muted flex items-center justify-center">
+                                        <p className="text-sm text-muted-foreground">Vídeo indisponível</p>
+                                    </div>
+                                    )}
+                                    <CardHeader>
+                                        <CardTitle className="text-base group-hover:text-primary transition-colors">{video.title}</CardTitle>
+                                        <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="flex-grow">
+                                        <p className="text-sm text-muted-foreground">{video.description}</p>
+                                    </CardContent>
+                                </Card>
                             </div>
-                        ) : (
-                          <div className="aspect-video bg-muted flex items-center justify-center">
-                            <p className="text-sm text-muted-foreground">Vídeo indisponível</p>
-                          </div>
-                        )}
-                        <CardHeader>
-                            <CardTitle className="text-base group-hover:text-primary transition-colors">{video.title}</CardTitle>
-                            <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow">
-                            <p className="text-sm text-muted-foreground">{video.description}</p>
-                        </CardContent>
-                    </Card>
-                </SwiperSlide>
-              )
-            })}
-        </Swiper>
+                        </CarouselItem>
+                    )
+                })}
+            </CarouselContent>
+            <CarouselPrevious className="ml-12" />
+            <CarouselNext className="mr-12" />
+        </Carousel>
     </div>
   );
 }
