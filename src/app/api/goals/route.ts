@@ -1,30 +1,35 @@
 
-
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+
 
 export async function GET(request: NextRequest) {
   const storeId = request.nextUrl.searchParams.get('storeId');
 
+
   if (!storeId) {
     return NextResponse.json({ error: 'O ID da loja é obrigatório' }, { status: 400 });
   }
+
 
   try {
     const goals = await prisma.goals.findUnique({
       where: { store_id: storeId },
     });
 
+
     if (!goals) {
       const store = await prisma.stores.findUnique({
         where: { id: storeId },
       });
+
 
       if (store) {
         return NextResponse.json({}); // Store exists, but no goals
       }
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 });
     }
+
 
     return NextResponse.json(goals);
   } catch (error) {
@@ -36,6 +41,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+
 export async function POST(request: NextRequest) {
   console.log("[API POST /api/goals] ===== INICIANDO =====");
   console.log("[API POST /api/goals] timestamp:", new Date().toISOString());
@@ -43,9 +49,11 @@ export async function POST(request: NextRequest) {
     const { store_id, goals } = await request.json();
     console.log("Body recebido em /api/goals:", { store_id, goals });
 
+
     if (!store_id || !goals) {
       return NextResponse.json({ error: 'store_id e metas são obrigatórios' }, { status: 400 });
     }
+
 
     // tira id/store_id internos
     const { id, store_id: nested_store_id, ...goalData } = goals;
@@ -58,13 +66,36 @@ export async function POST(request: NextRequest) {
       "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1",
       "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3",
       "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4",
-      "corridinhaenabled", "corridinhaEnabled", "metaHoje", "paMetaHoje",
+      // Campos das Corridinhas
+      "corridinhaenabled",  // USAR APENAS ESSE (lowercase, como está no banco)
+      "corridinhaStartDate", "corridinhaEndDate",
+      "corridinhaObjective1", "corridinhaPrize1",
+      "corridinhaObjective2", "corridinhaPrize2",
+      "corridinhaObjective3", "corridinhaPrize3",
+      "corridinhaObjective4", "corridinhaPrize4",
+      // Campos de Meta Hoje
+      "metaHoje", "paMetaHoje"
     ] as const;
+
 
     const prismaGoalData: any = {};
     for (const key of prismaGoalFields) {
       if (key in goalData && goalData[key] !== undefined) {
-          prismaGoalData[key] = goalData[key];
+        let value = goalData[key];
+        
+        // Sanitização especial para datas
+        if (key === 'corridinhaStartDate' || key === 'corridinhaEndDate') {
+          value = value && !isNaN(new Date(value).getTime()) 
+            ? new Date(value) 
+            : null;
+        }
+        
+        // Converte string vazia para null para campos que aceitam null
+        if (value === "") {
+          value = null;
+        }
+        
+        prismaGoalData[key] = value;
       }
     }
     
@@ -76,6 +107,7 @@ export async function POST(request: NextRequest) {
         ...prismaGoalData,
       },
     });
+
 
     return NextResponse.json(upsertedGoal);
   } catch (error) {
