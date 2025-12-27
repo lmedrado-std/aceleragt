@@ -68,7 +68,17 @@ export async function POST(request: NextRequest) {
     const prismaGoalData: any = {};
     for (const key of prismaGoalFields) {
       if (key in goalData && goalData[key] !== undefined) {
-          prismaGoalData[key] = goalData[key];
+          // Handle date conversion for specific fields
+          if ((key === 'corridinhaStartDate' || key === 'corridinhaEndDate') && goalData[key]) {
+              const date = new Date(goalData[key]);
+              if (!isNaN(date.getTime())) {
+                  prismaGoalData[key] = date;
+              } else {
+                  prismaGoalData[key] = null;
+              }
+          } else {
+              prismaGoalData[key] = goalData[key];
+          }
       }
     }
     
