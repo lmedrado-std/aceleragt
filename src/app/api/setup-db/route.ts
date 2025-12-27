@@ -259,8 +259,8 @@ export async function GET() {
         }
     }
     
-    // Adicionar colunas da Corridinha se elas não existirem
-    const corridinhaColumns = [
+    // Adicionar colunas da Corridinha e Metas do Dia se elas não existirem
+    const columnsToAdd = [
         { name: "corridinhaStartDate", type: "TIMESTAMPTZ" },
         { name: "corridinhaEndDate", type: "TIMESTAMPTZ" },
         { name: "corridinhaObjective1", type: "TEXT" },
@@ -275,7 +275,7 @@ export async function GET() {
         { name: "paMetaHoje", type: "REAL DEFAULT 0" },
     ];
 
-    for (const col of corridinhaColumns) {
+    for (const col of columnsToAdd) {
         try {
             await prisma.$executeRawUnsafe(`
                 ALTER TABLE goals ADD COLUMN "${col.name}" ${col.type};
