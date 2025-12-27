@@ -100,10 +100,10 @@ const GoalDetail = ({ label, prize, goal, achieved }: { label: string, prize: nu
     </div>
 )
 
-const GoalItem = ({ label, value }: { label: string, value: string }) => (
-    <div className="flex justify-between items-center py-2 border-b last:border-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-sm font-semibold">{value}</p>
+const GoalItem = ({ label, value }: { label: string, value: string | React.ReactNode }) => (
+    <div className="flex justify-between items-start py-2 border-b last:border-0">
+        <p className="text-sm text-muted-foreground pr-2">{label}</p>
+        <div className="text-sm font-semibold text-right">{value}</div>
     </div>
 );
 
@@ -383,9 +383,26 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                 <Card className="lg:col-span-3">
                     <CardHeader><CardTitle>Quadro de Metas</CardTitle><CardDescription>Consulte aqui todos os objetivos e prêmios do período.</CardDescription></CardHeader>
                     <CardContent className="grid gap-6 md:grid-cols-3">
-                        <Card><CardHeader><CardTitle className="text-lg">Metas de Vendas</CardTitle></CardHeader><CardContent><GoalItem label="Meta Mínima" value={`${formatCurrency(goals.metaMinha)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize)})`} /><GoalItem label="Meta Cheia" value={`${formatCurrency(goals.meta)} (Prêmio: ${formatCurrency(goals.metaPrize)})`} /><GoalItem label="Meta Turbo" value={`${formatCurrency(goals.metona)} (Prêmio: ${formatCurrency(goals.metonaPrize)})`} />{goals.performanceBonusEnabled && (<GoalItem label="Bônus Performance" value={`Acima de ${formatCurrency(goals.metaLendaria)}`} />)}</CardContent></Card>
-                         <Card><CardHeader><CardTitle className="text-lg">Metas de PA</CardTitle></CardHeader><CardContent><GoalItem label="Nível 1" value={`${(goals.paGoal1 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize1)})`} /><GoalItem label="Nível 2" value={`${(goals.paGoal2 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize2)})`} /><GoalItem label="Nível 3" value={`${(goals.paGoal3 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize3)})`} /><GoalItem label="Nível 4" value={`${(goals.paGoal4 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize4)})`} /></CardContent></Card>
-                         <Card><CardHeader><CardTitle className="text-lg">Metas de Ticket Médio</CardTitle></CardHeader><CardContent><GoalItem label="Nível 1" value={`${formatCurrency(goals.ticketMedioGoal1)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize1)})`} /><GoalItem label="Nível 2" value={`${formatCurrency(goals.ticketMedioGoal2)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize2)})`} /><GoalItem label="Nível 3" value={`${formatCurrency(goals.ticketMedioGoal3)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize3)})`} /><GoalItem label="Nível 4" value={`${formatCurrency(goals.ticketMedioGoal4)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize4)})`} /></CardContent></Card>
+                        <Card>
+                          <CardHeader><CardTitle className="text-lg">Metas de Vendas</CardTitle></CardHeader>
+                          <CardContent>
+                            <GoalItem label="Meta Mínima" value={`${formatCurrency(goals.metaMinha || 0)} (Prêmio: ${formatCurrency(goals.metaMinhaPrize || 0)})`} />
+                            <GoalItem label="Meta Cheia" value={`${formatCurrency(goals.meta || 0)} (Prêmio: ${formatCurrency(goals.metaPrize || 0)})`} />
+                            <GoalItem label="Meta Turbo" value={`${formatCurrency(goals.metona || 0)} (Prêmio: ${formatCurrency(goals.metonaPrize || 0)})`} />
+                            {goals.performanceBonusEnabled && (
+                              <GoalItem 
+                                label="Bônus Performance" 
+                                value={
+                                  <span>
+                                    Ganha-se {formatCurrency(goals.legendariaBonusValorPremio || 0)} a cada {formatCurrency(goals.legendariaBonusValorVenda || 0)} acima de {formatCurrency(goals.metaLendaria || 0)}
+                                  </span>
+                                } 
+                              />
+                            )}
+                          </CardContent>
+                        </Card>
+                         <Card><CardHeader><CardTitle className="text-lg">Metas de PA</CardTitle></CardHeader><CardContent><GoalItem label="Nível 1" value={`${(goals.paGoal1 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize1 || 0)})`} /><GoalItem label="Nível 2" value={`${(goals.paGoal2 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize2 || 0)})`} /><GoalItem label="Nível 3" value={`${(goals.paGoal3 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize3 || 0)})`} /><GoalItem label="Nível 4" value={`${(goals.paGoal4 || 0).toFixed(2)} (Prêmio: ${formatCurrency(goals.paPrize4 || 0)})`} /></CardContent></Card>
+                         <Card><CardHeader><CardTitle className="text-lg">Metas de Ticket Médio</CardTitle></CardHeader><CardContent><GoalItem label="Nível 1" value={`${formatCurrency(goals.ticketMedioGoal1 || 0)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize1 || 0)})`} /><GoalItem label="Nível 2" value={`${formatCurrency(goals.ticketMedioGoal2 || 0)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize2 || 0)})`} /><GoalItem label="Nível 3" value={`${formatCurrency(goals.ticketMedioGoal3 || 0)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize3 || 0)})`} /><GoalItem label="Nível 4" value={`${formatCurrency(goals.ticketMedioGoal4 || 0)} (Prêmio: ${formatCurrency(goals.ticketMedioPrize4 || 0)})`} /></CardContent></Card>
                     </CardContent>
                 </Card>
                  {isCorridinhaActive && (
