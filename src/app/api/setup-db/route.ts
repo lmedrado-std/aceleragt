@@ -206,61 +206,12 @@ export async function GET() {
       ON CONFLICT (key) DO NOTHING;
     `);
 
-    // Adicionar a coluna performanceBonusEnabled se ela não existir
-    try {
-      await prisma.$executeRawUnsafe(`
-        ALTER TABLE goals ADD COLUMN "performanceBonusEnabled" BOOLEAN DEFAULT FALSE;
-      `);
-    } catch (e) {
-      // Ignora o erro se a coluna já existir
-      if (e instanceof Error && e.message.includes('column "performanceBonusEnabled" of relation "goals" already exists')) {
-        // A coluna já existe, tudo bem.
-      } else {
-        throw e;
-      }
-    }
-    
-    // Adicionar a coluna last_viewed_at se ela não existir
-    try {
-        await prisma.$executeRawUnsafe(`
-            ALTER TABLE sellers ADD COLUMN "last_viewed_at" TIMESTAMPTZ;
-        `);
-    } catch (e) {
-        if (e instanceof Error && e.message.includes('column "last_viewed_at" of relation "sellers" already exists')) {
-            // Coluna já existe
-        } else {
-            throw e;
-        }
-    }
-
-    // Adicionar a coluna view_count se ela não existir
-    try {
-        await prisma.$executeRawUnsafe(`
-            ALTER TABLE sellers ADD COLUMN "view_count" INTEGER DEFAULT 0;
-        `);
-    } catch (e) {
-        if (e instanceof Error && e.message.includes('column "view_count" of relation "sellers" already exists')) {
-            // Coluna já existe
-        } else {
-            throw e;
-        }
-    }
-
-     // Adicionar a coluna created_at se ela não existir na SellerHistory
-    try {
-        await prisma.$executeRawUnsafe(`
-            ALTER TABLE "SellerHistory" ADD COLUMN "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
-        `);
-    } catch (e) {
-        if (e instanceof Error && e.message.includes('column "createdAt" of relation "SellerHistory" already exists')) {
-            // Coluna já existe
-        } else {
-            throw e;
-        }
-    }
-    
-    // Adicionar colunas da Corridinha e Metas do Dia se elas não existirem
+    // Adicionar colunas de forma segura (só se não existirem)
     const columnsToAdd = [
+        { name: "performanceBonusEnabled", type: "BOOLEAN DEFAULT FALSE" },
+        { name: "last_viewed_at", type: "TIMESTAMPTZ", table: "sellers" },
+        { name: "view_count", type: "INTEGER DEFAULT 0", table: "sellers" },
+        { name: "createdAt", type: "TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP", table: '"SellerHistory"' },
         { name: "corridinhaStartDate", type: "TIMESTAMPTZ" },
         { name: "corridinhaEndDate", type: "TIMESTAMPTZ" },
         { name: "corridinhaObjective1", type: "TEXT" },
@@ -276,14 +227,17 @@ export async function GET() {
     ];
 
     for (const col of columnsToAdd) {
+        const tableName = col.table || 'goals';
         try {
             await prisma.$executeRawUnsafe(`
-                ALTER TABLE goals ADD COLUMN "${col.name}" ${col.type};
+                ALTER TABLE ${tableName} ADD COLUMN "${col.name}" ${col.type};
             `);
         } catch (e) {
-            if (e instanceof Error && e.message.includes(`column "${col.name}" of relation "goals" already exists`)) {
-                // Coluna já existe, ignora o erro
+            // Ignora o erro se a coluna já existir
+            if (e instanceof Error && e.message.includes(`column "${col.name}" of relation "${tableName.replace(/"/g, '')}" already exists`)) {
+                // Coluna já existe, tudo bem.
             } else {
+                // Se for outro tipo de erro, relança para ser tratado no handler principal.
                 throw e;
             }
         }

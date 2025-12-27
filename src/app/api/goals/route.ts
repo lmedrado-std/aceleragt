@@ -58,27 +58,13 @@ export async function POST(request: NextRequest) {
       "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1",
       "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3",
       "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4",
-      "corridinhaenabled", "corridinhaEnabled",
-      "metaHoje", "paMetaHoje",
-      "corridinhaStartDate", "corridinhaEndDate", "corridinhaObjective1", "corridinhaPrize1",
-      "corridinhaObjective2", "corridinhaPrize2", "corridinhaObjective3", "corridinhaPrize3",
-      "corridinhaObjective4", "corridinhaPrize4",
+      "corridinhaenabled", "corridinhaEnabled", "metaHoje", "paMetaHoje",
     ] as const;
 
     const prismaGoalData: any = {};
     for (const key of prismaGoalFields) {
       if (key in goalData && goalData[key] !== undefined) {
-          // Handle date conversion for specific fields
-          if ((key === 'corridinhaStartDate' || key === 'corridinhaEndDate') && goalData[key]) {
-              const date = new Date(goalData[key]);
-              if (!isNaN(date.getTime())) {
-                  prismaGoalData[key] = date;
-              } else {
-                  prismaGoalData[key] = null;
-              }
-          } else {
-              prismaGoalData[key] = goalData[key];
-          }
+          prismaGoalData[key] = goalData[key];
       }
     }
     
