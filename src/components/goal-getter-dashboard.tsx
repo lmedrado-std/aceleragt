@@ -550,9 +550,9 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
-             <CardContent className="p-4 grid grid-cols-3 items-center gap-4">
+             <CardContent className="p-4 grid grid-cols-[1fr,auto,1fr] items-center gap-4">
                 <div className="text-left">
-                  <p className="text-white/80">Acompanhe as metas e os ganhos da equipe.</p>
+                  {/* Espaço reservado ou botões de navegação */}
                 </div>
                 
                 <div className="text-center">
@@ -562,9 +562,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                       <span className="text-xl font-semibold opacity-80 ml-2">_Gestor_</span>
                     )}
                   </h1>
+                   <p className="text-white/80 text-sm">Acompanhe as metas e os ganhos da equipe.</p>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 col-start-3">
+                <div className="flex items-center justify-end gap-2">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button asChild variant="outline" className="shadow-sm">
@@ -653,4 +654,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   );
 }
 
+    
     
