@@ -13,7 +13,8 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Gift } from 'lucide-react';
+import { Card, CardContent } from './ui/card';
 
 interface PrizeWheelProps {
   storeId: string;
@@ -65,7 +66,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             segments.map((s: any) => ({
               id: s.id,
               option: s.label.toUpperCase(),
-              style: { backgroundColor: s.color, textColor: '#fff' },
+              style: { backgroundColor: s.color, textColor: '#FFFFFF' },
               type: s.type,
               value: s.value,
               description: s.description,
@@ -83,7 +84,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     };
     if (storeId) loadInitialData();
     return () => pollingRef.current && clearInterval(pollingRef.current);
-  }, [storeId, sellerId]);
+  }, [storeId, sellerId, toast]);
 
   const handleSpinClick = async () => {
     try {
@@ -112,53 +113,71 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       </div>
     );
   if (configured === false)
-    return <p className="text-center p-8">Roleta não configurada.</p>;
+    return (
+        <Card className="text-center p-8">
+            <CardContent>
+                <p className="text-muted-foreground">A roleta de prêmios ainda não foi configurada pelo gestor.</p>
+            </CardContent>
+        </Card>
+    );
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4">
-      {/* Créditos e Botão */}
-      <div className="flex flex-col items-center gap-4">
-        <span className="bg-primary text-white py-1 px-4 rounded-full">
-          Você tem {credits} giro(s)
-        </span>
+    <Card className="w-full max-w-lg mx-auto bg-gradient-to-br from-slate-100 to-gray-200 dark:from-slate-800 dark:to-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg">
+      <div className="flex flex-col items-center gap-6">
+        
+        <div className="text-center">
+            <p className="font-semibold text-primary">Você tem</p>
+            <p className="text-4xl font-bold text-foreground">{credits} giro(s)</p>
+        </div>
+
+        <div className="relative w-full flex justify-center items-center select-none">
+            <div 
+                className="absolute top-[-15px] z-10 w-0 h-0 
+                border-l-[15px] border-l-transparent
+                border-r-[15px] border-r-transparent
+                border-t-[30px] border-t-red-600
+                drop-shadow-md"
+            />
+            <Wheel
+                mustStartSpinning={mustSpin}
+                prizeNumber={prizeNumber}
+                data={segments}
+                onStopSpinning={() => {
+                    setMustSpin(false);
+                    setShowResult(true);
+                }}
+                spinDuration={0.8}
+                textDistance={75}
+                fontSize={12}
+                radiusLineWidth={2}
+                radiusLineColor="rgba(255,255,255,0.2)"
+                outerBorderWidth={12}
+                outerBorderColor="#E2E8F0"
+                innerBorderWidth={0}
+                innerRadius={20}
+                perpendicularText={true}
+            />
+        </div>
+
         <Button
           onClick={handleSpinClick}
           disabled={credits <= 0 || mustSpin || segments.length === 0}
           className={cn(
-            'w-40 py-2 text-lg font-bold rounded-full shadow-md transition',
-            (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed'
+            'w-full max-w-xs py-6 text-xl font-bold rounded-lg shadow-lg transition-transform transform hover:scale-105',
+            'bg-green-600 hover:bg-green-700 text-white',
+            (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed bg-gray-500 hover:bg-gray-500'
           )}
         >
+          {mustSpin ? <Loader2 className="h-6 w-6 animate-spin" /> : <Gift className="mr-2 h-6 w-6" />}
           {mustSpin ? 'GIRANDO...' : 'GIRAR'}
         </Button>
       </div>
 
-      {/* Roleta Aumentada em 20% */}
-      <div className="relative mt-4 w-[120%] max-w-[480px]">
-        <Wheel
-          mustStartSpinning={mustSpin}
-          prizeNumber={prizeNumber}
-          data={segments}
-          onStopSpinning={() => {
-            setMustSpin(false);
-            setShowResult(true);
-          }}
-          spinDuration={3}
-          textDistance={65}
-          fontSize={12}
-          radiusLineWidth={0}
-          outerBorderWidth={8}
-          outerBorderColor="#ccc"
-          innerBorderWidth={0}
-        />
-      </div>
-
-      {/* Modal de Resultado com Acessibilidade */}
       {showResult && spinResult && (
         <Dialog open onOpenChange={() => setShowResult(false)}>
           <DialogContent aria-describedby="spin-result-description">
             <DialogHeader>
-              <DialogTitle className="text-center text-2xl">
+              <DialogTitle className="text-center text-2xl font-bold">
                 {spinResult?.type === "retry"
                   ? "Não foi desta vez!"
                   : "Parabéns! Você ganhou:"}
@@ -167,7 +186,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 {spinResult?.description || "Veja abaixo o prêmio sorteado."}
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4 text-center text-3xl font-bold text-primary">
+            <div className="py-6 text-center text-4xl font-extrabold text-primary tracking-tight">
               {spinResult?.option}
             </div>
             <DialogFooter>
@@ -178,6 +197,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </Card>
   );
 }
