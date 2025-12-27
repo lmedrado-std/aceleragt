@@ -48,6 +48,12 @@ export function TipsTab() {
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
 
+  // Filtra apenas os vídeos que têm um ID de vídeo válido extraível da URL
+  const videosDisponiveis = videos.filter(video => {
+      const videoId = getYouTubeVideoId(video.url);
+      return videoId && videoId.trim() !== "";
+  });
+
   return (
     <div className={styles.tipsContainer}>
       <div className={styles.header}>
@@ -78,27 +84,21 @@ export function TipsTab() {
             className="w-full"
         >
             <CarouselContent>
-                 {videos.map((video, index) => {
+                 {videosDisponiveis.map((video, index) => {
                     const videoId = getYouTubeVideoId(video.url);
                     return (
                         <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1 h-full">
                                 <Card className="group flex flex-col hover:border-primary transition-all h-full">
-                                    {videoId ? (
-                                        <div className={styles.videoWrapper}>
-                                            <iframe
-                                                src={`https://www.youtube.com/embed/${videoId}`}
-                                                title={video.title}
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            ></iframe>
-                                        </div>
-                                    ) : (
-                                    <div className="aspect-video bg-muted flex items-center justify-center">
-                                        <p className="text-sm text-muted-foreground">Vídeo indisponível</p>
+                                    <div className={styles.videoWrapper}>
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${videoId}`}
+                                            title={video.title}
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        ></iframe>
                                     </div>
-                                    )}
                                     <CardHeader>
                                         <CardTitle className="text-base group-hover:text-primary transition-colors">{video.title}</CardTitle>
                                         <CardDescription className="text-xs">{video.channel} - {video.publishedAt}</CardDescription>
