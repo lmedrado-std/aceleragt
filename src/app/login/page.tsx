@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Loader2, Eye, EyeOff } from 'lucide-react';
+import { KeyRound, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import Link from 'next/link';
 
 function LoginComponent() {
   const [password, setPassword] = useState('');
@@ -74,9 +75,17 @@ function LoginComponent() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8 relative">
+       <div className="absolute top-4 left-4">
+            <Button asChild variant="outline">
+                <Link href="/">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Voltar para o Início
+                </Link>
+            </Button>
+        </div>
       <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <Logo className="h-16 w-auto mb-4" />
+        <Logo className="h-16 w-auto mb-4" textColor="text-accent"/>
         <Card className="w-full shadow-lg border-primary/20">
           <CardHeader className="text-center bg-primary text-primary-foreground p-6 rounded-t-lg">
             <CardTitle>Login do Administrador Global</CardTitle>
