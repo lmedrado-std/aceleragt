@@ -574,7 +574,7 @@ export function AdminTab({
     setIsSavingGoals(true);
     const success = await handleSaveGoals();
     setIsSavingGoals(false);
-
+  
     if (success) {
       toast({
         title: "Metas Salvas!",
@@ -584,7 +584,8 @@ export function AdminTab({
       toast({
         variant: "destructive",
         title: "Erro ao Salvar",
-        description: "Não foi possível salvar as metas. Verifique os dados e tente novamente.",
+        description:
+          "Não foi possível salvar as metas. Verifique os dados e tente novamente.",
       });
     }
   };
@@ -921,7 +922,7 @@ export function AdminTab({
                         <TooltipContent side="top" align="end" className="max-w-xs">
                           <p className="font-bold">Como Gerar o Relatório:</p>
                           <p>No sistema Seta, acesse:</p>
-                          <p>Relatórios > Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar.</p>
+                          <p>{"Relatórios > Relatórios para Lojas, defina o período e clique em 'Excel' à esquerda para exportar."}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1146,6 +1147,8 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     
 
