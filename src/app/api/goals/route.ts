@@ -58,22 +58,13 @@ export async function POST(request: NextRequest) {
       "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1",
       "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3",
       "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4",
-      "corridinhaStartDate", "corridinhaEndDate", "corridinhaObjective1", "corridinhaPrize1",
-      "corridinhaObjective2", "corridinhaPrize2", "corridinhaObjective3", "corridinhaPrize3",
-      "corridinhaObjective4", "corridinhaPrize4", "metaHoje", "paMetaHoje",
+      "metaHoje", "paMetaHoje"
     ] as const;
 
     const prismaGoalData: any = {};
     for (const key of prismaGoalFields) {
       if (key in goalData && goalData[key] !== undefined) {
-        // Sanitização especial para datas
-        if (key === 'corridinhaStartDate' || key === 'corridinhaEndDate') {
-            prismaGoalData[key] = goalData[key] && !isNaN(new Date(goalData[key]).getTime()) 
-                ? new Date(goalData[key]) 
-                : null;
-        } else {
-            prismaGoalData[key] = goalData[key];
-        }
+          prismaGoalData[key] = goalData[key];
       }
     }
     
