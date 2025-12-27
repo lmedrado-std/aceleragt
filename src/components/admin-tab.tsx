@@ -980,7 +980,7 @@ export function AdminTab({
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField control={control} name="goals.metaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de Vendas do Dia (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.paMetaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de PA do Dia</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.paMetaHoje" render={({ field }) => (<FormItem><FormLabel>Prêmio da Meta do Dia (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                     </CardContent>
                 </Card>
 
