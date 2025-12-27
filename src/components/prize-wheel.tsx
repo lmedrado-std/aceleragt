@@ -65,7 +65,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           setSegments(
             segments.map((s: any) => ({
               id: s.id,
-              option: s.label.toUpperCase(),
+              option: s.label,
               style: { backgroundColor: s.color, textColor: '#FFFFFF' },
               type: s.type,
               value: s.value,
@@ -87,6 +87,8 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   }, [storeId, sellerId, toast]);
 
   const handleSpinClick = async () => {
+    if (mustSpin) return;
+
     try {
       const res = await fetch('/api/wheel/spin', {
         method: 'POST',
@@ -130,12 +132,12 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             <p className="text-4xl font-bold text-foreground">{credits} giro(s)</p>
         </div>
 
-        <div className="relative w-full flex justify-center items-center select-none">
+        <div className="relative w-[320px] sm:w-[360px] flex justify-center items-center select-none">
             <div 
-                className="absolute top-[-15px] z-10 w-0 h-0 
-                border-l-[15px] border-l-transparent
-                border-r-[15px] border-r-transparent
-                border-t-[30px] border-t-primary
+                className="absolute top-[-12px] z-10 w-0 h-0 
+                border-l-[12px] border-l-transparent
+                border-r-[12px] border-r-transparent
+                border-t-[24px] border-t-primary
                 drop-shadow-md"
             />
             <Wheel
@@ -146,13 +148,13 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                     setMustSpin(false);
                     setShowResult(true);
                 }}
-                spinDuration={0.8}
-                textDistance={65}
-                fontSize={12}
-                radiusLineWidth={2}
-                radiusLineColor="rgba(255,255,255,0.2)"
-                outerBorderWidth={12}
-                outerBorderColor="#E2E8F0"
+                spinDuration={1.4}
+                textDistance={70}
+                fontSize={14}
+                radiusLineWidth={3}
+                radiusLineColor="#FFFFFF"
+                outerBorderWidth={14}
+                outerBorderColor="#CBD5E1"
                 innerBorderWidth={0}
                 innerRadius={20}
                 perpendicularText={false}
@@ -169,7 +171,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           )}
         >
           {mustSpin ? <Loader2 className="h-6 w-6 animate-spin" /> : <Gift className="mr-2 h-6 w-6" />}
-          {mustSpin ? 'GIRANDO...' : 'GIRAR'}
+          {credits <= 0 ? 'SEM GIROS' : mustSpin ? 'GIRANDO...' : 'GIRAR'}
         </Button>
       </div>
 
@@ -177,10 +179,11 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         <Dialog open onOpenChange={() => setShowResult(false)}>
           <DialogContent aria-describedby="spin-result-description">
             <DialogHeader>
-              <DialogTitle className="text-center text-2xl font-bold">
-                {spinResult?.type === "retry"
-                  ? "Não foi desta vez!"
-                  : "Parabéns! Você ganhou:"}
+              <DialogTitle className={cn(
+                  "text-center text-2xl font-bold",
+                  spinResult.type === "retry" ? "text-muted-foreground" : "text-green-600"
+                )}>
+                {spinResult.type === "retry" ? "😕 Não foi desta vez!" : "🎉 Parabéns! Você ganhou:"}
               </DialogTitle>
               <DialogDescription id="spin-result-description" className="sr-only">
                 {spinResult?.description || "Veja abaixo o prêmio sorteado."}
