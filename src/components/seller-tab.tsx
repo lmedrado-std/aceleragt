@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -359,7 +360,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 md:grid-cols-2">
-                            {[
+                           {[
                               { objective: goals.corridinhaObjective1, prize: goals.corridinhaPrize1 },
                               { objective: goals.corridinhaObjective2, prize: goals.corridinhaPrize2 },
                               { objective: goals.corridinhaObjective3, prize: goals.corridinhaPrize3 },
@@ -410,8 +411,8 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
                       {goals.paMetaHoje > 0 && (
                           <Card className="bg-amber-50 dark:bg-amber-900/20">
                             <CardContent className="pt-6">
-                              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Meta de PA do Dia</p>
-                              <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">{(goals.paMetaHoje).toFixed(2)}</p>
+                              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Prêmio por Atingir a Meta do Dia</p>
+                              <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">{formatCurrency(goals.paMetaHoje)}</p>
                             </CardContent>
                           </Card>
                       )}
