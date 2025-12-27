@@ -58,7 +58,11 @@ export async function POST(request: NextRequest) {
       "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1",
       "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3",
       "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4",
-      "corridinhaenabled"
+      "corridinhaenabled", "corridinhaEnabled",
+      "metaHoje", "paMetaHoje",
+      "corridinhaStartDate", "corridinhaEndDate", "corridinhaObjective1", "corridinhaPrize1",
+      "corridinhaObjective2", "corridinhaPrize2", "corridinhaObjective3", "corridinhaPrize3",
+      "corridinhaObjective4", "corridinhaPrize4",
     ] as const;
 
     const prismaGoalData: any = {};
@@ -91,4 +95,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
