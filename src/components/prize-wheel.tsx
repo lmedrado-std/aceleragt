@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { Wheel } from 'react-custom-roulette';
@@ -134,19 +135,20 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
         <div className="relative w-[320px] sm:w-[360px] flex justify-center items-center select-none">
             <div 
-                className="absolute top-[-12px] z-10 w-0 h-0 
+                className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-10 w-0 h-0 
                 border-l-[12px] border-l-transparent
                 border-r-[12px] border-r-transparent
                 border-t-[24px] border-t-primary
                 drop-shadow-md"
             />
+             <div className="absolute w-20 h-20 rounded-full bg-white shadow-inner" />
             <Wheel
                 mustStartSpinning={mustSpin}
                 prizeNumber={prizeNumber}
-                data={segments.map(s => ({ ...s, option: s.option.substring(0, 18) }))}
+                data={segments.map(s => ({ ...s, option: s.option.substring(0, 14) }))}
                 onStopSpinning={() => {
                     setMustSpin(false);
-                    setShowResult(true);
+                    setTimeout(() => setShowResult(true), 400);
                 }}
                 spinDuration={1.4}
                 textDistance={70}
@@ -156,7 +158,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 outerBorderWidth={14}
                 outerBorderColor="#CBD5E1"
                 innerBorderWidth={0}
-                innerRadius={20}
+                innerRadius={35}
                 perpendicularText={false}
             />
         </div>
@@ -171,7 +173,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           )}
         >
           {mustSpin ? <Loader2 className="h-6 w-6 animate-spin" /> : <Gift className="mr-2 h-6 w-6" />}
-          {credits <= 0 ? 'SEM GIROS' : mustSpin ? 'GIRANDO...' : 'GIRAR'}
+          {credits <= 0 ? 'VOLTE AMANHÃ' : mustSpin ? 'BOA SORTE...' : 'GIRAR'}
         </Button>
       </div>
 
