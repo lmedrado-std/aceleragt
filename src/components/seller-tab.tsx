@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Seller, Goals } from "@/lib/storage";
@@ -350,19 +349,33 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         
         <TabsContent value="corridinhas" className="mt-6">
              {isCorridinhaActive ? (
-                <Card className="lg:col-span-3 mt-6">
+                <Card className="lg:col-span-3 mt-6 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-primary"><Rocket /> Corridinha Ativa!</CardTitle>
-                        <CardDescription>
+                        <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200"><Rocket /> Corridinha Ativa!</CardTitle>
+                        <CardDescription className="text-blue-700 dark:text-blue-300">
                             Um incentivo especial está ativo no período de {goals.corridinhaStartDate ? format(new Date(goals.corridinhaStartDate), 'dd/MM/yyyy') : ''} até {goals.corridinhaEndDate ? format(new Date(goals.corridinhaEndDate), 'dd/MM/yyyy') : ''}.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 md:grid-cols-2">
-                            {goals.corridinhaObjective1 && <GoalItem label={goals.corridinhaObjective1} value={formatCurrency(goals.corridinhaPrize1 || 0)} />}
-                            {goals.corridinhaObjective2 && <GoalItem label={goals.corridinhaObjective2} value={formatCurrency(goals.corridinhaPrize2 || 0)} />}
-                            {goals.corridinhaObjective3 && <GoalItem label={goals.corridinhaObjective3} value={formatCurrency(goals.corridinhaPrize3 || 0)} />}
-                            {goals.corridinhaObjective4 && <GoalItem label={goals.corridinhaObjective4} value={formatCurrency(goals.corridinhaPrize4 || 0)} />}
+                            {[
+                              { objective: goals.corridinhaObjective1, prize: goals.corridinhaPrize1 },
+                              { objective: goals.corridinhaObjective2, prize: goals.corridinhaPrize2 },
+                              { objective: goals.corridinhaObjective3, prize: goals.corridinhaPrize3 },
+                              { objective: goals.corridinhaObjective4, prize: goals.corridinhaPrize4 },
+                            ].map((corrida, index) => (
+                                corrida.objective && (
+                                    <Card key={index} className="bg-background/50">
+                                        <CardHeader>
+                                            <CardTitle className="text-base text-foreground">{corrida.objective}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-2xl font-bold text-primary">{formatCurrency(corrida.prize || 0)}</p>
+                                            <p className="text-xs text-muted-foreground">Prêmio</p>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            ))}
                         </div>
                     </CardContent>
                 </Card>
