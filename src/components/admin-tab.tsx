@@ -1,3 +1,4 @@
+
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -99,7 +100,7 @@ interface AdminTabProps {
   sellers: Seller[];
   onSellersChange: () => void;
   onIncentivesCalculated: (incentives: Incentives, lastUpdated: string) => void;
-  handleSaveGoals: () => void;
+  handleSaveGoals: () => Promise<boolean>;
   lastUpdated: string | null;
   incentives: Incentives;
   onArchiveSuccess: (callback: () => void) => void;
@@ -571,19 +572,21 @@ export function AdminTab({
 
   const onSaveGoals = async () => {
     setIsSavingGoals(true);
-    const toastInstance = toast({
-      title: "Salvando Metas...",
-      description: "Aguarde enquanto aplicamos as novas configurações.",
-    });
-    
-    await handleSaveGoals();
-
-    toastInstance.update({
-      id: toastInstance.id,
-      title: "Metas Salvas!",
-      description: "As novas metas e prêmios foram salvos com sucesso.",
-    });
+    const success = await handleSaveGoals();
     setIsSavingGoals(false);
+
+    if (success) {
+      toast({
+        title: "Metas Salvas!",
+        description: "As novas metas e prêmios foram salvos com sucesso.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erro ao Salvar",
+        description: "Não foi possível salvar as metas. Verifique os dados e tente novamente.",
+      });
+    }
   };
 
 
@@ -698,7 +701,7 @@ export function AdminTab({
                    )}
                 >
                   <Target className="mr-2 h-4 w-4" />
-                  Metas & Prêmios
+                  Metas &amp; Prêmios
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent>
@@ -1143,3 +1146,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    

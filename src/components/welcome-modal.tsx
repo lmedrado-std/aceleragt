@@ -82,12 +82,12 @@ const getTips = (
     );
   }
 
-  if (pa < goals.paGoal1) {
+  if (pa < (goals.paGoal1 || 99)) {
     tips.push(
       'Aumente seu P.A. oferecendo produtos complementares a cada cliente.'
     );
   }
-  if (ticketMedio < goals.ticketMedioGoal1) {
+  if (ticketMedio < (goals.ticketMedioGoal1 || 9999)) {
     tips.push(
       'Eleve o Ticket Médio sugerindo itens de maior valor ou pacotes.'
     );
@@ -125,6 +125,21 @@ export function WelcomeModal({
         </DialogHeader>
 
         <div className="space-y-6 my-4">
+          {/* Metas do Dia */}
+          {(goals.metaHoje > 0 || goals.paMetaHoje > 0) && (
+             <div className="p-4 rounded-lg bg-white dark:bg-slate-800 shadow-md">
+                <h3 className="font-semibold text-lg flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                    <Trophy className="h-5 w-5 text-amber-500" />
+                    Metas do Dia
+                </h3>
+                <div className='mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300'>
+                    {goals.metaHoje > 0 && <p>Vendas: <span className='font-bold'>{formatCurrency(goals.metaHoje)}</span></p>}
+                    {goals.paMetaHoje > 0 && <p>Peças por Atendimento (PA): <span className='font-bold'>{goals.paMetaHoje.toFixed(2)}</span></p>}
+                </div>
+            </div>
+          )}
+
+
           {/* Conquistas */}
           {achievements.length > 0 && (
             <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
@@ -183,3 +198,5 @@ export function WelcomeModal({
     </Dialog>
   );
 }
+
+    

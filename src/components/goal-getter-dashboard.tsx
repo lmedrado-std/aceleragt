@@ -34,6 +34,7 @@ import { isAdminGlobal, isStoreAuthenticated, isSellerAuthenticated, logoutStore
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { WelcomeModal } from "./welcome-modal";
 
 // --- ZOD SCHEMAS & TYPES ---
 const sellerSchema = z.object({
@@ -497,31 +498,26 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
       calculateRankings(getValues().sellers as Seller[]);
   },[calculateRankings, getValues]);
   
-  const handleSaveGoals = async () => {
+  const handleSaveGoals = async (): Promise<boolean> => {
     try {
       const goals = getValues().goals;
       const payload = { store_id: storeId, goals };
-      console.log("Enviando para /api/goals:", payload);
-
       const res = await fetch(`/api/goals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
+  
       if (!res.ok) {
         let errorData: any = {};
-        try {
-          errorData = await res.json();
-        } catch {
-          const text = await res.text();
-          errorData = { raw: text };
-        }
+        try { errorData = await res.json(); } catch { const text = await res.text(); errorData = { raw: text }; }
         console.error("Erro ao salvar metas:", res.status, errorData);
         throw new Error(errorData.details || errorData.error || errorData.raw || 'Falha ao salvar metas');
       }
+      return true;
     } catch(error) {
       toast({ variant: 'destructive', title: 'Erro ao Salvar Metas', description: (error as Error).message });
+      return false;
     }
   };
 
@@ -656,3 +652,5 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
+
+    
