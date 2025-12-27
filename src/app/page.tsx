@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Moon, Sun } from "lucide-react";
+import { Loader2, Moon, Sun, Shield } from "lucide-react";
 import AppLayout from "@/components/app-layout";
 import { Logo } from "@/components/logo";
 import { StoreCard } from "@/components/store-card";
@@ -12,6 +12,7 @@ import { AdminButton } from "@/components/admin-button";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const storeCardColors = [
     "border-blue-500",
@@ -87,16 +88,21 @@ export default function HomePage() {
         <div className="w-full max-w-5xl text-center flex flex-col min-h-full">
             
             <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-sm">
-              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-start gap-4">
-                <Logo className="h-12" />
-                <div>
-                  <h1 className="text-xl font-bold tracking-tight text-white text-left">
-                      Bem-vindo(a) ao Acelera GT
-                  </h1>
-                  <p className="text-sm text-white/80 text-left">
-                      Selecione uma loja abaixo para acessar o painel de desempenho.
-                  </p>
+              <CardContent className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Logo className="h-12" />
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight text-white text-left">
+                        Bem-vindo(a) ao Acelera GT
+                    </h1>
+                    <p className="text-sm text-white/80 text-left">
+                        Selecione uma loja abaixo para acessar o painel de desempenho.
+                    </p>
+                  </div>
                 </div>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => router.push('/admin')}>
+                  <Shield />
+                </Button>
               </CardContent>
             </Card>
 
@@ -131,7 +137,7 @@ export default function HomePage() {
                 )}
             </div>
             <div className="mt-12 pt-6">
-                <AdminButton onClick={() => router.push('/admin')}/>
+                <Separator className="my-8" />
             </div>
             <AppFooter />
         </div>
