@@ -134,7 +134,7 @@ export function WelcomeModal({
                 </h3>
                 <div className='mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300'>
                     {goals.metaHoje > 0 && <p>Vendas: <span className='font-bold'>{formatCurrency(goals.metaHoje)}</span></p>}
-                    {goals.paMetaHoje > 0 && <p>Peças por Atendimento (PA): <span className='font-bold'>{goals.paMetaHoje.toFixed(2)}</span></p>}
+                    {goals.paMetaHoje > 0 && <p>Prêmio do Dia: <span className='font-bold'>{formatCurrency(goals.paMetaHoje)}</span></p>}
                 </div>
             </div>
           )}
