@@ -34,37 +34,50 @@ model sellers {
 }
 
 model goals {
-  id                         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  store_id                   String   @unique(map: "goals_store_id_unique") @db.Uuid
-  metaMinha                  Int?
-  metaMinhaPrize             Int?
-  meta                       Int?
-  metaPrize                  Int?
-  metona                     Int?
-  metonaPrize                Int?
-  metaLendaria               Int?
-  legendariaBonusValorVenda  Int?
-  legendariaBonusValorPremio Int?
-  paGoal1                    Float?   @db.Real
-  paPrize1                   Int?
-  paGoal2                    Float?   @db.Real
-  paPrize2                   Int?
-  paGoal3                    Float?   @db.Real
-  paPrize3                   Int?
-  paGoal4                    Float?   @db.Real
-  paPrize4                   Int?
-  ticketMedioGoal1           Int?
-  ticketMedioPrize1          Int?
-  ticketMedioGoal2           Int?
-  ticketMedioPrize2          Int?
-  ticketMedioGoal3           Int?
-  ticketMedioPrize3          Int?
-  ticketMedioGoal4           Int?
-  ticketMedioPrize4          Int?
-  performanceBonusEnabled    Boolean? @default(false)
-  corridinhaenabled          Boolean? @default(false)
-  corridinhaEnabled          Boolean? @default(false)
-  store                      stores   @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  store_id                        String    @unique @db.Uuid
+  metaMinha                       Int?
+  metaMinhaPrize                  Int?
+  meta                            Int?
+  metaPrize                       Int?
+  metona                          Int?
+  metonaPrize                     Int?
+  metaLendaria                    Int?
+  legendariaBonusValorVenda       Int?
+  legendariaBonusValorPremio      Int?
+  performanceBonusEnabled         Boolean?  @default(false)
+  paGoal1                         Float?
+  paPrize1                        Int?
+  paGoal2                         Float?
+  paPrize2                        Int?
+  paGoal3                         Float?
+  paPrize3                        Int?
+  paGoal4                         Float?
+  paPrize4                        Int?
+  ticketMedioGoal1                Int?
+  ticketMedioPrize1               Int?
+  ticketMedioGoal2                Int?
+  ticketMedioPrize2               Int?
+  ticketMedioGoal3                Int?
+  ticketMedioPrize3               Int?
+  ticketMedioGoal4                Int?
+  ticketMedioPrize4               Int?
+  corridinhaenabled               Boolean?  @default(false)
+  corridinhaStartDate             DateTime?
+  corridinhaEndDate               DateTime?
+  corridinhaObjective1            String?
+  corridinhaPrize1                Int?      @default(0)
+  corridinhaObjective2            String?
+  corridinhaPrize2                Int?      @default(0)
+  corridinhaObjective3            String?
+  corridinhaPrize3                Int?      @default(0)
+  corridinhaObjective4            String?
+  corridinhaPrize4                Int?      @default(0)
+  metaHoje                        Int?      @default(0)
+  paMetaHoje                      Float?    @default(0)
+  store                           stores    @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("goals")
 }
 
 model SellerHistory {
