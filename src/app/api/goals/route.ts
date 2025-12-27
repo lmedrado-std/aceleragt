@@ -37,6 +37,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log("[API POST /api/goals] ===== INICIANDO =====");
+  console.log("[API POST /api/goals] timestamp:", new Date().toISOString());
   try {
     const { store_id, goals } = await request.json();
     console.log("Body recebido em /api/goals:", { store_id, goals });
