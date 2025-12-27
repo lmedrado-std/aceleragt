@@ -113,7 +113,7 @@ type ParsedRow = {
   ticketMedioValue: any;
 }
 
-const MoneyInput = ({ field, className, onChange, onBlur }: { field: ControllerRenderProps<any, any>, className?: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onBlur: () => void }) => (
+const MoneyInput = ({ field, className }: { field: ControllerRenderProps<any, any>, className?: string }) => (
     <div className="relative">
         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">R$</span>
         <Input
@@ -122,8 +122,21 @@ const MoneyInput = ({ field, className, onChange, onBlur }: { field: ControllerR
             placeholder="0,00"
             {...field}
             value={`${field.value ?? ''}`.replace('.', ',')}
-            onChange={onChange}
-            onBlur={onBlur}
+            onChange={(e) => {
+                const value = e.target.value;
+                const sanitizedValue = value.replace(/[^0-9,.]/g, '').replace(',', '.');
+                field.onChange(sanitizedValue);
+            }}
+            onBlur={() => {
+                let value = field.value;
+                if (typeof value === 'string') {
+                    const num = parseFloat(value.replace(',', '.'));
+                    if (!isNaN(num)) {
+                        value = num;
+                    }
+                }
+                field.onChange(value);
+            }}
             className={cn("pl-9", className)}
         />
     </div>
@@ -880,10 +893,10 @@ export function AdminTab({
                                   </CardHeader>
                                   <CardContent className="p-4">
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                          <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                          <FormField control={control} name={`sellers.${index}.vendas`} render={({field}) => (<FormItem><FormLabel>Vendas (R$)</FormLabel><FormControl><MoneyInput field={field} className={cn(dirtyFields.sellers?.[index]?.vendas && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
                                           <FormField control={control} name={`sellers.${index}.pa`} render={({field}) => (<FormItem><FormLabel>PA (Unid.)</FormLabel><FormControl><Input type="text" inputMode="decimal" placeholder="0,00" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.pa && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                          <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
-                                          <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
+                                          <FormField control={control} name={`sellers.${index}.ticket_medio`} render={({field}) => (<FormItem><FormLabel>Ticket Médio (R$)</FormLabel><FormControl><MoneyInput field={field} className={cn(dirtyFields.sellers?.[index]?.ticket_medio && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)}/>
+                                          <FormField control={control} name={`sellers.${index}.corridinha_diaria`} render={({field}) => (<FormItem><FormLabel>Bônus Corridinha (R$)</FormLabel><FormControl><MoneyInput field={field} className={cn(dirtyFields.sellers?.[index]?.corridinha_diaria && "bg-yellow-100 dark:bg-yellow-900/30")} /></FormControl></FormItem>)} />
                                       </div>
                                   </CardContent>
                               </Card>
@@ -966,7 +979,7 @@ export function AdminTab({
                         <CardDescription>Defina uma meta diária para manter a equipe focada e motivada.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={control} name="goals.metaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de Vendas do Dia (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de Vendas do Dia (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                         <FormField control={control} name="goals.paMetaHoje" render={({ field }) => (<FormItem><FormLabel>Meta de PA do Dia</FormLabel><FormControl><Input type="text" inputMode="decimal" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
                     </CardContent>
                 </Card>
@@ -976,18 +989,18 @@ export function AdminTab({
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                         <div className="p-4 border rounded-lg bg-card space-y-2 border-blue-200 dark:border-blue-800">
                             <h4 className="font-medium text-md text-card-foreground">Meta 1 (Mínima)</h4>
-                             <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                             <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                             <FormField control={control} name="goals.metaMinha" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
+                             <FormField control={control} name="goals.metaMinhaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                         </div>
                         <div className="p-4 border rounded-lg bg-card space-y-2 border-purple-200 dark:border-purple-800">
                             <h4 className="font-medium text-md text-card-foreground">Meta 2 (Cheia)</h4>
-                            <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                            <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                            <FormField control={control} name="goals.meta" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
+                            <FormField control={control} name="goals.metaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                         </div>
                         <div className="p-4 border rounded-lg bg-card space-y-2 border-green-200 dark:border-green-800">
                             <h4 className="font-medium text-md text-card-foreground">Meta 3 (Turbo)</h4>
-                            <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                            <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                            <FormField control={control} name="goals.metona" render={({ field }) => (<FormItem><FormLabel>Valor da Meta (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
+                            <FormField control={control} name="goals.metonaPrize" render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                         </div>
                     </div>
                 </div>
@@ -1003,9 +1016,9 @@ export function AdminTab({
                     </div>
                     {performanceBonusEnabled && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 border rounded-lg">
-                        <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                        <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.metaLendaria" render={({ field }) => (<FormItem><FormLabel>Atingir (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.legendariaBonusValorVenda" render={({ field }) => (<FormItem><FormLabel>A cada (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
+                        <FormField control={control} name="goals.legendariaBonusValorPremio" render={({ field }) => (<FormItem><FormLabel>Ganha-se (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                         <p className="text-xs text-muted-foreground mt-2 md:col-span-3">
                             Você ganha <strong>R$ {Number(legendariaValues[2] || 0).toFixed(2).replace('.',',')}</strong> a cada <strong>R$ {Number(legendariaValues[1] || 0).toFixed(2).replace('.',',')}</strong> vendidos acima de <strong>R$ {Number(legendariaValues[0] || 0).toFixed(2).replace('.',',')}</strong>.
                         </p>
@@ -1019,7 +1032,7 @@ export function AdminTab({
                       {goalTiers.map(tier => (
                           <div key={tier.id} className="space-y-2">
                               <FormField control={control} name={`goals.${tier.goal}`} render={({ field }) => (<FormItem><FormLabel>{tier.id} (PA)</FormLabel><FormControl><Input type="text" inputMode="decimal" step="0.01" {...field} value={`${field.value ?? ''}`.replace('.', ',')} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                              <FormField control={control} name={`goals.${tier.prize}`} render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                              <FormField control={control} name={`goals.${tier.prize}`} render={({ field }) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                           </div>
                       ))}
                   </div>
@@ -1030,8 +1043,8 @@ export function AdminTab({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4 pt-4">
                         {ticketMedioTiers.map(tier => (
                             <div key={tier.id} className="space-y-2">
-                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
-                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.goal}`} render={({field}) => (<FormItem><FormLabel>{tier.id} (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
+                                <FormField control={control} name={`goals.${tier.prize}`} render={({field}) => (<FormItem><FormLabel>Prêmio (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                             </div>
                         ))}
                     </div>
@@ -1063,19 +1076,19 @@ export function AdminTab({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                                 <div>
                                     <FormField control={control} name="goals.corridinhaObjective1" render={({ field }) => (<FormItem><FormLabel>Objetivo 1</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
-                                    <FormField control={control} name="goals.corridinhaPrize1" render={({ field }) => (<FormItem><FormLabel>Prêmio 1 (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaPrize1" render={({ field }) => (<FormItem><FormLabel>Prêmio 1 (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                                 </div>
                                 <div>
                                     <FormField control={control} name="goals.corridinhaObjective2" render={({ field }) => (<FormItem><FormLabel>Objetivo 2</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
-                                    <FormField control={control} name="goals.corridinhaPrize2" render={({ field }) => (<FormItem><FormLabel>Prêmio 2 (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaPrize2" render={({ field }) => (<FormItem><FormLabel>Prêmio 2 (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                                 </div>
                                 <div>
                                     <FormField control={control} name="goals.corridinhaObjective3" render={({ field }) => (<FormItem><FormLabel>Objetivo 3</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
-                                    <FormField control={control} name="goals.corridinhaPrize3" render={({ field }) => (<FormItem><FormLabel>Prêmio 3 (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaPrize3" render={({ field }) => (<FormItem><FormLabel>Prêmio 3 (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                                 </div>
                                 <div>
                                     <FormField control={control} name="goals.corridinhaObjective4" render={({ field }) => (<FormItem><FormLabel>Objetivo 4</FormLabel><FormControl><Input type="text" placeholder="Ex: Vender 20 itens" {...field} value={field.value ?? ''} /></FormControl></FormItem>)} />
-                                    <FormField control={control} name="goals.corridinhaPrize4" render={({ field }) => (<FormItem><FormLabel>Prêmio 4 (R$)</FormLabel><FormControl><MoneyInput field={field} onChange={e => handleNumericChange(field.onChange, e)} onBlur={() => handleNumericBlur(field)}/></FormControl></FormItem>)} />
+                                    <FormField control={control} name="goals.corridinhaPrize4" render={({ field }) => (<FormItem><FormLabel>Prêmio 4 (R$)</FormLabel><FormControl><MoneyInput field={field} /></FormControl></FormItem>)} />
                                 </div>
                             </div>
                         </CardContent>
@@ -1164,10 +1177,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
-
-    
-
-    
-

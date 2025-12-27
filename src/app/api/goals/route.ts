@@ -1,4 +1,5 @@
 
+
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -66,14 +67,12 @@ export async function POST(request: NextRequest) {
       "paGoal3", "paPrize3", "paGoal4", "paPrize4", "ticketMedioGoal1",
       "ticketMedioPrize1", "ticketMedioGoal2", "ticketMedioPrize2", "ticketMedioGoal3",
       "ticketMedioPrize3", "ticketMedioGoal4", "ticketMedioPrize4",
-      // Campos das Corridinhas
-      "corridinhaenabled",  // USAR APENAS ESSE (lowercase, como está no banco)
+      "corridinhaenabled",
       "corridinhaStartDate", "corridinhaEndDate",
       "corridinhaObjective1", "corridinhaPrize1",
       "corridinhaObjective2", "corridinhaPrize2",
       "corridinhaObjective3", "corridinhaPrize3",
       "corridinhaObjective4", "corridinhaPrize4",
-      // Campos de Meta Hoje
       "metaHoje", "paMetaHoje"
     ] as const;
 
