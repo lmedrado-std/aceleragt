@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Goals, Incentives, Seller } from "@/lib/storage";
-import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift, PartyPopper, Megaphone } from "lucide-react";
+import { DollarSign, Goal, Users, Trophy, TrendingUp, CheckCircle, Ticket, Gift, PartyPopper, Megaphone, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -139,6 +139,18 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     .filter(s => (s.vendas || 0) > 0)
     .sort((a, b) => (b.vendas || 0) - (a.vendas || 0));
   const topSellers = sortedSellers.slice(0, 3);
+  
+  const totalPrizesBySeller = sellers.map(seller => {
+    const sellerIncentives = incentives[seller.id];
+    const totalPrize = sellerIncentives 
+        ? Object.values(sellerIncentives).reduce((sum, val) => sum + (val || 0), 0)
+        : 0;
+    return {
+        ...seller,
+        totalPrize,
+    };
+  }).sort((a, b) => b.totalPrize - a.totalPrize);
+
 
 
   // Vendedores em cada faixa
@@ -315,6 +327,27 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                            </div>
                         ) : (
                             <p className="text-center text-sm text-muted-foreground py-4">Nenhuma venda registrada ainda para formar o pódio.</p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Star className="text-yellow-500"/> Resumo de Prêmios por Vendedor</CardTitle>
+                        <CardDescription>Ranking de prêmios para facilitar a apuração.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {totalPrizesBySeller.length > 0 ? (
+                           <div className="space-y-2">
+                            {totalPrizesBySeller.map((seller) => (
+                               <div key={seller.id} className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                                    <p className="font-semibold text-foreground">{seller.name}</p>
+                                    <p className={cn("font-bold text-lg", seller.totalPrize > 0 ? 'text-green-600' : 'text-muted-foreground')}>{formatCurrency(seller.totalPrize || 0)}</p>
+                                </div>
+                            ))}
+                           </div>
+                        ) : (
+                            <p className="text-center text-sm text-muted-foreground py-4">Nenhum prêmio a ser pago ainda.</p>
                         )}
                     </CardContent>
                 </Card>
