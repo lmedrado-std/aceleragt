@@ -334,18 +334,59 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Star className="text-yellow-500"/> Resumo de Prêmios por Vendedor</CardTitle>
-                        <CardDescription>Ranking de prêmios para facilitar a apuração.</CardDescription>
+                        <CardDescription>Passe o mouse sobre um vendedor para ver o detalhamento dos prêmios. Ranking de prêmios para facilitar a apuração.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {totalPrizesBySeller.length > 0 ? (
-                           <div className="space-y-2">
-                            {totalPrizesBySeller.map((seller) => (
-                               <div key={seller.id} className="flex items-center justify-between p-3 rounded-lg bg-muted">
-                                    <p className="font-semibold text-foreground">{seller.name}</p>
-                                    <p className={cn("font-bold text-lg", seller.totalPrize > 0 ? 'text-green-600' : 'text-muted-foreground')}>{formatCurrency(seller.totalPrize || 0)}</p>
-                                </div>
-                            ))}
-                           </div>
+                            <TooltipProvider>
+                               <div className="space-y-2">
+                                {totalPrizesBySeller.map((seller) => {
+                                    const sellerIncentives = incentives[seller.id];
+                                    const prizeDetails = sellerIncentives ? Object.entries(sellerIncentives)
+                                        .filter(([, value]) => value > 0)
+                                        .map(([key, value]) => {
+                                            const labelMap: Record<string, string> = {
+                                                meta1Premio: 'Prêmio Meta 1',
+                                                meta2Premio: 'Prêmio Meta 2',
+                                                meta3Premio: 'Prêmio Meta 3',
+                                                legendariaBonus: 'Bônus Performance',
+                                                paBonus: 'Bônus PA',
+                                                ticketMedioBonus: 'Bônus Ticket Médio',
+                                                corridinhaDiariaBonus: 'Bônus Corridinha'
+                                            };
+                                            return { label: labelMap[key] || key, value };
+                                        }) : [];
+
+                                    return (
+                                        <Tooltip key={seller.id}>
+                                            <TooltipTrigger asChild>
+                                                <div className="flex items-center justify-between p-3 rounded-lg bg-muted cursor-help">
+                                                    <p className="font-semibold text-foreground">{seller.name}</p>
+                                                    <p className={cn("font-bold text-lg", seller.totalPrize > 0 ? 'text-green-600' : 'text-muted-foreground')}>{formatCurrency(seller.totalPrize || 0)}</p>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                {prizeDetails.length > 0 ? (
+                                                     <div>
+                                                        <p className="font-bold mb-1">Detalhamento dos Prêmios:</p>
+                                                        <ul className="space-y-1">
+                                                            {prizeDetails.map(detail => (
+                                                                <li key={detail.label} className="flex justify-between">
+                                                                    <span>{detail.label}:</span>
+                                                                    <span className="font-semibold ml-4">{formatCurrency(detail.value)}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                ) : (
+                                                    <p>Nenhum prêmio atingido.</p>
+                                                )}
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    )
+                                })}
+                               </div>
+                            </TooltipProvider>
                         ) : (
                             <p className="text-center text-sm text-muted-foreground py-4">Nenhum prêmio a ser pago ainda.</p>
                         )}
