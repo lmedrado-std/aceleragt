@@ -137,10 +137,19 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
     };
     const incentiveKey = incentiveKeyMap[prizeKey] as keyof (typeof incentives[string]);
 
-    const contributingSellers = sellers.filter(seller => {
-        const incentive = incentives[seller.id];
-        return incentive && (incentive[incentiveKey] || 0) > 0;
-    });
+    const contributingSellers = sellers
+        .map(seller => {
+            const incentive = incentives[seller.id];
+            const prizeValue = incentive ? (incentive[incentiveKey] || 0) : 0;
+            return {
+                id: seller.id,
+                name: seller.name,
+                prize: prizeValue,
+            };
+        })
+        .filter(seller => seller.prize > 0)
+        .sort((a, b) => b.prize - a.prize);
+
 
     if (contributingSellers.length === 0) {
         return <p>Nenhum vendedor atingiu este prêmio.</p>;
@@ -148,9 +157,14 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
 
     return (
         <div>
-            <p className="font-bold mb-1">Vendedores:</p>
-            <ul className="list-disc pl-4">
-                {contributingSellers.map(s => <li key={s.id}>{s.name}</li>)}
+            <p className="font-bold mb-1">Vendedores Premiados:</p>
+            <ul className="space-y-1">
+                {contributingSellers.map(s => (
+                    <li key={s.id} className="flex justify-between">
+                        <span>{s.name}</span>
+                        <span className="font-semibold">{formatCurrency(s.prize)}</span>
+                    </li>
+                ))}
             </ul>
         </div>
     );
