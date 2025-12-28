@@ -32,6 +32,7 @@ interface SellerTabProps {
   rankings: Record<RankingMetric, number> | null;
   lastUpdated: string | null;
   storeId: string;
+  isManagerView: boolean;
 }
 
 const formatCurrency = (value: number) =>
@@ -109,10 +110,15 @@ const GoalItem = ({ label, value }: { label: string, value: string | React.React
 
 type RevealedCardType = "vendas" | "corridinha" | "pa" | "ticket";
 
-export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, storeId }: SellerTabProps) {
+export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, storeId, isManagerView }: SellerTabProps) {
   const salesData = { ...seller, goals };
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [revealedCards, setRevealedCards] = useState(new Set<RevealedCardType>());
+  
+  const allCards: RevealedCardType[] = ["vendas", "corridinha", "pa", "ticket"];
+  const [revealedCards, setRevealedCards] = useState<Set<RevealedCardType>>(
+    isManagerView ? new Set(allCards) : new Set()
+  );
+  
   const [prizeWheelCredits, setPrizeWheelCredits] = useState(0);
 
   const tips = useMemo(() => ({
