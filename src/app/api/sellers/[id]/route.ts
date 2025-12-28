@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const body = await request.json();
     // Assuming body can contain any of these fields for update
-    const { name, password, vendas, pa, ticketMedio, corridinhaDiaria, ticket_medio, corridinha_diaria } = body;
+    const { name, password, vendas, pa, ticketMedio, corridinhaDiaria, ticket_medio, corridinha_diaria, view_count, last_viewed_at } = body;
 
     const dataToUpdate: { [key: string]: any } = {};
 
@@ -49,6 +49,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (ticket_medio !== undefined) dataToUpdate.ticket_medio = ticket_medio; // Accept snake_case
     if (corridinhaDiaria !== undefined) dataToUpdate.corridinha_diaria = corridinhaDiaria;
     if (corridinha_diaria !== undefined) dataToUpdate.corridinha_diaria = corridinha_diaria; // Accept snake_case
+    if (view_count !== undefined) dataToUpdate.view_count = view_count;
+    if (last_viewed_at !== undefined) dataToUpdate.last_viewed_at = last_viewed_at;
 
     if (Object.keys(dataToUpdate).length === 0) {
       return NextResponse.json({ info: 'Nenhum campo para atualizar.' }, { status: 200 });

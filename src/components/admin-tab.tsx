@@ -28,6 +28,7 @@ import {
   History,
   Calendar,
   Rocket,
+  RotateCcw,
 } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FormValues } from "./goal-getter-dashboard";
@@ -620,6 +621,30 @@ export function AdminTab({
     }
   };
 
+  const handleResetViews = async (sellerId: string) => {
+    try {
+      const res = await fetch(`/api/sellers/${sellerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ view_count: null, last_viewed_at: null }),
+      });
+      if (!res.ok) {
+        throw new Error('Falha ao zerar acessos do vendedor.');
+      }
+      toast({
+        title: "Sucesso!",
+        description: "Os acessos do vendedor foram zerados.",
+      });
+      onSellersChange(); // Recarrega os dados
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: (error as Error).message,
+      });
+    }
+  };
+
 
   return (
     <div className="space-y-8">
@@ -845,17 +870,39 @@ export function AdminTab({
                         <>
                             <div className="flex-grow">
                                 <p className="font-medium">{seller.name ?? 'Vendedor sem nome'}</p>
-                                {seller.last_viewed_at && (
+                                {(seller.last_viewed_at || (seller.view_count || 0) > 0) && (
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
-                                            visto por último há {new Date(seller.last_viewed_at).toLocaleDateString()}
-                                        </span>
+                                        {seller.last_viewed_at && (
+                                            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
+                                                visto por último há {new Date(seller.last_viewed_at).toLocaleDateString()}
+                                            </span>
+                                        )}
                                         <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count || 0} acessos</span>
                                     </div>
                                 )}
                             </div>
                           <div className="flex items-center flex-shrink-0">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button size="icon" variant="ghost" type="button"><RotateCcw className="h-4 w-4" /></Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader><AlertDialogTitle>Zerar Acessos de "{seller.name ?? 'Vendedor'}"?</AlertDialogTitle><AlertDialogDescription>Esta ação irá resetar o contador de acessos e a data do último acesso para este vendedor. Útil para iniciar um novo período de acompanhamento.</AlertDialogDescription></AlertDialogHeader>
+                                      <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => handleResetViews(seller.id)}>Zerar Acessos</AlertDialogAction></AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Zerar contador de acessos</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
                             <Button size="icon" variant="ghost" type="button" onClick={() => startEditing(seller)}><Edit/></Button>
+                            
                             <AlertDialog>
                               <AlertDialogTrigger asChild><Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" type="button"><Trash2 /></Button></AlertDialogTrigger>
                               <AlertDialogContent>
