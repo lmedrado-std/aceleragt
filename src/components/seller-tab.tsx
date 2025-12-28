@@ -134,7 +134,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
   const allCardsRevealed = revealedCards.size === 4;
 
   useEffect(() => {
-    if (seller.id) {
+    if (seller.id && !isManagerView) {
       trackSellerView(seller.id);
       const justLoggedInKey = `justLoggedIn-${seller.id}`;
       const hasJustLoggedIn = sessionStorage.getItem(justLoggedInKey);
@@ -144,7 +144,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
         sessionStorage.removeItem(justLoggedInKey); // Remove a chave para não mostrar novamente
       }
     }
-  }, [seller.id]);
+  }, [seller.id, isManagerView]);
 
   useEffect(() => {
     const fetchCredits = async () => {
