@@ -33,20 +33,70 @@ const InfoCard = ({ title, value, icon, description, className }: { title: strin
     </Card>
 );
 
-const GoalAchievementItem = ({ label, goalValue, sellers, sellersReached }: { label: string; goalValue: number; sellers: Seller[]; sellersReached: number }) => {
-    const isAchieved = sellersReached > 0;
-    return (
-        <div className={cn("flex items-center justify-between p-3 rounded-lg", isAchieved ? "bg-green-100 dark:bg-green-900/30" : "bg-muted/50")}>
-            <div>
-                <p className="font-semibold text-foreground">{label}</p>
-                <p className="text-sm text-muted-foreground">Meta: {goalValue > 0 ? formatCurrency(goalValue) : '-'}</p>
-            </div>
-            <div className="text-right">
-                 <p className={cn("font-bold text-lg", isAchieved ? "text-green-600 dark:text-green-400" : "text-primary")}>{sellersReached} / {sellers.length}</p>
-                 <p className="text-xs text-muted-foreground">Vendedores</p>
-            </div>
+const GoalAchievementItem = ({
+  label,
+  goalValue,
+  sellers,
+  achievingSellers,
+}: {
+  label: string;
+  goalValue: number;
+  sellers: Seller[];
+  achievingSellers: { name: string; prize: number }[];
+}) => {
+  const sellersReached = achievingSellers.length;
+  const isAchieved = sellersReached > 0;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          className={cn(
+            "flex items-center justify-between p-3 rounded-lg cursor-help",
+            isAchieved ? "bg-green-100 dark:bg-green-900/30" : "bg-muted/50"
+          )}
+        >
+          <div>
+            <p className="font-semibold text-foreground">{label}</p>
+            <p className="text-sm text-muted-foreground">
+              Meta: {goalValue > 0 ? formatCurrency(goalValue) : "-"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p
+              className={cn(
+                "font-bold text-lg",
+                isAchieved
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-primary"
+              )}
+            >
+              {sellersReached} / {sellers.length}
+            </p>
+            <p className="text-xs text-muted-foreground">Vendedores</p>
+          </div>
         </div>
-    );
+      </TooltipTrigger>
+      <TooltipContent>
+        {achievingSellers.length > 0 ? (
+          <div>
+            <p className="font-bold mb-1">Vendedores que atingiram:</p>
+            <ul className="space-y-1">
+              {achievingSellers.map((s) => (
+                <li key={s.name} className="flex justify-between">
+                  <span>{s.name}</span>
+                  <span className="font-semibold ml-4">
+                    {formatCurrency(s.prize)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>Nenhum vendedor atingiu esta meta ainda.</p>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  );
 };
 
 const PrizeBreakdownItem = ({ label, value, colorClass, tooltipContent }: { label: string; value: number, colorClass?: string, tooltipContent: React.ReactNode }) => (
@@ -91,13 +141,36 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const topSellers = sortedSellers.slice(0, 3);
 
 
-  // Contagem de vendedores em cada faixa de meta
-  const sellersInLendaria = sellers.filter(s => (s.vendas || 0) >= goals.metaLendaria).length;
-  const sellersInMetona = sellers.filter(s => (s.vendas || 0) >= goals.metona && (s.vendas || 0) < goals.metaLendaria).length;
-  const sellersInMeta = sellers.filter(s => (s.vendas || 0) >= goals.meta && (s.vendas || 0) < goals.metona).length;
-  const sellersInMetinha = sellers.filter(s => (s.vendas || 0) >= goals.metaMinha && (s.vendas || 0) < goals.meta).length;
+  // Vendedores em cada faixa
+  const getSellersInTier = (min: number, max: number, prize: number) =>
+    sellers
+      .filter((s) => (s.vendas || 0) >= min && (s.vendas || 0) < max)
+      .map((s) => ({ name: s.name, prize }));
 
-  const sellersReachedAnyGoal = sellersInLendaria > 0 || sellersInMetona > 0 || sellersInMeta > 0 || sellersInMetinha > 0;
+  const sellersInLendaria = sellers
+    .filter((s) => (s.vendas || 0) >= goals.metaLendaria)
+    .map((s) => ({
+      name: s.name,
+      prize: incentives[s.id]?.legendariaBonus || 0,
+    }));
+  const sellersInMetona = getSellersInTier(
+    goals.metona,
+    goals.metaLendaria,
+    goals.metonaPrize
+  );
+  const sellersInMeta = getSellersInTier(
+    goals.meta,
+    goals.metona,
+    goals.metaPrize
+  );
+  const sellersInMetinha = getSellersInTier(
+    goals.metaMinha,
+    goals.meta,
+    goals.metaMinhaPrize
+  );
+
+
+  const sellersReachedAnyGoal = sellersInLendaria.length > 0 || sellersInMetona.length > 0 || sellersInMeta.length > 0 || sellersInMetinha.length > 0;
 
   // Cálculo do detalhamento de prêmios
   const prizeBreakdown = Object.values(incentives).reduce((acc, incentive) => {
@@ -115,10 +188,10 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
   const totalPrizes = Object.values(prizeBreakdown).reduce((sum, value) => sum + value, 0);
 
   const highestGoalAchieved = () => {
-    if (sellersInLendaria > 0) return { name: "Bônus Performance", message: `Pelo menos um membro da equipe já alcançou o Bônus Performance!` };
-    if (sellersInMetona > 0) return { name: "Meta 3", message: `Pelo menos um membro da equipe já alcançou a Meta 3!` };
-    if (sellersInMeta > 0) return { name: "Meta 2", message: `Pelo menos um membro da equipe já alcançou a Meta 2!` };
-    if (sellersInMetinha > 0) return { name: "Meta 1", message: `Pelo menos um membro da equipe já alcançou a Meta 1!` };
+    if (sellersInLendaria.length > 0) return { name: "Bônus Performance", message: `Pelo menos um membro da equipe já alcançou o Bônus Performance!` };
+    if (sellersInMetona.length > 0) return { name: "Meta 3", message: `Pelo menos um membro da equipe já alcançou a Meta 3!` };
+    if (sellersInMeta.length > 0) return { name: "Meta 2", message: `Pelo menos um membro da equipe já alcançou a Meta 2!` };
+    if (sellersInMetinha.length > 0) return { name: "Meta 1", message: `Pelo menos um membro da equipe já alcançou a Meta 1!` };
     return null;
   }
   const celebration = highestGoalAchieved();
@@ -162,7 +235,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                 {contributingSellers.map(s => (
                     <li key={s.id} className="flex justify-between">
                         <span>{s.name}</span>
-                        <span className="font-semibold">{formatCurrency(s.prize)}</span>
+                        <span className="font-semibold ml-4">{formatCurrency(s.prize)}</span>
                     </li>
                 ))}
             </ul>
@@ -257,16 +330,18 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Goal /> Progresso das Metas da Equipe</CardTitle>
-                        <CardDescription>Quantos vendedores atingiram cada nível de meta de vendas.</CardDescription>
+                        <CardDescription>Passe o mouse sobre cada meta para ver quem atingiu e o prêmio.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {sellersReachedAnyGoal ? (
-                            <div className="space-y-2">
-                                <GoalAchievementItem label="Meta 1" goalValue={goals.metaMinha || 0} sellers={sellers} sellersReached={sellersInMetinha} />
-                                <GoalAchievementItem label="Meta 2" goalValue={goals.meta || 0} sellers={sellers} sellersReached={sellersInMeta} />
-                                <GoalAchievementItem label="Meta 3" goalValue={goals.metona || 0} sellers={sellers} sellersReached={sellersInMetona} />
-                                {goals.performanceBonusEnabled && <GoalAchievementItem label="Bônus Performance" goalValue={goals.metaLendaria || 0} sellers={sellers} sellersReached={sellersInLendaria} />}
-                            </div>
+                            <TooltipProvider>
+                                <div className="space-y-2">
+                                    <GoalAchievementItem label="Meta 1" goalValue={goals.metaMinha || 0} sellers={sellers} achievingSellers={sellersInMetinha} />
+                                    <GoalAchievementItem label="Meta 2" goalValue={goals.meta || 0} sellers={sellers} achievingSellers={sellersInMeta} />
+                                    <GoalAchievementItem label="Meta 3" goalValue={goals.metona || 0} sellers={sellers} achievingSellers={sellersInMetona} />
+                                    {goals.performanceBonusEnabled && <GoalAchievementItem label="Bônus Performance" goalValue={goals.metaLendaria || 0} sellers={sellers} achievingSellers={sellersInLendaria} />}
+                                </div>
+                            </TooltipProvider>
                         ) : (
                             <p className="text-center text-sm text-muted-foreground py-4">Nenhum vendedor atingiu as metas de vendas ainda. Vamos lá, equipe!</p>
                         )}
@@ -279,7 +354,7 @@ export function StoreAdminDashboard({ sellers, goals, incentives }: StoreAdminDa
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Gift /> Detalhamento de Prêmios</CardTitle>
-                        <CardDescription>Distribuição total dos prêmios para a equipe.</CardDescription>
+                        <CardDescription>Passe o mouse sobre cada item para ver os detalhes.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <TooltipProvider>
