@@ -51,7 +51,7 @@ function AppFooter() {
         <footer className="mt-auto pt-16 pb-8 text-center text-slate-400">
             {renderThemeToggle()}
             <div className="mt-4 space-y-1 text-sm">
-                <p>v1.0.1 - Build Estável</p>
+                <p>V 2.0 - bUILD eSTÁVEL</p>
                 <p>RyannBreston desenvolvedor</p>
                 <p>© {new Date().getFullYear()} Acelera GT.</p>
             </div>
