@@ -627,7 +627,7 @@ export function AdminTab({
       const res = await fetch(`/api/sellers/${sellerId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ view_count: null, last_viewed_at: null }),
+        body: JSON.stringify({ view_count: 0, last_viewed_at: null }),
       });
       if (!res.ok) {
         throw new Error('Falha ao zerar acessos do vendedor.');
@@ -871,16 +871,16 @@ export function AdminTab({
                         <>
                             <div className="flex-grow">
                                 <p className="font-medium">{seller.name ?? 'Vendedor sem nome'}</p>
-                                {(seller.last_viewed_at || seller.view_count) && (
+                                {(seller.last_viewed_at || (seller.view_count ?? 0) > 0) && (
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                                         {seller.last_viewed_at && (
                                             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
                                                 visto por último em {format(new Date(seller.last_viewed_at), "dd/MM/yyyy")}
                                             </span>
                                         )}
-                                        {seller.view_count !== null && seller.view_count !== undefined && (
-                                          <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count} acessos</span>
-                                        )}
+                                        <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> 
+                                            {seller.view_count || 0} {(seller.view_count || 0) === 1 ? 'acesso' : 'acessos'}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -1227,5 +1227,7 @@ export function AdminTab({
     </div>
   );
 }
+
+    
 
     

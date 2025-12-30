@@ -473,3 +473,5 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     </TooltipProvider>
   );
 }
+
+    
