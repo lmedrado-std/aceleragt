@@ -72,10 +72,51 @@ const IncentiveProjectionOutputSchema = z.object({
 });
 export type IncentiveProjectionOutput = z.infer<typeof IncentiveProjectionOutputSchema>;
 
+const NUMERIC_GOAL_KEYS = [
+  "metaMinha", "metaMinhaPrize",
+  "meta", "metaPrize",
+  "metona", "metonaPrize",
+  "metaLendaria",
+  "legendariaBonusValorVenda",
+  "legendariaBonusValorPremio",
+  "paGoal1","paGoal2","paGoal3","paGoal4",
+  "paPrize1","paPrize2","paPrize3","paPrize4",
+  "ticketMedioGoal1","ticketMedioGoal2","ticketMedioGoal3","ticketMedioGoal4",
+  "ticketMedioPrize1","ticketMedioPrize2","ticketMedioPrize3","ticketMedioPrize4",
+] as const;
+
+function sanitizeRawGoals(rawGoals: any) {
+  const goals: any = { ...rawGoals };
+
+  for (const key of NUMERIC_GOAL_KEYS) {
+    const v = goals[key];
+
+    if (v === null || v === undefined || v === "") {
+      goals[key] = 0;
+    } else if (typeof v === "string") {
+      const num = parseFloat(v.replace(",", "."));
+      goals[key] = isNaN(num) ? 0 : num;
+    } else if (typeof v !== "number") {
+      goals[key] = 0;
+    }
+  }
+
+  if (typeof goals.performanceBonusEnabled !== "boolean") {
+    goals.performanceBonusEnabled = !!goals.performanceBonusEnabled;
+  }
+
+  return goals;
+}
+
 // Wrapper function to sanitize data before calling the flow
-export async function incentiveProjection(input: IncentiveProjectionInput): Promise<IncentiveProjectionOutput> {
-  // Sanitize goals to prevent runtime errors with null/undefined values
-  const sanitizedGoals = GoalsSchema.parse(input.goals);
+export async function incentiveProjection(
+  input: IncentiveProjectionInput
+): Promise<IncentiveProjectionOutput> {
+  // Primeiro normaliza null/undefined/"" -> 0
+  const rawGoals = sanitizeRawGoals(input.goals);
+
+  // Depois aplica o schema zod (coerce etc.)
+  const sanitizedGoals = GoalsSchema.parse(rawGoals);
   const sanitizedSeller = SellerSchema.parse(input.seller);
 
   const safeInput = {
@@ -83,7 +124,7 @@ export async function incentiveProjection(input: IncentiveProjectionInput): Prom
     goals: sanitizedGoals,
     seller: sanitizedSeller,
   };
-  
+
   return incentiveProjectionFlow(safeInput);
 }
 
@@ -100,36 +141,53 @@ const incentiveProjectionFlow = ai.defineFlow(
     let legendariaBonus = 0;
     let paBonus = 0;
     let ticketMedioBonus = 0;
-
-    // Data is now guaranteed to be clean by the wrapper function
-    const { vendas, pa, ticketMedio, corridinhaDiaria } = seller;
     
     // Calculate sales prize based on highest achieved tier
-    if (vendas >= goals.metona) {
-      meta3Premio = goals.metonaPrize;
-    } else if (vendas >= goals.meta) {
-      meta2Premio = goals.metaPrize;
-    } else if (vendas >= goals.metaMinha) {
-      meta1Premio = goals.metaMinhaPrize;
+    let salesPrize = 0;
+    if (seller.vendas >= goals.metaMinha) {
+      salesPrize = goals.metaMinhaPrize;
+    }
+    if (seller.vendas >= goals.meta) {
+      salesPrize = goals.metaPrize;
+    }
+    if (seller.vendas >= goals.metona) {
+      salesPrize = goals.metonaPrize;
     }
     
-    // Calculate performance bonus
-    if (goals.performanceBonusEnabled && vendas >= goals.metaLendaria && goals.legendariaBonusValorVenda > 0) {
-      const bonusIntervals = Math.floor((vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda);
-      legendariaBonus = bonusIntervals * goals.legendariaBonusValorPremio;
+    if (seller.vendas >= goals.metona) {
+      meta3Premio = goals.metonaPrize;
+    } else if (seller.vendas >= goals.meta) {
+      meta2Premio = salesPrize;
+    } else if (seller.vendas >= goals.metaMinha) {
+      meta1Premio = salesPrize;
     }
 
-    // PA Bonus
-    if (pa >= goals.paGoal4 && goals.paGoal4 > 0) paBonus = goals.paPrize4;
-    else if (pa >= goals.paGoal3 && goals.paGoal3 > 0) paBonus = goals.paPrize3;
-    else if (pa >= goals.paGoal2 && goals.paGoal2 > 0) paBonus = goals.paPrize2;
-    else if (pa >= goals.paGoal1 && goals.paGoal1 > 0) paBonus = goals.paPrize1;
+    if (goals.performanceBonusEnabled && seller.vendas >= goals.metaLendaria && goals.legendariaBonusValorVenda > 0) {
+      const bonusCalculation = Math.floor((seller.vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda) * goals.legendariaBonusValorPremio;
+      legendariaBonus = Math.max(0, bonusCalculation);
+    }
 
-    // Ticket Médio Bonus
-    if (ticketMedio >= goals.ticketMedioGoal4 && goals.ticketMedioGoal4 > 0) ticketMedioBonus = goals.ticketMedioPrize4;
-    else if (ticketMedio >= goals.ticketMedioGoal3 && goals.ticketMedioGoal3 > 0) ticketMedioBonus = goals.ticketMedioPrize3;
-    else if (ticketMedio >= goals.ticketMedioGoal2 && goals.ticketMedioGoal2 > 0) ticketMedioBonus = goals.ticketMedioPrize2;
-    else if (ticketMedio >= goals.ticketMedioGoal1 && goals.ticketMedioGoal1 > 0) ticketMedioBonus = goals.ticketMedioPrize1;
+    if (seller.pa >= goals.paGoal4 && goals.paGoal4 > 0) {
+      paBonus = goals.paPrize4;
+    } else if (seller.pa >= goals.paGoal3 && goals.paGoal3 > 0) {
+      paBonus = goals.paPrize3;
+    } else if (seller.pa >= goals.paGoal2 && goals.paGoal2 > 0) {
+      paBonus = goals.paPrize2;
+    } else if (seller.pa >= goals.paGoal1 && goals.paGoal1 > 0) {
+      paBonus = goals.paPrize1;
+    }
+
+    if (seller.ticketMedio >= goals.ticketMedioGoal4 && goals.ticketMedioGoal4 > 0) {
+      ticketMedioBonus = goals.ticketMedioPrize4;
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal3 && goals.ticketMedioGoal3 > 0) {
+      ticketMedioBonus = goals.ticketMedioPrize3;
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal2 && goals.ticketMedioGoal2 > 0) {
+      ticketMedioBonus = goals.ticketMedioPrize2;
+    } else if (seller.ticketMedio >= goals.ticketMedioGoal1 && goals.ticketMedioGoal1 > 0) {
+      ticketMedioBonus = goals.ticketMedioPrize1;
+    }
+
+    const corridinhaDiariaBonus = seller.corridinhaDiaria;
 
     return {
       meta1Premio,
@@ -138,7 +196,7 @@ const incentiveProjectionFlow = ai.defineFlow(
       legendariaBonus,
       paBonus,
       ticketMedioBonus,
-      corridinhaDiariaBonus: corridinhaDiaria,
+      corridinhaDiariaBonus,
     };
   }
 );
