@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { IncentiveProjectionOutput } from "@/ai/flows/incentive-projection";
@@ -98,7 +99,7 @@ const SegmentedProgressBar = ({
           );
         })}
          <div
-          className="absolute -top-14 -translate-x-1/2 flex flex-col items-center"
+          className="absolute -top-8 -translate-x-1/2 flex flex-col items-center"
           style={{ left: `${progress}%` }}
         >
           <div className="bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded-md">
