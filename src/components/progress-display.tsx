@@ -81,7 +81,7 @@ const SegmentedProgressBar = ({
                         className="absolute flex flex-col items-center left-1/2 -translate-x-1/2 top-[-32px] z-10"
                       >
                         <p className="text-white/80 text-xs font-bold">{formatter(g.value)}</p>
-                        <p className="text-white/60 text-[11px] font-medium">{g.label}</p>
+                        <p className="text-white/60 text-[11px] font-medium hidden sm:block">{g.label}</p>
                      </div>
                      <div
                         className={cn("h-full rounded-md", segmentColors[i % segmentColors.length])}
