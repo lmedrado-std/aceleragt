@@ -72,8 +72,19 @@ const IncentiveProjectionOutputSchema = z.object({
 });
 export type IncentiveProjectionOutput = z.infer<typeof IncentiveProjectionOutputSchema>;
 
+// Wrapper function to sanitize data before calling the flow
 export async function incentiveProjection(input: IncentiveProjectionInput): Promise<IncentiveProjectionOutput> {
-  return incentiveProjectionFlow(input);
+  // Sanitize goals to prevent runtime errors with null/undefined values
+  const sanitizedGoals = GoalsSchema.parse(input.goals);
+  const sanitizedSeller = SellerSchema.parse(input.seller);
+
+  const safeInput = {
+    ...input,
+    goals: sanitizedGoals,
+    seller: sanitizedSeller,
+  };
+  
+  return incentiveProjectionFlow(safeInput);
 }
 
 const incentiveProjectionFlow = ai.defineFlow(
@@ -89,71 +100,36 @@ const incentiveProjectionFlow = ai.defineFlow(
     let legendariaBonus = 0;
     let paBonus = 0;
     let ticketMedioBonus = 0;
+
+    // Data is now guaranteed to be clean by the wrapper function
+    const { vendas, pa, ticketMedio, corridinhaDiaria } = seller;
     
-    // Sanitize data to prevent crashes from null/undefined
-    const currentVendas = seller.vendas || 0;
-    const currentPa = seller.pa || 0;
-    const currentTicketMedio = seller.ticketMedio || 0;
-    const currentCorridinha = seller.corridinhaDiaria || 0;
-
-    const gMetaMinha = goals.metaMinha || 0;
-    const gMeta = goals.meta || 0;
-    const gMetona = goals.metona || 0;
-    const gMetaLendaria = goals.metaLendaria || 0;
-
-    const gMetaMinhaPrize = goals.metaMinhaPrize || 0;
-    const gMetaPrize = goals.metaPrize || 0;
-    const gMetonaPrize = goals.metonaPrize || 0;
-
     // Calculate sales prize based on highest achieved tier
-    let salesPrize = 0;
-    if (currentVendas >= gMetaMinha) {
-      salesPrize = gMetaMinhaPrize;
-    }
-    if (currentVendas >= gMeta) {
-      salesPrize = gMetaPrize;
-    }
-    if (currentVendas >= gMetona) {
-      salesPrize = gMetonaPrize;
+    if (vendas >= goals.metona) {
+      meta3Premio = goals.metonaPrize;
+    } else if (vendas >= goals.meta) {
+      meta2Premio = goals.metaPrize;
+    } else if (vendas >= goals.metaMinha) {
+      meta1Premio = goals.metaMinhaPrize;
     }
     
-    if (currentVendas >= gMetona) {
-      meta3Premio = gMetonaPrize;
-    } else if (currentVendas >= gMeta) {
-      meta2Premio = salesPrize;
-    } else if (currentVendas >= gMetaMinha) {
-      meta1Premio = salesPrize;
-    }
-    
-    const gLegendariaBonusValorVenda = goals.legendariaBonusValorVenda || 0;
-    if (goals.performanceBonusEnabled && currentVendas >= gMetaLendaria && gLegendariaBonusValorVenda > 0) {
-      const bonusCalculation = Math.floor((currentVendas - gMetaLendaria) / gLegendariaBonusValorVenda) * (goals.legendariaBonusValorPremio || 0);
-      legendariaBonus = Math.max(0, bonusCalculation);
+    // Calculate performance bonus
+    if (goals.performanceBonusEnabled && vendas >= goals.metaLendaria && goals.legendariaBonusValorVenda > 0) {
+      const bonusIntervals = Math.floor((vendas - goals.metaLendaria) / goals.legendariaBonusValorVenda);
+      legendariaBonus = bonusIntervals * goals.legendariaBonusValorPremio;
     }
 
     // PA Bonus
-    if (currentPa >= (goals.paGoal4 || 0) && (goals.paGoal4 || 0) > 0) {
-      paBonus = goals.paPrize4 || 0;
-    } else if (currentPa >= (goals.paGoal3 || 0) && (goals.paGoal3 || 0) > 0) {
-      paBonus = goals.paPrize3 || 0;
-    } else if (currentPa >= (goals.paGoal2 || 0) && (goals.paGoal2 || 0) > 0) {
-      paBonus = goals.paPrize2 || 0;
-    } else if (currentPa >= (goals.paGoal1 || 0) && (goals.paGoal1 || 0) > 0) {
-      paBonus = goals.paPrize1 || 0;
-    }
+    if (pa >= goals.paGoal4 && goals.paGoal4 > 0) paBonus = goals.paPrize4;
+    else if (pa >= goals.paGoal3 && goals.paGoal3 > 0) paBonus = goals.paPrize3;
+    else if (pa >= goals.paGoal2 && goals.paGoal2 > 0) paBonus = goals.paPrize2;
+    else if (pa >= goals.paGoal1 && goals.paGoal1 > 0) paBonus = goals.paPrize1;
 
     // Ticket Médio Bonus
-    if (currentTicketMedio >= (goals.ticketMedioGoal4 || 0) && (goals.ticketMedioGoal4 || 0) > 0) {
-      ticketMedioBonus = goals.ticketMedioPrize4 || 0;
-    } else if (currentTicketMedio >= (goals.ticketMedioGoal3 || 0) && (goals.ticketMedioGoal3 || 0) > 0) {
-      ticketMedioBonus = goals.ticketMedioPrize3 || 0;
-    } else if (currentTicketMedio >= (goals.ticketMedioGoal2 || 0) && (goals.ticketMedioGoal2 || 0) > 0) {
-      ticketMedioBonus = goals.ticketMedioPrize2 || 0;
-    } else if (currentTicketMedio >= (goals.ticketMedioGoal1 || 0) && (goals.ticketMedioGoal1 || 0) > 0) {
-      ticketMedioBonus = goals.ticketMedioPrize1 || 0;
-    }
-
-    const corridinhaDiariaBonus = currentCorridinha;
+    if (ticketMedio >= goals.ticketMedioGoal4 && goals.ticketMedioGoal4 > 0) ticketMedioBonus = goals.ticketMedioPrize4;
+    else if (ticketMedio >= goals.ticketMedioGoal3 && goals.ticketMedioGoal3 > 0) ticketMedioBonus = goals.ticketMedioPrize3;
+    else if (ticketMedio >= goals.ticketMedioGoal2 && goals.ticketMedioGoal2 > 0) ticketMedioBonus = goals.ticketMedioPrize2;
+    else if (ticketMedio >= goals.ticketMedioGoal1 && goals.ticketMedioGoal1 > 0) ticketMedioBonus = goals.ticketMedioPrize1;
 
     return {
       meta1Premio,
@@ -162,7 +138,7 @@ const incentiveProjectionFlow = ai.defineFlow(
       legendariaBonus,
       paBonus,
       ticketMedioBonus,
-      corridinhaDiariaBonus,
+      corridinhaDiariaBonus: corridinhaDiaria,
     };
   }
 );
