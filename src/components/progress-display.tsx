@@ -99,13 +99,13 @@ const SegmentedProgressBar = ({
           );
         })}
          <div
-          className="absolute -top-14 -translate-x-1/2 flex flex-col items-center"
+          className="absolute top-full mt-2 -translate-x-1/2 flex flex-col items-center"
           style={{ left: `${progress}%` }}
         >
+          <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-slate-800" />
           <div className="bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded-md">
             {progress.toFixed(0)}%
           </div>
-          <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-slate-800" />
         </div>
       </div>
     </div>
