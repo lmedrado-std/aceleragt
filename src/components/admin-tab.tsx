@@ -871,14 +871,16 @@ export function AdminTab({
                         <>
                             <div className="flex-grow">
                                 <p className="font-medium">{seller.name ?? 'Vendedor sem nome'}</p>
-                                {(seller.last_viewed_at || (seller.view_count ?? 0) > 0) && (
+                                {(seller.last_viewed_at || seller.view_count) && (
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                                         {seller.last_viewed_at && (
                                             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5"/> 
                                                 visto por último em {format(new Date(seller.last_viewed_at), "dd/MM/yyyy")}
                                             </span>
                                         )}
-                                        <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count || 0} acessos</span>
+                                        {seller.view_count !== null && seller.view_count !== undefined && (
+                                          <span className="flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5"/> {seller.view_count} acessos</span>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1225,3 +1227,5 @@ export function AdminTab({
     </div>
   );
 }
+
+    
