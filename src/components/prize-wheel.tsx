@@ -13,7 +13,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Loader2, Gift, Ticket } from 'lucide-react';
+import { Loader2, Gift, Ticket, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 
 interface PrizeWheelProps {
@@ -60,13 +60,13 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       try {
         const settingsRes = await fetch(`/api/wheel/settings?storeId=${storeId}`);
         if (!settingsRes.ok) throw new Error('Falha ao verificar configuração.');
-        const { configured, segments } = await settingsRes.json();
+        const { configured, segments: rawSegments } = await settingsRes.json();
         setConfigured(configured);
         if (configured) {
           setSegments(
-            segments.map((s: any) => ({
+            rawSegments.map((s: any) => ({
               id: s.id,
-              option: sanitizeLabel(s.label),
+              option: sanitizeLabel(s.label, s.type),
               style: { 
                 backgroundColor: s.type === 'retry' ? '#475569' : s.color, 
                 textColor: '#FFFFFF' 
@@ -117,11 +117,25 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     }
   };
 
-  const sanitizeLabel = (label: string) => {
+  const sanitizeLabel = (label: string, type: string) => {
+    let prefix = '';
+    switch(type) {
+      case 'money': prefix = '💰 '; break;
+      case 'voucher': prefix = '🎟️ '; break;
+      case 'product': prefix = '🎁 '; break;
+      case 'retry': prefix = '🔁 '; break;
+    }
+
     let clean = label.toUpperCase();
-    // Encurta labels para evitar sobreposição visual
-    if (clean.length > 15) return clean.substring(0, 13) + '..';
-    return clean;
+    
+    // Simplifica valores monetários: R$ 15,00 -> R$ 15
+    clean = clean.replace(',00', '').replace('.00', '');
+    
+    // Encurta labels muito longas
+    if (clean === 'TENTE NOVAMENTE') clean = 'TENTE';
+    if (clean.length > 12) clean = clean.substring(0, 10) + '..';
+    
+    return prefix + clean;
   };
 
   if (loading)
@@ -142,9 +156,9 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     );
 
   return (
-    <div className="w-full max-w-lg mx-auto space-y-4">
+    <div className="w-full max-w-lg mx-auto space-y-6 relative">
       
-      {/* SEÇÃO DE GIROS COMPACTA */}
+      {/* SEÇÃO DE GIROS INTEGRADA E MODERNA */}
       <div className="flex justify-center">
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full shadow-lg border border-white/20 flex items-center gap-3">
             <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900">
@@ -169,22 +183,23 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       </div>
 
       {/* CARD DA ROLETA PREMIUM */}
-      <Card className="bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-900 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+      <Card className="bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-900 border-none p-4 sm:p-8 rounded-[3rem] shadow-2xl overflow-hidden relative">
+        {/* Efeito de Vinheta */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
         
         <div className="flex flex-col items-center gap-8 relative z-10">
           
           {/* Container da Roda */}
-          <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
+          <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/5 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
               
-              {/* PONTEIRO TÉCNICO (AGULHA) - ALINHADO AO TOPO */}
-              <div className="absolute top-[-12px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">
+              {/* NOVO PONTEIRO "NEEDLE" - ALINHADO AO TOPO (12h) */}
+              <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
                   <div className="relative flex flex-col items-center">
-                      <div className="w-10 h-10 bg-yellow-400 rounded-full border-[3px] border-white flex items-center justify-center">
-                          <div className="w-2.5 h-2.5 bg-slate-900 rounded-full" />
+                      <div className="w-12 h-12 bg-yellow-400 rounded-full border-[4px] border-white flex items-center justify-center ring-2 ring-black/10">
+                          <div className="w-3 h-3 bg-slate-900 rounded-full" />
                       </div>
                       <div 
-                        className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[18px] border-t-yellow-400 -mt-1"
+                        className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[22px] border-t-yellow-400 -mt-1"
                         style={{ filter: 'drop-shadow(0 2px 0 white)' }}
                       />
                   </div>
@@ -214,12 +229,12 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                   innerRadius={40}
                   perpendicularText={true}
                   pointerProps={{ style: { display: 'none' } }}
-                  rotationAngle={270} // ALINHA O TOPO (12h) COMO PONTO DE PARADA
+                  rotationAngle={270} // Alinha o topo como ponto de parada
               />
           </div>
 
           {/* Botão de Ação */}
-          <div className="w-full space-y-4">
+          <div className="w-full">
               <Button
                   onClick={handleSpinClick}
                   disabled={credits <= 0 || mustSpin || segments.length === 0}
@@ -244,7 +259,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         </div>
       </Card>
 
-      {/* Modal de Resultado */}
+      {/* Modal de Resultado PREMIUM */}
       {showResult && spinResult && (
         <Dialog open onOpenChange={() => setShowResult(false)}>
           <DialogContent aria-describedby="spin-result-description" className="bg-gradient-to-br from-white to-blue-50 border-none shadow-2xl rounded-[2rem]">
