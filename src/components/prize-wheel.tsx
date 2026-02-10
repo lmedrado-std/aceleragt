@@ -69,7 +69,10 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             segments.map((s: any) => ({
               id: s.id,
               option: s.label,
-              style: { backgroundColor: s.color, textColor: '#FFFFFF' },
+              style: { 
+                backgroundColor: s.type === 'retry' ? '#64748b' : s.color, 
+                textColor: '#FFFFFF' 
+              },
               type: s.type,
               value: s.value,
               description: s.description,
@@ -129,28 +132,28 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   const { wheelCenterAvatar } = placeholderImages;
 
   return (
-    <Card className="w-full max-w-lg mx-auto bg-gradient-to-b from-blue-400 to-blue-600 border-none p-4 sm:p-8 rounded-3xl shadow-2xl overflow-hidden relative">
+    <Card className="w-full max-w-lg mx-auto bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative shadow-[inset_0_0_100px_rgba(0,0,0,0.3)]">
       {/* Círculos decorativos de fundo */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-black/20 rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex flex-col items-center gap-8 relative z-10">
         
-        <div className="text-center space-y-1">
-            <p className="text-blue-100 font-black uppercase tracking-widest text-sm">Seus Giros Disponíveis</p>
-            <p className="text-6xl font-black text-white drop-shadow-md">{credits}</p>
+        <div className="text-center space-y-0.5">
+            <p className="text-blue-200 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Seus Giros Disponíveis</p>
+            <p className="text-7xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{credits}</p>
         </div>
 
-        <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/20 p-2 rounded-full backdrop-blur-sm">
-            {/* Marcador Amarelo (Pointer) igual à imagem */}
-            <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-30 flex flex-col items-center">
-                <div className="w-8 h-10 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-lg flex items-center justify-center border-2 border-white/50 relative overflow-hidden">
+        <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/10">
+            {/* Marcador Amarelo (Pointer Superior) Refinado */}
+            <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center">
+                <div className="w-9 h-11 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-[0_4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center border-[3px] border-white relative overflow-hidden">
                     <div className="w-2.5 h-2.5 bg-slate-900 rounded-full -rotate-45" />
                 </div>
             </div>
 
-            {/* Imagem Central Persona */}
-            <div className="absolute z-20 w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white">
+            {/* Imagem Central Premium Persona */}
+            <div className="absolute z-20 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] border-white shadow-[0_0_20px_rgba(0,0,0,0.4)] overflow-hidden bg-white ring-[6px] ring-blue-900/30">
                 <Image 
                     src={wheelCenterAvatar.url}
                     width={wheelCenterAvatar.width}
@@ -164,25 +167,32 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             <Wheel
                 mustStartSpinning={mustSpin}
                 prizeNumber={prizeNumber}
-                data={segments.map(s => ({ 
-                    ...s, 
-                    option: s.option.substring(0, 14).toUpperCase(),
-                    style: { ...s.style, textColor: '#FFFFFF' }
-                }))}
+                data={segments.map(s => {
+                    // Sanitização de texto: Encurta para caber melhor
+                    let cleanOption = s.option.toUpperCase();
+                    if (cleanOption.length > 12) {
+                        cleanOption = cleanOption.substring(0, 10) + '..';
+                    }
+                    return { 
+                        ...s, 
+                        option: cleanOption,
+                        style: { ...s.style, textColor: '#FFFFFF' }
+                    }
+                })}
                 onStopSpinning={() => {
                     setMustSpin(false);
                     setTimeout(() => setShowResult(true), 400);
                 }}
-                spinDuration={0.8}
-                textDistance={65}
-                fontSize={16}
-                radiusLineWidth={4}
-                radiusLineColor="#FFFFFF"
-                outerBorderWidth={8}
+                spinDuration={0.6}
+                textDistance={75}
+                fontSize={14}
+                radiusLineWidth={3}
+                radiusLineColor="rgba(255,255,255,0.5)"
+                outerBorderWidth={10}
                 outerBorderColor="#FFFFFF"
                 innerBorderWidth={0}
-                innerRadius={35}
-                perpendicularText={false}
+                innerRadius={42}
+                perpendicularText={true}
             />
         </div>
 
@@ -192,8 +202,8 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 disabled={credits <= 0 || mustSpin || segments.length === 0}
                 className={cn(
                     'w-full py-8 text-2xl font-black rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter',
-                    'bg-white text-blue-600 hover:bg-blue-50',
-                    (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale'
+                    'bg-white text-blue-700 hover:bg-blue-50 animate-subtle-pulse',
+                    (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale animate-none'
                 )}
             >
                 {mustSpin ? (
@@ -201,14 +211,14 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                         <Loader2 className="h-8 w-8 animate-spin" /> Sorteando...
                     </span>
                 ) : (
-                    <span className="flex items-center gap-3">
-                        <Gift className="h-8 w-8" /> Girar Agora!
+                    <span className="flex items-center gap-4">
+                        <Gift className="h-10 w-10 text-blue-600" /> Girar Agora!
                     </span>
                 )}
             </Button>
             
             {credits <= 0 && (
-                <p className="text-center text-blue-100/80 text-xs font-bold uppercase tracking-widest">
+                <p className="text-center text-blue-100/60 text-[10px] font-bold uppercase tracking-widest">
                     Aguarde o gestor liberar novos giros
                 </p>
             )}
@@ -217,7 +227,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
       {showResult && spinResult && (
         <Dialog open onOpenChange={() => setShowResult(false)}>
-          <DialogContent aria-describedby="spin-result-description" className="bg-gradient-to-br from-white to-blue-50 border-none shadow-2xl">
+          <DialogContent aria-describedby="spin-result-description" className="bg-gradient-to-br from-white to-blue-50 border-none shadow-2xl rounded-[2rem]">
             <DialogHeader>
               <DialogTitle className={cn(
                   "text-center text-3xl font-black uppercase tracking-tighter",
@@ -230,14 +240,14 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               </DialogDescription>
             </DialogHeader>
             <div className="py-10 text-center">
-                <div className="inline-block p-6 rounded-3xl bg-blue-600 text-white shadow-2xl shadow-blue-200">
-                    <p className="text-sm font-black uppercase tracking-widest opacity-70 mb-1">Prêmio Conquistado</p>
-                    <p className="text-4xl font-black tracking-tight">{spinResult?.option}</p>
+                <div className="inline-block p-8 rounded-[2rem] bg-blue-600 text-white shadow-2xl shadow-blue-200">
+                    <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Prêmio Conquistado</p>
+                    <p className="text-4xl sm:text-5xl font-black tracking-tight">{spinResult?.option}</p>
                 </div>
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button className="w-full h-12 text-lg font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl">
+                <Button className="w-full h-14 text-xl font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-lg">
                   Continuar Vendendo
                 </Button>
               </DialogClose>
