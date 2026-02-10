@@ -42,22 +42,26 @@ type LastUpdateProps = {
 function LastUpdateBanner({ updatedAt, isToday }: LastUpdateProps) {
   return (
     <div
-      className="
-        mb-4 flex items-center justify-center rounded-full
-        border border-amber-200 bg-amber-50/50
-        px-4 py-1 text-[11px]
-        shadow-sm
-        dark:bg-amber-900/20 dark:border-amber-800/50
-      "
+      className={cn(
+        "mb-6 flex items-center gap-3 rounded-r-lg border-l-[6px] py-2 px-4 shadow-sm transition-all duration-300",
+        isToday 
+          ? "bg-emerald-500/10 border-emerald-500 text-emerald-800 dark:text-emerald-300" 
+          : "bg-primary/10 border-primary text-primary dark:text-blue-300"
+      )}
     >
-      <div className="flex items-center gap-2">
-        <Clock className={cn("h-3 w-3", isToday ? "text-emerald-500" : "text-amber-500")} />
-        <span className="font-medium uppercase tracking-wider text-amber-700/80 dark:text-amber-300/80">Última atualização:</span>
-        <span className="font-bold text-slate-900 dark:text-slate-200">{updatedAt}</span>
+      <div className="flex items-center justify-center">
+        <Clock className={cn("h-4 w-4", isToday && "animate-subtle-pulse")} />
+      </div>
+      <div className="flex flex-wrap items-center gap-x-1.5 text-xs sm:text-sm">
+        <span className="font-semibold uppercase tracking-tight opacity-70">Última atualização:</span>
+        <span className="font-black tracking-tight">{updatedAt}</span>
         {isToday && (
-          <span className="flex items-center gap-1.5 ml-2 pl-2 border-l border-amber-200 dark:border-amber-800">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-bold text-emerald-700 dark:text-emerald-400">Hoje</span>
+          <span className="flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-[10px] font-black uppercase tracking-tighter">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Sincronizado
           </span>
         )}
       </div>
