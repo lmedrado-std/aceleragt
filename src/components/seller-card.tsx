@@ -1,4 +1,3 @@
-
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -20,43 +19,43 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
     <div 
       onClick={onClick}
       className={cn(
-        "group bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 p-6 cursor-pointer border border-border/50 hover:-translate-y-2 relative overflow-hidden",
+        "group bg-white dark:bg-slate-800/50 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 cursor-pointer border border-border/50 hover:-translate-y-1 relative overflow-hidden",
         className
       )}
     >
       {/* Efeito visual de borda superior institucional */}
-      <div className="absolute top-0 left-0 w-full h-1.5 bg-primary/20 group-hover:bg-primary transition-colors" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 group-hover:bg-primary transition-colors" />
 
-      <div className="flex flex-col h-full justify-between gap-6">
+      <div className="flex flex-col h-full justify-between gap-4">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            {/* Avatar Institucional */}
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary text-2xl font-bold group-hover:bg-primary group-hover:text-white transition-colors">
+          <div className="flex items-center gap-3">
+            {/* Avatar Institucional Compacto */}
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-xl font-bold group-hover:bg-primary group-hover:text-white transition-colors">
               {initial}
             </div>
             
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/70">Vendedor</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground/70">Vendedor</span>
                 {badge && (
-                  <Badge variant="secondary" className="h-4 px-1.5 text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none">
+                  <Badge variant="secondary" className="h-3.5 px-1 text-[8px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none">
                     {badge}
                   </Badge>
                 )}
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors leading-tight">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors leading-tight truncate">
                 {name}
               </h3>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border/50">
-          <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
-            Ver meu desempenho
+        <div className="flex items-center justify-between pt-3 border-t border-border/40">
+          <span className="text-[10px] text-muted-foreground font-medium group-hover:text-foreground transition-colors hidden sm:inline-block">
+            Meu desempenho
           </span>
-          <Button size="sm" variant="ghost" className="rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-            Acessar <ArrowRight className="ml-2 h-4 w-4" />
+          <Button size="sm" variant="ghost" className="h-8 rounded-full px-3 text-xs group-hover:bg-primary group-hover:text-white transition-all ml-auto">
+            Acessar <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
