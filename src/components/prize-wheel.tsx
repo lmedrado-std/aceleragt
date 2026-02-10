@@ -15,7 +15,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Loader2, Gift, Ticket } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
-import Image from 'next/image';
 
 interface PrizeWheelProps {
   storeId: string;
@@ -67,7 +66,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           setSegments(
             segments.map((s: any) => ({
               id: s.id,
-              option: s.label,
+              option: sanitizeLabel(s.label),
               style: { 
                 backgroundColor: s.type === 'retry' ? '#475569' : s.color, 
                 textColor: '#FFFFFF' 
@@ -114,7 +113,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     }
   };
 
-  // Sanitização de labels para a roleta
   const sanitizeLabel = (label: string) => {
     let clean = label.toUpperCase();
     if (clean.length > 12) return clean.substring(0, 10) + '..';
@@ -139,92 +137,79 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     );
 
   return (
-    <div className="w-full max-w-lg mx-auto space-y-6">
+    <div className="w-full max-w-lg mx-auto space-y-4">
       
-      {/* SEÇÃO DE GIROS - FORA DA ROLETA */}
-      <Card className="border-none shadow-xl overflow-hidden bg-white dark:bg-slate-900 relative">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-600" />
-        <CardContent className="p-6 flex flex-col items-center justify-center relative">
-            <div className="flex items-center gap-2 mb-1">
-                <Ticket className="h-4 w-4 text-blue-600" />
-                <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                    Giros Disponíveis
-                </span>
+      {/* SEÇÃO DE GIROS COMPACTA */}
+      <div className="flex justify-center">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full shadow-lg border border-white/20 flex items-center gap-3">
+            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900">
+                <Ticket className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
-            
-            <div className="relative flex items-center justify-center">
+            <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none">Giros</span>
                 <span className={cn(
-                    "text-8xl sm:text-9xl font-black tracking-tighter leading-none transition-all duration-500",
-                    credits > 0 ? "text-slate-900 dark:text-white" : "text-slate-200 dark:text-slate-800"
+                    "text-2xl font-black leading-none",
+                    credits > 0 ? "text-blue-600" : "text-slate-300"
                 )}>
                     {credits}
                 </span>
-                
-                {credits > 0 && (
-                    <div className="absolute -right-4 top-4">
-                        <span className="relative flex h-4 w-4">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-600"></span>
-                        </span>
-                    </div>
-                )}
             </div>
-            
-            <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <span className="w-8 h-[1px] bg-slate-200 dark:bg-slate-800" />
-                {credits === 1 ? 'Chances de ganhar' : 'Oportunidades'}
-                <span className="w-8 h-[1px] bg-slate-200 dark:bg-slate-800" />
-            </div>
-        </CardContent>
-      </Card>
+            {credits > 0 && (
+                <span className="relative flex h-2 w-2 mb-auto">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                </span>
+            )}
+        </div>
+      </div>
 
-      {/* CARD DA ROLETA */}
+      {/* CARD DA ROLETA PREMIUM */}
       <Card className="bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-900 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-        {/* Efeito de Vinheta */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
         
-        {/* Elementos decorativos */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-black/20 rounded-full blur-3xl pointer-events-none" />
-
         <div className="flex flex-col items-center gap-8 relative z-10">
           
           {/* Container da Roda */}
           <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
               
-              {/* Ponteiro Amarelo Superior Refinado */}
-              <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center">
-                  <div className="w-9 h-11 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-xl flex items-center justify-center border-[3px] border-white overflow-hidden">
-                      <div className="w-2.5 h-2.5 bg-slate-900 rounded-full -rotate-45" />
+              {/* NOVO PONTEIRO TÉCNICO (AGULHA) */}
+              <div className="absolute top-[-12px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">
+                  <div className="relative flex flex-col items-center">
+                      {/* Base Circular */}
+                      <div className="w-10 h-10 bg-yellow-400 rounded-full border-[3px] border-white flex items-center justify-center">
+                          {/* Ponto de Foco Central */}
+                          <div className="w-2.5 h-2.5 bg-slate-900 rounded-full" />
+                      </div>
+                      {/* Ponta da Agulha */}
+                      <div 
+                        className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[18px] border-t-yellow-400 -mt-1"
+                        style={{ filter: 'drop-shadow(0 2px 0 white)' }}
+                      />
                   </div>
               </div>
 
               {/* Centro da Roleta Premium */}
-              <div className="absolute z-20 w-20 h-20 sm:w-22 sm:h-22 rounded-full border-[4px] border-white shadow-2xl flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
-                  <Gift className="w-10 h-10 sm:w-11 sm:h-11 text-blue-600 drop-shadow-sm" />
+              <div className="absolute z-20 w-16 h-16 sm:w-20 sm:h-20 rounded-full border-[4px] border-white shadow-2xl flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
+                  <Gift className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
               </div>
 
               <Wheel
                   mustStartSpinning={mustSpin}
                   prizeNumber={prizeNumber}
-                  data={segments.map(s => ({ 
-                      ...s, 
-                      option: sanitizeLabel(s.option),
-                      style: { ...s.style, textColor: '#FFFFFF' }
-                  }))}
+                  data={segments}
                   onStopSpinning={() => {
                       setMustSpin(false);
                       setTimeout(() => setShowResult(true), 400);
                   }}
                   spinDuration={0.6}
-                  textDistance={75}
+                  textDistance={78}
                   fontSize={14}
-                  radiusLineWidth={3}
-                  radiusLineColor="rgba(255,255,255,0.5)"
+                  radiusLineWidth={2}
+                  radiusLineColor="rgba(255,255,255,0.4)"
                   outerBorderWidth={10}
                   outerBorderColor="#FFFFFF"
                   innerBorderWidth={0}
-                  innerRadius={42}
+                  innerRadius={40}
                   perpendicularText={true}
                   pointerProps={{ style: { display: 'none' } }}
               />
@@ -252,12 +237,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                       </span>
                   )}
               </Button>
-              
-              {credits <= 0 && (
-                  <p className="text-center text-blue-100/40 text-[10px] font-bold uppercase tracking-widest">
-                      Fique atento aos novos lançamentos para ganhar giros
-                  </p>
-              )}
           </div>
         </div>
       </Card>
@@ -283,7 +262,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                     spinResult.type === "retry" ? "bg-slate-500" : "bg-blue-600 shadow-blue-200"
                 )}>
                     <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Prêmio Conquistado</p>
-                    <p className="text-4xl sm:text-5xl font-black tracking-tight">{spinResult?.option.toUpperCase()}</p>
+                    <p className="text-4xl sm:text-5xl font-black tracking-tight">{spinResult?.option}</p>
                 </div>
             </div>
             <DialogFooter>
