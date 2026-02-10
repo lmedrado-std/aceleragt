@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { Wheel } from 'react-custom-roulette';
@@ -14,10 +13,9 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Loader2, Gift } from 'lucide-react';
+import { Loader2, Gift, Ticket } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import Image from 'next/image';
-import placeholderImages from '@/app/lib/placeholder-images.json';
 
 interface PrizeWheelProps {
   storeId: string;
@@ -32,6 +30,7 @@ interface Segment {
   type: string;
   value?: number;
   description?: string;
+  color?: string;
 }
 
 export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps) {
@@ -76,6 +75,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               type: s.type,
               value: s.value,
               description: s.description,
+              color: s.color,
             }))
           );
           await fetchCredits();
@@ -114,117 +114,153 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
     }
   };
 
+  // Sanitização de labels para a roleta
+  const sanitizeLabel = (label: string) => {
+    let clean = label.toUpperCase();
+    if (clean.length > 12) return clean.substring(0, 10) + '..';
+    return clean;
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-96 w-full">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+
   if (configured === false)
     return (
-        <Card className="text-center p-8 border-none bg-blue-500/10">
-            <CardContent>
-                <p className="text-muted-foreground">A roleta de prêmios ainda não foi configurada pelo gestor.</p>
+        <Card className="text-center p-8 border-dashed border-2 bg-muted/20">
+            <CardContent className="flex flex-col items-center gap-4">
+                <Gift className="h-12 w-12 text-muted-foreground/50" />
+                <p className="text-muted-foreground font-medium">A roleta de prêmios ainda não foi configurada.</p>
             </CardContent>
         </Card>
     );
 
   return (
-    <Card className="w-full max-w-lg mx-auto bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative shadow-[inset_0_0_100px_rgba(0,0,0,0.3)]">
-      {/* Efeito de Vinheta no Fundo para focar no centro */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
+    <div className="w-full max-w-lg mx-auto space-y-6">
       
-      {/* Círculos decorativos de fundo */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-black/20 rounded-full blur-3xl pointer-events-none" />
+      {/* SEÇÃO DE GIROS - FORA DA ROLETA */}
+      <Card className="border-none shadow-xl overflow-hidden bg-white dark:bg-slate-900 relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-600" />
+        <CardContent className="p-6 flex flex-col items-center justify-center relative">
+            <div className="flex items-center gap-2 mb-1">
+                <Ticket className="h-4 w-4 text-blue-600" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                    Giros Disponíveis
+                </span>
+            </div>
+            
+            <div className="relative flex items-center justify-center">
+                <span className={cn(
+                    "text-8xl sm:text-9xl font-black tracking-tighter leading-none transition-all duration-500",
+                    credits > 0 ? "text-slate-900 dark:text-white" : "text-slate-200 dark:text-slate-800"
+                )}>
+                    {credits}
+                </span>
+                
+                {credits > 0 && (
+                    <div className="absolute -right-4 top-4">
+                        <span className="relative flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-600"></span>
+                        </span>
+                    </div>
+                )}
+            </div>
+            
+            <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-8 h-[1px] bg-slate-200 dark:bg-slate-800" />
+                {credits === 1 ? 'Chances de ganhar' : 'Oportunidades'}
+                <span className="w-8 h-[1px] bg-slate-200 dark:bg-slate-800" />
+            </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex flex-col items-center gap-8 relative z-10">
+      {/* CARD DA ROLETA */}
+      <Card className="bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-900 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+        {/* Efeito de Vinheta */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
         
-        {/* Cabeçalho da Roleta com Hierarquia Refinada */}
-        <div className="text-center space-y-0.5">
-            <p className="text-blue-100/60 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Seus Giros Disponíveis</p>
-            <p className="text-7xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{credits}</p>
+        {/* Elementos decorativos */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-black/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col items-center gap-8 relative z-10">
+          
+          {/* Container da Roda */}
+          <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
+              
+              {/* Ponteiro Amarelo Superior Refinado */}
+              <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center">
+                  <div className="w-9 h-11 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-xl flex items-center justify-center border-[3px] border-white overflow-hidden">
+                      <div className="w-2.5 h-2.5 bg-slate-900 rounded-full -rotate-45" />
+                  </div>
+              </div>
+
+              {/* Centro da Roleta Premium */}
+              <div className="absolute z-20 w-20 h-20 sm:w-22 sm:h-22 rounded-full border-[4px] border-white shadow-2xl flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
+                  <Gift className="w-10 h-10 sm:w-11 sm:h-11 text-blue-600 drop-shadow-sm" />
+              </div>
+
+              <Wheel
+                  mustStartSpinning={mustSpin}
+                  prizeNumber={prizeNumber}
+                  data={segments.map(s => ({ 
+                      ...s, 
+                      option: sanitizeLabel(s.option),
+                      style: { ...s.style, textColor: '#FFFFFF' }
+                  }))}
+                  onStopSpinning={() => {
+                      setMustSpin(false);
+                      setTimeout(() => setShowResult(true), 400);
+                  }}
+                  spinDuration={0.6}
+                  textDistance={75}
+                  fontSize={14}
+                  radiusLineWidth={3}
+                  radiusLineColor="rgba(255,255,255,0.5)"
+                  outerBorderWidth={10}
+                  outerBorderColor="#FFFFFF"
+                  innerBorderWidth={0}
+                  innerRadius={42}
+                  perpendicularText={true}
+                  pointerProps={{ style: { display: 'none' } }}
+              />
+          </div>
+
+          {/* Botão de Ação */}
+          <div className="w-full space-y-4">
+              <Button
+                  onClick={handleSpinClick}
+                  disabled={credits <= 0 || mustSpin || segments.length === 0}
+                  className={cn(
+                      'w-full py-8 text-2xl font-black rounded-2xl shadow-2xl transition-all active:scale-95 uppercase tracking-tighter',
+                      'bg-white text-blue-700 hover:bg-blue-50',
+                      credits > 0 && !mustSpin && 'animate-subtle-pulse',
+                      (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale animate-none shadow-none'
+                  )}
+              >
+                  {mustSpin ? (
+                      <span className="flex items-center gap-3">
+                          <Loader2 className="h-8 w-8 animate-spin" /> SORTEANDO...
+                      </span>
+                  ) : (
+                      <span className="flex items-center gap-4">
+                          <Gift className="h-10 w-10 text-blue-600" /> GIRAR AGORA!
+                      </span>
+                  )}
+              </Button>
+              
+              {credits <= 0 && (
+                  <p className="text-center text-blue-100/40 text-[10px] font-bold uppercase tracking-widest">
+                      Fique atento aos novos lançamentos para ganhar giros
+                  </p>
+              )}
+          </div>
         </div>
-
-        {/* Container da Roda */}
-        <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
-            
-            {/* Ponteiro Amarelo Superior Refinado */}
-            <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center">
-                <div className="w-9 h-11 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-[0_4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center border-[3px] border-white relative overflow-hidden">
-                    <div className="w-2.5 h-2.5 bg-slate-900 rounded-full -rotate-45" />
-                </div>
-            </div>
-
-            {/* Centro da Roleta - Sistema de Anéis Premium */}
-            <div className="absolute z-20 w-20 h-20 sm:w-22 sm:h-22 rounded-full border-[4px] border-white shadow-[0_0_20px_rgba(0,0,0,0.4)] flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
-                <Gift className="w-10 h-10 sm:w-11 sm:h-11 text-blue-600 drop-shadow-sm" />
-            </div>
-
-            <Wheel
-                mustStartSpinning={mustSpin}
-                prizeNumber={prizeNumber}
-                data={segments.map(s => {
-                    // Sanitização de texto: Encurta para caber melhor e usa uppercase
-                    let cleanOption = s.option.toUpperCase();
-                    if (cleanOption.length > 12) {
-                        cleanOption = cleanOption.substring(0, 10) + '..';
-                    }
-                    return { 
-                        ...s, 
-                        option: cleanOption,
-                        style: { ...s.style, textColor: '#FFFFFF' }
-                    }
-                })}
-                onStopSpinning={() => {
-                    setMustSpin(false);
-                    setTimeout(() => setShowResult(true), 400);
-                }}
-                spinDuration={0.6}
-                textDistance={75}
-                fontSize={14}
-                radiusLineWidth={3}
-                radiusLineColor="rgba(255,255,255,0.5)"
-                outerBorderWidth={10}
-                outerBorderColor="#FFFFFF"
-                innerBorderWidth={0}
-                innerRadius={42}
-                perpendicularText={true}
-                pointerProps={{
-                  style: { display: 'none' } // Garante que o ponteiro padrão da lib suma
-                }}
-            />
-        </div>
-
-        {/* Botão de Ação CTA Premium */}
-        <div className="w-full space-y-4">
-            <Button
-                onClick={handleSpinClick}
-                disabled={credits <= 0 || mustSpin || segments.length === 0}
-                className={cn(
-                    'w-full py-8 text-2xl font-black rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter',
-                    'bg-white text-blue-700 hover:bg-blue-50 animate-subtle-pulse',
-                    (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale animate-none shadow-none'
-                )}
-            >
-                {mustSpin ? (
-                    <span className="flex items-center gap-3">
-                        <Loader2 className="h-8 w-8 animate-spin" /> SORTEANDO...
-                    </span>
-                ) : (
-                    <span className="flex items-center gap-4">
-                        <Gift className="h-10 w-10 text-blue-600" /> GIRAR AGORA!
-                    </span>
-                )}
-            </Button>
-            
-            {credits <= 0 && (
-                <p className="text-center text-blue-100/40 text-[10px] font-bold uppercase tracking-widest">
-                    Aguarde o gestor liberar novos giros
-                </p>
-            )}
-        </div>
-      </div>
+      </Card>
 
       {/* Modal de Resultado */}
       {showResult && spinResult && (
@@ -242,9 +278,12 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               </DialogDescription>
             </DialogHeader>
             <div className="py-10 text-center">
-                <div className="inline-block p-8 rounded-[2rem] bg-blue-600 text-white shadow-2xl shadow-blue-200">
+                <div className={cn(
+                    "inline-block p-8 rounded-[2rem] text-white shadow-2xl",
+                    spinResult.type === "retry" ? "bg-slate-500" : "bg-blue-600 shadow-blue-200"
+                )}>
                     <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Prêmio Conquistado</p>
-                    <p className="text-4xl sm:text-5xl font-black tracking-tight">{spinResult?.option}</p>
+                    <p className="text-4xl sm:text-5xl font-black tracking-tight">{spinResult?.option.toUpperCase()}</p>
                 </div>
             </div>
             <DialogFooter>
@@ -257,6 +296,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           </DialogContent>
         </Dialog>
       )}
-    </Card>
+    </div>
   );
 }
