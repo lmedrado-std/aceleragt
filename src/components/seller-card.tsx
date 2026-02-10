@@ -1,113 +1,65 @@
 
+"use client";
+
+import { cn } from "@/lib/utils";
+import { User, ArrowRight, Circle } from "lucide-react";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+
 type SellerCardProps = {
   name: string;
-  color: "pink" | "green" | "purple" | "orange";
   badge?: string; // ex: "Top", "Novo"
   onClick: () => void;
+  className?: string;
 };
 
-const colorMap = {
-  pink: {
-    ring: "ring-pink-300",
-    border: "border-pink-200",
-    from: "from-pink-400",
-    to: "to-rose-400",
-  },
-  green: {
-    ring: "ring-emerald-300",
-    border: "border-emerald-200",
-    from: "from-emerald-400",
-    to: "to-teal-400",
-  },
-  purple: {
-    ring: "ring-violet-300",
-    border: "border-violet-200",
-    from: "from-violet-400",
-    to: "to-fuchsia-400",
-  },
-  orange: {
-    ring: "ring-orange-300",
-    border: "border-orange-200",
-    from: "from-orange-400",
-    to: "to-amber-400",
-  },
-};
-
-export function SellerCard({ name, color, badge, onClick }: SellerCardProps) {
-  const cfg = colorMap[color];
+export function SellerCard({ name, badge, onClick, className }: SellerCardProps) {
   const initial = name.trim().charAt(0).toUpperCase();
 
   return (
-    <button
+    <div 
       onClick={onClick}
-      className={`
-        group relative flex flex-col items-center justify-between
-        rounded-2xl border bg-white/70
-        ${cfg.border}
-        px-6 py-5
-        shadow-[0_6px_18px_rgba(15,23,42,0.06)]
-        backdrop-blur-sm
-        transition-all duration-300
-        hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(15,23,42,0.12)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500
-      `}
+      className={cn(
+        "group bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 p-6 cursor-pointer border border-border/50 hover:-translate-y-2 relative overflow-hidden",
+        className
+      )}
     >
-      {/* borda animada no hover */}
-      <span
-        className={`
-          pointer-events-none absolute inset-0 rounded-2xl
-          opacity-0 group-hover:opacity-100
-          ring-2 ${cfg.ring}
-          transition-opacity duration-300
-        `}
-      />
+      {/* Efeito visual de borda superior institucional */}
+      <div className="absolute top-0 left-0 w-full h-1.5 bg-primary/20 group-hover:bg-primary transition-colors" />
 
-      {/* avatar */}
-      <div className="relative z-[1]">
-        <div
-          className={`
-            flex h-24 w-24 items-center justify-center rounded-full
-            bg-gradient-to-br ${cfg.from} ${cfg.to}
-            text-white text-4xl font-bold
-            shadow-md shadow-slate-900/15
-            transition-transform duration-300
-            group-hover:scale-105
-          `}
-        >
-          {initial}
+      <div className="flex flex-col h-full justify-between gap-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            {/* Avatar Institucional */}
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary text-2xl font-bold group-hover:bg-primary group-hover:text-white transition-colors">
+              {initial}
+            </div>
+            
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/70">Vendedor</span>
+                {badge && (
+                  <Badge variant="secondary" className="h-4 px-1.5 text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none">
+                    {badge}
+                  </Badge>
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors leading-tight">
+                {name}
+              </h3>
+            </div>
+          </div>
         </div>
 
-        {badge && (
-          <span
-            className="
-              absolute -bottom-1 -right-1 rounded-full bg-amber-400
-              px-2 py-0.5 text-[10px] font-semibold uppercase
-              text-slate-900 shadow-sm
-            "
-          >
-            {badge}
+        <div className="flex items-center justify-between pt-4 border-t border-border/50">
+          <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
+            Ver meu desempenho
           </span>
-        )}
+          <Button size="sm" variant="ghost" className="rounded-full group-hover:bg-primary group-hover:text-white transition-all">
+            Acessar <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
-
-      {/* nome + legenda */}
-      <div className="relative z-[1] mt-4 flex flex-col items-center gap-1">
-        <span className="text-sm font-semibold tracking-[0.16em] text-slate-900">
-          {name.toUpperCase()}
-        </span>
-        <span className="text-xs text-slate-500">
-          Ver desempenho
-        </span>
-      </div>
-
-      {/* efeito de “pulse” no hover */}
-      <span
-        className="
-          pointer-events-none absolute -z-10 h-24 w-24 rounded-full
-          bg-sky-100/60 blur-2 opacity-0
-          group-hover:opacity-100 group-hover:animate-pulse
-        "
-      />
-    </button>
+    </div>
   );
 }
