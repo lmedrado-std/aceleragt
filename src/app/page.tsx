@@ -1,18 +1,19 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from 'next/navigation';
 import { Store } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Moon, Sun, Shield } from "lucide-react";
+import { Loader2, Moon, Sun, Shield, Search, X } from "lucide-react";
 import AppLayout from "@/components/app-layout";
 import { Logo } from "@/components/logo";
 import { StoreCard } from "@/components/store-card";
-import { AdminButton } from "@/components/admin-button";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 const storeCardColors = [
     "border-blue-500",
@@ -48,12 +49,17 @@ function AppFooter() {
     }
 
     return (
-        <footer className="mt-auto pt-16 pb-8 text-center text-slate-400">
-            {renderThemeToggle()}
-            <div className="mt-4 space-y-1 text-sm">
-                <p>V 2.0.1 BUILD ESTÁVEL</p>
-                <p>RyannBreston desenvolvedor</p>
-                <p>© {new Date().getFullYear()} Acelera GT.</p>
+        <footer className="mt-auto pt-12 pb-8 text-center border-t border-border/40">
+            <div className="flex flex-col items-center gap-4">
+                {renderThemeToggle()}
+                <div className="space-y-1">
+                    <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        V 2.0.1 BUILD ESTÁVEL
+                    </p>
+                    <p className="text-xs text-slate-500">
+                        © {new Date().getFullYear()} Acelera GT • <span className="opacity-70">RyannBreston dev</span>
+                    </p>
+                </div>
             </div>
         </footer>
     );
@@ -64,6 +70,7 @@ export default function HomePage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchText] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -82,63 +89,100 @@ export default function HomePage() {
     fetchStores();
   }, []);
 
+  const filteredStores = useMemo(() => {
+    return stores.filter(store => 
+      store.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [stores, searchTerm]);
+
   return (
     <AppLayout>
-      <div className="flex flex-1 flex-col items-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
-        <div className="w-full max-w-5xl text-center flex flex-col min-h-full">
+      <div className="flex flex-1 flex-col items-center p-4 md:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950 min-h-screen">
+        <div className="w-full max-w-5xl flex flex-col flex-1">
             
-            <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-sm">
-              <CardContent className="p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <Logo className="h-12" />
+            <Card className="mb-8 bg-primary shadow-2xl border-none overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+              <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
+                    <Logo className="h-12" />
+                  </div>
                   <div>
-                    <h1 className="text-xl font-bold tracking-tight text-white text-left">
-                        Bem-vindo(a) ao Acelera GT
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white mb-1">
+                        Acelera GT
                     </h1>
-                    <p className="text-sm text-white/80 text-left">
-                        Selecione uma loja abaixo para acessar o painel de desempenho.
+                    <p className="text-white/80 text-sm md:text-base font-medium">
+                        Selecione uma loja para gerenciar o desempenho.
                     </p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => router.push('/admin')}>
-                  <Shield />
+                <Button variant="secondary" size="lg" className="shadow-lg hover:scale-105 transition-transform font-bold" onClick={() => router.push('/admin')}>
+                  <Shield className="mr-2 h-5 w-5" /> Painel Global
                 </Button>
               </CardContent>
             </Card>
 
-            <div className="mt-10">
+            <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center">
+                <div className="relative flex-1 w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="Buscar loja pelo nome..." 
+                        className="pl-10 h-12 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-border/50 focus:ring-primary text-lg"
+                        value={searchTerm}
+                        onChange={(e) => setSearchText(e.target.value)}
+                    />
+                    {searchTerm && (
+                        <button 
+                            onClick={() => setSearchText("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
+                </div>
+                <div className="text-sm font-bold text-muted-foreground whitespace-nowrap bg-white/30 dark:bg-slate-800/30 px-4 py-2 rounded-full backdrop-blur-sm border border-border/20">
+                    {filteredStores.length} {filteredStores.length === 1 ? 'Loja' : 'Lojas'}
+                </div>
+            </div>
+
+            <div className="mt-4 flex-1">
                 {loading ? (
-                    <div className="flex justify-center items-center h-40">
-                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                    <div className="flex flex-col justify-center items-center h-64 gap-4">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                        <p className="text-muted-foreground font-semibold animate-pulse">Carregando indicadores das lojas...</p>
                     </div>
                 ) : error ? (
-                     <Card className="border-destructive bg-destructive/10">
+                     <Card className="border-destructive bg-destructive/5">
                         <CardHeader>
-                            <CardTitle className="text-destructive">Erro ao carregar</CardTitle>
+                            <CardTitle className="text-destructive flex items-center gap-2">
+                                <X className="h-5 w-5" /> Erro de Conexão
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p>{error}</p>
-                            <Button variant="link" onClick={() => window.location.reload()}>Tentar novamente</Button>
+                            <p className="text-muted-foreground mb-4">{error}</p>
+                            <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
                         </CardContent>
                     </Card>
-                ) : stores.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-                        {stores.map((store, index) => (
+                ) : filteredStores.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredStores.map((store, index) => (
                            <StoreCard
                               key={store.id}
                               name={store.name}
                               onClick={() => router.push(`/loja/${store.id}`)}
-                              className={storeCardColors[index % storeCardColors.length]}
                             />
                         ))}
                     </div>
                 ) : (
-                    <p className="text-slate-500 dark:text-slate-400">Nenhuma loja cadastrada no momento.</p>
+                    <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-border/50 rounded-3xl">
+                        <Search className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                        <p className="text-xl font-bold text-muted-foreground">Nenhuma loja encontrada</p>
+                        <p className="text-sm text-muted-foreground/70">Tente buscar com outro termo.</p>
+                        <Button variant="link" onClick={() => setSearchText("")} className="mt-2">Limpar busca</Button>
+                    </div>
                 )}
             </div>
-            <div className="mt-12 pt-6">
-                <Separator className="my-8" />
-            </div>
+            
             <AppFooter />
         </div>
       </div>
