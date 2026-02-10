@@ -18,6 +18,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/comp
 import { Logo } from "@/components/logo";
 import { SellerCard } from "@/components/seller-card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 function handleAccessAdminLoja(storeId: string, router: ReturnType<typeof useRouter>) {
   const lojaDashboardUrl = `/loja/${storeId}/dashboard?tab=admin`;
