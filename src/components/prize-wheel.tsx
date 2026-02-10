@@ -129,10 +129,11 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         </Card>
     );
 
-  const { wheelCenterAvatar } = placeholderImages;
-
   return (
     <Card className="w-full max-w-lg mx-auto bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative shadow-[inset_0_0_100px_rgba(0,0,0,0.3)]">
+      {/* Efeito de Vinheta no Fundo */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
+      
       {/* Círculos decorativos de fundo */}
       <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-black/20 rounded-full blur-3xl pointer-events-none" />
@@ -145,23 +146,16 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         </div>
 
         <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/10">
-            {/* Marcador Amarelo (Pointer Superior) Refinado */}
+            {/* Marcador Amarelo (Pointer Único Superior) */}
             <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center">
                 <div className="w-9 h-11 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-[0_4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center border-[3px] border-white relative overflow-hidden">
                     <div className="w-2.5 h-2.5 bg-slate-900 rounded-full -rotate-45" />
                 </div>
             </div>
 
-            {/* Imagem Central Premium Persona */}
-            <div className="absolute z-20 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] border-white shadow-[0_0_20px_rgba(0,0,0,0.4)] overflow-hidden bg-white ring-[6px] ring-blue-900/30">
-                <Image 
-                    src={wheelCenterAvatar.url}
-                    width={wheelCenterAvatar.width}
-                    height={wheelCenterAvatar.height}
-                    alt={wheelCenterAvatar.alt}
-                    data-ai-hint={wheelCenterAvatar.hint}
-                    className="object-cover w-full h-full"
-                />
+            {/* Centro da Roleta - Ícone de Presente */}
+            <div className="absolute z-20 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] border-white shadow-[0_0_20px_rgba(0,0,0,0.4)] flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
+                <Gift className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" />
             </div>
 
             <Wheel
@@ -193,6 +187,9 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 innerBorderWidth={0}
                 innerRadius={42}
                 perpendicularText={true}
+                pointerProps={{
+                  style: { display: 'none' } // Desativa o ponteiro padrão da biblioteca
+                }}
             />
         </div>
 
