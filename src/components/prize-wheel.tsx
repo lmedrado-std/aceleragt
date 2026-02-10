@@ -92,7 +92,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   }, [storeId, sellerId, toast]);
 
   const handleSpinClick = async () => {
-    if (mustSpin) return;
+    if (mustSpin || credits <= 0) return;
 
     try {
       const res = await fetch('/api/wheel/spin', {
@@ -102,11 +102,15 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const result = await res.json();
+      
       const idx = segments.findIndex((s) => s.id === result.prize.id);
+      if (idx === -1) throw new Error("Prêmio não encontrado na roleta local.");
+
       setPrizeNumber(idx);
       setSpinResult(segments[idx]);
-      setCredits((c) => c - 1);
+      setCredits((c) => Math.max(0, c - 1));
       setMustSpin(true);
+      
       if (onSpinResult) onSpinResult(result);
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Erro no Giro', description: err.message });
@@ -115,7 +119,8 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
   const sanitizeLabel = (label: string) => {
     let clean = label.toUpperCase();
-    if (clean.length > 12) return clean.substring(0, 10) + '..';
+    // Encurta labels para evitar sobreposição visual
+    if (clean.length > 15) return clean.substring(0, 13) + '..';
     return clean;
   };
 
@@ -172,15 +177,12 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           {/* Container da Roda */}
           <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
               
-              {/* NOVO PONTEIRO TÉCNICO (AGULHA) */}
+              {/* PONTEIRO TÉCNICO (AGULHA) - ALINHADO AO TOPO */}
               <div className="absolute top-[-12px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">
                   <div className="relative flex flex-col items-center">
-                      {/* Base Circular */}
                       <div className="w-10 h-10 bg-yellow-400 rounded-full border-[3px] border-white flex items-center justify-center">
-                          {/* Ponto de Foco Central */}
                           <div className="w-2.5 h-2.5 bg-slate-900 rounded-full" />
                       </div>
-                      {/* Ponta da Agulha */}
                       <div 
                         className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[18px] border-t-yellow-400 -mt-1"
                         style={{ filter: 'drop-shadow(0 2px 0 white)' }}
@@ -201,7 +203,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                       setMustSpin(false);
                       setTimeout(() => setShowResult(true), 400);
                   }}
-                  spinDuration={0.6}
+                  spinDuration={0.8}
                   textDistance={78}
                   fontSize={14}
                   radiusLineWidth={2}
@@ -212,6 +214,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                   innerRadius={40}
                   perpendicularText={true}
                   pointerProps={{ style: { display: 'none' } }}
+                  rotationAngle={270} // ALINHA O TOPO (12h) COMO PONTO DE PARADA
               />
           </div>
 
