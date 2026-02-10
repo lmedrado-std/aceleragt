@@ -70,7 +70,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               id: s.id,
               option: s.label,
               style: { 
-                backgroundColor: s.type === 'retry' ? '#64748b' : s.color, 
+                backgroundColor: s.type === 'retry' ? '#475569' : s.color, 
                 textColor: '#FFFFFF' 
               },
               type: s.type,
@@ -131,7 +131,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
   return (
     <Card className="w-full max-w-lg mx-auto bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 border-none p-4 sm:p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative shadow-[inset_0_0_100px_rgba(0,0,0,0.3)]">
-      {/* Efeito de Vinheta no Fundo */}
+      {/* Efeito de Vinheta no Fundo para focar no centro */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
       
       {/* Círculos decorativos de fundo */}
@@ -140,29 +140,32 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
 
       <div className="flex flex-col items-center gap-8 relative z-10">
         
+        {/* Cabeçalho da Roleta com Hierarquia Refinada */}
         <div className="text-center space-y-0.5">
-            <p className="text-blue-200 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Seus Giros Disponíveis</p>
+            <p className="text-blue-100/60 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Seus Giros Disponíveis</p>
             <p className="text-7xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{credits}</p>
         </div>
 
-        <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/10">
-            {/* Marcador Amarelo (Pointer Único Superior) */}
+        {/* Container da Roda */}
+        <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/10 p-2 rounded-full backdrop-blur-md border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
+            
+            {/* Ponteiro Amarelo Superior Refinado */}
             <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center">
                 <div className="w-9 h-11 bg-yellow-400 rounded-full rounded-bl-none rotate-45 shadow-[0_4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center border-[3px] border-white relative overflow-hidden">
                     <div className="w-2.5 h-2.5 bg-slate-900 rounded-full -rotate-45" />
                 </div>
             </div>
 
-            {/* Centro da Roleta - Ícone de Presente */}
-            <div className="absolute z-20 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] border-white shadow-[0_0_20px_rgba(0,0,0,0.4)] flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
-                <Gift className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" />
+            {/* Centro da Roleta - Sistema de Anéis Premium */}
+            <div className="absolute z-20 w-20 h-20 sm:w-22 sm:h-22 rounded-full border-[4px] border-white shadow-[0_0_20px_rgba(0,0,0,0.4)] flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
+                <Gift className="w-10 h-10 sm:w-11 sm:h-11 text-blue-600 drop-shadow-sm" />
             </div>
 
             <Wheel
                 mustStartSpinning={mustSpin}
                 prizeNumber={prizeNumber}
                 data={segments.map(s => {
-                    // Sanitização de texto: Encurta para caber melhor
+                    // Sanitização de texto: Encurta para caber melhor e usa uppercase
                     let cleanOption = s.option.toUpperCase();
                     if (cleanOption.length > 12) {
                         cleanOption = cleanOption.substring(0, 10) + '..';
@@ -188,11 +191,12 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 innerRadius={42}
                 perpendicularText={true}
                 pointerProps={{
-                  style: { display: 'none' } // Desativa o ponteiro padrão da biblioteca
+                  style: { display: 'none' } // Garante que o ponteiro padrão da lib suma
                 }}
             />
         </div>
 
+        {/* Botão de Ação CTA Premium */}
         <div className="w-full space-y-4">
             <Button
                 onClick={handleSpinClick}
@@ -200,28 +204,29 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 className={cn(
                     'w-full py-8 text-2xl font-black rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-tighter',
                     'bg-white text-blue-700 hover:bg-blue-50 animate-subtle-pulse',
-                    (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale animate-none'
+                    (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale animate-none shadow-none'
                 )}
             >
                 {mustSpin ? (
                     <span className="flex items-center gap-3">
-                        <Loader2 className="h-8 w-8 animate-spin" /> Sorteando...
+                        <Loader2 className="h-8 w-8 animate-spin" /> SORTEANDO...
                     </span>
                 ) : (
                     <span className="flex items-center gap-4">
-                        <Gift className="h-10 w-10 text-blue-600" /> Girar Agora!
+                        <Gift className="h-10 w-10 text-blue-600" /> GIRAR AGORA!
                     </span>
                 )}
             </Button>
             
             {credits <= 0 && (
-                <p className="text-center text-blue-100/60 text-[10px] font-bold uppercase tracking-widest">
+                <p className="text-center text-blue-100/40 text-[10px] font-bold uppercase tracking-widest">
                     Aguarde o gestor liberar novos giros
                 </p>
             )}
         </div>
       </div>
 
+      {/* Modal de Resultado */}
       {showResult && spinResult && (
         <Dialog open onOpenChange={() => setShowResult(false)}>
           <DialogContent aria-describedby="spin-result-description" className="bg-gradient-to-br from-white to-blue-50 border-none shadow-2xl rounded-[2rem]">
@@ -245,7 +250,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             <DialogFooter>
               <DialogClose asChild>
                 <Button className="w-full h-14 text-xl font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-lg">
-                  Continuar Vendendo
+                  CONTINUAR VENDENDO
                 </Button>
               </DialogClose>
             </DialogFooter>
