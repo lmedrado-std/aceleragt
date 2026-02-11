@@ -22,20 +22,45 @@ const categorias = [
   "Fechamento de Vendas"
 ];
 
-// Helper para extrair o ID do vídeo do YouTube
-const getYouTubeVideoId = (url: string): string | null => {
+const getEmbedUrl = (url: string): string => {
+  if (!url) return "";
+
   try {
-    const urlObj = new URL(url);
-    if (urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'youtube.com') {
-      return urlObj.searchParams.get('v');
+    const parsed = new URL(url);
+
+    if (parsed.pathname.includes("/embed/")) {
+      const id = parsed.pathname.split("/embed/")[1];
+      return `https://www.youtube.com/embed/${id}`;
     }
-    if (urlObj.hostname === 'youtu.be') {
-      return urlObj.pathname.slice(1);
+
+    let videoId = "";
+
+    if (parsed.searchParams.get("v")) {
+      videoId = parsed.searchParams.get("v")!;
     }
-  } catch (e) {
-    console.error("URL de vídeo inválida:", url, e);
+
+    if (parsed.hostname.includes("youtu.be")) {
+      videoId = parsed.pathname.replace("/", "");
+    }
+
+    if (parsed.pathname.includes("/shorts/")) {
+      videoId = parsed.pathname.split("/shorts/")[1];
+    }
+
+    if (parsed.pathname.includes("/live/")) {
+      videoId = parsed.pathname.split("/live/")[1];
+    }
+
+    videoId = videoId.split("?")[0].split("&")[0];
+
+    if (videoId.length === 11) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    return "";
+  } catch {
+    return "";
   }
-  return null;
 };
 
 
@@ -44,14 +69,12 @@ export function TipsTab() {
   const [categoria, setCategoria] = useState(categorias[0]);
 
   useEffect(() => {
-    // A função getVideosPorCategoria agora retorna vídeos aleatórios
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
 
-  // Filtra apenas os vídeos que têm um ID de vídeo válido extraível da URL
   const videosDisponiveis = videos.filter(video => {
-      const videoId = getYouTubeVideoId(video.url);
-      return videoId && videoId.trim() !== "";
+      const embedUrl = getEmbedUrl(video.url);
+      return embedUrl !== "";
   });
 
   return (
@@ -85,19 +108,26 @@ export function TipsTab() {
         >
             <CarouselContent>
                  {videosDisponiveis.map((video, index) => {
-                    const videoId = getYouTubeVideoId(video.url);
+                    const embedUrl = getEmbedUrl(video.url);
                     return (
                         <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1 h-full">
                                 <Card className="group flex flex-col hover:border-primary transition-all h-full">
                                     <div className={styles.videoWrapper}>
-                                        <iframe
-                                            src={`https://www.youtube.com/embed/${videoId}`}
+                                        {embedUrl ? (
+                                          <iframe
+                                            src={embedUrl}
                                             title={video.title}
                                             frameBorder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
-                                        ></iframe>
+                                            loading="lazy"
+                                          />
+                                        ) : (
+                                          <div className="flex items-center justify-center h-full text-sm text-muted-foreground bg-muted">
+                                            Vídeo indisponível
+                                          </div>
+                                        )}
                                     </div>
                                     <CardHeader>
                                         <CardTitle className="text-base group-hover:text-primary transition-colors">{video.title}</CardTitle>
