@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +34,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { WelcomeModal } from "./welcome-modal";
+import { cn } from "@/lib/utils";
 
 // --- ZOD SCHEMAS & TYPES ---
 const sellerSchema = z.object({
@@ -546,11 +546,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const isManagerView = isAdmin || isStoreAdmin;
 
-  // Adaptador seguro para Metas (Garante que campos opcionais/parciais tenham valores padrão)
-  const safeGoals: Goals = {
+  const safeGoals = {
     performanceBonusEnabled: false,
     ...getValues().goals,
   } as Goals;
+
+  const tabTriggerClass = cn(
+    "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+    "text-muted-foreground border border-transparent",
+    "hover:bg-muted/50",
+    "data-[state=active]:bg-primary",
+    "data-[state=active]:text-primary-foreground",
+    "data-[state=active]:shadow-md"
+  );
 
   return (
     <TooltipProvider>
@@ -608,10 +616,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
               <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                  {(isManagerView) && (
                     <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
-                        <TabsList className="h-auto p-0 bg-transparent">
+                        <TabsList className="h-auto p-1 bg-muted/30 rounded-xl">
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <TabsTrigger value="admin" className="px-4 py-2 text-base">
+                                    <TabsTrigger value="admin" className={tabTriggerClass}>
                                         <ShieldCheck className="h-5 w-5 mr-2" /> Painel do Gestor
                                     </TabsTrigger>
                                 </TooltipTrigger>
@@ -619,11 +627,11 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             </Tooltip>
                         </TabsList>
                         <div className="flex-1 min-w-0">
-                            <TabsList className="h-auto p-0 bg-transparent gap-2 overflow-x-auto">
+                            <TabsList className="h-auto p-1 bg-muted/30 rounded-xl gap-2 overflow-x-auto">
                                 {sellers.map((seller) => (
                                     <Tooltip key={seller.id}>
                                         <TooltipTrigger asChild>
-                                            <TabsTrigger value={seller.id}>{seller.name}</TabsTrigger>
+                                            <TabsTrigger value={seller.id} className={tabTriggerClass}>{seller.name}</TabsTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Acessar painel de {seller.name}</p></TooltipContent>
                                     </Tooltip>

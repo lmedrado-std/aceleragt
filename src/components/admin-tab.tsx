@@ -1,4 +1,3 @@
-
 "use client";
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
@@ -643,11 +642,19 @@ export function AdminTab({
     }
   };
 
-  // Adaptador seguro para Metas (Garante que campos opcionais/parciais tenham valores padrão)
-  const safeGoals: Goals = {
+  const safeGoals = {
     performanceBonusEnabled: false,
     ...getValues().goals,
   } as Goals;
+
+  const tabTriggerClass = cn(
+    "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+    "text-muted-foreground border border-transparent",
+    "hover:bg-muted/50",
+    "data-[state=active]:bg-primary",
+    "data-[state=active]:text-primary-foreground",
+    "data-[state=active]:shadow-md"
+  );
 
   return (
     <div className="space-y-8">
@@ -689,17 +696,12 @@ export function AdminTab({
 
       <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="w-full">
         <TooltipProvider>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 bg-muted/30 rounded-xl p-1 h-auto gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="dashboard"
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
-                   )}
+                  className={tabTriggerClass}
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -713,12 +715,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="vendedores"
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
-                   )}
+                  className={tabTriggerClass}
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Vendedores
@@ -732,12 +729,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="lancamentos"
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
-                   )}
+                  className={tabTriggerClass}
                 >
                   <BarChart className="mr-2 h-4 w-4" />
                   Lançamentos
@@ -751,12 +743,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="metas"
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
-                   )}
+                  className={tabTriggerClass}
                 >
                   <Target className="mr-2 h-4 w-4" />
                   Metas & Prêmios
@@ -770,12 +757,7 @@ export function AdminTab({
               <TooltipTrigger asChild>
                 <TabsTrigger
                   value="roleta"
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "disabled:pointer-events-none disabled:opacity-50",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse"
-                   )}
+                  className={tabTriggerClass}
                 >
                   <Gift className="mr-2 h-4 w-4" />
                   Roleta
@@ -787,7 +769,7 @@ export function AdminTab({
             </Tooltip>
              <Tooltip>
                 <TooltipTrigger asChild>
-                    <TabsTrigger value="seguranca" className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=active]:animate-subtle-pulse">
+                    <TabsTrigger value="seguranca" className={tabTriggerClass}>
                         <KeyRound className="mr-2 h-4 w-4" />
                         Configurações e Segurança
                     </TabsTrigger>
