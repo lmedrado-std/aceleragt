@@ -102,7 +102,7 @@ export type RankingMetric = "vendas" | "pa" | "ticketMedio";
 export type Rankings = Record<string, Record<RankingMetric, number>>;
 export type GoalsFormValues = z.infer<typeof goalsSchema>;
 
-// --- HISTORY FEATURE COMPONENTS & TYPES (MOVED FROM ADMIN) ---
+// --- HISTORY FEATURE COMPONENTS & TYPES ---
 interface ArchivedPeriod { period: string; storeId: string; sellerCount: number; }
 interface SellerHistoryDetail { id: string; period: string; seller_id: string; seller_name: string; vendas: number; pa: number; ticket_medio: number; total_prize: number; createdAt: string; }
 interface PeriodComparisonData { current: SellerHistoryDetail[]; previous: SellerHistoryDetail[]; }
@@ -116,7 +116,7 @@ function Comparison({ current, previous }: { current: number; previous: number |
     if (current > 0) {
       return <span className="ml-2 text-xs font-mono flex items-center gap-1 text-green-600">Novo</span>;
     }
-    return null; // both are 0
+    return null; 
   }
 
   const diff = current - previous;
@@ -202,7 +202,7 @@ export function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: stri
                 title: 'Sucesso!',
                 description: `Período "${periodName}" removido.`,
             });
-            fetchPeriods(); // Refresh the list
+            fetchPeriods(); 
         } catch (e) {
             toast({
                 variant: 'destructive',
@@ -529,7 +529,7 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const handleManagerLogout = () => {
     logoutStore(storeId);
-    logoutAll(); // Ensure global admin is logged out too
+    logoutAll(); 
     toast({ title: "Sessão encerrada", description: "Você saiu do modo de gestor." });
     router.push(`/loja/${storeId}`);
   };
@@ -546,13 +546,18 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
 
   const isManagerView = isAdmin || isStoreAdmin;
 
+  // Adaptador seguro para Metas (Garante que campos opcionais/parciais tenham valores padrão)
+  const safeGoals: Goals = {
+    performanceBonusEnabled: false,
+    ...getValues().goals,
+  } as Goals;
+
   return (
     <TooltipProvider>
       <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
         <Card className="mb-8 bg-accent/80 backdrop-blur-sm border-border/20 shadow-lg">
              <CardContent className="p-4 grid grid-cols-[1fr,auto,1fr] items-center gap-4">
                 <div className="text-left">
-                  {/* Espaço reservado ou botões de navegação */}
                 </div>
                 
                 <div className="text-center">
@@ -644,7 +649,19 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                   </TabsContent>
                 )}
 
-                {sellers.map((seller) => (<TabsContent key={seller.id} value={seller.id!} className="mt-6"><SellerTab storeId={storeId} seller={seller} goals={getValues().goals as Goals} incentives={incentives[seller.id!] || null} rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null} lastUpdated={lastUpdated} isManagerView={isManagerView} /></TabsContent>))}
+                {sellers.map((seller) => (
+                  <TabsContent key={seller.id} value={seller.id!} className="mt-6">
+                    <SellerTab 
+                      storeId={storeId} 
+                      seller={seller} 
+                      goals={safeGoals} 
+                      incentives={incentives[seller.id!] || null} 
+                      rankings={(rankings[seller.id!] || null) as Record<RankingMetric, number> | null} 
+                      lastUpdated={lastUpdated} 
+                      isManagerView={isManagerView} 
+                    />
+                  </TabsContent>
+                ))}
 
               </Tabs>
           </form>
@@ -653,6 +670,3 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     </TooltipProvider>
   );
 }
-
-    
-    

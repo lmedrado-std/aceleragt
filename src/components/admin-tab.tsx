@@ -281,7 +281,7 @@ export function AdminTab({
             throw new Error(errorData.details || errorData.error || 'Falha ao adicionar vendedor');
         }
         
-        onSellersChange(); // This will refetch sellers and update the state
+        onSellersChange(); 
         setValue("newSellerName", "");
         setValue("newSellerPassword", "");
         toast({ title: "Sucesso!", description: `Vendedor "${newSellerName}" adicionado.` });
@@ -421,8 +421,6 @@ export function AdminTab({
             corridinhaDiaria: Number(parsedSellerData.corridinha_diaria) || 0,
         };
 
-        console.log("input IA", { seller: sellerForAI, goals: fixedGoals });
-
         const result = await incentiveProjection({
           seller: sellerForAI,
           goals: {
@@ -552,7 +550,6 @@ export function AdminTab({
     const handleQuickAddSeller = async (name: string) => {
         const success = await handleAddSeller(name);
         if (success) {
-            // Remove from notFound list if successfully added
             setImportDialog(prev => ({
                 ...prev,
                 notFound: prev.notFound.filter(n => n.toLowerCase() !== name.toLowerCase()),
@@ -636,7 +633,7 @@ export function AdminTab({
         title: "Sucesso!",
         description: "Os acessos do vendedor foram zerados.",
       });
-      onSellersChange(); // Recarrega os dados
+      onSellersChange(); 
     } catch (error) {
       toast({
         variant: "destructive",
@@ -646,10 +643,14 @@ export function AdminTab({
     }
   };
 
+  // Adaptador seguro para Metas (Garante que campos opcionais/parciais tenham valores padrão)
+  const safeGoals: Goals = {
+    performanceBonusEnabled: false,
+    ...getValues().goals,
+  } as Goals;
 
   return (
     <div className="space-y-8">
-      {/* Import Confirmation Dialog */}
       <AlertDialog open={importDialog.open} onOpenChange={(open) => !open && setImportDialog({ open: false, notFound: [], found: [] })}>
           <AlertDialogContent>
               <AlertDialogHeader>
@@ -803,7 +804,7 @@ export function AdminTab({
             {sellers && getValues().goals && incentives ? (
                 <StoreAdminDashboard
                   sellers={sellers}
-                  goals={getValues().goals as Goals}
+                  goals={safeGoals}
                   incentives={incentives}
                 />
             ) : (
@@ -1227,7 +1228,3 @@ export function AdminTab({
     </div>
   );
 }
-
-    
-
-    
