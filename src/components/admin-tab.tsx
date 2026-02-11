@@ -693,7 +693,7 @@ export function AdminTab({
         <TooltipProvider>
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 bg-muted/30 rounded-xl p-1 h-auto gap-2">
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <TabsTrigger
                   value="dashboard"
                   className={tabTriggerClass}
@@ -707,7 +707,7 @@ export function AdminTab({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <TabsTrigger
                   value="vendedores"
                   className={tabTriggerClass}
@@ -721,7 +721,7 @@ export function AdminTab({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <TabsTrigger
                   value="lancamentos"
                   className={tabTriggerClass}
@@ -735,7 +735,7 @@ export function AdminTab({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <TabsTrigger
                   value="metas"
                   className={tabTriggerClass}
@@ -749,7 +749,7 @@ export function AdminTab({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <TabsTrigger
                   value="roleta"
                   className={tabTriggerClass}
@@ -763,7 +763,7 @@ export function AdminTab({
               </TooltipContent>
             </Tooltip>
              <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                     <TabsTrigger value="seguranca" className={tabTriggerClass}>
                         <KeyRound className="mr-2 h-4 w-4" />
                         Configurações e Segurança
@@ -823,7 +823,7 @@ export function AdminTab({
                         </FormItem>
                       )}
                     />
-                    <Button type="button" onClick={() => handleAddSeller()}><UserPlus className="mr-2" /> Adicionar Vendedor</Button>
+                    <Button type="button" onClick={() => handleAddSeller()}> <UserPlus className="mr-2" /> Adicionar Vendedor</Button>
                 </div>
               </div>
               <Separator />

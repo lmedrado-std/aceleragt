@@ -239,12 +239,12 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
       />
       <Tabs defaultValue="desempenho" className="w-full">
         <TabsList className="h-auto p-1 bg-muted/30 rounded-xl grid grid-cols-2 sm:grid-cols-6 w-full sm:w-max gap-2">
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="desempenho" className={tabTriggerClass}><Trophy className="mr-2 h-4 w-4" />Meu Desempenho</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver desempenho e progresso das metas</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="lancamentos" className={tabTriggerClass}><BarChart className="mr-2 h-4 w-4" />Meus Lançamentos</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver dados lançados pelo administrador</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="corridinhas" className={tabTriggerClass}><Rocket className="mr-2 h-4 w-4" />Corridinhas</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver metas e bônus de curto prazo</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="metas" className={tabTriggerClass}><Target className="mr-2 h-4 w-4" />Metas</TabsTrigger></TooltipTrigger><TooltipContent><p>Consultar os valores de todas as metas</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="roleta" className={cn(tabTriggerClass, prizeWheelCredits > 0 && "ring-2 ring-destructive/60")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild><TabsTrigger value="dicas" className={tabTriggerClass}><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger><TabsTrigger value="desempenho" className={tabTriggerClass}><Trophy className="mr-2 h-4 w-4" />Meu Desempenho</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver desempenho e progresso das metas</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger><TabsTrigger value="lancamentos" className={tabTriggerClass}><BarChart className="mr-2 h-4 w-4" />Meus Lançamentos</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver dados lançados pelo administrador</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger><TabsTrigger value="corridinhas" className={tabTriggerClass}><Rocket className="mr-2 h-4 w-4" />Corridinhas</TabsTrigger></TooltipTrigger><TooltipContent><p>Ver metas e bônus de curto prazo</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger><TabsTrigger value="metas" className={tabTriggerClass}><Target className="mr-2 h-4 w-4" />Metas</TabsTrigger></TooltipTrigger><TooltipContent><p>Consultar os valores de todas as metas</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger><TabsTrigger value="roleta" className={cn(tabTriggerClass, prizeWheelCredits > 0 && "ring-2 ring-destructive/60")}><Gift className="mr-2 h-4 w-4" />Roleta de Prêmios</TabsTrigger></TooltipTrigger><TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger><TabsTrigger value="dicas" className={tabTriggerClass}><Lightbulb className="mr-2 h-4 w-4" />Dicas</TabsTrigger></TooltipTrigger><TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent></Tooltip>
         </TabsList>
 
         <div className="my-6">
