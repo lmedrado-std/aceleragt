@@ -178,7 +178,7 @@ export function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: stri
         const [period, currentStoreId] = value.split('|');
         setLoadingDetails(prev => ({ ...prev, [value]: true }));
         try {
-            const res = await fetch(`/history?storeId=${currentStoreId}&period=${encodeURIComponent(period)}`);
+            const res = await fetch(`/api/history?storeId=${currentStoreId}&period=${encodeURIComponent(period)}`);
             if (!res.ok) throw new Error(`Falha ao buscar detalhes.`);
             const data = await res.json();
             setDetails(prev => ({ ...prev, [value]: data }));
@@ -297,7 +297,7 @@ export function ArchivedPeriods({ storeId, onDataNeedsRefresh }: { storeId: stri
                                         </Table>
                                     )}
                                 </AccordionContent>
-                            </AccordionItem>
+                             </AccordionItem>
                         );
                     })}
                 </Accordion>
@@ -557,7 +557,8 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
     "hover:bg-muted/50",
     "data-[state=active]:bg-primary",
     "data-[state=active]:text-primary-foreground",
-    "data-[state=active]:shadow-sm"
+    "data-[state=active]:shadow-sm",
+    "data-[state=active]:border-primary/20"
   );
 
   return (
@@ -618,10 +619,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                     <div className="flex flex-wrap items-center border-b pb-2 gap-x-4 gap-y-2">
                         <TabsList className="h-auto p-1 bg-muted/30 rounded-xl">
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <TabsTrigger value="admin" className={tabTriggerClass}>
-                                        <ShieldCheck className="h-5 w-5 mr-2" /> Painel do Gestor
-                                    </TabsTrigger>
+                                <TooltipTrigger asChild>
+                                    <div>
+                                      <TabsTrigger value="admin" className={tabTriggerClass}>
+                                          <ShieldCheck className="h-5 w-5 mr-2" /> Painel do Gestor
+                                      </TabsTrigger>
+                                    </div>
                                 </TooltipTrigger>
                                 <TooltipContent><p>Acessar o painel de gerenciamento da loja</p></TooltipContent>
                             </Tooltip>
@@ -630,8 +633,10 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
                             <TabsList className="h-auto p-1 bg-muted/30 rounded-xl gap-2 overflow-x-auto">
                                 {sellers.map((seller) => (
                                     <Tooltip key={seller.id}>
-                                        <TooltipTrigger>
-                                            <TabsTrigger value={seller.id} className={tabTriggerClass}>{seller.name}</TabsTrigger>
+                                        <TooltipTrigger asChild>
+                                            <div>
+                                              <TabsTrigger value={seller.id!} className={tabTriggerClass}>{seller.name}</TabsTrigger>
+                                            </div>
                                         </TooltipTrigger>
                                         <TooltipContent><p>Acessar painel de {seller.name}</p></TooltipContent>
                                     </Tooltip>

@@ -648,7 +648,8 @@ export function AdminTab({
     "hover:bg-muted/50",
     "data-[state=active]:bg-primary",
     "data-[state=active]:text-primary-foreground",
-    "data-[state=active]:shadow-sm"
+    "data-[state=active]:shadow-sm",
+    "data-[state=active]:border-primary/20"
   );
 
   return (
@@ -693,84 +694,96 @@ export function AdminTab({
         <TooltipProvider>
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 bg-muted/30 rounded-xl p-1 h-auto gap-2">
             <Tooltip>
-              <TooltipTrigger>
-                <TabsTrigger
-                  value="dashboard"
-                  className={tabTriggerClass}
-                >
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </TabsTrigger>
+              <TooltipTrigger asChild>
+                <div>
+                  <TabsTrigger
+                    value="dashboard"
+                    className={tabTriggerClass}
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </TabsTrigger>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Visão geral do desempenho da equipe.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
-                <TabsTrigger
-                  value="vendedores"
-                  className={tabTriggerClass}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Vendedores
-                </TabsTrigger>
+              <TooltipTrigger asChild>
+                <div>
+                  <TabsTrigger
+                    value="vendedores"
+                    className={tabTriggerClass}
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    Vendedores
+                  </TabsTrigger>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Adicionar, editar ou remover vendedores.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
-                <TabsTrigger
-                  value="lancamentos"
-                  className={tabTriggerClass}
-                >
-                  <BarChart className="mr-2 h-4 w-4" />
-                  Lançamentos
-                </TabsTrigger>
+              <TooltipTrigger asChild>
+                <div>
+                  <TabsTrigger
+                    value="lancamentos"
+                    className={tabTriggerClass}
+                  >
+                    <BarChart className="mr-2 h-4 w-4" />
+                    Lançamentos
+                  </TabsTrigger>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Inserir dados de vendas e importar de planilhas.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
-                <TabsTrigger
-                  value="metas"
-                  className={tabTriggerClass}
-                >
-                  <Target className="mr-2 h-4 w-4" />
-                  Metas & Prêmios
-                </TabsTrigger>
+              <TooltipTrigger asChild>
+                <div>
+                  <TabsTrigger
+                    value="metas"
+                    className={tabTriggerClass}
+                  >
+                    <Target className="mr-2 h-4 w-4" />
+                    Metas & Prêmios
+                  </TabsTrigger>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Configurar as metas e os valores dos prêmios.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
-                <TabsTrigger
-                  value="roleta"
-                  className={tabTriggerClass}
-                >
-                  <Gift className="mr-2 h-4 w-4" />
-                  Roleta
-                </TabsTrigger>
+              <TooltipTrigger asChild>
+                <div>
+                  <TabsTrigger
+                    value="roleta"
+                    className={tabTriggerClass}
+                  >
+                    <Gift className="mr-2 h-4 w-4" />
+                    Roleta
+                  </TabsTrigger>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Gerenciar roleta de prêmios.</p>
               </TooltipContent>
             </Tooltip>
              <Tooltip>
-                <TooltipTrigger>
-                    <TabsTrigger value="seguranca" className={tabTriggerClass}>
-                        <KeyRound className="mr-2 h-4 w-4" />
-                        Configurações e Segurança
-                    </TabsTrigger>
+                <TooltipTrigger asChild>
+                    <div>
+                      <TabsTrigger value="seguranca" className={tabTriggerClass}>
+                          <KeyRound className="mr-2 h-4 w-4" />
+                          Configurações
+                      </TabsTrigger>
+                    </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>Alterar a senha de acesso da loja e outras configurações.</p>
+                    <p>Segurança e outras configurações.</p>
                 </TooltipContent>
             </Tooltip>
           </TabsList>
