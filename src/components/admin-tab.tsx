@@ -287,7 +287,6 @@ export function AdminTab({
         return true;
 
     } catch (error) {
-        console.error(error);
         toast({ variant: 'destructive', title: 'Erro', description: (error as Error).message });
         return false;
     }
@@ -300,7 +299,6 @@ export function AdminTab({
       onSellersChange();
       toast({ title: "Vendedor Removido", description: "O vendedor foi removido com sucesso." });
     } catch(error) {
-        console.error(error);
         toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível remover o vendedor.' });
     }
   };
@@ -336,7 +334,6 @@ export function AdminTab({
         toast({ title: "Sucesso!", description: "Dados do vendedor atualizados." });
 
     } catch (error) {
-        console.error(error);
         toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível atualizar o vendedor.' });
     }
   };
@@ -441,7 +438,6 @@ export function AdminTab({
 
       toast({ title: "Sucesso!", description: "Incentivos de todos os vendedores foram calculados e os dados salvos." });
     } catch (err) {
-      console.error("Erro ao calcular incentivos:", err);
       const errorMessage = err instanceof Error ? err.message : "Falha ao calcular incentivos.";
       toast({ variant: "destructive", title: "Erro de Cálculo", description: errorMessage });
     } finally {
@@ -530,7 +526,6 @@ export function AdminTab({
             }
 
         } catch (error) {
-            console.error(error);
             toast({ variant: 'destructive', title: 'Erro de Importação', description: (error as Error).message });
         } finally {
             if (fileInputRef.current) {
@@ -648,12 +643,12 @@ export function AdminTab({
   } as Goals;
 
   const tabTriggerClass = cn(
-    "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+    "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
     "text-muted-foreground border border-transparent",
     "hover:bg-muted/50",
     "data-[state=active]:bg-primary",
     "data-[state=active]:text-primary-foreground",
-    "data-[state=active]:shadow-md"
+    "data-[state=active]:shadow-sm"
   );
 
   return (

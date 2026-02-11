@@ -552,12 +552,12 @@ export function GoalGetterDashboard({ storeId }: { storeId: string }) {
   } as Goals;
 
   const tabTriggerClass = cn(
-    "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+    "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
     "text-muted-foreground border border-transparent",
     "hover:bg-muted/50",
     "data-[state=active]:bg-primary",
     "data-[state=active]:text-primary-foreground",
-    "data-[state=active]:shadow-md"
+    "data-[state=active]:shadow-sm"
   );
 
   return (
