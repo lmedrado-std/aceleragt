@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getVideosPorCategoria, Video } from '@/lib/videosData';
 import styles from './styles.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -27,22 +27,16 @@ export function TipsTab() {
   const [categoria, setCategoria] = useState(categorias[0]);
 
   /**
-   * 🚀 CACHE ULTRA PRO
-   * Evita recalcular thumbs inválidas
+   * 🔥 ESTADO REAL (não useRef)
    */
-  const thumbsInvalidas = useRef<Record<string, boolean>>({});
+  const [thumbsInvalidas, setThumbsInvalidas] =
+    useState<Record<string, boolean>>({});
 
-  /**
-   * 🚀 Dados estáveis (sem useEffect)
-   */
   const videos = useMemo(
     () => getVideosPorCategoria(categoria),
     [categoria]
   );
 
-  /**
-   * 🚀 Mapeamento estável
-   */
   const videosFormatados = useMemo(() => {
     return videos.map(v => ({
       ...v,
@@ -52,10 +46,10 @@ export function TipsTab() {
   }, [videos]);
 
   /**
-   * 🚀 Apenas vídeos válidos renderizam
+   * 🔥 FILTRO REATIVO
    */
   const videosRender = videosFormatados.filter(
-    v => !thumbsInvalidas.current[v.id]
+    v => !thumbsInvalidas[v.id]
   );
 
   return (
@@ -95,11 +89,11 @@ export function TipsTab() {
                   <div className={`${styles.videoWrapper} relative overflow-hidden bg-slate-900`}>
 
                     <button
-                      onClick={() => window.open(video.videoUrl, "_blank", "noopener,noreferrer")}
+                      onClick={() => window.open(video.videoUrl, "_blank")}
                       className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                     >
 
-                      {/* 🔥 Thumb ULTRA PRO — valida placeholder fake do YouTube */}
+                      {/* ✅ VALIDAÇÃO REAL DO YOUTUBE */}
                       <img
                         src={video.thumb}
                         loading="lazy"
@@ -108,18 +102,19 @@ export function TipsTab() {
                           const img = e.currentTarget;
 
                           /**
-                           * 🎯 REGRA REAL DO YOUTUBE
-                           * Placeholder fake = 120x90 ~ 160px largura
+                           * Placeholder fake do YouTube:
+                           * naturalWidth ~ 120px
                            */
                           if(img.naturalWidth < 200){
-                            thumbsInvalidas.current[video.id] = true;
-                            img.style.display = "none";
+                            setThumbsInvalidas(prev=>{
+                              if(prev[video.id]) return prev;
+                              return {...prev, [video.id]: true};
+                            });
                           }
                         }}
                         className="absolute inset-0 w-full h-full object-cover z-0 opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                       />
 
-                      {/* Overlay Play Premium */}
                       <div className="relative z-20 flex flex-col items-center gap-2 text-white">
                         <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110 ring-4 ring-white/10">
                           <span className="ml-1 text-xl">▶</span>
