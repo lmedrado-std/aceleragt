@@ -112,22 +112,31 @@ export function TipsTab() {
                     return (
                         <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1 h-full">
-                                <Card className="group flex flex-col hover:border-primary transition-all h-full">
-                                    <div className={styles.videoWrapper}>
+                                <Card className="group flex flex-col hover:border-primary transition-all h-full shadow-sm hover:shadow-lg hover:-translate-y-[2px]">
+                                    <div className={`${styles.videoWrapper} relative overflow-hidden rounded-t-lg`}>
+                                        
+                                        {/* Skeleton enquanto carrega */}
+                                        <div className="absolute inset-0 bg-muted animate-pulse" />
+
                                         {embedUrl ? (
                                           <iframe
                                             src={embedUrl}
                                             title={video.title}
+                                            referrerPolicy="strict-origin-when-cross-origin"
                                             frameBorder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
                                             loading="lazy"
+                                            className="relative z-10 w-full h-full"
                                           />
                                         ) : (
                                           <div className="flex items-center justify-center h-full text-sm text-muted-foreground bg-muted">
                                             Vídeo indisponível
                                           </div>
                                         )}
+
+                                        {/* Gradient premium */}
+                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-20" />
                                     </div>
                                     <CardHeader>
                                         <CardTitle className="text-base group-hover:text-primary transition-colors">{video.title}</CardTitle>
