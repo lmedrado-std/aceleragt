@@ -240,7 +240,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           incentives={incentives}
       />
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-        <TabsList className="h-auto p-1 bg-muted/30 rounded-xl grid grid-cols-2 sm:grid-cols-6 w-full sm:w-max gap-2">
+        <TabsList className="h-auto p-1 bg-muted/30 rounded-xl grid grid-cols-2 sm:grid-cols-5 w-full sm:w-max gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
@@ -286,6 +286,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
             <TooltipContent><p>Gire a roleta para ganhar prêmios!</p></TooltipContent>
           </Tooltip>
 
+          {/* Ocultando aba Dicas conforme solicitado
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
@@ -294,6 +295,7 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
             </TooltipTrigger>
             <TooltipContent><p>Dicas e artigos para melhorar suas vendas</p></TooltipContent>
           </Tooltip>
+          */}
         </TabsList>
 
         <div className="my-6">
@@ -522,9 +524,11 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
           <PrizeWheel storeId={storeId} sellerId={seller.id} onSpinResult={handleSpinWin} />
         </TabsContent>
 
+        {/* Conteúdo da aba Dicas ocultado
         <TabsContent value="dicas" className="mt-6">
           <TipsTab />
         </TabsContent>
+        */}
       </Tabs>
     </TooltipProvider>
   );
