@@ -1,5 +1,5 @@
 // components/TipsTab/index.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getVideosPorCategoria, Video } from '@/lib/videosData';
 import styles from './styles.module.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -67,9 +67,25 @@ const getEmbedUrl = (url: string): string => {
 export function TipsTab() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [categoria, setCategoria] = useState(categorias[0]);
+  const iframeRefs = useRef<HTMLIFrameElement[]>([]);
+
+  const pauseAllVideos = () => {
+    iframeRefs.current.forEach((iframe) => {
+      if (!iframe) return;
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: "command",
+          func: "pauseVideo",
+          args: ""
+        }),
+        "*"
+      );
+    });
+  };
 
   useEffect(() => {
     setVideos(getVideosPorCategoria(categoria));
+    pauseAllVideos();
   }, [categoria]);
 
   const videosDisponiveis = videos.filter(video => {
@@ -116,18 +132,19 @@ export function TipsTab() {
                                     <div className={`${styles.videoWrapper} relative overflow-hidden rounded-t-lg`}>
                                         
                                         {/* Skeleton enquanto carrega */}
-                                        <div className="absolute inset-0 bg-muted animate-pulse" />
+                                        <div className="absolute inset-0 bg-muted animate-pulse group-hover:opacity-0 transition-opacity duration-500" />
 
                                         {embedUrl ? (
                                           <iframe
-                                            src={embedUrl}
+                                            ref={(el) => { if (el) iframeRefs.current[index] = el }}
+                                            src={`${embedUrl}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                                             title={video.title}
                                             referrerPolicy="strict-origin-when-cross-origin"
                                             frameBorder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
                                             loading="lazy"
-                                            className="relative z-10 w-full h-full"
+                                            className="relative z-10 w-full h-full aspect-video"
                                           />
                                         ) : (
                                           <div className="flex items-center justify-center h-full text-sm text-muted-foreground bg-muted">
