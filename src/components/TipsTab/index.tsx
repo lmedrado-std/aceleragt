@@ -116,11 +116,11 @@ export function TipsTab() {
                             [video.id]: true
                           }));
                         }}
-                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover z-0 opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                       />
 
-                      {/* Play Overlay Premium */}
-                      <div className="relative z-10 flex flex-col items-center gap-2 text-white">
+                      {/* Play Overlay Premium - z-20 para ficar acima do gradiente */}
+                      <div className="relative z-20 flex flex-col items-center gap-2 text-white">
                         <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110 ring-4 ring-white/10">
                           <span className="ml-1 text-xl">▶</span>
                         </div>
@@ -131,7 +131,8 @@ export function TipsTab() {
                       </div>
                     </button>
 
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-20" />
+                    {/* Gradiente Overlay - z-10 para ficar entre a imagem e o botão */}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10" />
                   </div>
 
                   <CardHeader className="p-4 pb-2">
