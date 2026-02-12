@@ -40,9 +40,9 @@ export function TipsTab() {
     return videos.map(v => ({
       ...v,
       videoUrl: `https://youtube.com/watch?v=${v.id}`,
-      thumbMax: `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
+      thumbPrimary: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
       thumbSd: `https://img.youtube.com/vi/${v.id}/sddefault.jpg`,
-      thumbHq: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
+      thumbMax: `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
     }));
   }, [videos]);
 
@@ -92,7 +92,7 @@ export function TipsTab() {
                       className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                     >
                       <img
-                        src={video.thumbMax}
+                        src={video.thumbPrimary}
                         loading="lazy"
                         alt={video.title}
                         onError={(e: any) => {
@@ -106,7 +106,7 @@ export function TipsTab() {
 
                           if (!img.dataset.fallback2) {
                             img.dataset.fallback2 = "true";
-                            img.src = video.thumbHq;
+                            img.src = video.thumbMax;
                             return;
                           }
 
