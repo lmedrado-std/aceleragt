@@ -22,19 +22,6 @@ const categorias = [
   "Fechamento de Vendas"
 ];
 
-const extractVideoId = (url: string): string => {
-  if (!url) return "";
-  const regExp = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-  const match = url.match(regExp);
-  return match && match[1] ? match[1] : "";
-};
-
-const getThumb = (url: string) => {
-  const id = extractVideoId(url);
-  if (!id) return "";
-  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-};
-
 export function TipsTab() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [categoria, setCategoria] = useState(categorias[0]);
@@ -71,40 +58,35 @@ export function TipsTab() {
       >
         <CarouselContent>
           {videos.map((video, index) => {
-            const thumb = getThumb(video.url);
+            const videoUrl = `https://youtube.com/watch?v=${video.id}`;
+            const thumbUrl = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
 
             return (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1 h-full">
                   <Card className="group flex flex-col hover:border-primary transition-all h-full shadow-sm hover:shadow-lg hover:-translate-y-[2px]">
                     <div className={`${styles.videoWrapper} relative overflow-hidden rounded-t-lg bg-black`}>
-                      {thumb ? (
-                        <a
-                          href={video.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="relative flex items-center justify-center w-full h-full group/link"
-                        >
-                          <img
-                            src={thumb}
-                            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-opacity duration-300"
-                            alt={video.title}
-                          />
+                      <button
+                        onClick={() => window.open(videoUrl, "_blank")}
+                        className="relative flex items-center justify-center w-full h-full group/link"
+                      >
+                        <img
+                          src={thumbUrl}
+                          className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
+                          alt={video.title}
+                        />
 
-                          <div className="relative z-10 flex flex-col items-center gap-2 text-white">
-                            <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl scale-100 group-hover/link:scale-110 transition-transform duration-300">
-                              <span className="ml-1 text-xl">▶</span>
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest bg-black/60 px-2 py-1 rounded backdrop-blur-sm">
-                              Assistir no YouTube
-                            </span>
+                        <div className="relative z-10 flex flex-col items-center gap-2 text-white">
+                          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110">
+                            <span className="ml-1 text-xl">▶</span>
                           </div>
-                        </a>
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-sm text-muted-foreground bg-muted">
-                          Vídeo indisponível
+
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-black/60 px-2 py-1 rounded backdrop-blur-sm">
+                            Assistir
+                          </span>
                         </div>
-                      )}
+                      </button>
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-20" />
                     </div>
 
                     <CardHeader>
