@@ -1,4 +1,3 @@
-
 {
   "wheelCenterAvatar": {
     "url": "https://picsum.photos/seed/gift/200/200",
@@ -6,5 +5,12 @@
     "height": 200,
     "alt": "Prêmio Surpresa",
     "hint": "gift box"
+  },
+  "videoPlaceholder": {
+    "url": "https://picsum.photos/seed/video/600/400",
+    "width": 600,
+    "height": 400,
+    "alt": "Vídeo indisponível",
+    "hint": "video camera"
   }
 }

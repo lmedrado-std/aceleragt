@@ -12,6 +12,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import placeholderImages from '@/app/lib/placeholder-images.json';
 
 const categorias = [
   "Objeções de Vendas",
@@ -30,7 +31,6 @@ export function TipsTab() {
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
 
-  // ✅ evita recriar URLs e objetos a cada render
   const videosFormatados = useMemo(() => {
     return videos.map(v => ({
       ...v,
@@ -84,10 +84,10 @@ export function TipsTab() {
                       className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                     >
 
-                      {/* ✅ Thumbnail Premium com fallback real em cascata */}
                       <img
                         src={video.thumbMax}
                         loading="lazy"
+                        data-ai-hint="video thumbnail"
                         onError={(e: any) => {
                           const img = e.currentTarget;
 
@@ -103,13 +103,13 @@ export function TipsTab() {
                             return;
                           }
 
-                          img.style.opacity = "0";
+                          img.src = placeholderImages.videoPlaceholder.url;
+                          img.style.opacity = "1";
                         }}
                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                         alt={video.title}
                       />
 
-                      {/* Play Overlay */}
                       <div className="relative z-10 flex flex-col items-center gap-2 text-white">
                         <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110 ring-4 ring-white/10">
                           <span className="ml-1 text-xl">▶</span>
