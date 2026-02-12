@@ -29,25 +29,22 @@ export function TipsTab() {
 
   useEffect(() => {
     setVideos(getVideosPorCategoria(categoria));
-    setInvalidThumbs({});
+    setInvalidThumbs({}); // Reseta o estado ao trocar de categoria
   }, [categoria]);
 
   /**
-   * ✅ Memo Premium
-   * Evita recriar objetos a cada render
+   * ✅ Memoização robusta para URLs
    */
   const videosFormatados = useMemo(() => {
     return videos.map(v => ({
       ...v,
       videoUrl: `https://youtube.com/watch?v=${v.id}`,
       thumbPrimary: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
-      thumbSd: `https://img.youtube.com/vi/${v.id}/sddefault.jpg`,
-      thumbMax: `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
     }));
   }, [videos]);
 
   /**
-   * ✅ Remove vídeos inválidos automaticamente
+   * ✅ Filtra apenas vídeos cujas thumbnails foram validadas como reais
    */
   const videosValidos = videosFormatados.filter(v => !invalidThumbs[v.id]);
 
@@ -95,31 +92,21 @@ export function TipsTab() {
                         src={video.thumbPrimary}
                         loading="lazy"
                         alt={video.title}
-                        onError={(e: any) => {
+                        onLoad={(e: any) => {
                           const img = e.currentTarget;
-
-                          if (!img.dataset.fallback1) {
-                            img.dataset.fallback1 = "true";
-                            img.src = video.thumbSd;
-                            return;
+                          // 🧠 SENIOR CHECK: O YouTube retorna um placeholder preto de 120x90px 
+                          // quando a thumb não existe. Thumbs reais têm no mínimo 480px.
+                          if (img.naturalWidth < 200) {
+                            setInvalidThumbs(prev => ({
+                              ...prev,
+                              [video.id]: true
+                            }));
                           }
-
-                          if (!img.dataset.fallback2) {
-                            img.dataset.fallback2 = "true";
-                            img.src = video.thumbMax;
-                            return;
-                          }
-
-                          // ❌ Thumb inválida → remove vídeo
-                          setInvalidThumbs(prev => ({
-                            ...prev,
-                            [video.id]: true
-                          }));
                         }}
                         className="absolute inset-0 w-full h-full object-cover z-0 opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                       />
 
-                      {/* Play Overlay Premium - z-20 para ficar acima do gradiente */}
+                      {/* Play Overlay - Z-20 para ficar acima do gradiente */}
                       <div className="relative z-20 flex flex-col items-center gap-2 text-white">
                         <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110 ring-4 ring-white/10">
                           <span className="ml-1 text-xl">▶</span>
@@ -131,7 +118,7 @@ export function TipsTab() {
                       </div>
                     </button>
 
-                    {/* Gradiente Overlay - z-10 para ficar entre a imagem e o botão */}
+                    {/* Gradiente Overlay - Z-10 para ficar entre a imagem e o botão */}
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10" />
                   </div>
 
