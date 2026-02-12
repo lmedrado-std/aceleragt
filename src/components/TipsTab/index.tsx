@@ -30,11 +30,15 @@ export function TipsTab() {
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.style.display = "none";
+  };
+
   return (
     <div className={styles.tipsContainer}>
       <div className={styles.header}>
-        <h2>Dicas em Vídeo para Vendedores</h2>
-        <p>Conteúdo curado para aprimorar suas habilidades, direto do YouTube.</p>
+        <h2 className="text-3xl font-bold tracking-tight">Dicas em Vídeo para Vendedores</h2>
+        <p className="text-muted-foreground mt-2">Conteúdo curado para aprimorar suas habilidades, direto do YouTube.</p>
       </div>
 
       <div className={styles.controls}>
@@ -44,7 +48,7 @@ export function TipsTab() {
               key={cat}
               variant={categoria === cat ? "default" : "outline"}
               onClick={() => setCategoria(cat)}
-              className="transition-all"
+              className="transition-all rounded-full"
             >
               {cat}
             </Button>
@@ -53,7 +57,7 @@ export function TipsTab() {
       </div>
 
       <Carousel
-        opts={{ align: "start", loop: true }}
+        opts={{ align: "start", loop: false }}
         className="w-full"
       >
         <CarouselContent>
@@ -64,41 +68,44 @@ export function TipsTab() {
             return (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1 h-full">
-                  <Card className="group flex flex-col hover:border-primary transition-all h-full shadow-sm hover:shadow-lg hover:-translate-y-[2px]">
-                    <div className={`${styles.videoWrapper} relative overflow-hidden rounded-t-lg bg-black`}>
+                  <Card className="group flex flex-col hover:border-primary transition-all h-full shadow-sm hover:shadow-lg hover:-translate-y-[2px] overflow-hidden">
+                    <div className={`${styles.videoWrapper} relative overflow-hidden bg-slate-900`}>
                       <button
                         onClick={() => window.open(videoUrl, "_blank")}
-                        className="relative flex items-center justify-center w-full h-full group/link"
+                        className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                       >
                         <img
                           src={thumbUrl}
+                          onError={handleImageError}
                           className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                           alt={video.title}
                         />
 
                         <div className="relative z-10 flex flex-col items-center gap-2 text-white">
-                          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110">
+                          <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110 ring-4 ring-white/10">
                             <span className="ml-1 text-xl">▶</span>
                           </div>
 
-                          <span className="text-[10px] font-black uppercase tracking-widest bg-black/60 px-2 py-1 rounded backdrop-blur-sm">
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
                             Assistir
                           </span>
                         </div>
                       </button>
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-20" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-20" />
                     </div>
 
-                    <CardHeader>
-                      <CardTitle className="text-base group-hover:text-primary transition-colors line-clamp-2 font-bold leading-tight">
+                    <CardHeader className="p-4 pb-2">
+                      <CardTitle className="text-base group-hover:text-primary transition-colors line-clamp-2 font-bold leading-tight min-h-[2.5rem]">
                         {video.title}
                       </CardTitle>
-                      <CardDescription className="text-[10px] uppercase font-bold tracking-tight opacity-70">
-                        {video.channel} • {video.publishedAt}
+                      <CardDescription className="text-[10px] uppercase font-black tracking-tighter opacity-60 flex items-center gap-2">
+                        <span className="bg-muted px-1.5 py-0.5 rounded text-primary">{video.channel}</span>
+                        <span>•</span>
+                        <span>{video.publishedAt}</span>
                       </CardDescription>
                     </CardHeader>
 
-                    <CardContent className="flex-grow">
+                    <CardContent className="p-4 pt-0 flex-grow">
                       <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
                         {video.description}
                       </p>
@@ -106,12 +113,14 @@ export function TipsTab() {
                   </Card>
                 </div>
               </CarouselItem>
-            )
+            );
           })}
         </CarouselContent>
 
-        <CarouselPrevious className="hidden md:flex -left-12" />
-        <CarouselNext className="hidden md:flex -right-12" />
+        <div className="hidden md:block">
+          <CarouselPrevious className="-left-12" />
+          <CarouselNext className="-right-12" />
+        </div>
       </Carousel>
     </div>
   );
