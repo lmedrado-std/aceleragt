@@ -91,11 +91,19 @@ export function TipsTab() {
                       className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                     >
                       
-                      {/* ✅ Thumb estável — sem lógica destrutiva */}
+                      {/* ✅ Thumb estável com validação de largura real */}
                       <img
                         src={video.thumb}
                         loading="lazy"
                         alt={video.title}
+                        onLoad={(e: any) => {
+                          const img = e.currentTarget;
+                          // 🎯 REGRA REAL DO YOUTUBE:
+                          // thumbnail falsa = largura pequena (120~180px)
+                          if (img.naturalWidth < 200) {
+                            img.style.display = "none";
+                          }
+                        }}
                         className="absolute inset-0 w-full h-full object-cover z-0 opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                       />
 
