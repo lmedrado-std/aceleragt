@@ -18,8 +18,8 @@ export const videosPorCategoria: Record<string, Video[]> = {
     },
     {
       title: "Como Responder Quando o Cliente Diz que 'TÁ CARO'?",
-      url: "https://www.youtube.com/watch?v=w7w0nZ4C7-I",
-      channel: "Diego Maia",
+      url: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+      channel: "Thiago Concer",
       publishedAt: "8 meses atrás",
       description: "Aprenda a justificar o valor do seu produto quando o cliente questiona o preço."
     },
@@ -36,20 +36,6 @@ export const videosPorCategoria: Record<string, Video[]> = {
       channel: "Ricardo Jordão",
       publishedAt: "2 anos atrás",
       description: "Uma abordagem direta e eficaz para superar qualquer barreira imposta pelo cliente."
-    },
-     {
-      title: "O Jeito Certo de Lidar com Objeções em Vendas",
-      url: "https://www.youtube.com/watch?v=JdGj2a5A3yI",
-      channel: "Paixão por Vendas",
-      publishedAt: "1 ano atrás",
-      description: "Descubra uma mentalidade e uma técnica para transformar objeções em oportunidades."
-    },
-    {
-      title: "Como Contornar a Objeção 'Não Tenho Dinheiro'?",
-      url: "https://www.youtube.com/watch?v=Kz6pDqgA3yE",
-      channel: "Janderson Santos",
-      publishedAt: "2 anos atrás",
-      description: "Estratégias para lidar com a falta de orçamento do cliente e ainda assim fechar negócio."
     }
   ],
   "Aumentar Ticket Médio": [
@@ -66,13 +52,6 @@ export const videosPorCategoria: Record<string, Video[]> = {
       channel: "Caio Carneiro",
       publishedAt: "2 anos atrás",
       description: "Aprenda a diferença e como aplicar Upsell e Cross-sell para vender mais."
-    },
-    {
-      title: "Como Aumentar o Ticket Médio da Sua Empresa",
-      url: "https://www.youtube.com/watch?v=Y6uXQ7SFApw",
-      channel: "Gustavo Cândido",
-      publishedAt: "1 ano atrás",
-      description: "Estratégias práticas para aumentar o valor médio de cada venda realizada."
     },
     {
       title: "Estratégia Para Aumentar o Ticket Médio",
@@ -103,13 +82,6 @@ export const videosPorCategoria: Record<string, Video[]> = {
       channel: "Thiago Concer",
       publishedAt: "5 meses atrás",
       description: "Descubra o que realmente faz a diferença na percepção de valor do cliente."
-    },
-    {
-      title: "Técnica de Atendimento que vai MULTIPLICAR suas Vendas",
-      url: "https://www.youtube.com/watch?v=Pq86oF2H3W4",
-      channel: "Leandro Rosadas",
-      publishedAt: "2 anos atrás",
-      description: "Uma técnica de abordagem e condução que pode aumentar drasticamente seus resultados."
     }
   ],
   "Técnicas de Conversão": [
@@ -126,13 +98,6 @@ export const videosPorCategoria: Record<string, Video[]> = {
       channel: "Igor Borges",
       publishedAt: "2 anos atrás",
       description: "Use a psicologia a seu favor para criar uma conexão mais forte com o cliente e vender mais."
-    },
-     {
-      title: "Como Usar o Gatilho da ESCASSEZ Para Vender Mais?",
-      url: "https://www.youtube.com/watch?v=cGiu-F2IfgA",
-      channel: "Diego Maia",
-      publishedAt: "1 ano atrás",
-      description: "Aprenda a criar um senso de urgência que acelera a decisão de compra do cliente."
     },
     {
       title: "A Melhor Técnica de Vendas que eu Conheço",
@@ -156,13 +121,6 @@ export const videosPorCategoria: Record<string, Video[]> = {
       channel: "Leandro Branquinho",
       publishedAt: "2 anos atrás",
       description: "Aprenda o momento e a forma certa de oferecer um produto adicional sem ser insistente."
-    },
-    {
-      title: "PA (PEÇAS POR ATENDIMENTO), INDICADOR DE VENDA",
-      url: "https://www.youtube.com/watch?v=np-ayvscmjs",
-      channel: "Mil Bijus",
-      publishedAt: "1 ano atrás",
-      description: "Entenda a importância do indicador P.A. e como ele pode multiplicar seu faturamento."
     }
   ],
   "Fechamento de Vendas": [
@@ -186,37 +144,25 @@ export const videosPorCategoria: Record<string, Video[]> = {
       channel: "Janderson Santos",
       publishedAt: "3 anos atrás",
       description: "Quatro perguntas estratégicas para fazer durante a negociação e levar ao fechamento."
-    },
-    {
-      title: "Nunca Mais Perca uma Venda com Essas Dicas de Fechamento",
-      url: "https://www.youtube.com/watch?v=1xlbodwW_xo",
-      channel: "Leandro Rosadas",
-      publishedAt: "1 ano atrás",
-      description: "Um conjunto de dicas práticas para aumentar sua taxa de conversão na etapa final da venda."
     }
   ]
 };
 
-// Função para buscar vídeos por categoria (agora embaralha a lista)
 export function getVideosPorCategoria(categoria: string): Video[] {
   const videos = videosPorCategoria[categoria] || videosPorCategoria["Objeções de Vendas"] || [];
-  // Embaralha o array para exibir uma ordem diferente a cada vez
   return [...videos].sort(() => Math.random() - 0.5);
 }
 
-// Função para buscar vídeos aleatórios de uma categoria
 export function getVideosAleatorios(categoria: string, quantidade: number = 6): Video[] {
   const videos = getVideosPorCategoria(categoria);
   const shuffled = [...videos].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, quantidade);
 }
 
-// Função para buscar todos os vídeos
 export function getTodosOsVideos(): Video[] {
   return Object.values(videosPorCategoria).flat();
 }
 
-// Função para buscar vídeos por palavra-chave
 export function buscarVideosPorPalavra(palavra: string): Video[] {
   const todosVideos = getTodosOsVideos();
   return todosVideos.filter(video => 
