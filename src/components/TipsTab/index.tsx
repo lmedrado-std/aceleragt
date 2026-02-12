@@ -24,41 +24,27 @@ const categorias = [
 ];
 
 const extractVideoId = (url: string): string => {
-  try {
-    const parsed = new URL(url);
+  if (!url) return "";
 
-    if (parsed.pathname.includes("/embed/")) {
-      return parsed.pathname.split("/embed/")[1];
-    }
+  // regex segura que pega SOMENTE o ID real do vídeo
+  const regExp =
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 
-    if (parsed.searchParams.get("v")) {
-      return parsed.searchParams.get("v")!;
-    }
+  const match = url.match(regExp);
 
-    if (parsed.hostname.includes("youtu.be")) {
-      return parsed.pathname.replace("/", "");
-    }
-
-    if (parsed.pathname.includes("/shorts/")) {
-      return parsed.pathname.split("/shorts/")[1];
-    }
-
-    if (parsed.pathname.includes("/live/")) {
-      return parsed.pathname.split("/live/")[1];
-    }
-
-    return "";
-  } catch {
-    return "";
+  if (match && match[1]) {
+    return match[1];
   }
+
+  return "";
 };
 
 const getEmbedUrl = (url: string): string => {
   const id = extractVideoId(url);
-  if (id && id.length === 11) {
-    return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
-  }
-  return "";
+
+  if (!id) return "";
+
+  return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
 };
 
 const getThumb = (url: string) => {
