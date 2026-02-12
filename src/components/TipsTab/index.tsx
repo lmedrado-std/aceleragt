@@ -30,10 +30,6 @@ export function TipsTab() {
     setVideos(getVideosPorCategoria(categoria));
   }, [categoria]);
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.style.display = "none";
-  };
-
   return (
     <div className={styles.tipsContainer}>
       <div className={styles.header}>
@@ -63,7 +59,6 @@ export function TipsTab() {
         <CarouselContent>
           {videos.map((video, index) => {
             const videoUrl = `https://youtube.com/watch?v=${video.id}`;
-            const thumbUrl = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
 
             return (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
@@ -71,12 +66,28 @@ export function TipsTab() {
                   <Card className="group flex flex-col hover:border-primary transition-all h-full shadow-sm hover:shadow-lg hover:-translate-y-[2px] overflow-hidden">
                     <div className={`${styles.videoWrapper} relative overflow-hidden bg-slate-900`}>
                       <button
-                        onClick={() => window.open(videoUrl, "_blank")}
+                        onClick={() => window.open(videoUrl, "_blank", "noopener,noreferrer")}
                         className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                       >
                         <img
-                          src={thumbUrl}
-                          onError={handleImageError}
+                          src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`}
+                          onError={(e: any) => {
+                            const img = e.currentTarget;
+
+                            if (!img.dataset.fallback1) {
+                              img.dataset.fallback1 = "true";
+                              img.src = `https://img.youtube.com/vi/${video.id}/sddefault.jpg`;
+                              return;
+                            }
+
+                            if (!img.dataset.fallback2) {
+                              img.dataset.fallback2 = "true";
+                              img.src = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg`;
+                              return;
+                            }
+
+                            img.style.display = "none";
+                          }}
                           className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
                           alt={video.title}
                         />
