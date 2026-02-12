@@ -12,7 +12,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import placeholderImages from '@/app/lib/placeholder-images.json';
 
 const categorias = [
   "Objeções de Vendas",
@@ -26,20 +25,31 @@ const categorias = [
 export function TipsTab() {
   const [categoria, setCategoria] = useState(categorias[0]);
   const [videos, setVideos] = useState<Video[]>([]);
+  const [invalidThumbs, setInvalidThumbs] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setVideos(getVideosPorCategoria(categoria));
+    setInvalidThumbs({});
   }, [categoria]);
 
+  /**
+   * ✅ Memo Premium
+   * Evita recriar objetos a cada render
+   */
   const videosFormatados = useMemo(() => {
     return videos.map(v => ({
       ...v,
       videoUrl: `https://youtube.com/watch?v=${v.id}`,
       thumbMax: `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
       thumbSd: `https://img.youtube.com/vi/${v.id}/sddefault.jpg`,
-      thumbHq: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`
+      thumbHq: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
     }));
   }, [videos]);
+
+  /**
+   * ✅ Remove vídeos inválidos automaticamente
+   */
+  const videosValidos = videosFormatados.filter(v => !invalidThumbs[v.id]);
 
   return (
     <div className={styles.tipsContainer}>
@@ -67,12 +77,10 @@ export function TipsTab() {
         </div>
       </div>
 
-      <Carousel
-        opts={{ align: "start", loop: false }}
-        className="w-full"
-      >
+      <Carousel opts={{ align: "start", loop: false }} className="w-full">
         <CarouselContent>
-          {videosFormatados.map((video) => (
+
+          {videosValidos.map((video) => (
             <CarouselItem key={video.id} className="md:basis-1/2 lg:basis-1/3">
               <div className="p-1 h-full">
                 <Card className="group flex flex-col hover:border-primary transition-all h-full shadow-sm hover:shadow-lg hover:-translate-y-[2px] overflow-hidden">
@@ -83,11 +91,10 @@ export function TipsTab() {
                       onClick={() => window.open(video.videoUrl, "_blank", "noopener,noreferrer")}
                       className="relative flex items-center justify-center w-full h-full group/link focus:outline-none"
                     >
-
                       <img
                         src={video.thumbMax}
                         loading="lazy"
-                        data-ai-hint="video thumbnail"
+                        alt={video.title}
                         onError={(e: any) => {
                           const img = e.currentTarget;
 
@@ -103,13 +110,16 @@ export function TipsTab() {
                             return;
                           }
 
-                          img.src = placeholderImages.videoPlaceholder.url;
-                          img.style.opacity = "1";
+                          // ❌ Thumb inválida → remove vídeo
+                          setInvalidThumbs(prev => ({
+                            ...prev,
+                            [video.id]: true
+                          }));
                         }}
                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:scale-105"
-                        alt={video.title}
                       />
 
+                      {/* Play Overlay Premium */}
                       <div className="relative z-10 flex flex-col items-center gap-2 text-white">
                         <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-xl transition-transform duration-300 group-hover/link:scale-110 ring-4 ring-white/10">
                           <span className="ml-1 text-xl">▶</span>
@@ -148,6 +158,7 @@ export function TipsTab() {
               </div>
             </CarouselItem>
           ))}
+
         </CarouselContent>
 
         <div className="hidden md:block">
