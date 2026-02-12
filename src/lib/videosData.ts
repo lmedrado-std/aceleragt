@@ -1,6 +1,5 @@
 // lib/videosData.ts
 // VERSÃO PREMIUM — TODOS OS LINKS AJUSTADOS PARA EMBED 100% FUNCIONAL
-// ⚠️ Apenas substitua TODO o conteúdo deste arquivo
 
 export interface Video {
   title: string;
