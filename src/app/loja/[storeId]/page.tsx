@@ -34,58 +34,42 @@ function handleSellerAccess(storeId: string, sellerId: string, router: ReturnTyp
   router.push(sellerLoginUrl);
 }
 
-type LastUpdateProps = {
+type LastUpdateBannerProps = {
   updatedAt: string;
   isToday: boolean;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  total: number;
 };
 
-function LastUpdateBanner({ updatedAt, isToday }: LastUpdateProps) {
+export function LastUpdateBanner({ updatedAt, isToday, searchTerm, setSearchTerm, total }: LastUpdateBannerProps) {
   return (
-    <div
-      className={cn(
-        "mb-5 relative overflow-hidden rounded-xl border backdrop-blur-sm",
-        "flex items-center gap-3 px-4 py-3",
-        "transition-all duration-300",
-        isToday
-          ? "bg-emerald-500/10 border-emerald-400/40"
-          : "bg-primary/10 border-primary/30"
-      )}
-    >
-      {/* Linha lateral institucional */}
-      <div
-        className={cn(
-          "absolute left-0 top-0 h-full w-[4px]",
-          isToday ? "bg-emerald-500" : "bg-primary"
-        )}
-      />
-
-      {/* Ícone */}
-      <div
-        className={cn(
-          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
-          isToday
-            ? "bg-emerald-500/20 text-emerald-600"
-            : "bg-primary/20 text-primary"
-        )}
-      >
-        <Clock className="h-4 w-4" />
+    <div className="mb-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/[0.08] via-accent/[0.08] to-primary/[0.08] backdrop-blur-lg px-4 py-3 shadow-[0_4px_18px_rgba(0,0,0,0.06)] space-y-3 transition-all">
+      {/* topo */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap text-sm">
+          <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center">
+            <Clock className="h-4 w-4 text-primary" />
+          </div>
+          <span className="text-muted-foreground font-medium">Atualizado:</span>
+          <span className="font-semibold tracking-tight">{updatedAt}</span>
+          {isToday && (
+            <span className="text-[10px] px-2 py-[2px] rounded-full bg-emerald-500/15 text-emerald-600 font-semibold">HOJE</span>
+          )}
+        </div>
+        <div className="text-[11px] font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full shrink-0">
+          {total} vendedores
+        </div>
       </div>
-
-      {/* Conteúdo */}
-      <div className="flex flex-wrap items-center gap-x-2 text-sm leading-none">
-        <span className="font-medium text-muted-foreground">
-          Última atualização:
-        </span>
-
-        <span className="font-semibold text-foreground">
-          {updatedAt}
-        </span>
-
-        {isToday && (
-          <span className="ml-2 px-2 py-[2px] rounded-full text-[10px] font-semibold uppercase tracking-wide bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-            Sincronizado hoje
-          </span>
-        )}
+      {/* busca PRO */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <input
+          placeholder="Buscar vendedor..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full h-9 sm:h-10 rounded-xl pl-9 pr-3 bg-white/70 dark:bg-slate-900/60 border border-border/50 outline-none focus:ring-2 focus:ring-primary/25 transition-all text-sm"
+        />
       </div>
     </div>
   );
@@ -111,12 +95,8 @@ function StorePageContent() {
 
   useEffect(() => {
     const updateDensity = () => {
-      document.body.classList.toggle(
-        "compact-ui",
-        window.innerHeight < 780
-      );
+      document.body.classList.toggle("compact-ui", window.innerHeight < 780);
     };
-
     updateDensity();
     window.addEventListener("resize", updateDensity);
     return () => window.removeEventListener("resize", updateDensity);
@@ -215,23 +195,15 @@ function StorePageContent() {
               </CardContent>
             </Card>
           
-            {formattedLastUpdated && <LastUpdateBanner updatedAt={formattedLastUpdated} isToday={updateIsToday} />}
-          
-            <div className="mb-6 flex flex-col sm:flex-row gap-3 items-center">
-                <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Buscar vendedor..." 
-                        className="pl-10 h-10 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-border/50 focus:ring-primary text-sm"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    {searchTerm && <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>}
-                </div>
-                <div className="text-[11px] font-bold text-muted-foreground whitespace-nowrap bg-white/30 dark:bg-slate-800/30 px-4 py-2.5 rounded-full backdrop-blur-sm border border-border/20 uppercase tracking-tighter">
-                    {filteredSellers.length} {filteredSellers.length === 1 ? 'Vendedor' : 'Vendedores'}
-                </div>
-            </div>
+            {formattedLastUpdated && (
+              <LastUpdateBanner
+                updatedAt={formattedLastUpdated}
+                isToday={updateIsToday}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                total={filteredSellers.length}
+              />
+            )}
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
@@ -239,7 +211,7 @@ function StorePageContent() {
                     <p className="text-xs text-muted-foreground font-semibold animate-pulse">Carregando equipe...</p>
                 </div>
             ) : filteredSellers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                     {filteredSellers.map((seller) => (
                     <SellerCard
                         key={seller.id}

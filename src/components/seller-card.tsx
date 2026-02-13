@@ -12,43 +12,90 @@ type SellerCardProps = {
   className?: string;
 };
 
-export function SellerCard({ name, badge, onClick, className }: SellerCardProps) {
+const colorMap = [
+  {
+    avatar: "from-pink-400 to-rose-500",
+    border: "hover:ring-pink-400/30",
+    glow: "hover:shadow-[0_10px_25px_rgba(244,114,182,0.25)]",
+  },
+  {
+    avatar: "from-emerald-400 to-teal-500",
+    border: "hover:ring-emerald-400/30",
+    glow: "hover:shadow-[0_10px_25px_rgba(16,185,129,0.25)]",
+  },
+  {
+    avatar: "from-violet-400 to-purple-500",
+    border: "hover:ring-violet-400/30",
+    glow: "hover:shadow-[0_10px_25px_rgba(139,92,246,0.25)]",
+  },
+  {
+    avatar: "from-orange-400 to-amber-500",
+    border: "hover:ring-orange-400/30",
+    glow: "hover:shadow-[0_10px_25px_rgba(251,146,60,0.25)]",
+  },
+];
+
+function getColor(name: string) {
+  const index = name.charCodeAt(0) % colorMap.length;
+  return colorMap[index];
+}
+
+export function SellerCard({
+  name,
+  badge,
+  onClick,
+  className,
+}: SellerCardProps) {
   const initial = name.trim().charAt(0).toUpperCase();
+  const color = getColor(name);
 
   return (
     <Card
       onClick={onClick}
       className={cn(
         "group relative overflow-hidden",
-        "border border-border/60",
-        "bg-white dark:bg-card",
+        "bg-gradient-to-b from-white to-primary/[0.04] dark:from-slate-900 dark:to-primary/[0.08]",
+        "border border-border/50",
         "transition-all duration-300 ease-out",
-        "hover:shadow-md hover:border-primary/40",
-        "p-4 sm:p-5",
+        "hover:-translate-y-[4px]",
+        "hover:ring-2",
+        color.border,
+        color.glow,
+        "p-5",
         "flex flex-col justify-between",
-        "min-h-[110px]",
-        "cursor-pointer card",
-        "select-none",
+        "min-h-[120px]",
+        "cursor-pointer card select-none",
         className
       )}
     >
-      {/* Linha superior institucional */}
-      <div className="absolute top-0 left-0 w-full h-[2px] bg-primary/40 opacity-70 group-hover:opacity-100 transition-all" />
+      {/* Linha glow superior */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary via-accent to-primary opacity-60 group-hover:opacity-100 transition-all duration-300" />
 
+      {/* Conteúdo */}
       <div className="flex items-start gap-4">
-        {/* Avatar */}
-        <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-base font-semibold text-primary shrink-0 transition-all group-hover:bg-primary group-hover:text-white">
+        {/* Avatar dinâmico */}
+        <div
+          className={cn(
+            "h-14 w-14 rounded-full flex items-center justify-center",
+            "text-lg font-bold text-white",
+            "bg-gradient-to-br",
+            color.avatar,
+            "shadow-md transition-all duration-300",
+            "group-hover:scale-110"
+          )}
+        >
           {initial}
         </div>
 
         {/* Info */}
         <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
               Vendedor
             </span>
+
             {badge && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[8px] font-semibold uppercase">
+              <span className="px-2 py-[2px] rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-semibold uppercase">
                 {badge}
               </span>
             )}

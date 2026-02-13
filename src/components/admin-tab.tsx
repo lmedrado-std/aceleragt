@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import {
@@ -957,12 +957,12 @@ export function AdminTab({
                           </Button>
                       )}
                       {formattedLastUpdated && (
-                          <div className="text-sm text-muted-foreground flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span>
-                                Última atualização: <span className="font-semibold text-foreground">{formattedLastUpdated}</span>
-                            </span>
-                          </div>
+                           <div className="p-2 rounded-md text-sm font-medium text-emerald-800 dark:text-emerald-200 flex items-center gap-2 bg-gradient-to-r from-emerald-400/15 to-accent/10 shadow-[0_0_18px_rgba(16,185,129,0.15)]">
+                               <Clock className="h-4 w-4" />
+                               <span>
+                                   Última atualização: <span className="font-semibold">{formattedLastUpdated}</span>
+                               </span>
+                           </div>
                       )}
                   </div>
                   <div className="w-full sm:w-auto flex-shrink-0">
