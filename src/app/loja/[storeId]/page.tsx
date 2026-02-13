@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -88,14 +87,13 @@ function StorePageContent() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Responsividade inteligente (auto-densidade)
+  // Responsividade inteligente (AUTO COMPACT MODE PRO)
   useEffect(() => {
     const updateDensity = () => {
-      if (window.innerHeight < 800) {
-        document.documentElement.classList.add("compact-ui");
-      } else {
-        document.documentElement.classList.remove("compact-ui");
-      }
+      document.body.classList.toggle(
+        "compact-ui",
+        window.innerHeight < 780
+      );
     };
 
     updateDensity();
@@ -166,7 +164,7 @@ function StorePageContent() {
   return (
     <TooltipProvider>
       <div className="flex flex-1 flex-col items-center p-4 md:px-8 md:py-4 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
-        <div className="w-full max-w-[1200px] mx-auto px-4">
+        <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
             {/* Header / Brand Card Compacto */}
             <Card className="mb-4 bg-primary shadow-lg border-none overflow-hidden relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-xl" />
@@ -182,7 +180,7 @@ function StorePageContent() {
                     <p className="text-white/70 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Equipe de Vendas</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                     {renderThemeToggle()}
                     <Button variant="secondary" size="sm" onClick={() => handleAccessAdminLoja(storeId, router)} className="font-bold h-9">
                         <Shield className="mr-1.5 h-3.5 w-3.5" /> Gestor
@@ -222,7 +220,7 @@ function StorePageContent() {
                     <p className="text-xs text-muted-foreground font-semibold animate-pulse">Carregando equipe...</p>
                 </div>
             ) : filteredSellers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 auto-rows-fr">
                     {filteredSellers.map((seller) => (
                     <SellerCard
                         key={seller.id}

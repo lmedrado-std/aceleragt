@@ -1,10 +1,9 @@
-
 "use client";
 
 import { cn } from "@/lib/utils";
-import { User, ArrowRight, Circle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+import { Card } from "./ui/card";
 
 type SellerCardProps = {
   name: string;
@@ -17,49 +16,55 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
   const initial = name.trim().charAt(0).toUpperCase();
 
   return (
-    <div 
+    <Card 
       onClick={onClick}
       className={cn(
-        "group bg-white dark:bg-slate-800/50 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 sm:p-5 cursor-pointer border border-border/50 hover:-translate-y-1 relative overflow-hidden card",
+        "group relative overflow-hidden border border-slate-200/60 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/70 backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:-translate-y-[2px] p-4 sm:p-5 flex flex-col justify-between min-h-[110px] cursor-pointer card",
         className
       )}
     >
       {/* Efeito visual de borda superior institucional */}
       <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 group-hover:bg-primary transition-colors" />
 
-      <div className="flex flex-col h-full justify-between gap-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            {/* Avatar Institucional Compacto */}
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-xl font-bold group-hover:bg-primary group-hover:text-white transition-colors">
-              {initial}
-            </div>
-            
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground/70">Vendedor</span>
-                {badge && (
-                  <Badge variant="secondary" className="h-3.5 px-1 text-[8px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-none">
-                    {badge}
-                  </Badge>
-                )}
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors leading-tight truncate">
-                {name}
-              </h3>
-            </div>
-          </div>
+      <div className="flex items-start gap-4">
+        {/* Avatar Institucional Compacto */}
+        <div className="h-12 w-12 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-black text-lg text-primary shrink-0 transition-colors group-hover:bg-primary group-hover:text-white">
+          {initial}
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/40">
-          <span className="text-xs sm:text-sm text-muted-foreground font-medium group-hover:text-foreground transition-colors hidden sm:inline-block">
-            Meu desempenho
-          </span>
-          <Button size="sm" variant="ghost" className="h-8 rounded-full px-3 text-xs group-hover:bg-primary group-hover:text-white transition-all ml-auto">
-            Acessar <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-          </Button>
+        {/* Info */}
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              Vendedor
+            </span>
+            {badge && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[8px] font-bold uppercase">
+                {badge}
+              </span>
+            )}
+          </div>
+
+          <h3 className="text-lg sm:text-xl font-black leading-tight truncate">
+            {name}
+          </h3>
         </div>
       </div>
-    </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-4">
+        <span className="text-xs sm:text-sm text-muted-foreground font-medium transition-colors group-hover:text-foreground">
+          Meu desempenho
+        </span>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="font-bold tracking-tight group-hover:translate-x-1 transition-all h-8 px-2"
+        >
+          Acessar <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </Card>
   );
 }
