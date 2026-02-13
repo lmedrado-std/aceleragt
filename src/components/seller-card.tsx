@@ -1,3 +1,4 @@
+
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -19,7 +20,7 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
     <div 
       onClick={onClick}
       className={cn(
-        "group bg-white dark:bg-slate-800/50 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 cursor-pointer border border-border/50 hover:-translate-y-1 relative overflow-hidden",
+        "group bg-white dark:bg-slate-800/50 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 sm:p-5 cursor-pointer border border-border/50 hover:-translate-y-1 relative overflow-hidden card",
         className
       )}
     >
@@ -43,7 +44,7 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
                   </Badge>
                 )}
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors leading-tight truncate">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors leading-tight truncate">
                 {name}
               </h3>
             </div>
@@ -51,7 +52,7 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-border/40">
-          <span className="text-[10px] text-muted-foreground font-medium group-hover:text-foreground transition-colors hidden sm:inline-block">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium group-hover:text-foreground transition-colors hidden sm:inline-block">
             Meu desempenho
           </span>
           <Button size="sm" variant="ghost" className="h-8 rounded-full px-3 text-xs group-hover:bg-primary group-hover:text-white transition-all ml-auto">

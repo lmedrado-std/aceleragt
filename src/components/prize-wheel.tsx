@@ -6,15 +6,11 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { Loader2, Gift, Ticket, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
+import { Loader2, Gift, Ticket } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface PrizeWheelProps {
   storeId: string;
@@ -24,13 +20,38 @@ interface PrizeWheelProps {
 
 interface Segment {
   id: string;
-  option: string;
-  style?: { backgroundColor?: string; textColor?: string };
+  label: string;
+  option: string; // Icon
+  style: { 
+    backgroundColor: string; 
+    textColor: string;
+    boxShadow?: string;
+  };
   type: string;
   value?: number;
   description?: string;
   color?: string;
 }
+
+const prizeIcons: { [key: string]: string } = {
+    money: '💰',
+    voucher: '⭐',
+    product: '🎁',
+    retry: '🔁',
+    points: '🔥',
+    default: '❌',
+};
+
+const prizeColors: { [key: string]: string } = {
+    money: '#10B981',     // green-500 (prêmio real)
+    product: '#10B981',    // green-500 (prêmio real)
+    voucher: '#F59E0B',    // yellow-500 (bônus médio)
+    points: '#A855F7',     // purple-500 (prêmio especial)
+    retry: '#3B82F6',      // blue-500 (tentativa)
+    default: '#6B7280',    // gray-500 (neutro)
+};
+
+const premiumGlow = 'inset 0 0 10px rgba(255,255,255,0.08), 0 0 12px rgba(255,255,255,0.05)';
 
 export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps) {
   const [mustSpin, setMustSpin] = useState(false);
@@ -64,18 +85,23 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         setConfigured(configured);
         if (configured) {
           setSegments(
-            rawSegments.map((s: any) => ({
-              id: s.id,
-              option: sanitizeLabel(s.label, s.type),
-              style: { 
-                backgroundColor: s.type === 'retry' ? '#475569' : s.color, 
-                textColor: '#FFFFFF' 
-              },
-              type: s.type,
-              value: s.value,
-              description: s.description,
-              color: s.color,
-            }))
+            rawSegments.map((s: any): Segment => {
+              const isPremium = ['money', 'product', 'voucher'].includes(s.type);
+              return {
+                id: s.id,
+                label: s.label,
+                option: prizeIcons[s.type] || prizeIcons.default,
+                style: { 
+                  backgroundColor: prizeColors[s.type] || prizeColors.default,
+                  textColor: '#FFFFFF',
+                  ...(isPremium && { boxShadow: premiumGlow })
+                },
+                type: s.type,
+                value: s.value,
+                description: s.description,
+                color: s.color, // Keep original color for modal logic if needed
+              }
+            })
           );
           await fetchCredits();
         }
@@ -116,27 +142,8 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       toast({ variant: 'destructive', title: 'Erro no Giro', description: err.message });
     }
   };
-
-  const sanitizeLabel = (label: string, type: string) => {
-    let prefix = '';
-    switch(type) {
-      case 'money': prefix = '💰 '; break;
-      case 'voucher': prefix = '🎟️ '; break;
-      case 'product': prefix = '🎁 '; break;
-      case 'retry': prefix = '🔁 '; break;
-    }
-
-    let clean = label.toUpperCase();
-    
-    // Simplifica valores monetários: R$ 15,00 -> R$ 15
-    clean = clean.replace(',00', '').replace('.00', '');
-    
-    // Encurta labels muito longas
-    if (clean === 'TENTE NOVAMENTE') clean = 'TENTE';
-    if (clean.length > 12) clean = clean.substring(0, 10) + '..';
-    
-    return prefix + clean;
-  };
+  
+  const prizeSegments = segments.filter(s => s.type !== 'retry');
 
   if (loading)
     return (
@@ -158,7 +165,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   return (
     <div className="w-full max-w-lg mx-auto space-y-6 relative">
       
-      {/* SEÇÃO DE GIROS INTEGRADA E MODERNA */}
       <div className="flex justify-center">
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full shadow-lg border border-white/20 flex items-center gap-3">
             <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900">
@@ -182,17 +188,13 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         </div>
       </div>
 
-      {/* CARD DA ROLETA PREMIUM */}
       <Card className="bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-900 border-none p-4 sm:p-8 rounded-[3rem] shadow-2xl overflow-hidden relative">
-        {/* Efeito de Vinheta */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
         
         <div className="flex flex-col items-center gap-8 relative z-10">
           
-          {/* Container da Roda */}
           <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/5 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
               
-              {/* NOVO PONTEIRO "NEEDLE" - ALINHADO AO TOPO (12h) */}
               <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
                   <div className="relative flex flex-col items-center">
                       <div className="w-12 h-12 bg-yellow-400 rounded-full border-[4px] border-white flex items-center justify-center ring-2 ring-black/10">
@@ -205,7 +207,6 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                   </div>
               </div>
 
-              {/* Centro da Roleta Premium */}
               <div className="absolute z-20 w-16 h-16 sm:w-20 sm:h-20 rounded-full border-[4px] border-white shadow-2xl flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
                   <Gift className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
               </div>
@@ -219,21 +220,25 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                       setTimeout(() => setShowResult(true), 400);
                   }}
                   spinDuration={0.8}
-                  textDistance={78}
-                  fontSize={14}
+                  textComponent={(props) => (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translate(-50%, -50%)' }}>
+                      {props.children}
+                    </div>
+                  )}
+                  textDistance={60}
+                  fontSize={32}
                   radiusLineWidth={2}
                   radiusLineColor="rgba(255,255,255,0.4)"
                   outerBorderWidth={10}
                   outerBorderColor="#FFFFFF"
                   innerBorderWidth={0}
                   innerRadius={40}
-                  perpendicularText={true}
+                  perpendicularText={false}
                   pointerProps={{ style: { display: 'none' } }}
-                  rotationAngle={270} // Alinha o topo como ponto de parada
+                  rotationAngle={270}
               />
           </div>
 
-          {/* Botão de Ação */}
           <div className="w-full">
               <Button
                   onClick={handleSpinClick}
@@ -246,11 +251,11 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                   )}
               >
                   {mustSpin ? (
-                      <span className="flex items-center gap-3">
+                      <span className="flex items-center justify-center gap-3">
                           <Loader2 className="h-8 w-8 animate-spin" /> SORTEANDO...
                       </span>
                   ) : (
-                      <span className="flex items-center gap-4">
+                      <span className="flex items-center justify-center gap-4">
                           <Gift className="h-10 w-10 text-blue-600" /> GIRAR AGORA!
                       </span>
                   )}
@@ -259,37 +264,62 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         </div>
       </Card>
 
-      {/* Modal de Resultado PREMIUM */}
+      {prizeSegments.length > 0 && (
+        <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-lg border border-white/20">
+            <CardHeader>
+                <CardTitle className="text-sm font-semibold tracking-wider text-slate-500 dark:text-slate-400">Prêmios possíveis:</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-2">
+                    {prizeSegments.map(prize => (
+                        <li key={prize.id} className="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <span className="text-xl" style={{ color: prizeColors[prize.type] || prizeColors.default }}>{prize.option}</span>
+                            <span>{prize.label}</span>
+                        </li>
+                    ))}
+                </ul>
+            </CardContent>
+        </Card>
+      )}
+
       {showResult && spinResult && (
         <Dialog open onOpenChange={() => setShowResult(false)}>
-          <DialogContent aria-describedby="spin-result-description" className="bg-gradient-to-br from-white to-blue-50 border-none shadow-2xl rounded-[2rem]">
-            <DialogHeader>
-              <DialogTitle className={cn(
-                  "text-center text-3xl font-black uppercase tracking-tighter",
-                  spinResult.type === "retry" ? "text-slate-400" : "text-blue-600"
-                )}>
-                {spinResult.type === "retry" ? "😕 Não foi dessa vez!" : "🎉 Vitória!"}
-              </DialogTitle>
-              <DialogDescription id="spin-result-description" className="text-center font-bold text-slate-500">
-                {spinResult.type === "retry" ? "Tente novamente na próxima carga de giros." : "Você acaba de ganhar um prêmio especial."}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-10 text-center">
-                <div className={cn(
-                    "inline-block p-8 rounded-[2rem] text-white shadow-2xl",
-                    spinResult.type === "retry" ? "bg-slate-500" : "bg-blue-600 shadow-blue-200"
-                )}>
-                    <p className="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Prêmio Conquistado</p>
-                    <p className="text-4xl sm:text-5xl font-black tracking-tight">{spinResult?.option}</p>
+          <DialogContent 
+            aria-describedby="spin-result-description" 
+            className="p-0 border-none bg-transparent shadow-none max-w-sm"
+            hideCloseButton={true}
+          >
+            {spinResult.type === 'retry' ? (
+                <div className="bg-background rounded-2xl p-8 text-center space-y-6">
+                    <h2 className="text-2xl font-black tracking-tight text-muted-foreground">
+                        😕 NÃO FOI DESSA VEZ!
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                        Continue vendendo para ganhar novos giros.
+                    </p>
+                    <DialogClose asChild>
+                        <Button className="w-full h-12 text-base font-bold">
+                            CONTINUAR VENDENDO
+                        </Button>
+                    </DialogClose>
+              </div>
+            ) : (
+                <div className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-900/50 rounded-[2rem] p-8 text-center space-y-6 shadow-2xl">
+                    <h2 className="text-3xl font-black tracking-tighter" style={{ color: prizeColors[spinResult.type] || prizeColors.default }}>🎉 PARABÉNS!</h2>
+                    <p className="text-base text-slate-600 dark:text-slate-300 font-medium">Você ganhou:</p>
+                    <div 
+                        className="inline-block py-4 px-6 rounded-2xl text-white shadow-xl"
+                        style={{ backgroundColor: prizeColors[spinResult.type] || prizeColors.default }}
+                    >
+                        <p className="text-3xl font-black tracking-tight break-words">{spinResult.label}</p>
+                    </div>
+                    <DialogClose asChild>
+                        <Button className="w-full h-14 text-xl font-bold bg-slate-900 hover:bg-slate-800 dark:bg-primary-foreground dark:text-primary dark:hover:bg-slate-200 text-white rounded-2xl shadow-lg">
+                            CONTINUAR VENDENDO
+                        </Button>
+                    </DialogClose>
                 </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button className="w-full h-14 text-xl font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-lg">
-                  CONTINUAR VENDENDO
-                </Button>
-              </DialogClose>
-            </DialogFooter>
+            )}
           </DialogContent>
         </Dialog>
       )}

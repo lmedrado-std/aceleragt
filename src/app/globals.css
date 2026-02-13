@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -74,5 +75,19 @@
       transform: scale(1.02);
       box-shadow: 0 0 0 5px hsl(var(--primary) / 0);
     }
+  }
+
+  /* Compact Mode Styles */
+  .compact-ui .card {
+    padding: 12px !important;
+  }
+
+  .compact-ui h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .compact-ui .header {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
   }
 }

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,21 @@ function StorePageContent() {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Responsividade inteligente (auto-densidade)
+  useEffect(() => {
+    const updateDensity = () => {
+      if (window.innerHeight < 800) {
+        document.documentElement.classList.add("compact-ui");
+      } else {
+        document.documentElement.classList.remove("compact-ui");
+      }
+    };
+
+    updateDensity();
+    window.addEventListener("resize", updateDensity);
+    return () => window.removeEventListener("resize", updateDensity);
+  }, []);
+
   const loadStoreData = useCallback(async (showToast = false) => {
     if (!storeId) { setError("ID da loja não encontrado."); setLoading(false); return; };
     setLoading(true);
@@ -150,11 +166,11 @@ function StorePageContent() {
   return (
     <TooltipProvider>
       <div className="flex flex-1 flex-col items-center p-4 md:px-8 md:py-4 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
-        <div className="w-full max-w-7xl">
+        <div className="w-full max-w-[1200px] mx-auto px-4">
             {/* Header / Brand Card Compacto */}
             <Card className="mb-4 bg-primary shadow-lg border-none overflow-hidden relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-xl" />
-              <CardContent className="p-3 md:p-4 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+              <CardContent className="p-3 sm:p-4 py-3 sm:py-4 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 header">
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
                     <Logo className="h-7" />
@@ -206,7 +222,7 @@ function StorePageContent() {
                     <p className="text-xs text-muted-foreground font-semibold animate-pulse">Carregando equipe...</p>
                 </div>
             ) : filteredSellers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
                     {filteredSellers.map((seller) => (
                     <SellerCard
                         key={seller.id}
