@@ -8,7 +8,7 @@ import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
-import Link from "link";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated } from "@/lib/auth";

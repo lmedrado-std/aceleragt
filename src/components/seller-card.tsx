@@ -21,13 +21,14 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
       className={cn(
         "group relative overflow-hidden",
         "border border-border/60",
-        "bg-card",
-        "transition-all duration-200",
+        "bg-white dark:bg-card",
+        "transition-all duration-300 ease-out",
         "hover:shadow-md hover:border-primary/40",
         "p-4 sm:p-5",
         "flex flex-col justify-between",
         "min-h-[110px]",
         "cursor-pointer card",
+        "select-none",
         className
       )}
     >
@@ -53,7 +54,6 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
             )}
           </div>
 
-          {/* 🔥 Ajuste principal: menos peso tipográfico */}
           <h3 className="text-lg sm:text-xl font-semibold leading-tight truncate text-foreground">
             {name}
           </h3>
