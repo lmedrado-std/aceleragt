@@ -7,7 +7,7 @@ import { Card } from "./ui/card";
 
 type SellerCardProps = {
   name: string;
-  badge?: string; // ex: "Top", "Novo"
+  badge?: string;
   onClick: () => void;
   className?: string;
 };
@@ -16,15 +16,14 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
   const initial = name.trim().charAt(0).toUpperCase();
 
   return (
-    <Card 
+    <Card
       onClick={onClick}
       className={cn(
         "group relative overflow-hidden",
-        "border border-border/50",
-        "bg-gradient-to-b from-white to-slate-50",
-        "dark:from-slate-900 dark:to-slate-800",
+        "border border-border/60",
+        "bg-card",
         "transition-all duration-200",
-        "hover:shadow-lg hover:border-primary/40",
+        "hover:shadow-md hover:border-primary/40",
         "p-4 sm:p-5",
         "flex flex-col justify-between",
         "min-h-[110px]",
@@ -32,29 +31,30 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
         className
       )}
     >
-      {/* Linha institucional premium no topo */}
-      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary/20 via-primary to-accent opacity-70 group-hover:opacity-100 transition-all" />
+      {/* Linha superior institucional */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-primary/40 opacity-70 group-hover:opacity-100 transition-all" />
 
       <div className="flex items-start gap-4">
-        {/* Avatar Institucional com cor da marca */}
-        <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center font-black text-lg text-primary shrink-0 transition-all group-hover:bg-primary group-hover:text-white">
+        {/* Avatar */}
+        <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-base font-semibold text-primary shrink-0 transition-all group-hover:bg-primary group-hover:text-white">
           {initial}
         </div>
 
         {/* Info */}
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
               Vendedor
             </span>
             {badge && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[8px] font-bold uppercase">
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[8px] font-semibold uppercase">
                 {badge}
               </span>
             )}
           </div>
 
-          <h3 className="text-lg sm:text-xl font-black leading-tight truncate">
+          {/* 🔥 Ajuste principal: menos peso tipográfico */}
+          <h3 className="text-lg sm:text-xl font-semibold leading-tight truncate text-foreground">
             {name}
           </h3>
         </div>
@@ -62,14 +62,14 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-4">
-        <span className="text-xs sm:text-sm text-muted-foreground font-medium transition-colors group-hover:text-foreground">
+        <span className="text-xs sm:text-sm text-muted-foreground font-normal">
           Meu desempenho
         </span>
 
         <Button
           variant="ghost"
           size="sm"
-          className="font-bold tracking-tight group-hover:translate-x-1 transition-all h-8 px-2"
+          className="font-medium tracking-tight group-hover:translate-x-1 transition-all h-8 px-2 text-primary"
         >
           Acessar <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
         </Button>
