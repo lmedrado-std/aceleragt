@@ -19,16 +19,25 @@ export function SellerCard({ name, badge, onClick, className }: SellerCardProps)
     <Card 
       onClick={onClick}
       className={cn(
-        "group relative overflow-hidden border border-slate-200/60 dark:border-slate-700/40 bg-white/80 dark:bg-slate-900/70 backdrop-blur-md transition-all duration-300 hover:shadow-xl hover:-translate-y-[2px] p-4 sm:p-5 flex flex-col justify-between min-h-[110px] cursor-pointer card",
+        "group relative overflow-hidden",
+        "border border-border/50",
+        "bg-gradient-to-b from-white to-slate-50",
+        "dark:from-slate-900 dark:to-slate-800",
+        "transition-all duration-200",
+        "hover:shadow-lg hover:border-primary/40",
+        "p-4 sm:p-5",
+        "flex flex-col justify-between",
+        "min-h-[110px]",
+        "cursor-pointer card",
         className
       )}
     >
-      {/* Efeito visual de borda superior institucional */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-primary/20 group-hover:bg-primary transition-colors" />
+      {/* Linha institucional premium no topo */}
+      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary/20 via-primary to-accent opacity-70 group-hover:opacity-100 transition-all" />
 
       <div className="flex items-start gap-4">
-        {/* Avatar Institucional Compacto */}
-        <div className="h-12 w-12 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-black text-lg text-primary shrink-0 transition-colors group-hover:bg-primary group-hover:text-white">
+        {/* Avatar Institucional com cor da marca */}
+        <div className="h-12 w-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center font-black text-lg text-primary shrink-0 transition-all group-hover:bg-primary group-hover:text-white">
           {initial}
         </div>
 

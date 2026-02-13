@@ -147,7 +147,7 @@ function StorePageContent() {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="outline" size="icon" className="rounded-full h-9 w-9">
-              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+              {theme === 'light' ? <Moon size(16} /> : <Sun size={16} />}
           </Button>
         </TooltipTrigger>
         <TooltipContent><p>Alternar tema</p></TooltipContent>
@@ -163,7 +163,7 @@ function StorePageContent() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-1 flex-col items-center p-4 md:px-8 md:py-4 bg-gradient-to-br from-slate-50 to-indigo-100 dark:from-slate-900 dark:to-indigo-950">
+      <div className="flex flex-1 flex-col items-center p-4 md:px-8 md:py-4 bg-gradient-to-b from-background to-slate-100/60 dark:to-slate-900">
         <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
             {/* Header / Brand Card Compacto */}
             <Card className="mb-4 bg-primary shadow-lg border-none overflow-hidden relative">
@@ -220,7 +220,7 @@ function StorePageContent() {
                     <p className="text-xs text-muted-foreground font-semibold animate-pulse">Carregando equipe...</p>
                 </div>
             ) : filteredSellers.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 auto-rows-fr">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5">
                     {filteredSellers.map((seller) => (
                     <SellerCard
                         key={seller.id}
