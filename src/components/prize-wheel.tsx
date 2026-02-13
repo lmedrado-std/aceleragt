@@ -7,7 +7,9 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
+  DialogTitle,
 } from '@/components/ui/dialog';
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from '@/lib/utils';
 import { Loader2, Gift, Ticket } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -289,6 +291,10 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             className="p-0 border-none bg-transparent shadow-none max-w-sm"
             hideCloseButton={true}
           >
+            <VisuallyHidden>
+              <DialogTitle>Resultado do Giro</DialogTitle>
+            </VisuallyHidden>
+
             {spinResult.type === 'retry' ? (
                 <div className="bg-background rounded-2xl p-8 text-center space-y-6">
                     <h2 className="text-2xl font-black tracking-tight text-muted-foreground">
