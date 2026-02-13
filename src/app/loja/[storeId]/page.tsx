@@ -147,7 +147,7 @@ function StorePageContent() {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} variant="outline" size="icon" className="rounded-full h-9 w-9">
-              {theme === 'light' ? <Moon size(16} /> : <Sun size={16} />}
+              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
           </Button>
         </TooltipTrigger>
         <TooltipContent><p>Alternar tema</p></TooltipContent>
