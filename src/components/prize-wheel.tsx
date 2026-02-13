@@ -221,23 +221,17 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                       setMustSpin(false);
                       setTimeout(() => setShowResult(true), 400);
                   }}
-                  spinDuration={0.8}
-                  textComponent={(props) => (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'translate(-50%, -50%)' }}>
-                      {props.children}
-                    </div>
-                  )}
+                  spinDuration={0.9}
+                  perpendicularText={false}
                   textDistance={60}
                   fontSize={32}
                   radiusLineWidth={2}
-                  radiusLineColor="rgba(255,255,255,0.4)"
+                  radiusLineColor="rgba(255,255,255,0.35)"
                   outerBorderWidth={10}
                   outerBorderColor="#FFFFFF"
                   innerBorderWidth={0}
                   innerRadius={40}
-                  perpendicularText={false}
                   pointerProps={{ style: { display: 'none' } }}
-                  rotationAngle={270}
               />
           </div>
 
