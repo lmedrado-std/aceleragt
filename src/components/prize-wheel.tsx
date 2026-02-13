@@ -135,7 +135,17 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
       if (idx === -1) throw new Error("Prêmio não encontrado na roleta local.");
 
       setPrizeNumber(idx);
-      setSpinResult(segments[idx]);
+      
+      // Use result.prize directly to guarantee absolute sync with the wheel and backend
+      setSpinResult({
+        ...result.prize,
+        option: prizeIcons[result.prize.type] || prizeIcons.default,
+        style: {
+          backgroundColor: prizeColors[result.prize.type] || prizeColors.default,
+          textColor: "#FFFFFF",
+        }
+      } as Segment);
+
       setCredits((c) => Math.max(0, c - 1));
       setMustSpin(true);
       
@@ -195,7 +205,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         
         <div className="flex flex-col items-center gap-8 relative z-10">
           
-          <div className="relative w-[320px] sm:w-[380px] flex justify-center items-center select-none bg-white/5 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
+          <div className="relative w-[320px] sm:w-[380px] aspect-square flex justify-center items-center select-none bg-white/5 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
               
               <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
                   <div className="relative flex flex-col items-center">
@@ -221,7 +231,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                       setMustSpin(false);
                       setTimeout(() => setShowResult(true), 400);
                   }}
-                  spinDuration={0.9}
+                  spinDuration={1.2}
                   perpendicularText={false}
                   textDistance={60}
                   fontSize={32}
