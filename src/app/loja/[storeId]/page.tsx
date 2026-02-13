@@ -8,7 +8,7 @@ import { Seller, Store } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import ClientOnly from "@/components/client-only";
-import Link from "next/link";
+import Link from "link";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAdminGlobal, isStoreAuthenticated } from "@/lib/auth";
@@ -43,23 +43,23 @@ function LastUpdateBanner({ updatedAt, isToday }: LastUpdateProps) {
   return (
     <div
       className={cn(
-        "mb-6 flex items-center gap-3 rounded-r-lg border-l-[6px] py-2 px-4 shadow-sm transition-all duration-300",
+        "mb-6 flex items-center gap-3 rounded-r-lg border-l-4 py-2 px-4 shadow-sm transition-all duration-300",
         isToday 
-          ? "bg-emerald-500/10 border-emerald-500 text-emerald-800 dark:text-emerald-300" 
-          : "bg-primary/10 border-primary text-primary dark:text-blue-300"
+          ? "bg-emerald-50/80 border-emerald-500 text-emerald-800 dark:bg-emerald-900/10 dark:text-emerald-300" 
+          : "bg-slate-50 border-slate-300 text-slate-600 dark:bg-slate-800/40 dark:border-slate-700 dark:text-slate-400"
       )}
     >
       <div className="flex items-center justify-center">
-        <Clock className={cn("h-4 w-4", isToday && "animate-subtle-pulse")} />
+        <Clock className={cn("h-4 w-4 opacity-70", isToday && "text-emerald-500 animate-subtle-pulse")} />
       </div>
       <div className="flex flex-wrap items-center gap-x-1.5 text-xs sm:text-sm">
-        <span className="font-semibold uppercase tracking-tight opacity-70">Última atualização:</span>
-        <span className="font-black tracking-tight">{updatedAt}</span>
+        <span className="uppercase tracking-wider text-[10px] opacity-60">Última atualização:</span>
+        <span className="tracking-tight">{updatedAt}</span>
         {isToday && (
-          <span className="flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-[10px] font-black uppercase tracking-tighter">
-            <span className="relative flex h-2 w-2">
+          <span className="flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
             Sincronizado
           </span>
@@ -87,7 +87,6 @@ function StorePageContent() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Responsividade inteligente (AUTO COMPACT MODE PRO)
   useEffect(() => {
     const updateDensity = () => {
       document.body.classList.toggle(
@@ -165,7 +164,6 @@ function StorePageContent() {
     <TooltipProvider>
       <div className="flex flex-1 flex-col items-center p-4 md:px-8 md:py-4 bg-gradient-to-b from-background to-slate-100/60 dark:to-slate-900">
         <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
-            {/* Header / Brand Card Compacto */}
             <Card className="mb-4 bg-primary shadow-lg border-none overflow-hidden relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-xl" />
               <CardContent className="p-3 sm:p-4 py-3 sm:py-4 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 header">
@@ -174,7 +172,7 @@ function StorePageContent() {
                     <Logo className="h-7" />
                   </div>
                   <div>
-                    <h1 className="text-lg md:text-xl font-black tracking-tight text-white leading-tight">
+                    <h1 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight">
                         {loading ? <Skeleton className="h-6 w-32" /> : store?.name}
                     </h1>
                     <p className="text-white/70 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Equipe de Vendas</p>
@@ -197,7 +195,6 @@ function StorePageContent() {
           
             {formattedLastUpdated && <LastUpdateBanner updatedAt={formattedLastUpdated} isToday={updateIsToday} />}
           
-            {/* Search Bar + Contador na mesma linha */}
             <div className="mb-6 flex flex-col sm:flex-row gap-3 items-center">
                 <div className="relative flex-1 w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
