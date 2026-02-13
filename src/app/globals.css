@@ -60,8 +60,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-family-base);
+    @apply bg-background text-foreground font-sans;
   }
 }
 
