@@ -43,25 +43,47 @@ function LastUpdateBanner({ updatedAt, isToday }: LastUpdateProps) {
   return (
     <div
       className={cn(
-        "mb-6 flex items-center gap-3 rounded-r-lg border-l-4 py-2 px-4 shadow-sm transition-all duration-300",
-        isToday 
-          ? "bg-emerald-50/80 border-emerald-500 text-emerald-800 dark:bg-emerald-900/10 dark:text-emerald-300" 
-          : "bg-slate-50 border-slate-300 text-slate-600 dark:bg-slate-800/40 dark:border-slate-700 dark:text-slate-400"
+        "mb-5 relative overflow-hidden rounded-xl border backdrop-blur-sm",
+        "flex items-center gap-3 px-4 py-3",
+        "transition-all duration-300",
+        isToday
+          ? "bg-emerald-500/10 border-emerald-400/40"
+          : "bg-primary/10 border-primary/30"
       )}
     >
-      <div className="flex items-center justify-center">
-        <Clock className={cn("h-4 w-4 opacity-70", isToday && "text-emerald-500 animate-subtle-pulse")} />
+      {/* Linha lateral institucional */}
+      <div
+        className={cn(
+          "absolute left-0 top-0 h-full w-[4px]",
+          isToday ? "bg-emerald-500" : "bg-primary"
+        )}
+      />
+
+      {/* Ícone */}
+      <div
+        className={cn(
+          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
+          isToday
+            ? "bg-emerald-500/20 text-emerald-600"
+            : "bg-primary/20 text-primary"
+        )}
+      >
+        <Clock className="h-4 w-4" />
       </div>
-      <div className="flex flex-wrap items-center gap-x-1.5 text-xs sm:text-sm">
-        <span className="uppercase tracking-wider text-[10px] opacity-60">Última atualização:</span>
-        <span className="tracking-tight">{updatedAt}</span>
+
+      {/* Conteúdo */}
+      <div className="flex flex-wrap items-center gap-x-2 text-sm leading-none">
+        <span className="font-medium text-muted-foreground">
+          Última atualização:
+        </span>
+
+        <span className="font-semibold text-foreground">
+          {updatedAt}
+        </span>
+
         {isToday && (
-          <span className="flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-            </span>
-            Sincronizado
+          <span className="ml-2 px-2 py-[2px] rounded-full text-[10px] font-semibold uppercase tracking-wide bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+            Sincronizado hoje
           </span>
         )}
       </div>
