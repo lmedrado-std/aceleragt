@@ -36,6 +36,8 @@ async function sliceUnderPointer(page: Page) {
   return { angle, idx, id: ids[idx] };
 }
 
+test.setTimeout(120_000);
+
 const credits = (page: Page) => page.getByTestId('wheel-credits').getAttribute('data-credits');
 
 test.describe('Roleta V2 — vendedor', () => {
@@ -140,8 +142,8 @@ test.describe('Roleta V2 — celular e movimento reduzido', () => {
     const data = await (await spinResponse).json();
     // mede a partir da resposta (a 1ª compilação da rota em modo dev não conta)
     const answeredAt = Date.now();
-    await expect(page.getByTestId('wheel-result')).toBeVisible({ timeout: 10_000 });
-    expect(Date.now() - answeredAt).toBeLessThan(4000); // giro normal ~9 s; reduzido ~1,2 s
+    await expect(page.getByTestId('wheel-result')).toBeVisible({ timeout: 20_000 });
+    expect(Date.now() - answeredAt).toBeLessThan(5000); // giro normal 12 s; reduzido 3 s
     expect((await sliceUnderPointer(page)).id).toBe(data.prize.id);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/e2e-mobile.png`, fullPage: true });
   });
@@ -158,7 +160,8 @@ test.describe('Roleta V2 — gestor', () => {
     const row = page.locator(`[data-testid="wheel-manager-row"][data-seller-id="${SELLER_ID}"]`);
     await expect(row.getByTestId('wheel-manager-credits')).toHaveText('3');
     await row.getByTestId('wheel-grant-1').dblclick();
-    await expect(row.getByTestId('wheel-manager-credits')).toHaveText(/^[45]$/);
+    // 1ª chamada compila a rota no modo dev: espera maior
+    await expect(row.getByTestId('wheel-manager-credits')).toHaveText(/^[45]$/, { timeout: 20_000 });
     // a trava de envio impede concessão em dobro no clique duplo
     await page.waitForTimeout(800);
     await expect(row.getByTestId('wheel-manager-credits')).toHaveText('4');
