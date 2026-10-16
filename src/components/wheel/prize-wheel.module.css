@@ -508,26 +508,3 @@
   width: min(calc(100% - 28px), 460px, calc(100vh - 230px));
   min-width: 260px;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .shell,
-  .stage {
-    transition: none;
-  }
-  .shell[data-state='finale'] {
-    transform: none;
-  }
-  .bulbEven,
-  .bulbOdd,
-  .winnerGlow,
-  .overlay,
-  .celebrationCard,
-  .cardLost,
-  .trophy,
-  .sparkle {
-    animation: none !important;
-  }
-  .balloon {
-    display: none;
-  }
-}

@@ -62,8 +62,14 @@ const FINALE_LEAD_MS = 3200;
 const POLL_MS = 30000;
 
 const brl = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+/**
+ * Decisão do dono do produto: a roleta sempre roda a experiência completa (12 s + efeitos),
+ * mesmo com "movimento reduzido" ligado no sistema (comum no Windows com efeitos de animação
+ * desligados), porque nesse modo o giro ficava curto e sem emoção.
+ */
+const RESPECT_REDUCED_MOTION = false;
 const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  RESPECT_REDUCED_MOTION && typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 const mod360 = (d: number) => ((d % 360) + 360) % 360;
 

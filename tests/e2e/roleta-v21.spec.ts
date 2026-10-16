@@ -217,19 +217,22 @@ test.describe('Roleta V2.1 — aceitação', () => {
     await ctx.close();
   });
 
-  test('movimento reduzido: giro curto, sem confete nem balões, resultado acessível', async ({ browser }) => {
+  test('movimento reduzido no sistema: ainda gira 12 s com efeitos (decisão do dono) e a fatia vencedora fica visível', async ({ browser }) => {
     seed(2);
     const ctx = await browser.newContext({ reducedMotion: 'reduce' });
     const page = await ctx.newPage();
     await openSellerWheel(page);
+    await startRotationProbe(page);
     const spinResponse = page.waitForResponse((r) => r.url().includes('/api/wheel/spin'));
     await page.getByTestId('wheel-spin').click({ force: true });
     const data = await (await spinResponse).json();
-    await expect(page.getByTestId('wheel-celebration')).toBeVisible({ timeout: 8000 });
-    await expect(page.getByTestId('wheel-celebration')).toHaveAttribute('data-effects', 'off');
-    await expect(page.getByTestId('wheel-balloon')).toHaveCount(0);
-    await expect(page.getByTestId('wheel-result')).toHaveAttribute('data-prize-id', data.prize.id);
-    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByTestId('wheel-celebration')).toBeVisible({ timeout: 20_000 });
+    const probe = await readProbe(page);
+    expect(probe.stoppedAt! - probe.startedAt!).toBeGreaterThan(11_300);
+    expect(await sliceUnderPointer(page)).toBe(data.prize.id);
+    // o destaque da fatia vencedora é translúcido: o rótulo continua legível
+    const opacity = await page.getByTestId('wheel-winner-glow').evaluate((el) => getComputedStyle(el).fillOpacity);
+    expect(Number(opacity)).toBeLessThan(0.5);
     await ctx.close();
   });
 });

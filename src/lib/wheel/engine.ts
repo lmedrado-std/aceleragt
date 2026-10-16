@@ -15,7 +15,7 @@ export const SEGMENT_TYPES = ['money', 'voucher', 'product', 'retry'] as const;
 export type SegmentType = (typeof SEGMENT_TYPES)[number];
 
 /** Fração máxima (para cada lado) que o ponto de parada pode se afastar do centro da fatia. */
-export const MAX_STOP_JITTER = 0.35;
+export const MAX_STOP_JITTER = 0.2;
 
 export interface SegmentRecord {
   id: string;

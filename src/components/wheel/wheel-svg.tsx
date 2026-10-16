@@ -160,6 +160,7 @@ export const WheelSvg = forwardRef<SVGGElement, WheelSvgProps>(function WheelSvg
               className={styles.winnerGlow}
               data-testid="wheel-winner-glow"
               fill="#FFFFFF"
+              fillOpacity={0.18}
               stroke="#FDE047"
               strokeWidth={6}
             />

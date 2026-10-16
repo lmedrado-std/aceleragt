@@ -93,11 +93,11 @@ describe('geometria da roda', () => {
     }
   });
 
-  it('o deslocamento é limitado a ±35% da fatia (nunca encosta na divisa)', () => {
+  it('o deslocamento é limitado a ±20% da fatia (nunca encosta na divisa)', () => {
     const n = 8;
     const center = stopAngleDeg(n, 3, 0);
     const extreme = stopAngleDeg(n, 3, 5);
-    expect(Math.abs(center - extreme)).toBeCloseTo(0.35 * (360 / n), 6);
+    expect(Math.abs(center - extreme)).toBeCloseTo(0.2 * (360 / n), 6);
   });
 
   it('valida parâmetros', () => {
