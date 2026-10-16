@@ -7,9 +7,10 @@ type Db = PrismaClient | Prisma.TransactionClient;
 /**
  * Janela anti-repetição: com a linha de saldo já travada, um segundo giro do mesmo
  * vendedor dentro desta janela é recusado e a transação inteira é desfeita
- * (o crédito volta). A animação dura ~9 s, então um giro legítimo nunca cai aqui.
+ * (o crédito volta). Clique duplo e reenvio chegam com milissegundos de diferença;
+ * um giro legítimo nunca cai aqui, porque a animação dura 12 s (3 s com movimento reduzido).
  */
-export const SPIN_COOLDOWN_MS = 4000;
+export const SPIN_COOLDOWN_MS = 2500;
 
 /**
  * Colunas usadas pela roleta. As consultas sempre usam `select` explícito para
