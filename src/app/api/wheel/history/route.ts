@@ -1,33 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { jsonError } from '@/lib/wheel/server';
 
-export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const storeId = searchParams.get('storeId');
+export const dynamic = 'force-dynamic';
 
-  if (!storeId) {
-    return NextResponse.json({ error: "O ID da loja é obrigatório." }, { status: 400 });
-  }
-
-  try {
-    const deleteResult = await prisma.prize_wheel_spins.deleteMany({
-      where: {
-        store_id: storeId,
-      },
-    });
-
-    return NextResponse.json({
-      message: `Histórico apagado. ${deleteResult.count} registros removidos.`,
-    });
-
-  } catch (error: any) {
-    console.error("[DELETE /api/wheel/history] Erro:", error);
-    return NextResponse.json(
-      {
-        error: "Erro interno do servidor ao apagar o histórico.",
-        details: error.message,
-      },
-      { status: 500 }
-    );
-  }
+/**
+ * DELETE /api/wheel/history — DESATIVADO (Roleta V2).
+ * O histórico de giros é registro comercial e não pode ser apagado pela interface.
+ * A rota responde 410 e não executa nenhuma exclusão.
+ */
+export async function DELETE() {
+  return jsonError(410, 'A exclusão do histórico de giros foi desativada. Nenhum registro foi apagado.');
 }

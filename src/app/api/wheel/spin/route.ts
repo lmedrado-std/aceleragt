@@ -1,111 +1,121 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { NextRequest } from 'next/server';
+import { randomInt } from 'crypto';
+import { prisma } from '@/lib/db';
+import { buildWheelSnapshot, pickWeightedIndex, stopAngleDeg, MAX_STOP_JITTER } from '@/lib/wheel/engine';
+import { spinRequestSchema } from '@/lib/wheel/validation';
+import { jsonError, jsonOk, loadStoreSegments, readJson, SPIN_SELECT } from '@/lib/wheel/server';
 
-// Helper function to select a prize based on weights
-const selectWeightedPrize = (segments: any[]) => {
-  const totalWeight = segments.reduce((sum, seg) => sum + seg.weight, 0);
-  let random = Math.random() * totalWeight;
+export const dynamic = 'force-dynamic';
 
-  for (const segment of segments) {
-    if (random < segment.weight) {
-      return segment;
-    }
-    random -= segment.weight;
+/**
+ * Janela anti-repetição: com a linha de saldo já travada, um segundo giro do mesmo
+ * vendedor dentro desta janela é recusado e a transação inteira é desfeita
+ * (o crédito volta). A animação dura ~9 s, então um giro legítimo nunca cai aqui.
+ */
+export const SPIN_COOLDOWN_MS = 4000;
+
+class SpinError extends Error {
+  constructor(public code: 'NO_CREDITS' | 'TOO_SOON' | 'NOT_CONFIGURED') {
+    super(code);
   }
-  return segments[segments.length - 1]; // Fallback
-};
+}
 
+// Resolução de 1e6 para o deslocamento do ponto de parada dentro da fatia.
+const jitterFromCrypto = () => (randomInt(0, 1_000_001) / 1_000_000) * 2 * MAX_STOP_JITTER - MAX_STOP_JITTER;
+
+/**
+ * POST /api/wheel/spin
+ * Débito do crédito, sorteio e registro acontecem na MESMA transação:
+ *  1. lê as fatias ativas (snapshot) — o sorteio usa exatamente o que será desenhado;
+ *  2. debita 1 crédito de forma atômica (`credits > 0`), o que trava a linha do saldo;
+ *  3. recusa repetição dentro de SPIN_COOLDOWN_MS (proteção contra clique duplo / reenvio);
+ *  4. sorteia com crypto.randomInt e grava o giro.
+ * Qualquer falha desfaz tudo: não existe giro sem débito nem débito sem giro.
+ */
 export async function POST(req: NextRequest) {
-  const { storeId, sellerId } = await req.json();
-
-  if (!storeId || !sellerId) {
-    return NextResponse.json({ error: "storeId e sellerId são obrigatórios" }, { status: 400 });
-  }
+  const parsed = spinRequestSchema.safeParse(await readJson(req));
+  if (!parsed.success) return jsonError(400, 'Identificação da loja ou vendedor inválida.');
+  const { storeId, sellerId } = parsed.data;
 
   try {
-    // --- Defensive Check: Validate settings BEFORE the transaction ---
-    const settings = await prisma.prize_wheel_settings.findFirst({
-      where: { store_id: storeId },
-      include: { prize_wheel_segments: { where: { is_active: true } } },
-    });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const snapshot = buildWheelSnapshot(await loadStoreSegments(tx, storeId));
+        if (snapshot.length === 0) throw new SpinError('NOT_CONFIGURED');
 
-    if (!settings || !settings.prize_wheel_segments || settings.prize_wheel_segments.length === 0) {
-      return NextResponse.json(
-        { error: "Roleta não configurada ou sem prêmios ativos." },
-        { status: 409 } // 409 Conflict is more descriptive than 500
-      );
-    }
-    
-    const activeSegments = settings.prize_wheel_segments;
+        const debit = await tx.prize_wheel_credits.updateMany({
+          where: { store_id: storeId, seller_id: sellerId, credits: { gt: 0 } },
+          data: { credits: { decrement: 1 } },
+        });
+        if (debit.count === 0) throw new SpinError('NO_CREDITS');
 
-    // --- Atomic Transaction: Perform the spin ---
-    const spinResult = await prisma.$transaction(async (tx) => {
-      // 1. Check for available credits
-      const creditRecord = await tx.prize_wheel_credits.findUnique({
-        where: {
-          store_id_seller_id: { 
+        const now = new Date();
+        const recent = await tx.prize_wheel_spins.findFirst({
+          where: {
             store_id: storeId,
             seller_id: sellerId,
+            created_at: { gte: new Date(now.getTime() - SPIN_COOLDOWN_MS) },
           },
-        },
-      });
+          select: { id: true },
+        });
+        if (recent) throw new SpinError('TOO_SOON');
 
-      if (!creditRecord || creditRecord.credits <= 0) {
-        // This specific error is thrown to be caught and returned as a 400
-        throw new Error("Créditos insuficientes");
-      }
+        const selectedIndex = pickWeightedIndex(
+          snapshot.map((s) => s.weight),
+          (max) => randomInt(0, max),
+        );
+        const winner = snapshot[selectedIndex];
 
-      // 2. Decrement the credit
-      const updatedCredits = await tx.prize_wheel_credits.update({
-        where: {
-          store_id_seller_id: { 
+        const spin = await tx.prize_wheel_spins.create({
+          data: {
             store_id: storeId,
             seller_id: sellerId,
+            granted_by: 'system',
+            segment_id: winner.id,
+            status: 'claimed',
+            created_at: now,
+            claimed_at: now,
           },
-        },
-        data: { credits: { decrement: 1 } },
-      });
+          select: SPIN_SELECT,
+        });
 
-      // 3. Select the prize and log the spin
-      const winningSegment = selectWeightedPrize(activeSegments);
-      
-      const newSpin = await tx.prize_wheel_spins.create({
-        data: {
-          store_id: storeId,
-          seller_id: sellerId,
-          granted_by: 'system', // A spin is always performed by the system/seller
-          segment_id: winningSegment.id,
-          status: "claimed", // Mark as claimed immediately
-          claimed_at: new Date(),
-        },
-        include: { prize_wheel_segments: true }, // Include the segment details in the result
-      });
+        const balance = await tx.prize_wheel_credits.findUnique({
+          where: { store_id_seller_id: { store_id: storeId, seller_id: sellerId } },
+          select: { credits: true },
+        });
 
-      return { newSpin, remainingCredits: updatedCredits.credits };
-    });
-
-    // --- Success Response ---
-    return NextResponse.json({
-      message: "Roleta girada com sucesso!",
-      remainingCredits: spinResult.remainingCredits,
-      prize: {
-        id: spinResult.newSpin.prize_wheel_segments.id,
-        label: spinResult.newSpin.prize_wheel_segments.label,
-        type: spinResult.newSpin.prize_wheel_segments.type,
-        value: spinResult.newSpin.prize_wheel_segments.value ? Number(spinResult.newSpin.prize_wheel_segments.value) : null,
-        description: spinResult.newSpin.prize_wheel_segments.description,
+        return { spin, snapshot, selectedIndex, winner, remainingCredits: balance?.credits ?? 0 };
       },
+      { maxWait: 5000, timeout: 10000 },
+    );
+
+    const { spin, snapshot, selectedIndex, winner, remainingCredits } = result;
+    return jsonOk({
+      message: 'Roleta girada com sucesso!',
+      spinId: spin.id,
+      createdAt: spin.created_at,
+      remainingCredits,
+      prize: {
+        id: winner.id,
+        label: winner.label,
+        type: winner.type,
+        value: winner.value,
+        description: winner.description,
+        color: winner.color,
+      },
+      // A roda é redesenhada com este snapshot antes de girar, então o ponteiro
+      // sempre para na fatia que foi efetivamente gravada.
+      wheelSnapshot: snapshot.map(({ weight: _w, ...slice }) => slice),
+      selectedIndex,
+      stopAngleDeg: stopAngleDeg(snapshot.length, selectedIndex, jitterFromCrypto()),
     });
-
-  } catch (error: any) {
-    // --- Error Handling ---
-    console.error("[POST /api/wheel/spin]", { message: error.message, stack: error.stack });
-    
-    if (error.message === "Créditos insuficientes") {
-      return NextResponse.json({ error: error.message, noCredits: true }, { status: 400 });
+  } catch (error) {
+    if (error instanceof SpinError) {
+      if (error.code === 'NO_CREDITS') return jsonError(409, 'Você não possui giros disponíveis.', { noCredits: true, remainingCredits: 0 });
+      if (error.code === 'TOO_SOON') return jsonError(429, 'Aguarde o giro anterior terminar.', { tooSoon: true });
+      return jsonError(409, 'Roleta não configurada ou sem prêmios ativos.', { notConfigured: true });
     }
-
-    // Generic fallback for any other unexpected errors
-    return NextResponse.json({ error: "Erro ao processar o giro da roleta.", details: error.message }, { status: 500 });
+    console.error('[POST /api/wheel/spin]', error);
+    return jsonError(500, 'Erro ao processar o giro da roleta. Nenhum crédito foi descontado.');
   }
 }
