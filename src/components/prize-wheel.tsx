@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
-import { Gift, Loader2, RotateCw, Ticket, Volume2, VolumeX } from 'lucide-react';
+import { Gift, Loader2, Rocket, RotateCw, Ticket, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -278,23 +278,40 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
   }
 
   const isRetry = result?.prize.type === 'retry';
+  const idleHint =
+    credits > 0
+      ? `Você tem ${credits} giro${credits > 1 ? 's' : ''}. Gire e descubra seu prêmio ✨`
+      : 'Continue vendendo para ganhar novos giros ✨';
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-5" data-testid="prize-wheel">
+    <div className={cn(styles.theme, "w-full max-w-xl mx-auto space-y-5")} data-testid="prize-wheel">
+      <header className={styles.brand}>
+        <div className={styles.brandTile} aria-hidden="true">
+          <Rocket className="mb-1 h-5 w-5" />
+          acelera
+          <span>GT</span>
+        </div>
+        <div className="min-w-0">
+          <div className={styles.eyebrow}>Experiência Acelera GT</div>
+          <h2 className={styles.title}>Gire &amp; Ganhe</h2>
+          <p className={styles.subtitle}>Bateu a meta? Sua próxima conquista pode começar com uma surpresa.</p>
+        </div>
+      </header>
+
       <div className="flex items-center justify-between gap-3">
         <div
           className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md pl-2 pr-5 py-2 rounded-full shadow-lg border border-white/20 flex items-center gap-3"
           data-testid="wheel-credits"
           data-credits={credits}
         >
-          <div className="flex items-center justify-center h-9 w-9 rounded-full bg-primary/10">
-            <Ticket className="h-4 w-4 text-primary" />
+          <div className={cn('flex items-center justify-center h-9 w-9 rounded-full', styles.accentSoft)}>
+            <Ticket className={cn('h-4 w-4', styles.accentText)} />
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-none">
               Giros disponíveis
             </span>
-            <span className={cn('text-2xl font-black leading-none', credits > 0 ? 'text-primary' : 'text-muted-foreground/60')}>
+            <span className={cn('text-2xl font-black leading-none', credits > 0 ? styles.accentText : 'text-muted-foreground/60')}>
               {credits}
             </span>
           </div>
@@ -314,10 +331,10 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         </Button>
       </div>
 
-      <div ref={wheelAreaRef} className="rounded-[2rem] bg-gradient-to-b from-primary/10 via-background to-accent/10 px-2 py-6 sm:px-6">
+      <div ref={wheelAreaRef} className="px-1 pt-4 pb-2 sm:px-4">
         <WheelSvg ref={rotorRef} slices={slices} />
         <div className={cn(styles.hint, busy && styles.suspense)} aria-live="polite" data-testid="wheel-hint">
-          {hint}
+          {hint || idleHint}
         </div>
         <div className="px-2 sm:px-8">
           <Button
@@ -326,7 +343,8 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
             aria-busy={busy}
             data-testid="wheel-spin"
             className={cn(
-              'w-full h-16 text-xl font-black rounded-2xl shadow-xl uppercase tracking-tight transition-transform active:scale-95',
+              'w-full h-16 text-xl font-black rounded-2xl uppercase tracking-tight transition-transform active:scale-95',
+              styles.spinButton,
               credits > 0 && !busy && 'animate-subtle-pulse',
             )}
           >
@@ -355,7 +373,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
           <Card className="overflow-hidden border-none shadow-2xl">
             <div
               className="px-6 pt-7 pb-6 text-center text-white"
-              style={{ background: isRetry ? 'linear-gradient(145deg,#64748B,#334155)' : `linear-gradient(145deg, ${result.prize.color}, hsl(193 100% 18%))` }}
+              style={{ background: isRetry ? 'linear-gradient(145deg,#64748B,#334155)' : `linear-gradient(145deg, ${result.prize.color}, #263875)` }}
             >
               <div className={cn('text-5xl', styles.pop)}>{isRetry ? '😕' : '🎉'}</div>
               <div className="mt-2 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
@@ -370,7 +388,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               {!isRetry && result.prize.type === 'money' && result.prize.value != null && (
                 <div className={cn('rounded-xl p-4 text-center', styles.ticket)}>
                   <small className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor</small>
-                  <div className="text-3xl font-black text-primary">{brl(result.prize.value)}</div>
+                  <div className={cn('text-3xl font-black', styles.accentText)}>{brl(result.prize.value)}</div>
                 </div>
               )}
               <p className="text-center text-sm text-muted-foreground">
@@ -380,7 +398,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 {result.remainingCredits > 0 ? (
-                  <Button className="flex-1 h-12 font-bold" onClick={handleSpin} disabled={busy}>
+                  <Button className={cn('flex-1 h-12 font-bold', styles.spinButton)} onClick={handleSpin} disabled={busy}>
                     <RotateCw className="mr-2 h-4 w-4" /> Girar de novo ({result.remainingCredits})
                   </Button>
                 ) : null}
@@ -411,7 +429,7 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
                 <span className="text-base">{prizeIcon(s.type)}</span>
                 <span className="truncate">{s.label}</span>
                 {s.type === 'money' && s.value != null && (
-                  <span className="ml-auto shrink-0 font-bold text-primary">{brl(s.value)}</span>
+                  <span className={cn('ml-auto shrink-0 font-bold', styles.accentText)}>{brl(s.value)}</span>
                 )}
               </li>
             ))}

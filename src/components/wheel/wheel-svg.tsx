@@ -43,8 +43,9 @@ const wedgePath = (i: number, n: number) => {
 const RADIAL_FROM = 9;
 
 function SliceLabel({ slice, index, count }: { slice: WheelSvgSlice; index: number; count: number }) {
-  const fill = readableTextColor(slice.color);
-  const outline = fill === '#FFFFFF' ? 'rgba(15,23,42,0.55)' : 'rgba(255,255,255,0.75)';
+  // Cores de texto da referência: branco com contorno azul-marinho, ou azul-marinho com contorno branco.
+  const fill = readableTextColor(slice.color) === '#FFFFFF' ? '#FFFFFF' : '#1E2F69';
+  const outline = fill === '#FFFFFF' ? '#23366F' : '#FFFFFF';
   const mid = ((index + 0.5) * 360) / count;
 
   if (count >= RADIAL_FROM) {
@@ -127,7 +128,7 @@ export const WheelSvg = forwardRef<SVGGElement, WheelSvgProps>(function WheelSvg
 ) {
   const n = Math.max(slices.length, 1);
   return (
-    <div className={cn(styles.shell, compact && styles.shellCompact, className)}>
+    <div className={cn(styles.theme, styles.shell, compact && styles.shellCompact, className)}>
       <div className={styles.pointer} aria-hidden="true" />
       <svg className={styles.svg} viewBox="0 0 500 500" role="img" aria-label={ariaLabel}>
         <g ref={rotorRef} className={styles.rotor} data-testid="wheel-rotor">
@@ -147,7 +148,9 @@ export const WheelSvg = forwardRef<SVGGElement, WheelSvgProps>(function WheelSvg
       </svg>
       <div className={styles.hub} aria-hidden="true">
         <Rocket className={styles.hubIcon} />
-        <span className={styles.hubText}>GT</span>
+        <span className={styles.hubText}>
+          acelera<small>GT</small>
+        </span>
       </div>
     </div>
   );

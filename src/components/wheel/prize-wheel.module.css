@@ -1,13 +1,29 @@
-/* Roleta V2 — motor visual inspirado nas roletas Supermoda v1.6 / Óticas Alves v7.3.
-   Cores derivadas do tema do AceleraGT (--primary / --accent). */
+/* Roleta V2 — acabamento das roletas de referência (Supermoda v1.6 / Óticas Alves v7.3):
+   mesma geometria, aro, ponteiro, cubo, tipografia e animações.
+   As cores das FATIAS vêm da configuração do AceleraGT; as do acabamento ficam nas
+   variáveis abaixo (paleta da referência) e podem ser trocadas num único lugar. */
+.theme {
+  --wheel-ring: #344792;
+  --wheel-ring-light: #5267a8;
+  --wheel-ring-dark: #263875;
+  --wheel-pointer: #17265c;
+  --wheel-hub-border: #edf0f8;
+  --wheel-title: #344792;
+  --wheel-eyebrow: #f2446a;
+  --wheel-muted: #667080;
+}
+:global(.dark) .theme {
+  --wheel-title: #9fb0ea;
+  --wheel-muted: #a3acc0;
+}
 
 .shell {
   position: relative;
-  width: min(92vw, 440px);
+  width: min(calc(100% - 28px), 440px);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  margin: 18px auto 6px;
-  filter: drop-shadow(0 16px 28px rgba(0, 45, 60, 0.22));
+  margin: 22px auto 8px;
+  filter: drop-shadow(0 16px 28px rgba(38, 55, 112, 0.15));
 }
 .shellCompact {
   width: min(100%, 300px);
@@ -18,8 +34,8 @@
   position: absolute;
   inset: -11px;
   border-radius: 50%;
-  background: linear-gradient(145deg, hsl(var(--primary) / 0.85), hsl(193 100% 16%));
-  box-shadow: 0 18px 45px hsl(193 100% 16% / 0.25);
+  background: linear-gradient(145deg, var(--wheel-ring-light, #5267a8), var(--wheel-ring-dark, #263875));
+  box-shadow: 0 18px 45px #24366f33;
   z-index: 0;
   pointer-events: none;
 }
@@ -38,46 +54,32 @@
   will-change: transform;
 }
 .outerRing {
-  stroke: hsl(193 100% 22%);
+  stroke: var(--wheel-ring, #344792);
 }
 .sliceLabel {
   pointer-events: none;
 }
 .sliceLabel text {
-  font-family: var(--font-montserrat, 'Montserrat'), Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 .pointer {
   position: absolute;
   z-index: 8;
   left: 50%;
-  top: -14px;
+  top: -3px;
   transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 18px solid transparent;
   border-right: 18px solid transparent;
-  border-top: 40px solid hsl(193 100% 14%);
-  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3));
-}
-.pointer::after {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: -36px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: hsl(var(--accent));
-  box-shadow: 0 0 0 2px #fff;
+  border-top: 40px solid var(--wheel-pointer, #17265c);
+  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.2));
 }
 .shellCompact .pointer {
   border-left-width: 13px;
   border-right-width: 13px;
   border-top-width: 28px;
-  top: -10px;
-}
-.shellCompact .pointer::after {
-  display: none;
+  top: -2px;
 }
 .hub {
   position: absolute;
@@ -85,42 +87,92 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 25%;
+  width: 27%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: #fff;
-  border: 6px solid #eef4f6;
-  box-shadow: 0 5px 14px rgba(0, 45, 60, 0.2);
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 0;
+  background: linear-gradient(150deg, #6274bd, var(--wheel-ring, #344792));
+  border: 5px solid var(--wheel-hub-border, #edf0f8);
+  box-shadow: 0 5px 14px rgba(32, 45, 90, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
 }
 .hubIcon {
-  width: 42%;
-  height: 42%;
-  color: hsl(var(--primary));
+  width: 30%;
+  height: 30%;
+  margin-bottom: 2%;
 }
 .hubText {
+  font-family: Arial, Helvetica, sans-serif;
   font-weight: 900;
-  font-size: clamp(10px, 2.6vw, 15px);
-  letter-spacing: 0.08em;
-  color: hsl(193 100% 18%);
-  line-height: 1;
+  font-size: clamp(11px, 3.4vw, 19px);
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  text-align: center;
+}
+.hubText small {
+  display: block;
+  font-size: 0.82em;
+}
+.shellCompact .hub {
+  border-width: 4px;
 }
 .shellCompact .hubText {
   font-size: 10px;
 }
 
+/* Cabeçalho no padrão das referências */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brandTile {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(150deg, #6274bd, var(--wheel-ring, #344792));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  line-height: 0.95;
+  box-shadow: 0 8px 18px rgba(38, 55, 112, 0.25);
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--wheel-eyebrow, #f2446a);
+}
+.title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: clamp(30px, 7vw, 46px);
+  line-height: 0.98;
+  margin: 4px 0;
+  color: var(--wheel-title, #344792);
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--wheel-muted, #667080);
+}
+
 .hint {
   text-align: center;
   font-weight: 900;
+  font-size: 17px;
   min-height: 28px;
-  margin: 10px 0 4px;
-  color: hsl(var(--primary));
-}
-:global(.dark) .hint {
-  color: hsl(var(--accent));
+  margin: 18px 0 6px;
+  color: var(--wheel-title, #344792);
 }
 .suspense {
   animation: hintPulse 1s ease-in-out infinite;
@@ -160,7 +212,7 @@
   }
 }
 .ticket {
-  border: 2px dashed hsl(var(--primary) / 0.35);
+  border: 2px dashed #34479255;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -169,4 +221,20 @@
   .pop {
     animation: none !important;
   }
+}
+
+/* Botão e destaques no mesmo azul das referências */
+.spinButton {
+  background: linear-gradient(145deg, var(--wheel-ring-light, #5267a8), var(--wheel-ring, #344792));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(38, 55, 112, 0.28);
+}
+.spinButton:hover:not(:disabled) {
+  background: linear-gradient(145deg, var(--wheel-ring, #344792), var(--wheel-ring-dark, #263875));
+}
+.accentText {
+  color: var(--wheel-title, #344792);
+}
+.accentSoft {
+  background: rgba(52, 71, 146, 0.1);
 }

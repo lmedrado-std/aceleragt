@@ -136,13 +136,12 @@ test.describe('Roleta V2 — celular e movimento reduzido', () => {
     expect(bounds.left).toBeGreaterThanOrEqual(-1);
     expect(bounds.right).toBeLessThanOrEqual(bounds.vw + 1);
     const spinResponse = page.waitForResponse((r) => r.url().includes('/api/wheel/spin'));
-    const started = Date.now();
     await page.getByTestId('wheel-spin').click({ force: true });
     const data = await (await spinResponse).json();
-    const tResp = Date.now() - started;
+    // mede a partir da resposta (a 1ª compilação da rota em modo dev não conta)
+    const answeredAt = Date.now();
     await expect(page.getByTestId('wheel-result')).toBeVisible({ timeout: 10_000 });
-    console.log('tempo até resposta', tResp, 'até resultado', Date.now() - started);
-    expect(Date.now() - started).toBeLessThan(6000);
+    expect(Date.now() - answeredAt).toBeLessThan(4000); // giro normal ~9 s; reduzido ~1,2 s
     expect((await sliceUnderPointer(page)).id).toBe(data.prize.id);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/e2e-mobile.png`, fullPage: true });
   });
