@@ -40,3 +40,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# testes ponta a ponta
+/test-results/
+/playwright-report/

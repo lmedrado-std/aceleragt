@@ -1,0 +1,172 @@
+/* Roleta V2 — motor visual inspirado nas roletas Supermoda v1.6 / Óticas Alves v7.3.
+   Cores derivadas do tema do AceleraGT (--primary / --accent). */
+
+.shell {
+  position: relative;
+  width: min(92vw, 440px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  margin: 18px auto 6px;
+  filter: drop-shadow(0 16px 28px rgba(0, 45, 60, 0.22));
+}
+.shellCompact {
+  width: min(100%, 300px);
+  margin: 12px auto 4px;
+}
+.shell::before {
+  content: '';
+  position: absolute;
+  inset: -11px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, hsl(var(--primary) / 0.85), hsl(193 100% 16%));
+  box-shadow: 0 18px 45px hsl(193 100% 16% / 0.25);
+  z-index: 0;
+  pointer-events: none;
+}
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  z-index: 2;
+}
+.rotor {
+  transform-origin: 250px 250px;
+  transform-box: view-box;
+  will-change: transform;
+}
+.outerRing {
+  stroke: hsl(193 100% 22%);
+}
+.sliceLabel {
+  pointer-events: none;
+}
+.sliceLabel text {
+  font-family: var(--font-montserrat, 'Montserrat'), Arial, Helvetica, sans-serif;
+}
+.pointer {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 40px solid hsl(193 100% 14%);
+  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3));
+}
+.pointer::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -36px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: hsl(var(--accent));
+  box-shadow: 0 0 0 2px #fff;
+}
+.shellCompact .pointer {
+  border-left-width: 13px;
+  border-right-width: 13px;
+  border-top-width: 28px;
+  top: -10px;
+}
+.shellCompact .pointer::after {
+  display: none;
+}
+.hub {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 25%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #fff;
+  border: 6px solid #eef4f6;
+  box-shadow: 0 5px 14px rgba(0, 45, 60, 0.2);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0;
+}
+.hubIcon {
+  width: 42%;
+  height: 42%;
+  color: hsl(var(--primary));
+}
+.hubText {
+  font-weight: 900;
+  font-size: clamp(10px, 2.6vw, 15px);
+  letter-spacing: 0.08em;
+  color: hsl(193 100% 18%);
+  line-height: 1;
+}
+.shellCompact .hubText {
+  font-size: 10px;
+}
+
+.hint {
+  text-align: center;
+  font-weight: 900;
+  min-height: 28px;
+  margin: 10px 0 4px;
+  color: hsl(var(--primary));
+}
+:global(.dark) .hint {
+  color: hsl(var(--accent));
+}
+.suspense {
+  animation: hintPulse 1s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  50% {
+    transform: scale(1.025);
+    opacity: 0.72;
+  }
+}
+
+.reveal {
+  animation: reveal 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pop {
+  animation: pop 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+  }
+  70% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.ticket {
+  border: 2px dashed hsl(var(--primary) / 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .suspense,
+  .reveal,
+  .pop {
+    animation: none !important;
+  }
+}

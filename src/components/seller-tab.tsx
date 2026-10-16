@@ -13,7 +13,6 @@ import { TipsTab } from "./TipsTab";
 import { useEffect, useState, useMemo } from "react";
 import { trackSellerView } from "@/lib/tracking";
 import { format } from "date-fns";
-import confetti from 'canvas-confetti';
 import dynamic from "next/dynamic";
 import { Separator } from "./ui/separator";
 import { WelcomeModal } from "./welcome-modal";
@@ -150,10 +149,10 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     const fetchCredits = async () => {
       if (!storeId || !seller.id) return;
       try {
-        const res = await fetch(`/api/wheel/status?storeId=${storeId}`);
+        const res = await fetch(`/api/wheel/status?storeId=${storeId}&sellerId=${seller.id}&limit=1`);
         if (res.ok) {
           const data = await res.json();
-          setPrizeWheelCredits(data.creditsMap[seller.id] || 0);
+          setPrizeWheelCredits(typeof data.credits === 'number' ? data.credits : 0);
         }
       } catch (error) {
         console.error("Failed to fetch wheel credits", error);
@@ -173,14 +172,9 @@ export function SellerTab({ seller, goals, incentives, rankings, lastUpdated, st
     new Date(goals.corridinhaEndDate) >= new Date() &&
     (goals.corridinhaObjective1 || goals.corridinhaObjective2 || goals.corridinhaObjective3 || goals.corridinhaObjective4);
 
-  const handleSpinWin = (result: any) => {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-    // Ao girar, o crédito diminui, então atualizamos
-    setPrizeWheelCredits(prev => (prev > 0 ? prev - 1 : 0));
+  const handleSpinWin = (result: { remainingCredits?: number }) => {
+    // A roleta já faz a celebração; aqui só sincronizamos o saldo com o valor do servidor.
+    if (typeof result?.remainingCredits === 'number') setPrizeWheelCredits(result.remainingCredits);
   };
   
   const totalIncentives = incentives

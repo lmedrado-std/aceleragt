@@ -5,6 +5,13 @@ import type { SegmentRecord } from './engine';
 type Db = PrismaClient | Prisma.TransactionClient;
 
 /**
+ * Janela anti-repetição: com a linha de saldo já travada, um segundo giro do mesmo
+ * vendedor dentro desta janela é recusado e a transação inteira é desfeita
+ * (o crédito volta). A animação dura ~9 s, então um giro legítimo nunca cai aqui.
+ */
+export const SPIN_COOLDOWN_MS = 4000;
+
+/**
  * Colunas usadas pela roleta. As consultas sempre usam `select` explícito para
  * depender apenas das colunas que existem tanto no schema.prisma quanto no banco
  * criado pelo antigo /api/setup-db (ex.: não dependemos de `notes`/`paid_at`).

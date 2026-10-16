@@ -1,126 +1,206 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { Wheel } from 'react-custom-roulette';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import confetti from 'canvas-confetti';
+import { Gift, Loader2, RotateCw, Ticket, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Loader2, Gift, Ticket } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { indexAtAngle, targetRotation } from '@/lib/wheel/engine';
+import { WheelSvg, prizeIcon, type WheelSvgSlice } from '@/components/wheel/wheel-svg';
+import {
+  playRetry,
+  playTick,
+  playWin,
+  readMutedPreference,
+  saveMutedPreference,
+  startSuspense,
+  unlockAudio,
+} from '@/components/wheel/wheel-audio';
+import styles from '@/components/wheel/prize-wheel.module.css';
 
 interface PrizeWheelProps {
   storeId: string;
   sellerId: string;
-  onSpinResult?: (result: any) => void;
+  /** Chamado depois que a roda para, com a resposta do servidor (inclui remainingCredits). */
+  onSpinResult?: (result: SpinResponse) => void;
 }
 
-interface Segment {
-  id: string;
-  label: string;
-  option: string; // Icon
-  style: { 
-    backgroundColor: string; 
-    textColor: string;
-    boxShadow?: string;
-  };
-  type: string;
-  value?: number;
-  description?: string;
-  color?: string;
+interface Slice extends WheelSvgSlice {
+  value: number | null;
+  description: string | null;
 }
 
-const prizeIcons: { [key: string]: string } = {
-    money: '💰',
-    voucher: '⭐',
-    product: '🎁',
-    retry: '🔁',
-    points: '🔥',
-    default: '❌',
-};
+export interface SpinResponse {
+  spinId: string;
+  remainingCredits: number;
+  prize: { id: string; label: string; type: string; value: number | null; description: string | null; color: string };
+  wheelSnapshot: Slice[];
+  selectedIndex: number;
+  stopAngleDeg: number;
+}
 
-const prizeColors: { [key: string]: string } = {
-    money: '#10B981',     // green-500 (prêmio real)
-    product: '#10B981',    // green-500 (prêmio real)
-    voucher: '#F59E0B',    // yellow-500 (bônus médio)
-    points: '#A855F7',     // purple-500 (prêmio especial)
-    retry: '#3B82F6',      // blue-500 (tentativa)
-    default: '#6B7280',    // gray-500 (neutro)
-};
+type Phase = 'loading' | 'idle' | 'requesting' | 'spinning' | 'result';
 
-const premiumGlow = 'inset 0 0 10px rgba(255,255,255,0.08), 0 0 12px rgba(255,255,255,0.05)';
+/** Duração aprovada para o vendedor (~9 s). */
+export const SPIN_DURATION_MS = 9000;
+const SPIN_TURNS = 8;
+const REDUCED_DURATION_MS = 1200;
+const EASING = 'cubic-bezier(.07,.72,.04,1)';
+const POLL_MS = 30000;
+
+const brl = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
 export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps) {
-  const [mustSpin, setMustSpin] = useState(false);
-  const [prizeNumber, setPrizeNumber] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [configured, setConfigured] = useState<boolean | null>(null);
-  const [segments, setSegments] = useState<Segment[]>([]);
+  const [phase, setPhase] = useState<Phase>('loading');
+  const [slices, setSlices] = useState<Slice[]>([]);
   const [credits, setCredits] = useState(0);
-  const [spinResult, setSpinResult] = useState<Segment | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const { toast } = useToast();
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const [hint, setHint] = useState('');
+  const [error, setError] = useState('');
+  const [result, setResult] = useState<SpinResponse | null>(null);
+  const [muted, setMuted] = useState(false);
 
-  const fetchCredits = async () => {
-    if (!storeId || !sellerId) return;
-    try {
-      const statusRes = await fetch(`/api/wheel/status?storeId=${storeId}`);
-      if (!statusRes.ok) return;
-      const statusData = await statusRes.json();
-      setCredits(statusData.creditsMap[sellerId] || 0);
-    } catch {}
-  };
+  const rotorRef = useRef<SVGGElement>(null);
+  const wheelAreaRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+  const angleRef = useRef(0);
+  const lockRef = useRef(false); // trava síncrona: impede o segundo clique antes do React re-renderizar
+  const mutedRef = useRef(false);
+  const phaseRef = useRef<Phase>('loading');
+  const mountedRef = useRef(true);
+  phaseRef.current = phase;
 
   useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const settingsRes = await fetch(`/api/wheel/settings?storeId=${storeId}`);
-        if (!settingsRes.ok) throw new Error('Falha ao verificar configuração.');
-        const { configured, segments: rawSegments } = await settingsRes.json();
-        setConfigured(configured);
-        if (configured) {
-          setSegments(
-            rawSegments.map((s: any): Segment => {
-              const isPremium = ['money', 'product', 'voucher'].includes(s.type);
-              return {
-                id: s.id,
-                label: s.label,
-                option: prizeIcons[s.type] || prizeIcons.default,
-                style: { 
-                  backgroundColor: prizeColors[s.type] || prizeColors.default,
-                  textColor: '#FFFFFF',
-                  ...(isPremium && { boxShadow: premiumGlow })
-                },
-                type: s.type,
-                value: s.value,
-                description: s.description,
-                color: s.color, // Keep original color for modal logic if needed
-              }
-            })
-          );
-          await fetchCredits();
-        }
-      } catch (err: any) {
-        toast({ variant: 'destructive', title: 'Erro', description: err.message });
-      } finally {
-        setLoading(false);
-        if (pollingRef.current) clearInterval(pollingRef.current);
-        pollingRef.current = setInterval(fetchCredits, 10000);
-      }
+    mountedRef.current = true;
+    const m = readMutedPreference();
+    setMuted(m);
+    mutedRef.current = m;
+    return () => {
+      mountedRef.current = false;
     };
-    if (storeId) loadInitialData();
-    return () => pollingRef.current && clearInterval(pollingRef.current);
-  }, [storeId, sellerId, toast]);
+  }, []);
 
-  const handleSpinClick = async () => {
-    if (mustSpin || credits <= 0) return;
+  const loadWheel = useCallback(async () => {
+    const res = await fetch(`/api/wheel/settings?storeId=${encodeURIComponent(storeId)}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Não foi possível carregar a roleta.');
+    const data = await res.json();
+    const wheel: Slice[] = Array.isArray(data.wheel) ? data.wheel : [];
+    if (mountedRef.current && (phaseRef.current === 'idle' || phaseRef.current === 'loading' || phaseRef.current === 'result')) {
+      setSlices(wheel);
+    }
+  }, [storeId]);
+
+  const loadCredits = useCallback(async () => {
+    const res = await fetch(
+      `/api/wheel/status?storeId=${encodeURIComponent(storeId)}&sellerId=${encodeURIComponent(sellerId)}&limit=1`,
+      { cache: 'no-store' },
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    if (mountedRef.current && typeof data.credits === 'number') setCredits(data.credits);
+  }, [storeId, sellerId]);
+
+  useEffect(() => {
+    if (!storeId || !sellerId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await Promise.all([loadWheel(), loadCredits()]);
+      } catch (e) {
+        if (!cancelled) setError((e as Error).message);
+      } finally {
+        if (!cancelled) setPhase('idle');
+      }
+    })();
+    // Atualiza saldo e prêmios periodicamente, mas nunca durante um giro.
+    const timer = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      if (phaseRef.current !== 'idle' && phaseRef.current !== 'result') return;
+      void loadCredits();
+      void loadWheel().catch(() => {});
+    }, POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [storeId, sellerId, loadWheel, loadCredits]);
+
+  const toggleMute = () => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setMuted(next);
+    saveMutedPreference(next);
+    if (!next) unlockAudio(); // o próprio clique serve de gesto para liberar o áudio
+  };
+
+  const animateTo = async (data: SpinResponse) => {
+    const snapshot = data.wheelSnapshot;
+    setSlices(snapshot);
+    await nextFrame(); // garante que a roda foi redesenhada com o snapshot do servidor
+
+    const el = rotorRef.current;
+    if (!el) throw new Error('Roleta indisponível.');
+    const reduced = prefersReducedMotion();
+    const duration = reduced ? REDUCED_DURATION_MS : SPIN_DURATION_MS;
+    const from = angleRef.current;
+    const to = targetRotation(from, data.stopAngleDeg, reduced ? 1 : SPIN_TURNS);
+
+    const sound = !mutedRef.current && !reduced;
+    const stopSuspense = sound ? startSuspense(duration) : () => {};
+    let tickDelay = 70;
+    let tickTimer: ReturnType<typeof setTimeout> | undefined;
+    const tick = () => {
+      if (!mutedRef.current) playTick();
+      tickDelay = Math.min(330, tickDelay * 1.045);
+      tickTimer = setTimeout(tick, tickDelay);
+    };
+    if (sound) tick();
+
+    setPhase('spinning');
+    setHint('✨ Começou... boa sorte!');
+    const hints: [number, string][] = [
+      [0.45, '👀 Olha onde ela vai parar...'],
+      [0.7, '🤞 Está chegando...'],
+      [0.88, '😮 Quase...'],
+    ];
+    const hintTimers = reduced ? [] : hints.map(([at, text]) => setTimeout(() => mountedRef.current && setHint(text), duration * at));
+
+    const anim = el.animate([{ transform: `rotate(${from}deg)` }, { transform: `rotate(${to}deg)` }], {
+      duration,
+      easing: EASING,
+      fill: 'forwards',
+    });
+    try {
+      await anim.finished;
+    } finally {
+      if (tickTimer) clearTimeout(tickTimer);
+      hintTimers.forEach(clearTimeout);
+      stopSuspense();
+    }
+    el.style.transform = `rotate(${to}deg)`;
+    anim.cancel();
+    angleRef.current = to;
+
+    // Conferência: a fatia sob o ponteiro tem que ser a que o servidor gravou.
+    const landed = indexAtAngle(snapshot.length, to);
+    if (landed !== data.selectedIndex || snapshot[landed]?.id !== data.prize.id) {
+      console.error('[Roleta] divergência visual', { landed, selectedIndex: data.selectedIndex, prize: data.prize.id });
+    }
+    return { reduced };
+  };
+
+  const handleSpin = async () => {
+    if (lockRef.current || phase === 'loading' || credits <= 0 || slices.length === 0) return;
+    lockRef.current = true;
+    if (!mutedRef.current) unlockAudio(); // precisa acontecer dentro do gesto do clique
+    setError('');
+    setResult(null);
+    setPhase('requesting');
+    setHint('🍀 Preparando sua sorte...');
+    wheelAreaRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
 
     try {
       const res = await fetch('/api/wheel/spin', {
@@ -128,211 +208,216 @@ export function PrizeWheel({ storeId, sellerId, onSpinResult }: PrizeWheelProps)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ storeId, sellerId }),
       });
-      if (!res.ok) throw new Error((await res.json()).error);
-      const result = await res.json();
-      
-      const idx = segments.findIndex((s) => s.id === result.prize.id);
-      if (idx === -1) throw new Error("Prêmio não encontrado na roleta local.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (data?.noCredits) setCredits(0);
+        if (data?.notConfigured) void loadWheel().catch(() => {});
+        throw new Error(data?.error || 'Não foi possível girar a roleta.');
+      }
 
-      setPrizeNumber(idx);
-      
-      // Use result.prize directly to guarantee absolute sync with the wheel and backend
-      setSpinResult({
-        ...result.prize,
-        option: prizeIcons[result.prize.type] || prizeIcons.default,
-        style: {
-          backgroundColor: prizeColors[result.prize.type] || prizeColors.default,
-          textColor: "#FFFFFF",
+      const spin = data as SpinResponse;
+      const { reduced } = await animateTo(spin);
+      if (!mountedRef.current) return;
+
+      setCredits(spin.remainingCredits);
+      setResult(spin);
+      setPhase('result');
+      const isRetry = spin.prize.type === 'retry';
+      setHint(isRetry ? 'Não foi dessa vez. Continue vendendo!' : '🎉 Parabéns! Seu prêmio foi registrado.');
+      if (!mutedRef.current) (isRetry ? playRetry : playWin)();
+      if (!isRetry) {
+        try {
+          navigator.vibrate?.([90, 50, 180]);
+        } catch {
+          /* ignora */
         }
-      } as Segment);
-
-      setCredits((c) => Math.max(0, c - 1));
-      setMustSpin(true);
-      
-      if (onSpinResult) onSpinResult(result);
-    } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Erro no Giro', description: err.message });
+        if (!reduced) {
+          confetti({
+            particleCount: 140,
+            spread: 75,
+            origin: { y: 0.55 },
+            colors: [spin.prize.color, '#00B7A8', '#005A73', '#FFFFFF', '#FDE047'],
+            disableForReducedMotion: true,
+          });
+        }
+      }
+      onSpinResult?.(spin);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' }), 400);
+    } catch (e) {
+      if (!mountedRef.current) return;
+      setError((e as Error).message || 'Falha de conexão. O crédito só é descontado quando o giro é registrado.');
+      setHint('');
+      setPhase('idle');
+      void loadCredits();
+    } finally {
+      lockRef.current = false;
     }
   };
-  
-  const prizeSegments = segments.filter(s => s.type !== 'retry');
 
-  if (loading)
+  const busy = phase === 'requesting' || phase === 'spinning';
+
+  if (phase === 'loading') {
     return (
       <div className="flex items-center justify-center h-96 w-full">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
 
-  if (configured === false)
+  if (slices.length === 0 && !busy) {
     return (
-        <Card className="text-center p-8 border-dashed border-2 bg-muted/20">
-            <CardContent className="flex flex-col items-center gap-4">
-                <Gift className="h-12 w-12 text-muted-foreground/50" />
-                <p className="text-muted-foreground font-medium">A roleta de prêmios ainda não foi configurada.</p>
-            </CardContent>
-        </Card>
+      <Card className="text-center p-8 border-dashed border-2 bg-muted/20">
+        <CardContent className="flex flex-col items-center gap-4">
+          <Gift className="h-12 w-12 text-muted-foreground/50" />
+          <p className="text-muted-foreground font-medium">
+            {error || 'A roleta de prêmios ainda não foi configurada.'}
+          </p>
+        </CardContent>
+      </Card>
     );
+  }
+
+  const isRetry = result?.prize.type === 'retry';
 
   return (
-    <div className="w-full max-w-lg mx-auto space-y-6 relative">
-      
-      <div className="flex justify-center">
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full shadow-lg border border-white/20 flex items-center gap-3">
-            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900">
-                <Ticket className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none">Giros</span>
-                <span className={cn(
-                    "text-2xl font-black leading-none",
-                    credits > 0 ? "text-blue-600" : "text-slate-300"
-                )}>
-                    {credits}
-                </span>
-            </div>
-            {credits > 0 && (
-                <span className="relative flex h-2 w-2 mb-auto">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                </span>
+    <div className="w-full max-w-xl mx-auto space-y-5" data-testid="prize-wheel">
+      <div className="flex items-center justify-between gap-3">
+        <div
+          className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md pl-2 pr-5 py-2 rounded-full shadow-lg border border-white/20 flex items-center gap-3"
+          data-testid="wheel-credits"
+          data-credits={credits}
+        >
+          <div className="flex items-center justify-center h-9 w-9 rounded-full bg-primary/10">
+            <Ticket className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-none">
+              Giros disponíveis
+            </span>
+            <span className={cn('text-2xl font-black leading-none', credits > 0 ? 'text-primary' : 'text-muted-foreground/60')}>
+              {credits}
+            </span>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={toggleMute}
+          aria-pressed={muted}
+          aria-label={muted ? 'Ativar som da roleta' : 'Silenciar roleta'}
+          title={muted ? 'Ativar som' : 'Silenciar'}
+          className="rounded-full h-11 w-11"
+          data-testid="wheel-mute"
+        >
+          {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+        </Button>
+      </div>
+
+      <div ref={wheelAreaRef} className="rounded-[2rem] bg-gradient-to-b from-primary/10 via-background to-accent/10 px-2 py-6 sm:px-6">
+        <WheelSvg ref={rotorRef} slices={slices} />
+        <div className={cn(styles.hint, busy && styles.suspense)} aria-live="polite" data-testid="wheel-hint">
+          {hint}
+        </div>
+        <div className="px-2 sm:px-8">
+          <Button
+            onClick={handleSpin}
+            disabled={busy || credits <= 0 || slices.length === 0}
+            aria-busy={busy}
+            data-testid="wheel-spin"
+            className={cn(
+              'w-full h-16 text-xl font-black rounded-2xl shadow-xl uppercase tracking-tight transition-transform active:scale-95',
+              credits > 0 && !busy && 'animate-subtle-pulse',
             )}
+          >
+            {busy ? (
+              <span className="flex items-center gap-3">
+                <Loader2 className="h-6 w-6 animate-spin" /> Roleta em andamento...
+              </span>
+            ) : credits > 0 ? (
+              <span className="flex items-center gap-3">
+                <Gift className="h-6 w-6" /> {result ? 'Girar de novo' : 'Girar agora'}
+              </span>
+            ) : (
+              'Sem giros disponíveis'
+            )}
+          </Button>
+          {error && (
+            <p className="mt-3 text-center text-sm font-semibold text-destructive" role="alert" data-testid="wheel-error">
+              {error}
+            </p>
+          )}
         </div>
       </div>
 
-      <Card className="bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-900 border-none p-4 sm:p-8 rounded-[3rem] shadow-2xl overflow-hidden relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
-        
-        <div className="flex flex-col items-center gap-8 relative z-10">
-          
-          <div className="relative w-[320px] sm:w-[380px] aspect-square flex justify-center items-center select-none bg-white/5 p-2 rounded-full backdrop-blur-sm border border-white/10 shadow-2xl">
-              
-              <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-                  <div className="relative flex flex-col items-center">
-                      <div className="w-12 h-12 bg-yellow-400 rounded-full border-[4px] border-white flex items-center justify-center ring-2 ring-black/10">
-                          <div className="w-3 h-3 bg-slate-900 rounded-full" />
-                      </div>
-                      <div 
-                        className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[22px] border-t-yellow-400 -mt-1"
-                        style={{ filter: 'drop-shadow(0 2px 0 white)' }}
-                      />
-                  </div>
+      {result && phase === 'result' && (
+        <div ref={resultRef} className={styles.reveal} role="status" aria-live="polite" data-testid="wheel-result" data-prize-id={result.prize.id}>
+          <Card className="overflow-hidden border-none shadow-2xl">
+            <div
+              className="px-6 pt-7 pb-6 text-center text-white"
+              style={{ background: isRetry ? 'linear-gradient(145deg,#64748B,#334155)' : `linear-gradient(145deg, ${result.prize.color}, hsl(193 100% 18%))` }}
+            >
+              <div className={cn('text-5xl', styles.pop)}>{isRetry ? '😕' : '🎉'}</div>
+              <div className="mt-2 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
+                {isRetry ? 'Não foi dessa vez' : 'Seu prêmio'}
               </div>
-
-              <div className="absolute z-20 w-16 h-16 sm:w-20 sm:h-20 rounded-full border-[4px] border-white shadow-2xl flex items-center justify-center bg-white ring-[6px] ring-blue-900/30">
-                  <Gift className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
-              </div>
-
-              <Wheel
-                  mustStartSpinning={mustSpin}
-                  prizeNumber={prizeNumber}
-                  data={segments}
-                  onStopSpinning={() => {
-                      setMustSpin(false);
-                      setTimeout(() => setShowResult(true), 400);
-                  }}
-                  spinDuration={1.2}
-                  perpendicularText={false}
-                  textDistance={60}
-                  fontSize={32}
-                  radiusLineWidth={2}
-                  radiusLineColor="rgba(255,255,255,0.35)"
-                  outerBorderWidth={10}
-                  outerBorderColor="#FFFFFF"
-                  innerBorderWidth={0}
-                  innerRadius={40}
-                  pointerProps={{ style: { display: 'none' } }}
-              />
-          </div>
-
-          <div className="w-full">
-              <Button
-                  onClick={handleSpinClick}
-                  disabled={credits <= 0 || mustSpin || segments.length === 0}
-                  className={cn(
-                      'w-full py-8 text-2xl font-black rounded-2xl shadow-2xl transition-all active:scale-95 uppercase tracking-tighter',
-                      'bg-white text-blue-700 hover:bg-blue-50',
-                      credits > 0 && !mustSpin && 'animate-subtle-pulse',
-                      (credits <= 0 || mustSpin) && 'opacity-50 cursor-not-allowed grayscale animate-none shadow-none'
-                  )}
-              >
-                  {mustSpin ? (
-                      <span className="flex items-center justify-center gap-3">
-                          <Loader2 className="h-8 w-8 animate-spin" /> SORTEANDO...
-                      </span>
-                  ) : (
-                      <span className="flex items-center justify-center gap-4">
-                          <Gift className="h-10 w-10 text-blue-600" /> GIRAR AGORA!
-                      </span>
-                  )}
-              </Button>
-          </div>
-        </div>
-      </Card>
-
-      {prizeSegments.length > 0 && (
-        <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-lg border border-white/20">
-            <CardHeader>
-                <CardTitle className="text-sm font-semibold tracking-wider text-slate-500 dark:text-slate-400">Prêmios possíveis:</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <ul className="space-y-2">
-                    {prizeSegments.map(prize => (
-                        <li key={prize.id} className="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
-                            <span className="text-xl" style={{ color: prizeColors[prize.type] || prizeColors.default }}>{prize.option}</span>
-                            <span>{prize.label}</span>
-                        </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
-      )}
-
-      {showResult && spinResult && (
-        <Dialog open onOpenChange={() => setShowResult(false)}>
-          <DialogContent 
-            aria-describedby="spin-result-description" 
-            className="p-0 border-none bg-transparent shadow-none max-w-sm"
-            hideCloseButton={true}
-          >
-            <VisuallyHidden>
-              <DialogTitle>Resultado do Giro</DialogTitle>
-            </VisuallyHidden>
-
-            {spinResult.type === 'retry' ? (
-                <div className="bg-background rounded-2xl p-8 text-center space-y-6">
-                    <h2 className="text-2xl font-black tracking-tight text-muted-foreground">
-                        😕 NÃO FOI DESSA VEZ!
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                        Continue vendendo para ganhar novos giros.
-                    </p>
-                    <DialogClose asChild>
-                        <Button className="w-full h-12 text-base font-bold">
-                            CONTINUAR VENDENDO
-                        </Button>
-                    </DialogClose>
-              </div>
-            ) : (
-                <div className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-900/50 rounded-[2rem] p-8 text-center space-y-6 shadow-2xl">
-                    <h2 className="text-3xl font-black tracking-tighter" style={{ color: prizeColors[spinResult.type] || prizeColors.default }}>🎉 PARABÉNS!</h2>
-                    <p className="text-base text-slate-600 dark:text-slate-300 font-medium">Você ganhou:</p>
-                    <div 
-                        className="inline-block py-4 px-6 rounded-2xl text-white shadow-xl"
-                        style={{ backgroundColor: prizeColors[spinResult.type] || prizeColors.default }}
-                    >
-                        <p className="text-3xl font-black tracking-tight break-words">{spinResult.label}</p>
-                    </div>
-                    <DialogClose asChild>
-                        <Button className="w-full h-14 text-xl font-bold bg-slate-900 hover:bg-slate-800 dark:bg-primary-foreground dark:text-primary dark:hover:bg-slate-200 text-white rounded-2xl shadow-lg">
-                            CONTINUAR VENDENDO
-                        </Button>
-                    </DialogClose>
+              <h3 className="mt-1 text-3xl font-black tracking-tight break-words" data-testid="wheel-result-label">
+                {prizeIcon(result.prize.type)} {result.prize.label}
+              </h3>
+              {result.prize.description && <p className="mt-2 text-sm opacity-90">{result.prize.description}</p>}
+            </div>
+            <CardContent className="p-5 space-y-4">
+              {!isRetry && result.prize.type === 'money' && result.prize.value != null && (
+                <div className={cn('rounded-xl p-4 text-center', styles.ticket)}>
+                  <small className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor</small>
+                  <div className="text-3xl font-black text-primary">{brl(result.prize.value)}</div>
                 </div>
-            )}
-          </DialogContent>
-        </Dialog>
+              )}
+              <p className="text-center text-sm text-muted-foreground">
+                {isRetry
+                  ? 'Continue vendendo para ganhar novos giros.'
+                  : 'Prêmio registrado. Combine o resgate com o seu gestor.'}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                {result.remainingCredits > 0 ? (
+                  <Button className="flex-1 h-12 font-bold" onClick={handleSpin} disabled={busy}>
+                    <RotateCw className="mr-2 h-4 w-4" /> Girar de novo ({result.remainingCredits})
+                  </Button>
+                ) : null}
+                <Button
+                  variant="outline"
+                  className="flex-1 h-12 font-bold"
+                  onClick={() => {
+                    setResult(null);
+                    setPhase('idle');
+                    setHint('');
+                  }}
+                >
+                  Continuar vendendo
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
+
+      <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-lg border border-white/20">
+        <CardContent className="p-5">
+          <p className="mb-3 text-xs font-black uppercase tracking-widest text-muted-foreground">Prêmios da roleta</p>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {slices.map((s) => (
+              <li key={s.id} className="flex items-center gap-3 rounded-lg bg-muted/40 px-3 py-2 text-sm font-medium">
+                <span className="h-3 w-3 shrink-0 rounded-full ring-2 ring-white" style={{ backgroundColor: s.color }} />
+                <span className="text-base">{prizeIcon(s.type)}</span>
+                <span className="truncate">{s.label}</span>
+                {s.type === 'money' && s.value != null && (
+                  <span className="ml-auto shrink-0 font-bold text-primary">{brl(s.value)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

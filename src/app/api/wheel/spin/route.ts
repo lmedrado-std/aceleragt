@@ -3,16 +3,10 @@ import { randomInt } from 'crypto';
 import { prisma } from '@/lib/db';
 import { buildWheelSnapshot, pickWeightedIndex, stopAngleDeg, MAX_STOP_JITTER } from '@/lib/wheel/engine';
 import { spinRequestSchema } from '@/lib/wheel/validation';
-import { jsonError, jsonOk, loadStoreSegments, readJson, SPIN_SELECT } from '@/lib/wheel/server';
+import { jsonError, jsonOk, loadStoreSegments, readJson, SPIN_COOLDOWN_MS, SPIN_SELECT } from '@/lib/wheel/server';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Janela anti-repetição: com a linha de saldo já travada, um segundo giro do mesmo
- * vendedor dentro desta janela é recusado e a transação inteira é desfeita
- * (o crédito volta). A animação dura ~9 s, então um giro legítimo nunca cai aqui.
- */
-export const SPIN_COOLDOWN_MS = 4000;
 
 class SpinError extends Error {
   constructor(public code: 'NO_CREDITS' | 'TOO_SOON' | 'NOT_CONFIGURED') {

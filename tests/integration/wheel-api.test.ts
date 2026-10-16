@@ -11,6 +11,7 @@ let grant: typeof import('@/app/api/wheel/grant/route');
 let status: typeof import('@/app/api/wheel/status/route');
 let history: typeof import('@/app/api/wheel/history/route');
 let engine: typeof import('@/lib/wheel/engine');
+let SPIN_COOLDOWN_MS = 0;
 
 const run = describe.skipIf(!TEST_DB);
 
@@ -82,6 +83,7 @@ run('Roleta V2 — APIs contra Postgres descartável', () => {
     status = await import('@/app/api/wheel/status/route');
     history = await import('@/app/api/wheel/history/route');
     engine = await import('@/lib/wheel/engine');
+    SPIN_COOLDOWN_MS = (await import('@/lib/wheel/server')).SPIN_COOLDOWN_MS;
   });
   beforeEach(resetDb);
   afterAll(async () => {
@@ -145,7 +147,7 @@ run('Roleta V2 — APIs contra Postgres descartável', () => {
       await setCredits(storeId, sellerId, 2);
       expect((await doSpin(storeId, sellerId)).status).toBe(200);
       expect((await doSpin(storeId, sellerId)).status).toBe(429);
-      await new Promise((r) => setTimeout(r, spin.SPIN_COOLDOWN_MS + 200));
+      await new Promise((r) => setTimeout(r, SPIN_COOLDOWN_MS + 200));
       const third = await doSpin(storeId, sellerId);
       expect(third.status).toBe(200);
       expect(third.json.remainingCredits).toBe(0);
