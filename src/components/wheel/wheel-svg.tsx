@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef } from 'react';
+import { forwardRef, type Ref } from 'react';
 import { Rocket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { readableTextColor, wheelLabelLines } from '@/lib/wheel/engine';
@@ -110,26 +110,38 @@ function SliceLabel({ slice, index, count }: { slice: WheelSvgSlice; index: numb
   );
 }
 
+export type WheelVisualState = 'idle' | 'spinning' | 'finale' | 'won' | 'lost';
+
 interface WheelSvgProps {
   slices: WheelSvgSlice[];
   className?: string;
   /** Tamanho compacto (preview do gestor). */
   compact?: boolean;
   ariaLabel?: string;
+  /** Fase visual: controla luzes do aro, zoom da reta final e destaque. */
+  state?: WheelVisualState;
+  /** Fatia vencedora (só depois que a roda para). */
+  highlightIndex?: number | null;
+  /** Ref do ponteiro, para o efeito de "balançar" a cada divisa. */
+  pointerRef?: Ref<HTMLDivElement>;
 }
 
+const BULBS = 24;
+
 /**
- * Roda SVG. O `ref` aponta para o grupo que gira (rotor); ponteiro e cubo ficam fixos.
+ * Roda SVG. O `ref` aponta para o grupo que gira (rotor); ponteiro, luzes e cubo ficam fixos.
  * Cada fatia leva `data-segment-id` e `data-index` para conferência nos testes.
  */
 export const WheelSvg = forwardRef<SVGGElement, WheelSvgProps>(function WheelSvg(
-  { slices, className, compact, ariaLabel = 'Roleta de prêmios' },
+  { slices, className, compact, ariaLabel = 'Roleta de prêmios', state = 'idle', highlightIndex = null, pointerRef },
   rotorRef,
 ) {
   const n = Math.max(slices.length, 1);
   return (
-    <div className={cn(styles.theme, styles.shell, compact && styles.shellCompact, className)}>
-      <div className={styles.pointer} aria-hidden="true" />
+    <div className={cn(styles.theme, styles.shell, compact && styles.shellCompact, className)} data-state={state}>
+      <div className={styles.pointerWrap} aria-hidden="true">
+        <div ref={pointerRef} className={styles.pointer} />
+      </div>
       <svg className={styles.svg} viewBox="0 0 500 500" role="img" aria-label={ariaLabel}>
         <g ref={rotorRef} className={styles.rotor} data-testid="wheel-rotor">
           {slices.length === 0 ? (
@@ -142,9 +154,27 @@ export const WheelSvg = forwardRef<SVGGElement, WheelSvgProps>(function WheelSvg
               </g>
             ))
           )}
+          {highlightIndex !== null && highlightIndex >= 0 && highlightIndex < slices.length && (
+            <path
+              d={wedgePath(highlightIndex, n)}
+              className={styles.winnerGlow}
+              data-testid="wheel-winner-glow"
+              fill="#FFFFFF"
+              stroke="#FDE047"
+              strokeWidth={6}
+            />
+          )}
           <circle cx={C} cy={C} r={R} fill="none" className={styles.outerRing} strokeWidth={13} />
           <circle cx={C} cy={C} r={226} fill="none" stroke="#FFFFFF" strokeWidth={4} />
         </g>
+        {!compact && (
+          <g className={styles.bulbs} aria-hidden="true">
+            {Array.from({ length: BULBS }, (_, i) => {
+              const p = polar(R, (i * 360) / BULBS + 360 / BULBS / 2);
+              return <circle key={i} cx={p.x} cy={p.y} r={3.6} className={i % 2 ? styles.bulbOdd : styles.bulbEven} />;
+            })}
+          </g>
+        )}
       </svg>
       <div className={styles.hub} aria-hidden="true">
         <Rocket className={styles.hubIcon} />
